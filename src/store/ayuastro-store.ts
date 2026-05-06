@@ -1,0 +1,195 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+// View types for the single-page app
+export type AppView = 'landing' | 'onboarding' | 'calculating' | 'insights' | 'report' | 'premium' | 'profile' | 'wisdom';
+export type OnboardingStep = 'name' | 'birth' | 'relationship' | 'questionnaire' | 'complete';
+export type BottomNavTab = 'insights' | 'sync' | 'wisdom' | 'profile';
+
+export interface BirthDetails {
+  name: string;
+  dateOfBirth: string;
+  timeOfBirth: string;
+  placeOfBirth: string;
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  gender: string;
+  relationshipStatus: string;
+}
+
+export interface QuestionnaireAnswer {
+  questionId: string;
+  answer: string;
+  category: 'emotional' | 'social' | 'behavioral' | 'relational';
+  score: number; // 1-5 Likert scale
+}
+
+export interface TraitScore {
+  name: string;
+  label: string;
+  score: number;
+  description: string;
+}
+
+export interface ReportSection {
+  id: string;
+  title: string;
+  icon: string;
+  content: string;
+  traits: string[];
+  insightLevel: 'free' | 'premium';
+}
+
+export interface AstrologyInfo {
+  sunSign: string;
+  moonSign: string;
+  ascendant: string;
+  nakshatra: string;
+  currentDasha: string;
+  yogas: string[];
+  doshas: string[];
+  planetaryPositions: Record<string, { sign: string; degree: number; house: number; retrograde: boolean }>;
+}
+
+export interface NumerologyInfo {
+  lifePathNumber: number;
+  destinyNumber: number;
+  soulUrgeNumber: number;
+  personalityNumber: number;
+  lifePathDesc: string;
+  destinyDesc: string;
+  soulUrgeDesc: string;
+}
+
+interface AyuAstroState {
+  // App navigation
+  currentView: AppView;
+  previousView: AppView | null;
+  activeTab: BottomNavTab;
+  onboardingStep: OnboardingStep;
+
+  // User data
+  userId: string | null;
+  birthDetails: BirthDetails | null;
+  questionnaireAnswers: QuestionnaireAnswer[];
+
+  // Computed data (from backend)
+  astrologyData: AstrologyInfo | null;
+  numerologyData: NumerologyInfo | null;
+  traitScores: TraitScore[];
+  reportSections: ReportSection[];
+  reportSummary: string;
+
+  // UI state
+  isLoading: boolean;
+  loadingMessage: string;
+  hasPaid: boolean;
+  error: string | null;
+
+  // Actions
+  setView: (view: AppView) => void;
+  setActiveTab: (tab: BottomNavTab) => void;
+  setOnboardingStep: (step: OnboardingStep) => void;
+  setBirthDetails: (details: Partial<BirthDetails>) => void;
+  addQuestionnaireAnswer: (answer: QuestionnaireAnswer) => void;
+  setQuestionnaireAnswers: (answers: QuestionnaireAnswer[]) => void;
+  setAstrologyData: (data: AstrologyInfo) => void;
+  setNumerologyData: (data: NumerologyInfo) => void;
+  setTraitScores: (scores: TraitScore[]) => void;
+  setReportSections: (sections: ReportSection[]) => void;
+  setReportSummary: (summary: string) => void;
+  setLoading: (loading: boolean, message?: string) => void;
+  setHasPaid: (paid: boolean) => void;
+  setError: (error: string | null) => void;
+  setUserId: (id: string) => void;
+  reset: () => void;
+  nextOnboardingStep: () => void;
+  prevOnboardingStep: () => void;
+}
+
+const ONBOARDING_STEPS: OnboardingStep[] = ['name', 'birth', 'relationship', 'questionnaire', 'complete'];
+
+const initialState = {
+  currentView: 'landing' as AppView,
+  previousView: null as AppView | null,
+  activeTab: 'insights' as BottomNavTab,
+  onboardingStep: 'name' as OnboardingStep,
+  userId: null as string | null,
+  birthDetails: null as BirthDetails | null,
+  questionnaireAnswers: [] as QuestionnaireAnswer[],
+  astrologyData: null as AstrologyInfo | null,
+  numerologyData: null as NumerologyInfo | null,
+  traitScores: [] as TraitScore[],
+  reportSections: [] as ReportSection[],
+  reportSummary: '',
+  isLoading: false,
+  loadingMessage: '',
+  hasPaid: false,
+  error: null as string | null,
+};
+
+export const useAyuAstroStore = create<AyuAstroState>()(
+  persist(
+    (set, get) => ({
+      ...initialState,
+
+      setView: (view) => set((state) => ({ previousView: state.currentView, currentView: view })),
+      setActiveTab: (tab) => set({ activeTab: tab }),
+      setOnboardingStep: (step) => set({ onboardingStep: step }),
+      setBirthDetails: (details) =>
+        set((state) => ({
+          birthDetails: { ...state.birthDetails, ...details } as BirthDetails,
+        })),
+      addQuestionnaireAnswer: (answer) =>
+        set((state) => ({
+          questionnaireAnswers: [
+            ...state.questionnaireAnswers.filter((a) => a.questionId !== answer.questionId),
+            answer,
+          ],
+        })),
+      setQuestionnaireAnswers: (answers) => set({ questionnaireAnswers: answers }),
+      setAstrologyData: (data) => set({ astrologyData: data }),
+      setNumerologyData: (data) => set({ numerologyData: data }),
+      setTraitScores: (scores) => set({ traitScores: scores }),
+      setReportSections: (sections) => set({ reportSections: sections }),
+      setReportSummary: (summary) => set({ reportSummary: summary }),
+      setLoading: (loading, message = '') => set({ isLoading: loading, loadingMessage: message }),
+      setHasPaid: (paid) => set({ hasPaid: paid }),
+      setError: (error) => set({ error }),
+      setUserId: (id) => set({ userId: id }),
+      reset: () => set(initialState),
+
+      nextOnboardingStep: () => {
+        const { onboardingStep } = get();
+        const currentIndex = ONBOARDING_STEPS.indexOf(onboardingStep);
+        if (currentIndex < ONBOARDING_STEPS.length - 1) {
+          set({ onboardingStep: ONBOARDING_STEPS[currentIndex + 1] });
+        }
+      },
+
+      prevOnboardingStep: () => {
+        const { onboardingStep } = get();
+        const currentIndex = ONBOARDING_STEPS.indexOf(onboardingStep);
+        if (currentIndex > 0) {
+          set({ onboardingStep: ONBOARDING_STEPS[currentIndex - 1] });
+        }
+      },
+    }),
+    {
+      name: 'ayuastro-storage',
+      partialize: (state) => ({
+        userId: state.userId,
+        birthDetails: state.birthDetails,
+        questionnaireAnswers: state.questionnaireAnswers,
+        astrologyData: state.astrologyData,
+        numerologyData: state.numerologyData,
+        traitScores: state.traitScores,
+        reportSections: state.reportSections,
+        reportSummary: state.reportSummary,
+        hasPaid: state.hasPaid,
+        currentView: state.currentView,
+      }),
+    }
+  )
+);

@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String?  @unique
+  name         String?
+  phone        String?  @unique
+  googleId     String?  @unique
+  appleId      String?  @unique
+  avatar       String?
+  isOnboarded  Boolean  @default(false)
+  hasPaid      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profile      Profile?
+  astrology    AstrologyData?
+  numerology   NumerologyData?
+  traits       TraitScores?
+  reports      Report[]
+  answers      QuestionnaireAnswer[]
+  transactions Transaction[]
+}
+
+model Profile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  dateOfBirth    String
+  timeOfBirth    String
+  placeOfBirth   String
+  latitude       Float?
+  longitude      Float?
+  timezone       String?
+  gender         String?
+  relationshipStatus String?
+  occupation     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AstrologyData {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  sunSign         String
+  moonSign        String
+  ascendant       String
+  planetaryPositions String  // JSON string
+  houses          String   // JSON string
+  nakshatra       String   // JSON string
+  dashaPeriods    String   // JSON string
+  yogas           String   // JSON string
+  doshas          String   // JSON string
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model NumerologyData {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  lifePathNumber    Int
+  destinyNumber     Int
+  soulUrgeNumber    Int
+  personalityNumber Int
+  birthdayNumber    Int
+  lifePathDesc      String?
+  destinyDesc       String?
+  soulUrgeDesc      String?
+  personalityDesc   String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TraitScores {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  emotionalIntensity    Int      // 0-100
+  attachmentStyle       Int      // 0-100 (0=secure, 100=anxious)
+  ambition              Int
+  trust                 Int
+  communicationOpenness Int
+  impulsiveness         Int
+  empathy               Int
+  resilience            Int
+  creativity            Int
+  intuition             Int
+  discipline            Int
+  socialEnergy          Int
+  patience              Int
+  adaptability          Int
+  additionalTraits      String?  // JSON string for future traits
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // personality, relationship, emotional_pattern
+  title       String
+  summary     String
+  sections    String   // JSON string with full report sections
+  isPremium   Boolean  @default(false)
+  isPaid      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model QuestionnaireAnswer {
+  id          String   @id @default(cuid())
+  userId      String
+  questionId  String
+  answer      String
+  category    String   // emotional, social, behavioral, relational
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Transaction {
+  id              String   @id @default(cuid())
+  userId          String
+  amount          Int      // in paise (Indian currency)
+  currency        String   @default("INR")
+  razorpayOrderId String?
+  razorpayPaymentId String?
+  status          String   @default("pending") // pending, completed, failed, refunded
+  reportType      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
