@@ -25,6 +25,7 @@ import {
   ChevronDown,
   Star,
   Share2,
+  Gamepad2,
 } from 'lucide-react';
 
 // ─── Zodiac Data ────────────────────────────────────────────────────────────
@@ -371,6 +372,32 @@ export default function SyncView() {
           <p className="text-sm text-brown-400">
             Discover the resonance between your stars. Explore how your emotional and cosmic patterns align with others.
           </p>
+        </motion.div>
+
+        {/* Zodiac Game Entry */}
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.02 }} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
+          <Card
+            className="border-0 shadow-sm bg-gradient-to-br from-gold/5 to-sage-muted/10 dark:from-gold/5 dark:to-sage-muted/5 cursor-pointer transition-shadow hover:shadow-md"
+            onClick={() => setView('zodiacGame')}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/80 dark:bg-brown-50/20 border border-gold/20">
+                  <Gamepad2 className="size-6 text-gold" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-serif text-base font-semibold text-brown-900 dark:text-brown-100"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                    Zodiac Game 🎮
+                  </h3>
+                  <p className="text-xs text-brown-400 dark:text-brown-500 mt-0.5">
+                    Test your cosmic intuition — guess the compatibility!
+                  </p>
+                </div>
+                <span className="text-lg">🔔</span>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
 
         {/* Your Cosmic Profile Card */}

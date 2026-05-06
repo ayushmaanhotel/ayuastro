@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -128,6 +128,7 @@ export default function WisdomView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<WisdomCategory>('All');
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  const [recentlyViewed, setRecentlyViewed] = useState<string[]>([]);
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = { All: wisdomCards.length };
@@ -148,43 +149,55 @@ export default function WisdomView() {
     });
   }, [activeCategory, searchQuery]);
 
-  const toggleCard = (title: string) => {
+  const toggleCard = useCallback((title: string) => {
     setExpandedCards((prev) => {
       const next = new Set(prev);
       if (next.has(title)) {
         next.delete(title);
       } else {
         next.add(title);
+        // Track recently viewed
+        setRecentlyViewed((rv) => {
+          const filtered = rv.filter((t) => t !== title);
+          return [title, ...filtered].slice(0, 3);
+        });
       }
       return next;
     });
-  };
+  }, []);
+
+  // Get recently viewed card data
+  const recentlyViewedCards = useMemo(() => {
+    return recentlyViewed
+      .map((title) => wisdomCards.find((c) => c.title === title))
+      .filter(Boolean) as WisdomCard[];
+  }, [recentlyViewed]);
 
   return (
-    <div className="cosmic-bg bg-cream px-4 py-6 pb-24">
+    <div className="cosmic-bg bg-cream dark:bg-[#1A1412] px-4 py-6 pb-24">
       <div className="mx-auto max-w-lg space-y-6">
         {/* Header */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
           <h1
-            className="font-serif text-3xl font-bold text-brown-900 mb-1"
+            className="font-serif text-3xl font-bold text-brown-900 dark:text-brown-100 mb-1"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
             Wisdom Library
           </h1>
-          <p className="text-sm text-brown-400">
+          <p className="text-sm text-brown-400 dark:text-brown-500">
             Deepen your understanding of the ancient sciences behind your analysis.
           </p>
         </motion.div>
 
-        {/* Search Bar */}
+        {/* Search Bar — with magnifying glass icon and gold focus ring */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300 dark:text-brown-400" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search wisdom topics..."
-              className="pl-10 border-brown-200 dark:border-brown-100/30 bg-white dark:bg-cream-dark dark:text-brown-900 focus:border-brown-500 focus:ring-brown-500/20"
+              className="pl-10 gold-focus-ring border-brown-200 dark:border-brown-100/30 bg-white dark:bg-cream-dark dark:text-brown-900"
             />
           </div>
         </motion.div>
@@ -198,13 +211,13 @@ export default function WisdomView() {
                 onClick={() => setActiveCategory(cat)}
                 className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                   activeCategory === cat
-                    ? 'bg-brown-700 text-white'
+                    ? 'bg-brown-700 dark:bg-gold text-white dark:text-brown-900'
                     : 'bg-white dark:bg-cream-dark text-brown-500 dark:text-brown-300 hover:bg-brown-50 dark:hover:bg-brown-50/20 border border-brown-200 dark:border-brown-100/30'
                 }`}
               >
                 {cat}
                 <span className={`text-[10px] ${
-                  activeCategory === cat ? 'text-white/70' : 'text-brown-300'
+                  activeCategory === cat ? 'text-white/70 dark:text-brown-900/70' : 'text-brown-300 dark:text-brown-400'
                 }`}>
                   {categoryCounts[cat] || 0}
                 </span>
@@ -213,33 +226,70 @@ export default function WisdomView() {
           </div>
         </motion.div>
 
+        {/* Recently Viewed Section */}
+        {recentlyViewedCards.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Clock className="size-4 text-gold" />
+              <h3 className="text-sm font-semibold text-brown-900 dark:text-brown-100">Recently Viewed</h3>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+              {recentlyViewedCards.map((card) => {
+                const Icon = card.icon;
+                return (
+                  <button
+                    key={card.title}
+                    onClick={() => toggleCard(card.title)}
+                    className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-white/5 border border-brown-100/50 dark:border-brown-100/20 hover:border-gold/30 transition-colors"
+                  >
+                    <Icon className="size-4 text-gold" />
+                    <span className="text-xs font-medium text-brown-700 dark:text-brown-300 whitespace-nowrap">{card.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
         {/* Wisdom Cards */}
         <div className="space-y-4">
           {filteredCards.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-sm text-brown-400">No wisdom topics match your search.</p>
+              <p className="text-sm text-brown-400 dark:text-brown-500">No wisdom topics match your search.</p>
             </div>
           )}
           {filteredCards.map((card, i) => {
             const Icon = card.icon;
             const isExpanded = expandedCards.has(card.title);
+            const isFirst = i === 0 && activeCategory === 'All' && searchQuery.trim() === '';
             return (
               <motion.div
                 key={card.title}
                 {...fadeInUp}
                 transition={{ duration: 0.4, delay: 0.08 * i }}
-                whileHover={{ y: -2, boxShadow: "0 8px 30px rgba(139,111,71,0.12)" }}
+                whileHover={{ y: -3, boxShadow: "0 12px 40px rgba(139,111,71,0.15)" }}
                 whileTap={{ scale: 0.98 }}
+                className="card-lift"
               >
                 <Card className={`card-hover border-0 shadow-md border-l-4 ${card.accentBorder} ${card.color} dark:bg-white/5`}>
                   <CardContent className="p-6">
                     <Collapsible open={isExpanded} onOpenChange={() => toggleCard(card.title)}>
                       <div className="flex items-start gap-4">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brown-700/10">
-                          <Icon className="size-5 text-brown-700" />
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brown-700/10 dark:bg-brown-700/20">
+                          <Icon className="size-5 text-brown-700 dark:text-brown-300" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
+                            {/* Featured badge on first card */}
+                            {isFirst && (
+                              <Badge className="animate-featured-shimmer border-0 text-[9px] font-bold px-2 py-0.5 rounded-full">
+                                ✦ Featured
+                              </Badge>
+                            )}
                             <Badge className={`${card.badgeColor} border-0 text-[10px] font-medium`}>
                               {card.category}
                             </Badge>
@@ -249,21 +299,21 @@ export default function WisdomView() {
                             </span>
                           </div>
                           <h3
-                            className="font-serif text-lg font-bold text-brown-900 mb-2"
+                            className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 mb-2"
                             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                           >
                             {card.title}
                           </h3>
-                          <p className="text-sm text-brown-500 leading-relaxed">
+                          <p className="text-sm text-brown-500 dark:text-brown-300 leading-relaxed">
                             {card.preview}
                           </p>
                           <CollapsibleContent>
-                            <p className="text-sm text-brown-500 leading-relaxed mt-3">
+                            <p className="text-sm text-brown-500 dark:text-brown-300 leading-relaxed mt-3">
                               {card.description.substring(card.preview.length)}
                             </p>
                           </CollapsibleContent>
                           <CollapsibleTrigger asChild>
-                            <button className="mt-2 text-xs font-medium text-gold-dark hover:text-gold flex items-center gap-1 transition-colors">
+                            <button className="mt-2 text-xs font-medium text-gold-dark hover:text-gold dark:text-gold flex items-center gap-1 transition-colors">
                               {isExpanded ? 'Show Less' : 'Read More'}
                               <ChevronDown className={`size-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                             </button>

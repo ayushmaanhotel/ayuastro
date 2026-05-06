@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
-import { Sparkles, ArrowRight, MessageCircle } from 'lucide-react';
+import { Sparkles, ArrowRight, MessageCircle, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cosmicToast } from '@/lib/toast';
 
@@ -32,35 +32,53 @@ const SUGGESTED_QUESTIONS = [
   'How do my current transits affect me?',
 ];
 
+// ─── Message entrance variants ──────────────────────────────────────────────
+
+const aiMessageVariant = {
+  initial: { opacity: 0, x: -20 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -10 },
+};
+
+const userMessageVariant = {
+  initial: { opacity: 0, x: 20 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: 10 },
+};
+
 // ─── Typing Indicator ───────────────────────────────────────────────────────
 
 function TypingIndicator() {
   return (
     <div className="flex items-start gap-2 mb-4">
-      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center">
+      <motion.div
+        className="flex-shrink-0 w-8 h-8 rounded-full bg-gold/20 dark:bg-gold/10 flex items-center justify-center"
+        animate={{
+          boxShadow: [
+            '0 0 0 0 rgba(212,175,55,0)',
+            '0 0 12px 4px rgba(212,175,55,0.25)',
+            '0 0 0 0 rgba(212,175,55,0)',
+          ],
+        }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+      >
         <Sparkles className="w-4 h-4 text-gold" />
-      </div>
+      </motion.div>
       <div className="bg-white dark:bg-white/5 border border-brown-100/50 dark:border-brown-100/20 rounded-2xl rounded-tl-sm px-4 py-3">
         <div className="flex gap-1.5 items-center">
-          <motion.span
-            className="w-2 h-2 bg-brown-300 dark:bg-brown-400 rounded-full"
-            animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
-          />
-          <motion.span
-            className="w-2 h-2 bg-brown-300 dark:bg-brown-400 rounded-full"
-            animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }}
-          />
-          <motion.span
-            className="w-2 h-2 bg-brown-300 dark:bg-brown-400 rounded-full"
-            animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }}
-          />
+          <span className="typing-dot w-2 h-2 bg-brown-300 dark:bg-brown-400 rounded-full inline-block" />
+          <span className="typing-dot w-2 h-2 bg-brown-300 dark:bg-brown-400 rounded-full inline-block" />
+          <span className="typing-dot w-2 h-2 bg-brown-300 dark:bg-brown-400 rounded-full inline-block" />
         </div>
       </div>
     </div>
   );
+}
+
+// ─── Format timestamp ───────────────────────────────────────────────────────
+
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 // ─── Main ChatView ──────────────────────────────────────────────────────────
@@ -202,6 +220,12 @@ export default function ChatView() {
     sendMessage(question);
   };
 
+  const handleClearChat = () => {
+    setMessages([]);
+    setShowSuggestions(true);
+    setRemaining(null);
+  };
+
   const zodiacSign = astrologyData?.sunSign || '';
   const zodiacSymbol = zodiacSign ? ZODIAC_SYMBOLS[zodiacSign] || '✨' : '✨';
   const userName = birthDetails?.name || 'Seeker';
@@ -225,12 +249,27 @@ export default function ChatView() {
                 </p>
               </div>
             </div>
-            {zodiacSign && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 dark:bg-white/5 border border-brown-100/50 dark:border-brown-100/20">
-                <span className="text-base leading-none">{zodiacSymbol}</span>
-                <span className="text-xs font-medium text-brown-600 dark:text-brown-300">{zodiacSign}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {zodiacSign && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 dark:bg-white/5 border border-brown-100/50 dark:border-brown-100/20">
+                  <span className="text-base leading-none">{zodiacSymbol}</span>
+                  <span className="text-xs font-medium text-brown-600 dark:text-brown-300">{zodiacSign}</span>
+                </div>
+              )}
+              {/* Clear Chat Button */}
+              {messages.length > 0 && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  onClick={handleClearChat}
+                  className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 text-brown-400 hover:text-red-500 dark:text-brown-300 dark:hover:text-red-400"
+                  aria-label="Clear chat"
+                  title="Clear chat"
+                >
+                  <Trash2 className="size-4" />
+                </motion.button>
+              )}
+            </div>
           </div>
           {remaining !== null && remaining <= 5 && (
             <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-2 text-center">
@@ -271,10 +310,11 @@ export default function ChatView() {
           {messages.map((msg) => (
             <motion.div
               key={msg.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              variants={msg.role === 'assistant' ? aiMessageVariant : userMessageVariant}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3, ease: 'easeOut' }}
               className={`flex items-start gap-2 mb-4 ${
                 msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'
               }`}
@@ -287,15 +327,23 @@ export default function ChatView() {
               )}
 
               {/* Message Bubble */}
-              <div
-                className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed ${
-                  msg.role === 'user'
-                    ? 'bg-brown-700 dark:bg-brown-600 text-white rounded-2xl rounded-tr-sm'
-                    : 'bg-white dark:bg-white/5 border border-brown-100/50 dark:border-brown-100/20 text-brown-900 dark:text-brown-100 rounded-2xl rounded-tl-sm border-l-2 border-l-gold/40'
-                }`}
-              >
-                {msg.role === 'assistant' && <span className="text-gold/50 mr-1 text-xs">✦</span>}
-                {msg.content}
+              <div className="flex flex-col">
+                <div
+                  className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'bg-brown-700 dark:bg-brown-600 text-white rounded-2xl rounded-tr-sm'
+                      : 'bg-white dark:bg-white/5 border border-brown-100/50 dark:border-brown-100/20 text-brown-900 dark:text-brown-100 rounded-2xl rounded-tl-sm border-l-2 border-l-gold/40'
+                  }`}
+                >
+                  {msg.role === 'assistant' && <span className="text-gold/50 mr-1 text-xs">✦</span>}
+                  {msg.content}
+                </div>
+                {/* Timestamp */}
+                <span className={`text-[10px] text-brown-300 dark:text-brown-500 mt-1 ${
+                  msg.role === 'user' ? 'text-right mr-1' : 'ml-1'
+                }`}>
+                  {formatTime(msg.timestamp)}
+                </span>
               </div>
 
               {/* User Avatar */}
@@ -330,7 +378,7 @@ export default function ChatView() {
                 <button
                   key={question}
                   onClick={() => handleSuggestionClick(question)}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs rounded-full border border-brown-200 dark:border-brown-100/30 bg-white/80 dark:bg-white/5 text-brown-700 dark:text-brown-300 hover:scale-[1.02] hover:border-gold/40 transition-all duration-200 hover:shadow-sm shimmer"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs rounded-full border border-brown-200 dark:border-brown-100/30 bg-white/80 dark:bg-white/5 text-brown-700 dark:text-brown-300 transition-all duration-200 hover:border-gold/50 hover:shadow-[0_0_12px_rgba(212,175,55,0.15)] hover:scale-[1.02]"
                 >
                   <Sparkles className="w-3 h-3 text-gold flex-shrink-0" />
                   <span className="line-clamp-1">{question}</span>
@@ -352,7 +400,7 @@ export default function ChatView() {
             placeholder="Ask your cosmic question..."
             maxLength={500}
             disabled={isLoading}
-            className="flex-1 h-11 px-4 rounded-full bg-white dark:bg-white/5 border border-brown-200 dark:border-brown-100/20 text-brown-900 dark:text-brown-100 placeholder:text-brown-300 dark:placeholder:text-brown-400 text-sm focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="gold-focus-ring flex-1 h-11 px-4 rounded-full bg-white dark:bg-white/5 border border-brown-200 dark:border-brown-100/20 text-brown-900 dark:text-brown-100 placeholder:text-brown-300 dark:placeholder:text-brown-400 text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           />
           <button
             type="submit"

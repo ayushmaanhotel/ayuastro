@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // View types for the single-page app
-export type AppView = 'landing' | 'onboarding' | 'calculating' | 'insights' | 'report' | 'premium' | 'profile' | 'wisdom' | 'sync' | 'chat' | 'mood' | 'breathing' | 'yogaDosha' | 'compatibilityDetail' | 'dashboard' | 'calendar' | 'cosmicSounds' | 'zodiacDeepDive' | 'gratitudeJournal';
-export type OnboardingStep = 'name' | 'birth' | 'relationship' | 'questionnaire' | 'complete';
+export type AppView = 'landing' | 'onboarding' | 'calculating' | 'insights' | 'report' | 'premium' | 'profile' | 'wisdom' | 'sync' | 'chat' | 'mood' | 'breathing' | 'yogaDosha' | 'compatibilityDetail' | 'dashboard' | 'calendar' | 'cosmicSounds' | 'zodiacDeepDive' | 'gratitudeJournal' | 'zodiacGame';
+export type OnboardingStep = 'name' | 'birth' | 'relationship' | 'questionnaire' | 'preview' | 'complete';
 export type BottomNavTab = 'insights' | 'chat' | 'sync' | 'wisdom' | 'profile';
 
 export interface BirthDetails {
@@ -117,7 +117,7 @@ interface AyuAstroState {
   prevOnboardingStep: () => void;
 }
 
-const ONBOARDING_STEPS: OnboardingStep[] = ['name', 'birth', 'relationship', 'questionnaire', 'complete'];
+const ONBOARDING_STEPS: OnboardingStep[] = ['name', 'birth', 'relationship', 'questionnaire', 'preview', 'complete'];
 
 const initialState = {
   currentView: 'landing' as AppView,

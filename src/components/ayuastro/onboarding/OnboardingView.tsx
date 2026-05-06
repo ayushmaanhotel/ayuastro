@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useAyuAstroStore, type OnboardingStep, type QuestionnaireAnswer } from '@/store/ayuastro-store';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ import {
   Info,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
+import { calculateAllPlanetaryPositions } from '@/lib/astrology/calculator';
 
 const INDIAN_CITIES: Record<string, { lat: number; lon: number }> = {
   'New Delhi': { lat: 28.6139, lon: 77.209 },
@@ -242,6 +243,235 @@ function CelebrationOverlay({ onComplete }: { onComplete: () => void }) {
   );
 }
 
+// ─── Birth Chart Preview Overlay ─────────────────────────────────────────────
+
+const ZODIAC_SIGNS_LIST = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+const ZODIAC_SYMBOLS_MAP: Record<string, string> = {
+  Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
+  Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
+};
+
+function BirthChartPreview({ onComplete, birthDetails }: { onComplete: () => void; birthDetails: { dateOfBirth: string; timeOfBirth: string; latitude: number; longitude: number } | null }) {
+  const [phase, setPhase] = useState<'cycling' | 'revealed'>('cycling');
+  const [cyclingSymbol, setCyclingSymbol] = useState(0);
+
+  // Calculate zodiac signs deterministically
+  const zodiacResults = useMemo(() => {
+    if (!birthDetails?.dateOfBirth) {
+      return { sunSign: 'Capricorn', moonSign: 'Gemini', risingSign: 'Taurus' };
+    }
+
+    try {
+      const dob = new Date(birthDetails.dateOfBirth + 'T' + (birthDetails.timeOfBirth || '12:00'));
+      const timezoneOffset = 5.5; // IST
+      const result = calculateAllPlanetaryPositions(dob, birthDetails.latitude || 28.6139, birthDetails.longitude || 77.209, timezoneOffset);
+
+      return {
+        sunSign: result.positions.Sun?.sign || 'Capricorn',
+        moonSign: result.positions.Moon?.sign || 'Gemini',
+        risingSign: result.ascendant?.sign || 'Taurus',
+      };
+    } catch {
+      // Fallback: simple sun sign calculation from date
+      const dateStr = birthDetails.dateOfBirth;
+      if (!dateStr) return { sunSign: 'Capricorn', moonSign: 'Gemini', risingSign: 'Taurus' };
+
+      const month = parseInt(dateStr.split('-')[1]);
+      const day = parseInt(dateStr.split('-')[2]);
+
+      // Tropical sun sign (approximate)
+      let signIndex: number;
+      if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) signIndex = 0;
+      else if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) signIndex = 1;
+      else if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) signIndex = 2;
+      else if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) signIndex = 3;
+      else if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) signIndex = 4;
+      else if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) signIndex = 5;
+      else if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) signIndex = 6;
+      else if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) signIndex = 7;
+      else if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) signIndex = 8;
+      else if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) signIndex = 9;
+      else if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) signIndex = 10;
+      else signIndex = 11;
+
+      return {
+        sunSign: ZODIAC_SIGNS_LIST[signIndex],
+        moonSign: ZODIAC_SIGNS_LIST[(signIndex + 4) % 12],
+        risingSign: ZODIAC_SIGNS_LIST[(signIndex + 2) % 12],
+      };
+    }
+  }, [birthDetails]);
+
+  // Cycling animation for 2 seconds
+  useEffect(() => {
+    if (phase !== 'cycling') return;
+    const interval = setInterval(() => {
+      setCyclingSymbol((prev) => (prev + 1) % 12);
+    }, 120);
+
+    const timer = setTimeout(() => {
+      setPhase('revealed');
+    }, 2000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timer);
+    };
+  }, [phase]);
+
+  // Auto-advance after reveal
+  useEffect(() => {
+    if (phase !== 'revealed') return;
+    const timer = setTimeout(onComplete, 2500);
+    return () => clearTimeout(timer);
+  }, [phase, onComplete]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-cream/95 dark:bg-[#1a1410]/95"
+    >
+      <div className="max-w-sm w-full mx-4">
+        {phase === 'cycling' ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center"
+          >
+            {/* Cycling zodiac symbols */}
+            <motion.div
+              className="text-6xl mb-4"
+              key={cyclingSymbol}
+              initial={{ scale: 0.5, opacity: 0, rotate: -30 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              transition={{ duration: 0.1 }}
+            >
+              {ZODIAC_SYMBOLS_MAP[ZODIAC_SIGNS_LIST[cyclingSymbol]]}
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="font-serif text-xl font-bold text-brown-900 dark:text-brown-100"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              Generating your cosmic identity...
+            </motion.h2>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="mt-3"
+            >
+              <div className="flex gap-1.5 justify-center">
+                {[0, 1, 2].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="size-2 rounded-full bg-gold"
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.12 }}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+            className="bg-white dark:bg-white/5 rounded-2xl shadow-lg border border-gold/10 overflow-hidden"
+          >
+            {/* Gold top accent */}
+            <div className="h-1.5 bg-gradient-to-r from-gold via-gold-light to-gold-dark" />
+
+            <div className="p-6 text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 300 }}
+                className="mb-4"
+              >
+                <div className="flex size-16 items-center justify-center rounded-full bg-gold/10 border border-gold/20 mx-auto">
+                  <span className="text-3xl">{ZODIAC_SYMBOLS_MAP[zodiacResults.sunSign]}</span>
+                </div>
+              </motion.div>
+
+              <motion.h2
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="font-serif text-xl font-bold text-brown-900 dark:text-brown-100 mb-4"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
+                Your Cosmic Identity ✦
+              </motion.h2>
+
+              <div className="space-y-3">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="flex items-center gap-3 rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3"
+                >
+                  <span className="text-2xl">☉</span>
+                  <div className="text-left flex-1">
+                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-300">Your Sun Sign</p>
+                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">
+                      {zodiacResults.sunSign} {ZODIAC_SYMBOLS_MAP[zodiacResults.sunSign]}
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex items-center gap-3 rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3"
+                >
+                  <span className="text-2xl">☽</span>
+                  <div className="text-left flex-1">
+                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-300">Moon Sign</p>
+                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">
+                      {zodiacResults.moonSign} {ZODIAC_SYMBOLS_MAP[zodiacResults.moonSign]}
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="flex items-center gap-3 rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3"
+                >
+                  <span className="text-2xl">⬆</span>
+                  <div className="text-left flex-1">
+                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-300">Rising Sign</p>
+                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">
+                      {zodiacResults.risingSign} {ZODIAC_SYMBOLS_MAP[zodiacResults.risingSign]}
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="text-xs text-brown-400 dark:text-brown-300 mt-4"
+              >
+                Preparing your full cosmic analysis...
+              </motion.p>
+            </div>
+          </motion.div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
 // ─── Questionnaire Encouragement Messages ──────────────────────────────────
 
 function getEncouragement(count: number): string {
@@ -284,6 +514,7 @@ export default function OnboardingView() {
     birthDetails?.relationshipStatus || ''
   );
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showBirthChartPreview, setShowBirthChartPreview] = useState(false);
   const [celebrationHandled, setCelebrationHandled] = useState(false);
   const hasShownWelcomeToast = useRef(false);
 
@@ -323,9 +554,15 @@ export default function OnboardingView() {
     setShowCelebration(false);
     if (!celebrationHandled) {
       setCelebrationHandled(true);
-      setDirection(1);
-      nextOnboardingStep(); // goes to 'complete'
+      // Show birth chart preview instead of directly going to complete
+      setShowBirthChartPreview(true);
     }
+  };
+
+  const handleBirthChartPreviewComplete = () => {
+    setShowBirthChartPreview(false);
+    setDirection(1);
+    nextOnboardingStep(); // goes to 'complete'
   };
 
   const handleQuestionnaireAnswer = (questionId: string, score: number, category: QuestionnaireAnswer['category']) => {
@@ -356,6 +593,9 @@ export default function OnboardingView() {
         return localRelationship.length > 0;
       case 'questionnaire':
         return answeredCount === totalQuestions;
+      case 'preview':
+      case 'complete':
+        return true;
       default:
         return true;
     }
@@ -865,7 +1105,7 @@ export default function OnboardingView() {
   };
 
   // Calculate overall progress (0-100) based on step
-  const stepProgress: Record<string, number> = { name: 25, birth: 50, relationship: 75, questionnaire: 100, complete: 100 };
+  const stepProgress: Record<string, number> = { name: 20, birth: 40, relationship: 60, questionnaire: 80, preview: 90, complete: 100 };
   const overallProgress = stepProgress[onboardingStep] || 0;
 
   return (
@@ -913,6 +1153,16 @@ export default function OnboardingView() {
         <AnimatePresence>
           {showCelebration && (
             <CelebrationOverlay onComplete={handleCelebrationComplete} />
+          )}
+        </AnimatePresence>
+
+        {/* Birth chart preview overlay */}
+        <AnimatePresence>
+          {showBirthChartPreview && (
+            <BirthChartPreview
+              onComplete={handleBirthChartPreviewComplete}
+              birthDetails={birthDetails}
+            />
           )}
         </AnimatePresence>
 

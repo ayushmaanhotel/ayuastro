@@ -642,6 +642,181 @@
   }
 }
 
+/* ─── Task 9-b: Micro-animation & Visual Polish Utilities ──────────────── */
+
+/* Gold shimmer text effect — moving highlight across text */
+@keyframes shimmer-text {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.animate-shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #D4AF37 0%,
+    #F0C14B 25%,
+    #FFFFFF 50%,
+    #F0C14B 75%,
+    #D4AF37 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-text 3s linear infinite;
+}
+.dark .animate-shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #F0C14B 0%,
+    #FFD54F 25%,
+    #FFFFFF 50%,
+    #FFD54F 75%,
+    #F0C14B 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Confetti scatter — gold dots that burst upward */
+@keyframes confetti {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-80px) scale(0.3);
+  }
+}
+.animate-confetti {
+  animation: confetti 0.8s ease-out forwards;
+}
+
+/* Gold focus ring for inputs */
+.gold-focus-ring {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.gold-focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
+  border-color: #D4AF37;
+}
+.dark .gold-focus-ring:focus {
+  box-shadow: 0 0 0 3px rgba(240, 193, 75, 0.2);
+  border-color: #F0C14B;
+}
+
+/* Card lift utility */
+.card-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(139, 111, 71, 0.15);
+}
+.dark .card-lift:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+/* Typing dot bounce for chat indicators */
+@keyframes typing-dot {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+.typing-dot:nth-child(1) { animation: typing-dot 1.2s ease-in-out infinite 0s; }
+.typing-dot:nth-child(2) { animation: typing-dot 1.2s ease-in-out infinite 0.15s; }
+.typing-dot:nth-child(3) { animation: typing-dot 1.2s ease-in-out infinite 0.3s; }
+
+/* Featured badge shimmer */
+@keyframes featured-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-featured-shimmer {
+  background: linear-gradient(90deg, #D4AF37, #F0C14B, #FFFFFF, #F0C14B, #D4AF37);
+  background-size: 200% 100%;
+  animation: featured-shimmer 2.5s linear infinite;
+  color: #3E2723;
+}
+.dark .animate-featured-shimmer {
+  background: linear-gradient(90deg, #F0C14B, #FFD54F, #FFFFFF, #FFD54F, #F0C14B);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Confetti particle positioning helper */
+.confetti-particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Gold ring pulse for profile button */
+@keyframes gold-ring-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1); }
+}
+.animate-gold-ring {
+  animation: gold-ring-pulse 2s ease-in-out infinite;
+}
+
+/* Tooltip styles for mood timeline */
+.mood-tooltip {
+  position: relative;
+}
+.mood-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: #3E2723;
+  color: #EFEBE9;
+  font-size: 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+.dark .mood-tooltip::after {
+  background: #EFEBE9;
+  color: #3E2723;
+}
+.mood-tooltip:hover::after {
+  opacity: 1;
+}
+
+/* Pulsing red dot for limited-time badge */
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.5); }
+}
+.animate-pulse-red {
+  animation: pulse-red 1.5s ease-in-out infinite;
+}
+
+/* Star fill animation for testimonials */
+@keyframes star-fill {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.animate-star-fill {
+  animation: star-fill 0.6s ease-out forwards;
+}
+
 /* Mobile responsive text */
 @media (max-width: 640px) {
   .hero-title {

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useAyuAstroStore, type TraitScore } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ import {
   Wind,
   Share2,
   HelpCircle,
+  Download,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
 
@@ -121,7 +123,39 @@ const staggerItem = {
 };
 
 export default function ProfileView() {
-  const { birthDetails, astrologyData, numerologyData, traitScores, hasPaid, reportSections, reset, setView } = useAyuAstroStore();
+  const { birthDetails, astrologyData, numerologyData, traitScores, hasPaid, reportSections, reset, setView, userId } = useAyuAstroStore();
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportData = async () => {
+    if (!userId) {
+      cosmicToast.warning('No user data found', 'Please complete onboarding first');
+      return;
+    }
+    setIsExporting(true);
+    try {
+      const response = await fetch(`/api/user/export?userId=${encodeURIComponent(userId)}`);
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || data.message || 'Export failed');
+      }
+      const data = await response.json();
+      // Create downloadable JSON file
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ayuastro-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      cosmicToast.success('Data Exported! ✦', 'Your cosmic data has been downloaded');
+    } catch (err) {
+      cosmicToast.warning('Export Failed', err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleReset = () => {
     cosmicToast.cosmic('Starting fresh ✦', 'Your cosmic journey awaits anew');
@@ -713,6 +747,29 @@ export default function ProfileView() {
         <div className="section-divider">
           <span className="text-gold text-lg zodiac-glow">✦</span>
         </div>
+
+        {/* Export My Data Button */}
+        <motion.div variants={staggerItem}>
+          <Button
+            onClick={handleExportData}
+            disabled={isExporting}
+            variant="outline"
+            className="w-full border-gold/30 text-gold-dark dark:text-gold hover:bg-gold/5 disabled:opacity-50"
+          >
+            {isExporting ? (
+              <motion.span
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                className="inline-block mr-2"
+              >
+                <Sparkles className="size-4" />
+              </motion.span>
+            ) : (
+              <Download className="mr-2 size-4" />
+            )}
+            {isExporting ? 'Exporting...' : 'Export My Data'}
+          </Button>
+        </motion.div>
 
         {/* Start Over — with shake on hover */}
         <motion.div variants={staggerItem}>

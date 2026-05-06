@@ -25,6 +25,7 @@ import CosmicCalendarView from '@/components/ayuastro/calendar/CosmicCalendarVie
 import CosmicSoundsView from '@/components/ayuastro/wellness/CosmicSoundsView';
 import ZodiacDeepDiveView from '@/components/ayuastro/zodiac/ZodiacDeepDiveView';
 import GratitudeJournalView from '@/components/ayuastro/wellness/GratitudeJournalView';
+import ZodiacGameView from '@/components/ayuastro/sync/ZodiacGameView';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -88,6 +89,8 @@ export default function Home() {
         return <ZodiacDeepDiveView />;
       case 'gratitudeJournal':
         return <GratitudeJournalView />;
+      case 'zodiacGame':
+        return <ZodiacGameView />;
       case 'yogaDosha':
         return <YogaDoshaView />;
       case 'compatibilityDetail': {
@@ -111,7 +114,7 @@ export default function Home() {
   };
 
   const showHeader = currentView !== 'landing' && currentView !== 'calculating';
-  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'zodiacDeepDive', 'gratitudeJournal'].includes(currentView);
+  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'zodiacDeepDive', 'gratitudeJournal', 'zodiacGame'].includes(currentView);
 
   return (
     <div className="min-h-screen flex flex-col bg-cream">

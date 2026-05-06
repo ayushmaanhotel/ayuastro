@@ -68,45 +68,58 @@ export default function Header() {
           >
             <Image src="/logo.svg" alt="AyuAstro" width={24} height={24} className="size-6" priority />
             <h1
-              className="font-serif text-xl font-semibold tracking-wide text-brown-900 dark:text-brown-100"
+              className="animate-shimmer-text font-serif text-xl font-semibold tracking-wide"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               AyuAstro
             </h1>
+            {/* v2.0 badge */}
+            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-gold/10 text-gold-dark dark:bg-gold/15 dark:text-gold">
+              v2.0
+            </span>
           </motion.button>
 
           <div className="flex items-center gap-1">
-            {/* Theme Toggle */}
+            {/* Theme Toggle — smooth morphing animation */}
             <button
               onClick={toggleTheme}
               className="flex size-9 items-center justify-center rounded-full transition-all duration-300 hover:bg-brown-50 dark:hover:bg-brown-800"
               aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              <motion.div
-                initial={false}
-                animate={{
-                  rotate: theme === 'dark' ? 180 : 0,
-                  scale: 1,
-                }}
-                transition={{ duration: 0.5, ease: 'easeInOut' }}
-                style={{
-                  filter: theme === 'dark'
-                    ? 'drop-shadow(0 0 8px rgba(212,175,55,0.5))'
-                    : 'none',
-                }}
-              >
+              <AnimatePresence mode="wait" initial={false}>
                 {theme === 'dark' ? (
-                  <Sun className="size-5 text-gold" />
+                  <motion.div
+                    key="sun"
+                    initial={{ rotate: -90, scale: 0, opacity: 0 }}
+                    animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                    exit={{ rotate: 90, scale: 0, opacity: 0 }}
+                    transition={{ duration: 0.4, ease: 'easeInOut' }}
+                    style={{
+                      filter: 'drop-shadow(0 0 8px rgba(212,175,55,0.5))',
+                    }}
+                  >
+                    <Sun className="size-5 text-gold" />
+                  </motion.div>
                 ) : (
-                  <Moon className="size-5 text-brown-700" />
+                  <motion.div
+                    key="moon"
+                    initial={{ rotate: 90, scale: 0, opacity: 0 }}
+                    animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                    exit={{ rotate: -90, scale: 0, opacity: 0 }}
+                    transition={{ duration: 0.4, ease: 'easeInOut' }}
+                  >
+                    <Moon className="size-5 text-brown-700" />
+                  </motion.div>
                 )}
-              </motion.div>
+              </AnimatePresence>
             </button>
 
-            {/* Profile Button */}
+            {/* Profile Button — gold ring when user has unread mood entries */}
             <button
               onClick={() => setView('profile')}
-              className="relative flex size-9 items-center justify-center rounded-full transition-colors hover:bg-brown-50 dark:hover:bg-brown-800"
+              className={`relative flex size-9 items-center justify-center rounded-full transition-colors hover:bg-brown-50 dark:hover:bg-brown-800 ${
+                needsMoodCheckIn && currentView !== 'mood' ? 'animate-gold-ring' : ''
+              }`}
               aria-label="Profile"
             >
               {birthDetails?.name ? (
@@ -136,12 +149,13 @@ export default function Header() {
           </div>
         </div>
       </div>
-      {/* Gradient underline — gold to transparent */}
+      {/* Gradient underline — gold to transparent (thinner 0.5px) */}
       <div
         className="h-px w-full"
         style={{
           background: 'linear-gradient(90deg, transparent, #D4AF37, transparent)',
-          opacity: 0.5,
+          opacity: 0.35,
+          height: '0.5px',
         }}
       />
     </motion.header>
