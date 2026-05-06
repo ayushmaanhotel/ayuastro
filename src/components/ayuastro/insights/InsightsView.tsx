@@ -652,9 +652,11 @@ export default function InsightsView() {
                   </h3>
 
                   {horoscopeLoading ? (
-                    <div className="space-y-2">
-                      <div className="h-3 w-full rounded bg-brown-100 animate-pulse" />
-                      <div className="h-3 w-3/4 rounded bg-brown-100 animate-pulse" />
+                    <div className="space-y-2.5">
+                      <div className="h-3 w-full rounded-full bg-gold/10 animate-pulse" />
+                      <div className="h-3 w-5/6 rounded-full bg-gold/10 animate-pulse" />
+                      <div className="h-3 w-3/4 rounded-full bg-gold/10 animate-pulse" />
+                      <div className="h-3 w-2/3 rounded-full bg-gold/10 animate-pulse" />
                     </div>
                   ) : horoscope ? (
                     <>
@@ -723,9 +725,10 @@ export default function InsightsView() {
 
               {transitsLoading ? (
                 <div className="space-y-3">
-                  <div className="h-3 w-full rounded bg-brown-100 animate-pulse" />
-                  <div className="h-3 w-3/4 rounded bg-brown-100 animate-pulse" />
-                  <div className="h-12 w-full rounded-lg bg-brown-50 animate-pulse" />
+                  <div className="h-3 w-full rounded-full bg-gold/10 animate-pulse" />
+                  <div className="h-3 w-5/6 rounded-full bg-gold/10 animate-pulse" />
+                  <div className="h-3 w-3/4 rounded-full bg-gold/10 animate-pulse" />
+                  <div className="h-10 w-full rounded-lg bg-gold/10 animate-pulse" />
                 </div>
               ) : transits ? (
                 <div className="space-y-3">
@@ -793,9 +796,9 @@ export default function InsightsView() {
         </motion.div>
 
         {/* Cosmic Calendar Card */}
-        <motion.div variants={staggerItem}>
+        <motion.div variants={staggerItem} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
           <Card
-            className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden card-hover cursor-pointer"
+            className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden cursor-pointer transition-shadow hover:shadow-[0_8px_30px_rgba(139,111,71,0.12)]"
             onClick={() => setView('calendar')}
           >
             <div className="h-1 bg-gradient-to-r from-gold via-amber-400 to-sage" />
@@ -818,6 +821,40 @@ export default function InsightsView() {
                   </h3>
                   <p className="text-xs text-brown-400 dark:text-brown-400 mt-0.5">
                     Upcoming cosmic events and their emotional impact
+                  </p>
+                </div>
+                <ArrowRight className="size-4 text-brown-300 dark:text-brown-400 shrink-0 mt-1" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Zodiac Deep Dive Card */}
+        <motion.div variants={staggerItem} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
+          <Card
+            className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden cursor-pointer transition-shadow hover:shadow-[0_8px_30px_rgba(139,111,71,0.12)]"
+            onClick={() => setView('zodiacDeepDive')}
+          >
+            <div className="h-1 bg-gradient-to-r from-gold via-sage to-brown-400" />
+            <CardContent className="p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gold/20 to-sage/20 dark:from-gold/10 dark:to-sage/10">
+                  <Sparkles className="size-5 text-gold-dark dark:text-gold" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge className="bg-gold/15 text-gold-dark dark:bg-gold/20 dark:text-gold border-0 text-[10px] px-2 py-0 tracking-wider uppercase">
+                      Zodiac
+                    </Badge>
+                  </div>
+                  <h3
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Zodiac Deep Dive
+                  </h3>
+                  <p className="text-xs text-brown-400 dark:text-brown-400 mt-0.5">
+                    Explore all 12 zodiac signs
                   </p>
                 </div>
                 <ArrowRight className="size-4 text-brown-300 dark:text-brown-400 shrink-0 mt-1" />
@@ -1298,8 +1335,8 @@ export default function InsightsView() {
         )}
 
         {/* CTA — cosmic gradient background with floating dots */}
-        <motion.div variants={staggerItem}>
-          <Card className="card-hover border-0 shadow-md overflow-hidden relative">
+        <motion.div variants={staggerItem} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
+          <Card className="border-0 shadow-md overflow-hidden relative transition-shadow hover:shadow-[0_8px_30px_rgba(139,111,71,0.12)]">
             {/* Cosmic gradient background */}
             <div className="absolute inset-0 bg-gradient-to-br from-gold/8 via-brown-700/5 to-sage/8 dark:from-gold/5 dark:via-brown-700/3 dark:to-sage/5" />
             {/* Floating decorative dots */}

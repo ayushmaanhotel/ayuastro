@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -22,15 +22,18 @@ import YogaDoshaView from '@/components/ayuastro/insights/YogaDoshaView';
 import CompatibilityDetailView from '@/components/ayuastro/sync/CompatibilityDetailView';
 import TraitDashboardView from '@/components/ayuastro/dashboard/TraitDashboardView';
 import CosmicCalendarView from '@/components/ayuastro/calendar/CosmicCalendarView';
+import CosmicSoundsView from '@/components/ayuastro/wellness/CosmicSoundsView';
+import ZodiacDeepDiveView from '@/components/ayuastro/zodiac/ZodiacDeepDiveView';
 
 const pageVariants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  exit: { opacity: 0 },
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 },
 };
 
 export default function Home() {
   const { currentView, birthDetails, astrologyData, setView, setActiveTab } = useAyuAstroStore();
+  const [showShimmer, setShowShimmer] = useState(false);
 
   // If user has persisted data, redirect to insights
   useEffect(() => {
@@ -39,6 +42,16 @@ export default function Home() {
       setActiveTab('insights');
     }
   }, [birthDetails, astrologyData, currentView, setView, setActiveTab]);
+
+  // Trigger shimmer when view changes
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      setShowShimmer(true);
+      const timer = setTimeout(() => setShowShimmer(false), 500);
+      return () => clearTimeout(timer);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [currentView]);
 
   const renderView = () => {
     switch (currentView) {
@@ -68,6 +81,10 @@ export default function Home() {
         return <TraitDashboardView />;
       case 'calendar':
         return <CosmicCalendarView />;
+      case 'cosmicSounds':
+        return <CosmicSoundsView />;
+      case 'zodiacDeepDive':
+        return <ZodiacDeepDiveView />;
       case 'yogaDosha':
         return <YogaDoshaView />;
       case 'compatibilityDetail': {
@@ -91,13 +108,28 @@ export default function Home() {
   };
 
   const showHeader = currentView !== 'landing' && currentView !== 'calculating';
-  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar'].includes(currentView);
+  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'zodiacDeepDive'].includes(currentView);
 
   return (
     <div className="min-h-screen flex flex-col bg-cream">
       {showHeader && <Header />}
 
-      <main className="flex-1">
+      <main className="flex-1 relative">
+        {/* Gold shimmer line during transitions */}
+        <AnimatePresence>
+          {showShimmer && (
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              exit={{ scaleX: 0, opacity: 0 }}
+              transition={{ duration: 0.35, ease: 'easeInOut' }}
+              className="absolute top-0 left-0 right-0 h-[2px] z-50 origin-left"
+              style={{
+                background: 'linear-gradient(90deg, transparent, #D4AF37, #BF9B30, #D4AF37, transparent)',
+              }}
+            />
+          )}
+        </AnimatePresence>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentView}
@@ -105,7 +137,7 @@ export default function Home() {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
             {renderView()}
           </motion.div>

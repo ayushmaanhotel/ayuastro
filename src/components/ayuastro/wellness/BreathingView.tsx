@@ -19,6 +19,8 @@ import {
   Sun,
   Heart,
   BedDouble,
+  Music,
+  ChevronRight,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
 
@@ -661,6 +663,41 @@ export default function BreathingView() {
               </div>
             </CardContent>
           </Card>
+        </motion.div>
+
+        {/* ─── Cosmic Sounds Entry Card ──────────────────────────────── */}
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.12 }}>
+          <motion.div
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setView('cosmicSounds')}
+            className="cursor-pointer rounded-xl overflow-hidden border border-gold/20 shadow-md card-hover bg-gradient-to-br from-[#2D2320] to-[#1a1410] dark:from-[#2D2320] dark:to-[#1a1410] p-5"
+          >
+            <div className="h-1 bg-gradient-to-r from-gold via-sage-muted/50 to-gold-dark mb-4 -mt-5 -mx-5" />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center size-12 rounded-xl bg-gold/15 text-gold">
+                <Music className="size-6" />
+              </div>
+              <div className="flex-1">
+                <h3
+                  className="font-serif text-base font-semibold text-cream mb-0.5"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  Cosmic Sounds
+                </h3>
+                <p className="text-xs text-brown-300">Ambient soundscapes for meditation & relaxation</p>
+              </div>
+              <div className="flex items-center gap-1 text-gold">
+                <Play className="size-4" />
+                <ChevronRight className="size-4" />
+              </div>
+            </div>
+            {/* Mini sound icons preview */}
+            <div className="flex items-center gap-2 mt-3">
+              {['🌧️', '🌊', '🔥', '🌲', '⭐', '🎵', '🦗', '💨'].map((emoji, i) => (
+                <span key={i} className="text-sm opacity-50">{emoji}</span>
+              ))}
+            </div>
+          </motion.div>
         </motion.div>
 
         {/* ─── Section 3: Daily Mindfulness Prompt ───────────────────── */}

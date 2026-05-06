@@ -518,9 +518,9 @@ export default function ProfileView() {
         </motion.div>
 
         {/* Mood Journal Card */}
-        <motion.div variants={staggerItem}>
+        <motion.div variants={staggerItem} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
           <Card
-            className="card-hover border-0 shadow-md bg-gradient-to-br from-gold/5 to-sage-muted/10 dark:from-gold/5 dark:to-sage-muted/5 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-[3px]"
+            className="card-hover border-0 shadow-md bg-gradient-to-br from-gold/5 to-sage-muted/10 dark:from-gold/5 dark:to-sage-muted/5 cursor-pointer transition-shadow hover:shadow-[0_8px_30px_rgba(139,111,71,0.12)]"
             onClick={() => setView('mood')}
           >
             <CardContent className="p-4">
@@ -544,9 +544,9 @@ export default function ProfileView() {
         </motion.div>
 
         {/* Breathing & Meditation Card */}
-        <motion.div variants={staggerItem}>
+        <motion.div variants={staggerItem} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
           <Card
-            className="card-hover border-0 shadow-md bg-gradient-to-br from-sage-muted/15 to-gold/10 dark:from-sage-muted/10 dark:to-gold/5 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-[3px]"
+            className="card-hover border-0 shadow-md bg-gradient-to-br from-sage-muted/15 to-gold/10 dark:from-sage-muted/10 dark:to-gold/5 cursor-pointer transition-shadow hover:shadow-[0_8px_30px_rgba(139,111,71,0.12)]"
             onClick={() => setView('breathing')}
           >
             <CardContent className="p-4">

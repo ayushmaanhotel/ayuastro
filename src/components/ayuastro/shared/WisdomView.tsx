@@ -228,6 +228,8 @@ export default function WisdomView() {
                 key={card.title}
                 {...fadeInUp}
                 transition={{ duration: 0.4, delay: 0.08 * i }}
+                whileHover={{ y: -2, boxShadow: "0 8px 30px rgba(139,111,71,0.12)" }}
+                whileTap={{ scale: 0.98 }}
               >
                 <Card className={`card-hover border-0 shadow-md border-l-4 ${card.accentBorder} ${card.color} dark:bg-white/5`}>
                   <CardContent className="p-6">

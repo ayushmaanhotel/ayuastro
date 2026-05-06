@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -136,14 +136,56 @@ const starPositions = [
   { x: 85, y: 70, delay: 1.4 }, { x: 48, y: 85, delay: 0.5 },
 ];
 
+// ─── Count-Up Animation Component ─────────────────────────────────────────────
+function CountUpValue({ value }: { value: string }) {
+  const [display, setDisplay] = useState(value);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    if (hasAnimated.current) return;
+    hasAnimated.current = true;
+
+    // Parse numeric part from value like "50K+", "94%", "4.9/5"
+    const numericMatch = value.match(/[\d.]+/);
+    if (!numericMatch) return;
+
+    const target = parseFloat(numericMatch[0]);
+    const suffix = value.replace(numericMatch[0], '');
+    const isFloat = numericMatch[0].includes('.');
+    const steps = 30;
+    const stepDuration = 25;
+    let current = 0;
+
+    const interval = setInterval(() => {
+      current++;
+      const progress = current / steps;
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const currentVal = target * eased;
+      setDisplay(isFloat ? `${currentVal.toFixed(1)}${suffix}` : `${Math.round(currentVal)}${suffix}`);
+
+      if (current >= steps) {
+        clearInterval(interval);
+        setDisplay(value);
+      }
+    }, stepDuration);
+
+    return () => clearInterval(interval);
+  }, [value]);
+
+  return <>{display}</>;
+}
+
 export default function LandingView() {
   const { setView } = useAyuAstroStore();
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [trustCounted, setTrustCounted] = useState(false);
 
   // Parallax effect
   const { scrollY } = useScroll();
   const bgY = useTransform(scrollY, [0, 1000], [0, 200]);
   const contentY = useTransform(scrollY, [0, 1000], [0, 50]);
+  const decorY = useTransform(scrollY, [0, 1000], [0, 300]);
 
   // Auto-rotate testimonials
   useEffect(() => {
@@ -212,9 +254,9 @@ export default function LandingView() {
           />
 
           {/* Existing background decorations (slower due to parallax) */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gold/[0.03] blur-3xl" />
-          <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] rounded-full bg-sage/[0.05] blur-2xl" />
-          <div className="absolute top-1/3 right-1/4 w-[200px] h-[200px] rounded-full bg-brown-200/20 dark:bg-brown-600/10 blur-2xl" />
+          <motion.div style={{ y: decorY }} className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gold/[0.03] blur-3xl" />
+          <motion.div style={{ y: decorY }} className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] rounded-full bg-sage/[0.05] blur-2xl" />
+          <motion.div style={{ y: decorY }} className="absolute top-1/3 right-1/4 w-[200px] h-[200px] rounded-full bg-brown-200/20 dark:bg-brown-600/10 blur-2xl" />
         </motion.div>
 
         {/* Content (foreground - moves at different parallax speed) */}
@@ -417,6 +459,7 @@ export default function LandingView() {
           whileInView="animate"
           viewport={{ once: true }}
           variants={stagger}
+          onViewportEnter={() => setTrustCounted(true)}
           className="mx-auto max-w-lg"
         >
           <div className="grid grid-cols-3 gap-4">
@@ -430,7 +473,7 @@ export default function LandingView() {
                   className="font-serif text-2xl font-bold text-brown-900 dark:text-cream"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
-                  {metric.value}
+                  {trustCounted ? <CountUpValue value={metric.value} /> : metric.value}
                 </p>
                 <p className="text-xs text-brown-400 dark:text-brown-300 mt-1">{metric.label}</p>
               </motion.div>
@@ -524,13 +567,13 @@ export default function LandingView() {
       {/* FAQ Accordion Section */}
       <section className="px-6 pb-16">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: '-50px' }}
+          variants={stagger}
           className="mx-auto max-w-lg"
         >
-          <div className="mb-6 text-center">
+          <motion.div variants={fadeInUp} className="mb-6 text-center">
             <h2
               className="font-serif text-2xl font-bold text-brown-900 dark:text-cream mb-2"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
@@ -540,29 +583,33 @@ export default function LandingView() {
             <p className="text-sm text-brown-400 dark:text-brown-300">
               Everything you need to know before your analysis
             </p>
-          </div>
+          </motion.div>
 
           <Card className="border-0 shadow-sm bg-white dark:bg-white/5 dark:border dark:border-brown-700/30 p-2">
             <CardContent className="p-4">
               <Accordion type="single" collapsible className="w-full">
                 {faqItems.map((item, i) => (
-                  <AccordionItem
+                  <motion.div
                     key={i}
-                    value={`faq-${i}`}
-                    className="border-brown-100 dark:border-brown-700/40"
+                    variants={fadeInUp}
                   >
-                    <AccordionTrigger className="text-sm font-semibold text-brown-900 dark:text-cream hover:text-gold-dark dark:hover:text-gold hover:no-underline py-4">
-                      <span className="flex items-center gap-2 text-left">
-                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-gold/10 text-[10px] font-bold text-gold-dark dark:text-gold">
-                          {i + 1}
+                    <AccordionItem
+                      value={`faq-${i}`}
+                      className="border-brown-100 dark:border-brown-700/40"
+                    >
+                      <AccordionTrigger className="text-sm font-semibold text-brown-900 dark:text-cream hover:text-gold-dark dark:hover:text-gold hover:no-underline py-4">
+                        <span className="flex items-center gap-2 text-left">
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-gold/10 text-[10px] font-bold text-gold-dark dark:text-gold">
+                            {i + 1}
+                          </span>
+                          {item.question}
                         </span>
-                        {item.question}
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent className="text-sm text-brown-500 dark:text-brown-300 leading-relaxed pl-7">
-                      {item.answer}
-                    </AccordionContent>
-                  </AccordionItem>
+                      </AccordionTrigger>
+                      <AccordionContent className="text-sm text-brown-500 dark:text-brown-300 leading-relaxed pl-7">
+                        {item.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </motion.div>
                 ))}
               </Accordion>
             </CardContent>

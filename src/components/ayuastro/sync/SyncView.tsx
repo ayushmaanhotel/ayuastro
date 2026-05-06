@@ -374,7 +374,7 @@ export default function SyncView() {
         </motion.div>
 
         {/* Your Cosmic Profile Card */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }} whileHover={{ y: -2, boxShadow: "0 8px 30px rgba(139,111,71,0.12)" }} whileTap={{ scale: 0.98 }}>
           <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
@@ -423,7 +423,7 @@ export default function SyncView() {
         </motion.div>
 
         {/* Compatibility Check Section */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }} whileHover={{ y: -2, boxShadow: "0 8px 30px rgba(139,111,71,0.12)" }} whileTap={{ scale: 0.98 }}>
           <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
@@ -680,7 +680,7 @@ export default function SyncView() {
         </AnimatePresence>
 
         {/* Zodiac Pairings Guide */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }} whileHover={{ y: -2, boxShadow: "0 8px 30px rgba(139,111,71,0.12)" }}>
           <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">

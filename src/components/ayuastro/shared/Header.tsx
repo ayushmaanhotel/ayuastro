@@ -1,14 +1,38 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { useTheme } from 'next-themes';
 import { Menu, User, Sun, Moon } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
 export default function Header() {
-  const { currentView, setView, birthDetails } = useAyuAstroStore();
+  const { currentView, setView, birthDetails, userId } = useAyuAstroStore();
   const { theme, setTheme } = useTheme();
+  const [needsMoodCheckIn, setNeedsMoodCheckIn] = useState(false);
+
+  // Check if user has logged a mood today
+  useEffect(() => {
+    async function checkMoodToday() {
+      if (!userId) return;
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const res = await fetch(`/api/mood/history?userId=${userId}&days=1`);
+        if (res.ok) {
+          const json = await res.json();
+          const hasLoggedToday = json.data?.some(
+            (entry: { createdAt: string }) => entry.createdAt.startsWith(today)
+          );
+          setNeedsMoodCheckIn(!hasLoggedToday);
+        }
+      } catch {
+        // If API fails, show dot (better to remind than miss)
+        setNeedsMoodCheckIn(true);
+      }
+    }
+    checkMoodToday();
+  }, [userId]);
 
   if (currentView === 'landing' || currentView === 'calculating') return null;
 
@@ -82,7 +106,7 @@ export default function Header() {
             {/* Profile Button */}
             <button
               onClick={() => setView('profile')}
-              className="flex size-9 items-center justify-center rounded-full transition-colors hover:bg-brown-50 dark:hover:bg-brown-800"
+              className="relative flex size-9 items-center justify-center rounded-full transition-colors hover:bg-brown-50 dark:hover:bg-brown-800"
               aria-label="Profile"
             >
               {birthDetails?.name ? (
@@ -92,6 +116,21 @@ export default function Header() {
               ) : (
                 <User className="size-5 text-brown-700 dark:text-brown-300" />
               )}
+              {/* Notification dot for mood check-in */}
+              <AnimatePresence>
+                {needsMoodCheckIn && currentView !== 'mood' && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                    className="absolute top-0.5 right-0.5 flex size-2.5"
+                  >
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-gold opacity-75 animate-ping" />
+                    <span className="relative inline-flex size-2.5 rounded-full bg-gold" style={{ boxShadow: '0 0 4px rgba(212,175,55,0.5)' }} />
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </button>
           </div>
         </div>
