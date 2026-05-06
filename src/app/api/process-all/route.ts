@@ -24,6 +24,7 @@ const questionnaireAnswerSchema = z.object({
   questionId: z.string().min(1),
   answer: z.string().min(1),
   category: z.enum(['emotional', 'social', 'behavioral', 'relational']),
+  score: z.number().min(1).max(5).optional(),
 });
 
 const processAllSchema = z.object({
@@ -33,11 +34,35 @@ const processAllSchema = z.object({
   placeOfBirth: z.string().min(1, 'Place of birth is required'),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
-  timezone: z.number().min(-12).max(14).optional(),
-  gender: z.enum(['male', 'female', 'other']).optional(),
+  timezone: z.union([z.string(), z.number()]).optional().transform(v => {
+    if (typeof v === 'string') {
+      // Convert timezone string like "Asia/Kolkata" to UTC offset
+      const tzOffsets: Record<string, number> = {
+        'Asia/Kolkata': 5.5,
+        'Asia/Calcutta': 5.5,
+        'Asia/Mumbai': 5.5,
+        'Asia/Delhi': 5.5,
+        'Asia/Chennai': 5.5,
+        'Asia/Kolkata': 5.5,
+      };
+      return tzOffsets[v] ?? 5.5;
+    }
+    return v ?? 5.5;
+  }),
+  gender: z.enum(['male', 'female', 'other', 'Male', 'Female', 'Other']).optional().transform(v => v?.toLowerCase() as 'male' | 'female' | 'other' | undefined),
   relationshipStatus: z
-    .enum(['single', 'in_relationship', 'married', 'divorced', 'widowed', 'complicated'])
-    .optional(),
+    .enum(['single', 'in_relationship', 'married', 'divorced', 'widowed', 'complicated', 'Single', 'Partnered', "It's Complicated", 'Prefer Not to Say'])
+    .optional()
+    .transform(v => {
+      if (!v) return v;
+      const map: Record<string, string> = {
+        'Single': 'single',
+        'Partnered': 'in_relationship',
+        "It's Complicated": 'complicated',
+        'Prefer Not to Say': 'complicated',
+      };
+      return map[v] ?? v.toLowerCase();
+    }),
   questionnaireAnswers: z.array(questionnaireAnswerSchema).optional(),
   reportType: z.enum(['personality', 'relationship', 'emotional_pattern']).optional(),
   freeOnly: z.boolean().optional(),
@@ -90,7 +115,7 @@ export async function POST(request: NextRequest) {
         placeOfBirth: data.placeOfBirth,
         latitude: data.latitude,
         longitude: data.longitude,
-        timezone: data.timezone?.toString() ?? null,
+        timezone: String(data.timezone ?? 5.5),
         gender: data.gender ?? null,
         relationshipStatus: data.relationshipStatus ?? null,
       },
@@ -216,11 +241,16 @@ export async function POST(request: NextRequest) {
         // Convert questionnaire answers to scoring format (map string answers to Likert)
         const scoringQuestionnaire: ScoringQuestionnaireAnswer[] = (data.questionnaireAnswers ?? []).map(
           (qa) => {
-            // Convert string answer to Likert scale (1-5)
-            const numericAnswer = parseInt(qa.answer, 10);
-            const likertValue = isNaN(numericAnswer)
-              ? 3 // default neutral
-              : Math.max(1, Math.min(5, numericAnswer)) as 1 | 2 | 3 | 4 | 5;
+            // Use score field if provided, otherwise convert string answer to Likert scale (1-5)
+            let likertValue: 1 | 2 | 3 | 4 | 5;
+            if (qa.score) {
+              likertValue = Math.max(1, Math.min(5, qa.score)) as 1 | 2 | 3 | 4 | 5;
+            } else {
+              const numericAnswer = parseInt(qa.answer, 10);
+              likertValue = isNaN(numericAnswer)
+                ? 3 // default neutral
+                : Math.max(1, Math.min(5, numericAnswer)) as 1 | 2 | 3 | 4 | 5;
+            }
             return {
               questionId: qa.questionId,
               answer: likertValue,

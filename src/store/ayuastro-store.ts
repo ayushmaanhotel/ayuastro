@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // View types for the single-page app
-export type AppView = 'landing' | 'onboarding' | 'calculating' | 'insights' | 'report' | 'premium' | 'profile' | 'wisdom';
+export type AppView = 'landing' | 'onboarding' | 'calculating' | 'insights' | 'report' | 'premium' | 'profile' | 'wisdom' | 'sync';
 export type OnboardingStep = 'name' | 'birth' | 'relationship' | 'questionnaire' | 'complete';
 export type BottomNavTab = 'insights' | 'sync' | 'wisdom' | 'profile';
 

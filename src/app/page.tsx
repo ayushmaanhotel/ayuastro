@@ -12,6 +12,7 @@ import WisdomView from '@/components/ayuastro/shared/WisdomView';
 import LandingView from '@/components/ayuastro/landing/LandingView';
 import OnboardingView from '@/components/ayuastro/onboarding/OnboardingView';
 import InsightsView from '@/components/ayuastro/insights/InsightsView';
+import SyncView from '@/components/ayuastro/sync/SyncView';
 import ReportView from '@/components/ayuastro/report/ReportView';
 import PremiumView from '@/components/ayuastro/premium/PremiumView';
 
@@ -48,6 +49,8 @@ export default function Home() {
         return <PremiumView />;
       case 'profile':
         return <ProfileView />;
+      case 'sync':
+        return <SyncView />;
       case 'wisdom':
         return <WisdomView />;
       default:
@@ -56,7 +59,7 @@ export default function Home() {
   };
 
   const showHeader = currentView !== 'landing' && currentView !== 'calculating';
-  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile'].includes(currentView);
+  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync'].includes(currentView);
 
   return (
     <div className="min-h-screen flex flex-col bg-cream">

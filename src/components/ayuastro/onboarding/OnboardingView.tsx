@@ -221,11 +221,42 @@ export default function OnboardingView() {
 
       const data = await response.json();
 
-      if (data.astrology) setAstrologyData(data.astrology);
-      if (data.numerology) setNumerologyData(data.numerology);
-      if (data.traits) setTraitScores(data.traits);
-      if (data.reportSections) setReportSections(data.reportSections);
-      if (data.summary) setReportSummary(data.summary);
+      // Map API response to store - API wraps in data.data
+      const result = data.data || data;
+
+      if (result.astrology) {
+        setAstrologyData({
+          sunSign: result.astrology.sunSign,
+          moonSign: result.astrology.moonSign,
+          ascendant: result.astrology.ascendant,
+          nakshatra: typeof result.astrology.nakshatra === 'string' ? result.astrology.nakshatra : result.astrology.nakshatra?.name || '',
+          currentDasha: result.astrology.dashaPeriods?.currentMahadasha
+            ? `${result.astrology.dashaPeriods.currentMahadasha.planet}${result.astrology.dashaPeriods.currentAntardasha ? '/' + result.astrology.dashaPeriods.currentAntardasha.planet : ''}`
+            : '',
+          yogas: (result.astrology.yogas || []).filter((y: { present: boolean }) => y.present).map((y: { name: string }) => y.name),
+          doshas: (result.astrology.doshas || []).filter((d: { present: boolean }) => d.present).map((d: { name: string }) => d.name),
+          planetaryPositions: Object.fromEntries(
+            Object.entries(result.astrology.planetaryPositions || {}).map(([key, pos]: [string, unknown]) => {
+              const p = pos as { sign: string; degreeInSign: number; house?: number; isRetrograde?: boolean };
+              return [key, { sign: p.sign, degree: p.degreeInSign, house: p.house || 1, retrograde: p.isRetrograde || false }];
+            })
+          ),
+        });
+      }
+      if (result.numerology) setNumerologyData({
+        lifePathNumber: result.numerology.lifePathNumber,
+        destinyNumber: result.numerology.destinyNumber,
+        soulUrgeNumber: result.numerology.soulUrgeNumber,
+        personalityNumber: result.numerology.personalityNumber,
+        lifePathDesc: result.numerology.descriptions?.lifePath || '',
+        destinyDesc: result.numerology.descriptions?.destiny || '',
+        soulUrgeDesc: result.numerology.descriptions?.soulUrge || '',
+      });
+      if (result.traits) setTraitScores(result.traits);
+      if (result.report) {
+        if (result.report.sections) setReportSections(result.report.sections);
+        if (result.report.summary) setReportSummary(result.report.summary);
+      }
 
       setLoading(false);
       setView('insights');

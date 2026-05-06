@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 
 const tabs: { id: BottomNavTab; label: string; icon: React.ElementType; view: string }[] = [
   { id: 'insights', label: 'Insights', icon: Sparkles, view: 'insights' },
-  { id: 'sync', label: 'Sync', icon: Users, view: 'insights' },
+  { id: 'sync', label: 'Sync', icon: Users, view: 'sync' },
   { id: 'wisdom', label: 'Wisdom', icon: BookOpen, view: 'wisdom' },
   { id: 'profile', label: 'Profile', icon: User, view: 'profile' },
 ];
@@ -14,12 +14,12 @@ const tabs: { id: BottomNavTab; label: string; icon: React.ElementType; view: st
 export default function BottomNav() {
   const { currentView, activeTab, setActiveTab, setView } = useAyuAstroStore();
 
-  const visibleViews = ['insights', 'report', 'premium', 'wisdom', 'profile'];
+  const visibleViews = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync'];
   if (!visibleViews.includes(currentView)) return null;
 
   const handleTabClick = (tab: typeof tabs[number]) => {
     setActiveTab(tab.id);
-    setView(tab.view as 'insights' | 'wisdom' | 'profile');
+    setView(tab.view as 'insights' | 'sync' | 'wisdom' | 'profile');
   };
 
   return (
