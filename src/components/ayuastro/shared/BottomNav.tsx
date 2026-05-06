@@ -15,7 +15,7 @@ const tabs: { id: BottomNavTab; label: string; icon: React.ElementType; view: st
 export default function BottomNav() {
   const { currentView, activeTab, setActiveTab, setView } = useAyuAstroStore();
 
-  const visibleViews = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood'];
+  const visibleViews = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'yogaDosha', 'compatibilityDetail'];
   if (!visibleViews.includes(currentView)) return null;
 
   const handleTabClick = (tab: typeof tabs[number]) => {

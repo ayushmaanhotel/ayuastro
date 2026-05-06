@@ -32,13 +32,21 @@ export async function GET(request: NextRequest) {
 
     const { userId, days } = parsed.data;
 
-    // Verify user exists
+    // Verify user exists - return empty results for unknown users instead of 404
     const user = await db.user.findUnique({ where: { id: userId } });
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        success: true,
+        data: {
+          entries: [],
+          summary: {
+            averageMood: 0,
+            mostCommonEmoji: '😊',
+            streakDays: 0,
+            totalEntries: 0,
+          },
+        },
+      });
     }
 
     // Calculate date range

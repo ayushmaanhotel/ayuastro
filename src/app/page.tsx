@@ -17,6 +17,8 @@ import ReportView from '@/components/ayuastro/report/ReportView';
 import PremiumView from '@/components/ayuastro/premium/PremiumView';
 import ChatView from '@/components/ayuastro/chat/ChatView';
 import MoodTrackerView from '@/components/ayuastro/mood/MoodTrackerView';
+import YogaDoshaView from '@/components/ayuastro/insights/YogaDoshaView';
+import CompatibilityDetailView from '@/components/ayuastro/sync/CompatibilityDetailView';
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -57,6 +59,21 @@ export default function Home() {
         return <ChatView />;
       case 'mood':
         return <MoodTrackerView />;
+      case 'yogaDosha':
+        return <YogaDoshaView />;
+      case 'compatibilityDetail': {
+        const state = useAyuAstroStore.getState();
+        return (
+          <CompatibilityDetailView
+            partnerSign={state.compatPartnerSign || 'Aries'}
+            partnerName={state.compatPartnerName || undefined}
+            overallScore={state.compatOverallScore}
+            emotionalScore={state.compatEmotionalScore}
+            communicationScore={state.compatCommunicationScore}
+            trustScore={state.compatTrustScore}
+          />
+        );
+      }
       case 'wisdom':
         return <WisdomView />;
       default:
@@ -65,7 +82,7 @@ export default function Home() {
   };
 
   const showHeader = currentView !== 'landing' && currentView !== 'calculating';
-  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood'].includes(currentView);
+  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'yogaDosha', 'compatibilityDetail'].includes(currentView);
 
   return (
     <div className="min-h-screen flex flex-col bg-cream">

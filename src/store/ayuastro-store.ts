@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // View types for the single-page app
-export type AppView = 'landing' | 'onboarding' | 'calculating' | 'insights' | 'report' | 'premium' | 'profile' | 'wisdom' | 'sync' | 'chat' | 'mood';
+export type AppView = 'landing' | 'onboarding' | 'calculating' | 'insights' | 'report' | 'premium' | 'profile' | 'wisdom' | 'sync' | 'chat' | 'mood' | 'yogaDosha' | 'compatibilityDetail';
 export type OnboardingStep = 'name' | 'birth' | 'relationship' | 'questionnaire' | 'complete';
 export type BottomNavTab = 'insights' | 'chat' | 'sync' | 'wisdom' | 'profile';
 
@@ -81,6 +81,14 @@ interface AyuAstroState {
   reportSections: ReportSection[];
   reportSummary: string;
 
+  // Compatibility detail data
+  compatPartnerSign: string | null;
+  compatPartnerName: string | null;
+  compatOverallScore: number;
+  compatEmotionalScore: number;
+  compatCommunicationScore: number;
+  compatTrustScore: number;
+
   // UI state
   isLoading: boolean;
   loadingMessage: string;
@@ -103,6 +111,7 @@ interface AyuAstroState {
   setHasPaid: (paid: boolean) => void;
   setError: (error: string | null) => void;
   setUserId: (id: string) => void;
+  setCompatDetail: (data: { partnerSign: string; partnerName?: string; overall: number; emotional: number; communication: number; trust: number }) => void;
   reset: () => void;
   nextOnboardingStep: () => void;
   prevOnboardingStep: () => void;
@@ -123,6 +132,12 @@ const initialState = {
   traitScores: [] as TraitScore[],
   reportSections: [] as ReportSection[],
   reportSummary: '',
+  compatPartnerSign: null as string | null,
+  compatPartnerName: null as string | null,
+  compatOverallScore: 0,
+  compatEmotionalScore: 0,
+  compatCommunicationScore: 0,
+  compatTrustScore: 0,
   isLoading: false,
   loadingMessage: '',
   hasPaid: false,
@@ -158,6 +173,14 @@ export const useAyuAstroStore = create<AyuAstroState>()(
       setHasPaid: (paid) => set({ hasPaid: paid }),
       setError: (error) => set({ error }),
       setUserId: (id) => set({ userId: id }),
+      setCompatDetail: (data) => set({
+        compatPartnerSign: data.partnerSign,
+        compatPartnerName: data.partnerName || null,
+        compatOverallScore: data.overall,
+        compatEmotionalScore: data.emotional,
+        compatCommunicationScore: data.communication,
+        compatTrustScore: data.trust,
+      }),
       reset: () => set(initialState),
 
       nextOnboardingStep: () => {

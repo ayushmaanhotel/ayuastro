@@ -471,6 +471,84 @@
   animation: appear 0.4s ease-out both;
 }
 
+/* Premium glassmorphism - multiple levels */
+.glass-light {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.glass-premium {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(248, 245, 240, 0.4) 100%);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  box-shadow: 0 8px 32px rgba(93, 64, 55, 0.06);
+}
+
+.dark .glass-light {
+  background: rgba(45, 35, 32, 0.5);
+  border: 1px solid rgba(212, 175, 55, 0.08);
+}
+
+.dark .glass-premium {
+  background: linear-gradient(135deg, rgba(45, 35, 32, 0.7) 0%, rgba(26, 20, 18, 0.5) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+/* Decorative zodiac corner ornaments */
+.zodiac-corner {
+  position: relative;
+}
+.zodiac-corner::before,
+.zodiac-corner::after {
+  content: '✦';
+  position: absolute;
+  color: rgba(212, 175, 55, 0.15);
+  font-size: 1.25rem;
+  pointer-events: none;
+}
+.zodiac-corner::before { top: 0.75rem; left: 0.75rem; }
+.zodiac-corner::after { bottom: 0.75rem; right: 0.75rem; }
+
+.dark .zodiac-corner::before,
+.dark .zodiac-corner::after {
+  color: rgba(240, 193, 75, 0.1);
+}
+
+/* Breathing glow effect for active elements */
+@keyframes breathe-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+  50% { box-shadow: 0 0 20px 2px rgba(212, 175, 55, 0.15); }
+}
+.animate-breathe-glow {
+  animation: breathe-glow 4s ease-in-out infinite;
+}
+
+/* Smooth card entrance */
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-card-enter {
+  animation: card-enter 0.5s ease-out both;
+}
+
+/* Golden border shimmer */
+@keyframes border-shimmer {
+  0% { border-color: rgba(212, 175, 55, 0.1); }
+  50% { border-color: rgba(212, 175, 55, 0.3); }
+  100% { border-color: rgba(212, 175, 55, 0.1); }
+}
+.animate-border-shimmer {
+  animation: border-shimmer 3s ease-in-out infinite;
+}
+
 /* Mobile responsive text */
 @media (max-width: 640px) {
   .hero-title {

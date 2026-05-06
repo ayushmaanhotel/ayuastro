@@ -23,6 +23,7 @@ import {
   BookOpen,
   TrendingUp,
 } from 'lucide-react';
+import { cosmicToast } from '@/lib/toast';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -203,6 +204,7 @@ export default function MoodTrackerView() {
         setSubmitSuccess(true);
         setJournalNote('');
         setSelectedTags([]);
+        cosmicToast.success('Mood logged! ✦', 'Your emotional journey is being tracked');
         await fetchHistory();
         setTimeout(() => setSubmitSuccess(false), 3000);
       }

@@ -251,7 +251,7 @@ export default function LandingView() {
             <Button
               onClick={() => setView('onboarding')}
               size="lg"
-              className="bg-brown-700 px-8 text-base font-medium text-white hover:bg-brown-800 shadow-lg shadow-brown-700/20 transition-all hover:shadow-xl hover:shadow-brown-700/30 hover:-translate-y-0.5"
+              className="bg-brown-700 px-8 text-base font-medium text-white hover:bg-brown-800 shadow-lg shadow-brown-700/20 transition-all hover:shadow-xl hover:shadow-brown-700/30 hover:-translate-y-0.5 animate-breathe-glow"
             >
               Start Free Analysis
               <ArrowRight className="ml-2 size-4" />
@@ -325,7 +325,7 @@ export default function LandingView() {
                 variants={fadeInUp}
                 whileHover={{ y: -2, transition: { duration: 0.2 } }}
               >
-                <Card className={`border-0 shadow-sm ${feature.bg} transition-shadow hover:shadow-md dark:border dark:border-brown-700/30`}>
+                <Card className={`glass-light border-0 shadow-sm ${feature.bg} transition-shadow hover:shadow-md dark:border dark:border-brown-700/30 animate-card-enter`} style={{ animationDelay: `${i * 0.1}s` }}>
                   <CardContent className="flex items-start gap-4 p-5">
                     <div className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${feature.iconBg}`}>
                       <Icon className={`size-5 ${feature.iconColor}`} />
@@ -460,8 +460,10 @@ export default function LandingView() {
             </p>
           </div>
 
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5 dark:border dark:border-brown-700/30 p-2 min-h-[200px]">
+          <Card className="glass-light border-0 shadow-sm dark:border dark:border-brown-700/30 p-2 min-h-[200px]">
             <CardContent className="p-5 relative overflow-hidden">
+              {/* Decorative gold quote mark */}
+              <span className="absolute top-3 left-4 text-5xl text-gold/10 dark:text-gold/5 font-serif leading-none select-none pointer-events-none" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>&ldquo;</span>
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTestimonial}

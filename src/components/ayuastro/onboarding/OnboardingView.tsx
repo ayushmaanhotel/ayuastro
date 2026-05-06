@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAyuAstroStore, type OnboardingStep, type QuestionnaireAnswer } from '@/store/ayuastro-store';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -18,7 +19,9 @@ import {
   User,
   CheckCircle2,
   Sparkles,
+  Info,
 } from 'lucide-react';
+import { cosmicToast } from '@/lib/toast';
 
 const INDIAN_CITIES: Record<string, { lat: number; lon: number }> = {
   'New Delhi': { lat: 28.6139, lon: 77.209 },
@@ -146,6 +149,110 @@ const slideVariants = {
   }),
 };
 
+// ─── Star-field animation component ────────────────────────────────────────
+
+function StarField() {
+  const stars = Array.from({ length: 6 }, (_, i) => ({
+    id: i,
+    x: 20 + Math.random() * 60,
+    y: 10 + Math.random() * 30,
+    size: 2 + Math.random() * 3,
+    delay: i * 0.2,
+  }));
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {stars.map((star) => (
+        <motion.div
+          key={star.id}
+          className="absolute rounded-full bg-gold/60"
+          style={{
+            left: `${star.x}%`,
+            top: `${star.y}%`,
+            width: star.size,
+            height: star.size,
+          }}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{
+            opacity: [0, 0.8, 0],
+            scale: [0, 1, 0.5],
+          }}
+          transition={{
+            duration: 2,
+            delay: star.delay,
+            repeat: Infinity,
+            repeatDelay: 2,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Completion Celebration Overlay ─────────────────────────────────────────
+
+function CelebrationOverlay({ onComplete }: { onComplete: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, 2000);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-cream/95 dark:bg-[#1a1410]/95"
+    >
+      <motion.div
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 15, duration: 0.6 }}
+        className="text-7xl mb-6"
+      >
+        ✦
+      </motion.div>
+      <motion.h2
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-100 text-center px-8"
+        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+      >
+        Analyzing Your Cosmic Identity...
+      </motion.h2>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
+        className="mt-4"
+      >
+        <div className="flex gap-1.5">
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              className="size-2 rounded-full bg-gold"
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
+            />
+          ))}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─── Questionnaire Encouragement Messages ──────────────────────────────────
+
+function getEncouragement(count: number): string {
+  if (count <= 4) return 'Every answer reveals a layer of your emotional architecture';
+  if (count <= 8) return 'You\'re uncovering deep patterns ✦';
+  if (count <= 12) return 'Almost there — your cosmic portrait is taking shape ✦';
+  return 'Beautiful. Your emotional blueprint is complete ✦';
+}
+
+// ─── Main OnboardingView ──────────────────────────────────────────────────
+
 export default function OnboardingView() {
   const {
     onboardingStep,
@@ -171,11 +278,14 @@ export default function OnboardingView() {
   const [localName, setLocalName] = useState(birthDetails?.name || '');
   const [localDob, setLocalDob] = useState(birthDetails?.dateOfBirth || '');
   const [localTob, setLocalTob] = useState(birthDetails?.timeOfBirth || '');
-  const [localPlace, setLocalPlace] = useState(birthDetails?.placeOfBirth || '');
+  const [localPlace, setLocalPlace] = useState(birthDetails?.placeOfBirth || 'Mumbai');
   const [localGender, setLocalGender] = useState(birthDetails?.gender || '');
   const [localRelationship, setLocalRelationship] = useState(
     birthDetails?.relationshipStatus || ''
   );
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationHandled, setCelebrationHandled] = useState(false);
+  const hasShownWelcomeToast = useRef(false);
 
   const handleNext = () => {
     if (onboardingStep === 'name') {
@@ -194,6 +304,11 @@ export default function OnboardingView() {
       });
     } else if (onboardingStep === 'relationship') {
       setBirthDetails({ relationshipStatus: localRelationship });
+    } else if (onboardingStep === 'questionnaire') {
+      // Show celebration overlay instead of directly going to complete
+      setShowCelebration(true);
+      setCelebrationHandled(false);
+      return;
     }
     setDirection(1);
     nextOnboardingStep();
@@ -202,6 +317,15 @@ export default function OnboardingView() {
   const handleBack = () => {
     setDirection(-1);
     prevOnboardingStep();
+  };
+
+  const handleCelebrationComplete = () => {
+    setShowCelebration(false);
+    if (!celebrationHandled) {
+      setCelebrationHandled(true);
+      setDirection(1);
+      nextOnboardingStep(); // goes to 'complete'
+    }
   };
 
   const handleQuestionnaireAnswer = (questionId: string, score: number, category: QuestionnaireAnswer['category']) => {
@@ -302,6 +426,9 @@ export default function OnboardingView() {
         if (result.report.summary) setReportSummary(result.report.summary);
       }
 
+      // Show welcome toast
+      cosmicToast.cosmic(`Welcome, ${birthDetails?.name || 'Seeker'}! ✦`, 'Your cosmic journey begins...');
+
       setLoading(false);
       setView('insights');
     } catch (err) {
@@ -322,6 +449,13 @@ export default function OnboardingView() {
     }
   }, [onboardingStep]);
 
+  // Show welcome toast once when name step first appears
+  useEffect(() => {
+    if (onboardingStep === 'name' && !hasShownWelcomeToast.current && birthDetails?.name) {
+      hasShownWelcomeToast.current = true;
+    }
+  }, [onboardingStep, birthDetails?.name]);
+
   const renderStep = () => {
     switch (onboardingStep) {
       case 'name':
@@ -337,21 +471,23 @@ export default function OnboardingView() {
             className="w-full"
           >
             <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
-              <CardContent className="p-6">
-                <div className="mb-2">
+              <CardContent className="p-6 relative">
+                {/* Star-field effect */}
+                <StarField />
+                <div className="mb-2 relative z-10">
                   <Badge className="bg-sage-muted text-sage-dark text-xs">Step 1 of 4</Badge>
                 </div>
                 <h2
-                  className="font-serif text-2xl font-bold text-brown-900 mb-2"
+                  className="font-serif text-2xl font-bold text-brown-900 mb-2 relative z-10"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
                   What should we call you?
                 </h2>
-                <p className="text-sm text-brown-400 mb-6">
+                <p className="text-sm text-brown-400 mb-6 relative z-10">
                   Your name carries vibrational energy that shapes your numerological blueprint.
                 </p>
 
-                <div className="space-y-3">
+                <div className="space-y-3 relative z-10">
                   <Label htmlFor="name" className="text-sm font-medium text-brown-700">
                     Your Name
                   </Label>
@@ -426,7 +562,19 @@ export default function OnboardingView() {
                   </div>
 
                   <div>
-                    <Label className="text-sm font-medium text-brown-700">Time of Birth</Label>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-brown-700">Time of Birth</Label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-brown-300 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-brown-900 text-cream text-xs max-w-[200px]">
+                            Exact time gives more accurate results ✦
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                     <div className="relative mt-1">
                       <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
                       <Input
@@ -563,6 +711,16 @@ export default function OnboardingView() {
                 </span>
               </div>
               <Progress value={progressPercent} className="h-1.5 bg-brown-100" />
+              {/* Encouragement message */}
+              <motion.p
+                key={answeredCount}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="text-xs text-brown-400 dark:text-brown-500 mt-2 italic text-center"
+              >
+                {getEncouragement(answeredCount)}
+              </motion.p>
             </div>
 
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
@@ -673,6 +831,13 @@ export default function OnboardingView() {
   return (
     <div className="min-h-screen bg-cream px-4 py-6">
       <div className="mx-auto max-w-lg">
+        {/* Celebration overlay */}
+        <AnimatePresence>
+          {showCelebration && (
+            <CelebrationOverlay onComplete={handleCelebrationComplete} />
+          )}
+        </AnimatePresence>
+
         {/* Back button (not on name or complete steps) */}
         {onboardingStep !== 'name' && onboardingStep !== 'complete' && (
           <button

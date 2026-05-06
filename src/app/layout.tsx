@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Inter, Cormorant_Garamond } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -60,7 +60,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}
         </ThemeProvider>
-        <Toaster />
+        <Toaster position="top-center" richColors={false} closeButton toastOptions={{ duration: 4000 }} />
       </body>
     </html>
   );

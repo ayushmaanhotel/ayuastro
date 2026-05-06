@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { motion } from 'framer-motion';
-import { Star, Eye, CheckCircle2, Shield, ArrowRight, Quote, Lock, Smartphone, Diamond } from 'lucide-react';
+import { Star, Eye, CheckCircle2, Shield, ArrowRight, Quote, Lock, Smartphone, Diamond, Sparkles } from 'lucide-react';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
@@ -24,6 +24,13 @@ const BENEFIT_ICONS = [
   { icon: Lock, label: 'Lifetime Access', emoji: '🔒' },
   { icon: Smartphone, label: 'Works Everywhere', emoji: '📱' },
   { icon: Diamond, label: 'One-Time Payment', emoji: '💎' },
+];
+
+const PREMIUM_SECTIONS = [
+  { title: 'Hidden Strengths', description: 'Uncover untapped powers and hidden gifts from your 12th house placements', icon: '✨' },
+  { title: 'Emotional Blind Spots', description: 'See the patterns you can\'t see — self-worth, boundaries, and over-giving', icon: '👁' },
+  { title: 'Money Psychology', description: 'Transform your financial trajectory by understanding 2nd house patterns', icon: '💰' },
+  { title: 'Recurring Life Patterns', description: 'Break free from karmic cycles and understand your life\'s repeating themes', icon: '🔄' },
 ];
 
 function CountdownTimer() {
@@ -117,8 +124,8 @@ export default function PremiumView() {
 
         {/* Premium Visual Report Card Preview */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
-          <Card className="premium-card shimmer border-0 overflow-hidden dark:bg-white/5">
-            <CardContent className="p-6">
+          <Card className="glass-premium zodiac-corner relative premium-card shimmer overflow-hidden animate-border-shimmer">
+            <CardContent className="relative p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex size-12 items-center justify-center rounded-xl bg-gold/10">
                   <Eye className="size-6 text-gold" />
@@ -171,9 +178,33 @@ export default function PremiumView() {
           </Card>
         </motion.div>
 
+        {/* What You'll Unlock Section */}
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.12 }}>
+          <div className="space-y-3">
+            <h3
+              className="font-serif text-lg font-bold text-brown-900 text-center mb-4"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              What You&apos;ll Unlock
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              {PREMIUM_SECTIONS.map((section, i) => (
+                <div key={i} className="glass-light rounded-xl p-4 text-center relative overflow-hidden group hover:shadow-md transition-shadow">
+                  <div className="absolute top-2 right-2">
+                    <Lock className="size-3.5 text-gold/40 group-hover:text-gold/70 transition-colors" />
+                  </div>
+                  <span className="text-2xl mb-2 block">{section.icon}</span>
+                  <p className="text-xs font-semibold text-brown-900 dark:text-brown-100 mb-1">{section.title}</p>
+                  <p className="text-[10px] text-brown-400 dark:text-brown-300 leading-tight">{section.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
         {/* Benefits */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+          <Card className="glass-light border-0 shadow-sm">
             <CardContent className="p-6">
               <h3 className="text-sm font-semibold text-brown-900 mb-4">What you will unlock</h3>
               <div className="space-y-3">
@@ -190,8 +221,8 @@ export default function PremiumView() {
 
         {/* Pricing */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5 text-center">
-            <CardContent className="p-6">
+          <Card className="glass-premium zodiac-corner relative border-0 shadow-sm text-center animate-border-shimmer">
+            <CardContent className="relative p-6">
               {/* Countdown Timer */}
               <CountdownTimer />
 
@@ -225,17 +256,17 @@ export default function PremiumView() {
 
               {/* Trust badges */}
               <div className="mt-4 flex items-center justify-center gap-3 text-[10px] text-brown-400">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 hover:scale-105 transition-transform">
                   <Shield className="size-3" />
                   <span>SSL Secured</span>
                 </div>
-                <span className="text-brown-200 dark:text-brown-100/30">|</span>
-                <div className="flex items-center gap-1">
+                <span className="text-brown-200 dark:text-brown-100/30">•</span>
+                <div className="flex items-center gap-1 hover:scale-105 transition-transform">
                   <CheckCircle2 className="size-3" />
                   <span>7-Day Guarantee</span>
                 </div>
-                <span className="text-brown-200 dark:text-brown-100/30">|</span>
-                <div className="flex items-center gap-1">
+                <span className="text-brown-200 dark:text-brown-100/30">•</span>
+                <div className="flex items-center gap-1 hover:scale-105 transition-transform">
                   <Lock className="size-3" />
                   <span>Instant Access</span>
                 </div>
@@ -246,8 +277,9 @@ export default function PremiumView() {
 
         {/* Testimonial */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.25 }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
-            <CardContent className="p-6">
+          <Card className="glass-light border-0 shadow-sm">
+            <CardContent className="p-6 relative">
+              <span className="absolute top-4 left-5 text-4xl text-gold/15 dark:text-gold/10 font-serif leading-none" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>&ldquo;</span>
               <Quote className="size-8 text-brown-100 dark:text-brown-50/30 mb-2" />
               <p className="text-sm leading-relaxed text-brown-600 italic mb-3">
                 &ldquo;The premium report revealed patterns I had been living with for decades

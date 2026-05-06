@@ -32,13 +32,17 @@ export async function POST(request: NextRequest) {
 
     const data = parsed.data;
 
-    // Verify user exists
-    const user = await db.user.findUnique({ where: { id: data.userId } });
+    // Verify user exists — auto-create if not found (for localStorage-based users)
+    let user = await db.user.findUnique({ where: { id: data.userId } });
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'User not found' },
-        { status: 404 }
-      );
+      user = await db.user.create({
+        data: {
+          id: data.userId,
+          name: 'Seeker',
+          isOnboarded: false,
+          hasPaid: false,
+        },
+      });
     }
 
     // Create mood entry

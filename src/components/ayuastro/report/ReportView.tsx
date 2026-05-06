@@ -20,6 +20,7 @@ import {
   Download,
   ArrowUp,
 } from 'lucide-react';
+import { cosmicToast } from '@/lib/toast';
 
 const ICON_MAP: Record<string, React.ElementType> = {
   heart: Heart,
@@ -116,7 +117,7 @@ const staggerContainer = {
 };
 
 export default function ReportView() {
-  const { reportSections, hasPaid, setView, userId } = useAyuAstroStore();
+  const { reportSections, hasPaid, setView, userId, astrologyData } = useAyuAstroStore();
   const [downloading, setDownloading] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
@@ -160,8 +161,10 @@ export default function ReportView() {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+        cosmicToast.success('Report downloaded! ✦');
       } else if (res.status === 404) {
         // User not found in database - generate client-side fallback
+        cosmicToast.warning('Download issue', 'Generated a basic report instead');
         generateClientSideReport();
       } else {
         setDownloadError('Failed to generate report. Please try again later.');

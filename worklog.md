@@ -772,3 +772,304 @@ Stage Summary:
 8. Add Redis-based rate limiting for chat API
 9. Add push notifications for daily horoscope and mood reminders
 10. Add data export (user can download all their data)
+
+---
+Task ID: r5-2
+Agent: Main Coordinator (Round 5)
+Task: Fix mood API 404 for new users
+
+Work Log:
+- Fixed /api/mood/history: Returns empty results instead of 404 when user not found in database
+- Fixed /api/mood/entry: Auto-creates user record when not found (for localStorage-based users) instead of returning 404
+
+Stage Summary:
+- Mood API now works gracefully for users who haven't gone through the onboarding API
+- No more 404 errors in the mood tracker for new users
+
+---
+Task ID: r5-3
+Agent: Subagent (full-stack-developer)
+Task: Add Daily Affirmation & Ritual Card + Yoga/Dosha Detail View
+
+Work Log:
+- Created Daily Affirmation & Ritual Card in InsightsView:
+  - Deterministic affirmation selection (84 affirmations, 7 per zodiac sign) based on date + sun sign hash
+  - Deterministic ritual selection (14 rituals with emoji icons) based on day of year + moon sign
+  - "Mark as Done" button with spring animation checkmark and sage-green "Completed ✓" badge
+  - Warm gradient background, gold-to-sage accent bar
+- Created YogaDoshaView.tsx with:
+  - 11 detailed yoga entries with Sanskrit transliteration, emoji icons, one-line summary, detailed description, houses/planets, emotional interpretation
+  - 4 detailed dosha entries with Sanskrit, challenge summary, description, 3 practical remedies (behavioral, mindfulness, journaling prompt), severity badge (Mild/Moderate/Significant)
+  - Collapsible cards with sage-green (yoga) and gold/amber (dosha) left accent borders
+  - Count badges: "X Yogas ✦" and "X Karmic Lessons ⚠️"
+  - Educational disclaimer card at bottom
+- Replaced simple yogas/doshas badges in InsightsView with clickable "View Your Yogas (X) & Doshas (X) →" link
+- Updated store: Added 'yogaDosha' to AppView type
+- Updated page.tsx: Imported YogaDoshaView, added 'yogaDosha' case
+
+Stage Summary:
+- 4 files modified/created
+- Daily Affirmation & Ritual provides daily personalized content
+- Yoga/Dosha detail view gives comprehensive information with practical remedies
+- All features have dark mode support and smooth animations
+
+---
+Task ID: r5-4
+Agent: Subagent (full-stack-developer)
+Task: Major styling enhancement — premium glassmorphism, animations, visual depth
+
+Work Log:
+- Added 6 new CSS utility classes to globals.css:
+  - .glass-light — frosted glass with 12px blur, subtle gold border
+  - .glass-premium — premium glass with 24px blur, gradient background, box shadow
+  - .zodiac-corner — decorative ✦ zodiac ornaments in corners
+  - .animate-breathe-glow — 4s breathing glow animation
+  - .animate-card-enter — smooth card entrance animation
+  - .animate-border-shimmer — 3s golden border shimmer
+- Enhanced InsightsView: glass-premium on Anchor card, glass-light on Duality/Trait/Numerology/Elemental cards, zodiac-corner decorations, border shimmer, trait row hover effects, sparkle icons on high traits
+- Enhanced ChatView: glass-premium on welcome card, gold border on AI messages, glass-light on input area, breathe-glow on send button, hover effects on suggested chips
+- Enhanced PremiumView: glass-premium + zodiac-corner on pricing cards, new "What You'll Unlock" section with 4 mini-cards, trust badge hover effects, gold quote marks on testimonial
+- Enhanced LandingView: breathe-glow on CTA button, glass-light + staggered animations on feature cards, glass-light on testimonial
+
+Stage Summary:
+- 5 files modified
+- Premium glassmorphism system with multiple tiers
+- Significant visual depth improvement across 4 views
+- 6 new CSS utility classes
+- Full dark mode support
+
+---
+Task ID: r5-5
+Agent: Subagent (full-stack-developer)
+Task: Add Cosmic Toast System + Enhanced Onboarding UX + Compatibility Detail View
+
+Work Log:
+- Created /src/lib/toast.ts — cosmicToast utility with 4 types (success, info, warning, cosmic), all styled with AyuAstro colors
+- Created CosmicToast.tsx — wrapper around Sonner Toaster with AyuAstro defaults
+- Integrated toasts in 5 views: OnboardingView (welcome), MoodTrackerView (mood logged), ChatView (rate limit), ReportView (download), ProfileView (start over)
+- Enhanced OnboardingView:
+  - Star-field animation on step 1 (6 gold dots that appear and fade)
+  - Smart defaults: birth place pre-filled with "Mumbai", tooltip on time input
+  - Questionnaire encouragement: 4-tier dynamic message based on answers count
+  - Completion celebration: 2-second animated overlay with ✦ symbol and "Analyzing Your Cosmic Identity..." text
+- Created CompatibilityDetailView.tsx:
+  - Overall Score with large circular SVG ring + sub-score grid
+  - Element Harmony section with compatibility level badges and descriptions
+  - Communication Style based on ruling planets
+  - Emotional Compatibility based on Moon sign interactions
+  - Growth Areas and Strengths sections
+  - Cosmic Wisdom summary card
+- Updated SyncView: Added "View Full Details →" button below compatibility results
+- Updated store: Added 'compatibilityDetail' to AppView with 6 new state fields
+- Updated page.tsx: Imported CompatibilityDetailView, added renderView case
+- Updated BottomNav: Added 'yogaDosha' and 'compatibilityDetail' to visibleViews
+
+Stage Summary:
+- 9 files modified/created
+- Complete toast notification system integrated across 5 views
+- Enhanced onboarding UX with animations, smart defaults, encouragement, celebration
+- Full compatibility detail view with element harmony, communication, emotional analysis
+- All features have dark mode support
+
+---
+## Current Project Status Assessment (Round 5)
+
+### Working Features:
+1. Landing page with animated hero, features, how-it-works, testimonials carousel, FAQ accordion, trust metrics, CTA, **glass-light feature cards**, **breathe-glow CTA button**
+2. 5-step onboarding with visual step indicator, 16-question behavioral questionnaire, **star-field animation**, **smart defaults**, **encouragement messages**, **completion celebration overlay**
+3. Full backend pipeline: astrology → numerology → trait scoring → AI report
+4. Insights dashboard with archetype, duality, trait map, numerology, kundali chart, daily insight
+5. **NEW: Daily Affirmation & Ritual Card** — personalized affirmation + daily ritual with "Mark as Done"
+6. Daily Horoscope card with collapsible content, zodiac element badge
+7. Planetary Transits card with 6 transit interpretations
+8. Planetary Positions Table — collapsible table showing all 9 planetary positions
+9. Elemental Balance Visualization — horizontal bar chart for Fire/Earth/Air/Water
+10. Dasha Timeline — horizontal scrollable visualization of 9 Mahadasha periods
+11. **NEW: Yoga/Dosha Detail View** — 11 yogas + 4 doshas with descriptions, remedies, severity badges
+12. Shareable Profile Card in Dialog
+13. Report view with Download Report button, staggered animations, section numbering
+14. Premium paywall with shimmer, countdown timer, **"What You'll Unlock" section**, trust badges
+15. Sync/compatibility view with sparkle effects, compatibility badges
+16. **NEW: Compatibility Detail View** — full breakdown with element harmony, communication style, emotional compatibility, growth areas
+17. AI Cosmic Counselor Chat with LLM integration, **glass-premium welcome card**, **sparkle AI messages**
+18. Enhanced Wisdom Library with 8 cards, search, category filter
+19. Enhanced Profile with cosmic identity card, trait highlights, account stats, Cosmic Age card, Mood Journal entry point
+20. Mood Tracker & Journal — daily check-in, journal notes, tags, 7-day timeline, insights
+21. Full dark mode with smooth toggle
+22. **NEW: Cosmic Toast Notification System** — integrated across 5 views (success, info, warning, cosmic)
+23. Premium glassmorphism system (glass-light, glass-premium, zodiac-corner, border-shimmer, breathe-glow, card-enter)
+24. 5-tab bottom navigation with haptic press, glow indicator
+
+### API Endpoints:
+- POST /api/onboarding — Create user with birth details
+- POST /api/astrology/calculate — Calculate Vedic astrology data
+- POST /api/numerology/calculate — Calculate numerology data
+- POST /api/traits/generate — Generate trait scores
+- POST /api/ai/generate-report — Generate AI interpretation
+- POST /api/process-all — Full pipeline
+- GET /api/horoscope/daily — Daily horoscope
+- GET /api/transits/current — Current planetary transits
+- POST /api/reports/generate-pdf — Generate HTML report
+- POST /api/chat — AI cosmic counselor chat
+- POST /api/mood/entry — Create mood entry (**auto-creates user if not found**)
+- GET /api/mood/history — Get mood history (**returns empty for unknown users**)
+
+### Known Issues/Risks:
+- The process-all API takes ~13s mostly due to AI report generation
+- Premium unlock is simulated (no real Razorpay integration yet)
+- No real authentication (just simulated user creation)
+- PDF is HTML-based (production would use Puppeteer/jsPDF)
+- Chat uses in-memory rate limiting (would need Redis in production)
+
+### Priority Recommendations for Next Phase:
+1. Add real Razorpay payment integration
+2. Optimize API response time (stream AI responses)
+3. Add PWA support with offline caching
+4. Add multi-language support (Hindi, Tamil)
+5. Add real PDF generation with Puppeteer/jsPDF
+6. Add real authentication (Firebase Auth)
+7. Add admin dashboard for user analytics
+8. Add push notifications for daily horoscope and mood reminders
+9. Add data export functionality
+
+---
+Task ID: r5-4
+Agent: Styling Enhancement Agent
+Task: Major Styling Enhancement — Premium Glassmorphism, Animations, Visual Depth
+
+Work Log:
+- Updated globals.css with new premium utility classes:
+  - .glass-light: Frosted glass with 12px blur, subtle gold border (light + dark mode)
+  - .glass-premium: Premium glass with 24px blur, gradient background, subtle shadow (light + dark mode)
+  - .zodiac-corner: Decorative zodiac ornaments in top-left and bottom-right corners (light + dark mode)
+  - .animate-breathe-glow: 4s breathing glow animation for active elements
+  - .animate-card-enter: Smooth card entrance with translateY + scale (0.5s ease-out)
+  - .animate-border-shimmer: 3s golden border color shimmer animation
+- Enhanced InsightsView with premium styling:
+  - The Anchor card: glass-premium + zodiac-corner + animate-border-shimmer + gold gradient overlay
+  - Duality of Self card: glass-light + decorative gold vertical divider between Strengths/Blind Spots
+  - Trait Map card: hover:bg-gold/5 on each trait row, sparkle icon next to traits scored > 85
+  - Numerology Blueprint card: glass-light + radial gradient background on each grid item
+  - Elemental Balance card: glass-light + animate-breathe-glow on dominant element
+  - Vedic Astrology Summary card: glass-premium + zodiac-corner
+- Enhanced ChatView with premium styling:
+  - Welcome card: glass-premium + zodiac-corner + cosmic background gradient pattern
+  - AI message bubbles: sparkle icon before AI messages
+  - Input area: glass-light effect, animate-breathe-glow on send button when input has text
+  - Suggested question chips: hover:scale-[1.02] + hover:border-gold/40 + shimmer effect
+- Enhanced PremiumView with more visual impact:
+  - Premium Visual Report card: glass-premium + zodiac-corner + animate-border-shimmer
+  - New "What You'll Unlock" section: 4 mini-cards with gold lock icons
+  - Pricing card: glass-premium + zodiac-corner + animate-border-shimmer
+  - Trust badges: hover:scale-105 pulse effect on each badge
+  - Testimonial card: glass-light + decorative gold quote mark overlay
+- Enhanced LandingView hero section:
+  - Start Free Analysis button: animate-breathe-glow pulsing effect
+  - Feature cards: glass-light + animate-card-enter with staggered delays
+  - Testimonial card: glass-light + decorative gold quote mark overlay
+- Lint passes with zero errors (1 pre-existing warning)
+
+Stage Summary:
+- 5 files modified: globals.css, InsightsView.tsx, ChatView.tsx, PremiumView.tsx, LandingView.tsx
+- 6 new CSS utility classes added
+- Premium glassmorphism applied across 4 major views
+- New "What You'll Unlock" section in PremiumView
+- Full dark mode support across all new styling
+
+---
+Task ID: r5-3
+Agent: Affirmation + Yoga/Dosha Agent
+Task: Add Daily Affirmation & Ritual Card + Yoga/Dosha Detail View
+
+Work Log:
+- Created YogaDoshaView.tsx at /src/components/ayuastro/insights/YogaDoshaView.tsx
+  - Full-screen detail view with back button to return to insights
+  - "Cosmic Blessings & Karmic Lessons" title
+  - Yoga section with 11 detailed yoga entries (Gaj Kesari, Budh Aditya, Raj Yoga, Dhana Yoga, Neech Bhang Raj, Chandra Mangal, Hansa, Malavya, Shasha, Ruchaka, Bhadra)
+  - Each yoga: name, Sanskrit transliteration, emoji icon, one-line summary, detailed description, houses/planets, emotional interpretation
+  - Dosha section with 4 detailed dosha entries (Mangal Dosha, Kaal Sarp Dosha, Pitra Dosha, Shani Sade Sati)
+  - Each dosha: name, Sanskrit transliteration, warning icon, one-line challenge summary, detailed description, 3 practical remedies (behavioral, mindfulness, journaling prompt), severity indicator (Mild/Moderate/Significant)
+  - Yoga cards with sage-green left accent border, dosha cards with gold/amber left accent border
+  - Collapsible cards with framer-motion animations
+  - Yoga count badge "X Yogas ✦" and dosha count badge "X Karmic Lessons ⚠️"
+  - Full dark mode support
+  - Educational note at bottom about yogas/doshas being patterns not predictions
+
+- Added Daily Affirmation & Ritual Card to InsightsView
+  - Positioned after Daily Cosmic Insight card
+  - Affirmation section: deterministic hash of current date + sun sign selects from 7 per-sign affirmations (84 total)
+  - Italic serif font with decorative gold ✦ quote mark
+  - Ritual section: deterministic based on day of year + moon sign from 14 ritual suggestions
+  - Clock icon with "Today's Ritual" badge
+  - "Mark as Done" button with spring animation check mark and sage-green "Completed ✓" badge
+  - Warm gradient background (gold/5 to sage-muted/10) with gold-to-sage accent bar
+  - Full dark mode support
+
+- Replaced yogas/doshas badges in InsightsView with clickable navigation
+  - New clickable section: "View Your Yogas (X) & Doshas (X) →"
+  - Gradient button with Sparkles icon navigates to 'yogaDosha' view via setView()
+  - Dark mode support with hover states
+
+- Updated ayuastro-store.ts: Added 'yogaDosha' to AppView type
+- Updated page.tsx: Imported YogaDoshaView, added 'yogaDosha' case to renderView switch, added to showBottomNav
+- Added AnimatePresence import to InsightsView for ritual completion animation
+- Added Check icon import from lucide-react
+- Lint check passes with zero errors (only pre-existing warning in OnboardingView)
+
+Stage Summary:
+- 4 files modified: ayuastro-store.ts, page.tsx, InsightsView.tsx
+- 1 file created: YogaDoshaView.tsx
+- Daily Affirmation & Ritual card provides personalized daily content
+- Yoga/Dosha detail view shows comprehensive information with remedies
+- All new features have full dark mode support
+- Zero lint errors introduced
+
+---
+Task ID: r5-5
+Agent: Toast + Onboarding + Compatibility Detail Agent
+Task: Add Toast Notification System + Enhanced Onboarding UX + Compatibility Detail View
+
+Work Log:
+- Created /src/lib/toast.ts — cosmicToast utility with 4 toast types: success, info, warning, cosmic
+  - All toasts use AyuAstro color variables (var(--ayu-cream), var(--ayu-brown-900), etc.)
+  - Custom icons: ✦ for info, ⚠️ for warning, 🔮 for cosmic
+  - Cosmic toast uses gradient background (cream → cream-dark)
+- Created /src/components/ayuastro/shared/CosmicToast.tsx — wrapper around Sonner Toaster with AyuAstro defaults
+  - Position: top-center, richColors: false, closeButton, duration: 4000ms
+- Updated /src/app/layout.tsx — replaced old Toaster import with Sonner Toaster from @/components/ui/sonner
+  - Added position="top-center", richColors={false}, closeButton, toastOptions={{ duration: 4000 }}
+- Integrated toast notifications across 5 views:
+  - OnboardingView: cosmicToast.cosmic("Welcome, {name}! ✦", "Your cosmic journey begins...") on completion
+  - MoodTrackerView: cosmicToast.success("Mood logged! ✦", "Your emotional journey is being tracked") on mood submit
+  - ChatView: cosmicToast.info("Cosmic Counselor", "You have {N} messages remaining in this session") when ≤5 messages left
+  - ReportView: cosmicToast.success("Report downloaded! ✦") on successful download, cosmicToast.warning("Download issue", "Generated a basic report instead") on fallback
+  - ProfileView: cosmicToast.cosmic("Starting fresh ✦", "Your cosmic journey awaits anew") on Start Over
+- Enhanced OnboardingView with 4 UX improvements:
+  - Star-field animation on step 1: 6 small gold dots appear and fade behind "What should we call you?" heading using framer-motion
+  - Smart birth details defaults: Pre-fills "Mumbai" as default place on step 2, adds tooltip "Exact time gives more accurate results ✦" on time input using shadcn Tooltip
+  - Questionnaire progress encouragement: Dynamic message below progress bar based on answered count (4 tiers: 0-4, 5-8, 9-12, 13-16)
+  - Completion celebration overlay: 2-second overlay with large ✦ symbol, "Analyzing Your Cosmic Identity..." text, and bouncing dots before the calculating view begins
+- Created /src/components/ayuastro/sync/CompatibilityDetailView.tsx — detailed compatibility breakdown with 6 sections:
+  - Overall Score with large circular progress ring (140px), zodiac symbols, sub-score grid (Emotional/Communication/Trust)
+  - Element Harmony section: Shows element pair interaction with badge level (Excellent Synergy/Good Resonance/Dynamic Tension/Balanced) and description
+  - Communication Style: Based on ruling planets, describes how two signs communicate together with deterministic score
+  - Emotional Compatibility: Based on Moon sign + partner element interactions, same element = high, compatible = moderate, opposing = growth area
+  - Growth Areas: 2-3 specific areas where the relationship can grow (element-based, modality-based, vulnerability)
+  - Strengths: 2-3 natural strengths of the pairing (synergy, action styles, gift exchange)
+  - Cosmic Wisdom summary card at bottom
+  - Full dark mode support, back button to SyncView, animated sections
+- Updated store (ayuastro-store.ts):
+  - Added 'compatibilityDetail' to AppView type
+  - Added 6 new state fields: compatPartnerSign, compatPartnerName, compatOverallScore, compatEmotionalScore, compatCommunicationScore, compatTrustScore
+  - Added setCompatDetail action
+- Updated SyncView: Added "View Full Details →" button below compatibility score results, calls setCompatDetail and navigates to compatibilityDetail view
+- Updated page.tsx: Imported CompatibilityDetailView, added 'compatibilityDetail' case to renderView switch with store state props, added to showBottomNav conditions
+- All lint checks pass with zero errors
+
+Stage Summary:
+- 8 files modified/created
+- Complete cosmic toast notification system with Sonner integration
+- Enhanced onboarding UX: star-field animation, Mumbai default, time tooltip, encouragement messages, celebration overlay
+- Compatibility Detail View with 6 detailed sections (Score, Element Harmony, Communication, Emotional, Strengths, Growth Areas)
+- Full dark mode support across all new components
+- Zero lint errors

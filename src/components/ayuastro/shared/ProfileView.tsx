@@ -28,6 +28,7 @@ import {
   BookHeart,
   Infinity,
 } from 'lucide-react';
+import { cosmicToast } from '@/lib/toast';
 
 const ZODIAC_ICONS: Record<string, string> = {
   Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
@@ -105,6 +106,7 @@ export default function ProfileView() {
   const { birthDetails, astrologyData, numerologyData, traitScores, hasPaid, reportSections, reset, setView } = useAyuAstroStore();
 
   const handleReset = () => {
+    cosmicToast.cosmic('Starting fresh ✦', 'Your cosmic journey awaits anew');
     reset();
     setView('landing');
   };

@@ -320,7 +320,7 @@ const BEST_PAIRINGS: [string, string, string][] = [
 // ─── Main SyncView ──────────────────────────────────────────────────────────
 
 export default function SyncView() {
-  const { astrologyData, birthDetails } = useAyuAstroStore();
+  const { astrologyData, birthDetails, setView, setCompatDetail } = useAyuAstroStore();
   const [partnerName, setPartnerName] = useState('');
   const [partnerSign, setPartnerSign] = useState('');
   const [showSignDropdown, setShowSignDropdown] = useState(false);
@@ -654,6 +654,25 @@ export default function SyncView() {
                       </DialogContent>
                     </Dialog>
                   </div>
+
+                  {/* View Full Details Button */}
+                  <Button
+                    onClick={() => {
+                      setCompatDetail({
+                        partnerSign,
+                        partnerName: partnerName || undefined,
+                        overall: result.overall,
+                        emotional: result.emotional,
+                        communication: result.communication,
+                        trust: result.trust,
+                      });
+                      setView('compatibilityDetail');
+                    }}
+                    className="w-full bg-gold hover:bg-gold-dark text-white font-semibold mt-2"
+                  >
+                    <Sparkles className="mr-2 size-4" />
+                    View Full Details →
+                  </Button>
                 </CardContent>
               </Card>
             </motion.div>

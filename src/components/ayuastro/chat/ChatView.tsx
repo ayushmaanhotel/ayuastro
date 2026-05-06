@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Sparkles, ArrowRight, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cosmicToast } from '@/lib/toast';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -173,6 +174,9 @@ export default function ChatView() {
         setMessages((prev) => [...prev, assistantMessage]);
         if (data.remaining !== undefined) {
           setRemaining(data.remaining);
+          if (data.remaining <= 5 && data.remaining > 0) {
+            cosmicToast.info('Cosmic Counselor', `You have ${data.remaining} messages remaining in this session`);
+          }
         }
       }
     } catch {
@@ -244,17 +248,21 @@ export default function ChatView() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="bg-white dark:bg-white/5 border border-gold/20 rounded-2xl p-5 mb-6 shadow-sm"
+            className="glass-premium zodiac-corner relative border border-gold/20 rounded-2xl p-5 mb-6 shadow-sm overflow-hidden"
           >
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-full bg-gold/20 dark:bg-gold/10 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-gold" />
+            {/* Subtle cosmic background pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gold/3 via-transparent to-purple-500/3 dark:from-gold/2 dark:via-transparent dark:to-purple-500/2 pointer-events-none" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-gold/20 dark:bg-gold/10 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-gold" />
+                </div>
+                <span className="text-sm font-semibold text-brown-900 dark:text-brown-100">Cosmic Counselor</span>
               </div>
-              <span className="text-sm font-semibold text-brown-900 dark:text-brown-100">Cosmic Counselor</span>
+              <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
+                Welcome{userName !== 'Seeker' ? `, ${userName}` : ''} to Cosmic Counselor! I&apos;m here to help you explore your emotional patterns through the lens of Vedic astrology and behavioral science. What would you like to explore today?
+              </p>
             </div>
-            <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
-              Welcome{userName !== 'Seeker' ? `, ${userName}` : ''} to Cosmic Counselor! I&apos;m here to help you explore your emotional patterns through the lens of Vedic astrology and behavioral science. What would you like to explore today?
-            </p>
           </motion.div>
         )}
 
@@ -286,6 +294,7 @@ export default function ChatView() {
                     : 'bg-white dark:bg-white/5 border border-brown-100/50 dark:border-brown-100/20 text-brown-900 dark:text-brown-100 rounded-2xl rounded-tl-sm border-l-2 border-l-gold/40'
                 }`}
               >
+                {msg.role === 'assistant' && <span className="text-gold/50 mr-1 text-xs">✦</span>}
                 {msg.content}
               </div>
 
@@ -320,7 +329,7 @@ export default function ChatView() {
                 <button
                   key={question}
                   onClick={() => handleSuggestionClick(question)}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs rounded-full border border-brown-200 dark:border-brown-100/30 bg-white/80 dark:bg-white/5 text-brown-700 dark:text-brown-300 hover:border-gold/50 hover:bg-gold/5 dark:hover:bg-gold/10 transition-all duration-200 hover:shadow-sm"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs rounded-full border border-brown-200 dark:border-brown-100/30 bg-white/80 dark:bg-white/5 text-brown-700 dark:text-brown-300 hover:scale-[1.02] hover:border-gold/40 transition-all duration-200 hover:shadow-sm shimmer"
                 >
                   <Sparkles className="w-3 h-3 text-gold flex-shrink-0" />
                   <span className="line-clamp-1">{question}</span>
@@ -332,7 +341,7 @@ export default function ChatView() {
       </AnimatePresence>
 
       {/* Input Area */}
-      <div className="sticky bottom-16 bg-cream/90 dark:bg-[#1A1412]/90 backdrop-blur-md border-t border-brown-100/30 dark:border-brown-100/10 px-4 py-3 z-10">
+      <div className="sticky bottom-16 glass-light border-t border-brown-100/30 dark:border-brown-100/10 px-4 py-3 z-10">
         <form onSubmit={handleSubmit} className="max-w-lg mx-auto flex items-center gap-2">
           <input
             ref={inputRef}
@@ -347,7 +356,7 @@ export default function ChatView() {
           <button
             type="submit"
             disabled={isLoading || !inputValue.trim()}
-            className="flex-shrink-0 w-11 h-11 rounded-full bg-gold hover:bg-gold/90 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md active:scale-95"
+            className={`flex-shrink-0 w-11 h-11 rounded-full bg-gold hover:bg-gold/90 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 ${inputValue.trim() ? 'animate-breathe-glow' : ''}`}
             aria-label="Send message"
           >
             <ArrowRight className="w-5 h-5" />
