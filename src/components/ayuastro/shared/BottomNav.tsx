@@ -1,13 +1,13 @@
 'use client';
 
 import { useAyuAstroStore, type BottomNavTab } from '@/store/ayuastro-store';
-import { Sparkles, Users, BookOpen, User, FileText } from 'lucide-react';
+import { Sparkles, Users, BookOpen, User, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const tabs: { id: BottomNavTab; label: string; icon: React.ElementType; view: string }[] = [
   { id: 'insights', label: 'Insights', icon: Sparkles, view: 'insights' },
+  { id: 'chat', label: 'Chat', icon: MessageCircle, view: 'chat' },
   { id: 'sync', label: 'Sync', icon: Users, view: 'sync' },
-  { id: 'report', label: 'Report', icon: FileText, view: 'report' },
   { id: 'wisdom', label: 'Wisdom', icon: BookOpen, view: 'wisdom' },
   { id: 'profile', label: 'Profile', icon: User, view: 'profile' },
 ];
@@ -15,12 +15,12 @@ const tabs: { id: BottomNavTab; label: string; icon: React.ElementType; view: st
 export default function BottomNav() {
   const { currentView, activeTab, setActiveTab, setView } = useAyuAstroStore();
 
-  const visibleViews = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync'];
+  const visibleViews = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood'];
   if (!visibleViews.includes(currentView)) return null;
 
   const handleTabClick = (tab: typeof tabs[number]) => {
     setActiveTab(tab.id);
-    setView(tab.view as 'insights' | 'sync' | 'report' | 'wisdom' | 'profile');
+    setView(tab.view as 'insights' | 'chat' | 'sync' | 'wisdom' | 'profile');
   };
 
   return (

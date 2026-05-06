@@ -189,6 +189,28 @@ const PLANET_COLORS: Record<string, string> = {
   Moon: 'bg-slate-400',
 };
 
+const PLANET_SYMBOLS: Record<string, string> = {
+  Sun: '☉', Moon: '☽', Mars: '♂', Mercury: '☿', Jupiter: '♃', Venus: '♀', Saturn: '♄', Rahu: '☊', Ketu: '☋',
+};
+
+const PLANET_DOT_COLORS: Record<string, string> = {
+  Sun: 'bg-yellow-500', Moon: 'bg-slate-400', Mars: 'bg-red-500', Mercury: 'bg-emerald-500', Jupiter: 'bg-amber-500', Venus: 'bg-pink-400', Saturn: 'bg-amber-900', Rahu: 'bg-purple-600', Ketu: 'bg-gray-500',
+};
+
+const ELEMENT_COLORS: Record<string, { bar: string; bg: string; text: string; darkBar: string; darkBg: string; darkText: string }> = {
+  Fire: { bar: 'bg-gradient-to-r from-red-500 to-orange-500', bg: 'bg-gradient-to-r from-red-50 to-orange-50', text: 'text-red-700', darkBar: 'dark:from-red-600 dark:to-orange-600', darkBg: 'dark:from-red-900/20 dark:to-orange-900/20', darkText: 'dark:text-red-300' },
+  Earth: { bar: 'bg-gradient-to-r from-green-600 to-emerald-500', bg: 'bg-gradient-to-r from-green-50 to-emerald-50', text: 'text-green-700', darkBar: 'dark:from-green-600 dark:to-emerald-600', darkBg: 'dark:from-green-900/20 dark:to-emerald-900/20', darkText: 'dark:text-green-300' },
+  Air: { bar: 'bg-gradient-to-r from-yellow-400 to-amber-400', bg: 'bg-gradient-to-r from-yellow-50 to-amber-50', text: 'text-yellow-700', darkBar: 'dark:from-yellow-500 dark:to-amber-500', darkBg: 'dark:from-yellow-900/20 dark:to-amber-900/20', darkText: 'dark:text-yellow-300' },
+  Water: { bar: 'bg-gradient-to-r from-blue-500 to-teal-400', bg: 'bg-gradient-to-r from-blue-50 to-teal-50', text: 'text-blue-700', darkBar: 'dark:from-blue-500 dark:to-teal-500', darkBg: 'dark:from-blue-900/20 dark:to-teal-900/20', darkText: 'dark:text-blue-300' },
+};
+
+const ELEMENT_QUALITIES: Record<string, string> = {
+  Fire: 'Passion, initiative, courage',
+  Earth: 'Stability, patience, practicality',
+  Air: 'Communication, adaptability, intellect',
+  Water: 'Emotion, intuition, depth',
+};
+
 const TRANSIT_TYPE_STYLES: Record<string, string> = {
   major: 'bg-sage-muted text-sage-dark',
   shadow: 'bg-purple-100 text-purple-700',
@@ -206,6 +228,7 @@ export default function InsightsView() {
   const [transits, setTransits] = useState<TransitsData | null>(null);
   const [transitsLoading, setTransitsLoading] = useState(true);
   const [expandedTransits, setExpandedTransits] = useState<Record<string, boolean>>({});
+  const [planetaryExpanded, setPlanetaryExpanded] = useState(false);
 
   const topTraits = getTopTraits(traitScores);
   const archetype = getArchetype(traitScores);
@@ -281,7 +304,7 @@ export default function InsightsView() {
 
         {/* Daily Cosmic Insight Card */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
-          <Card className="border-0 shadow-sm overflow-hidden relative">
+          <Card className="glass border-0 shadow-md overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-brown-100/20 dark:from-gold/3 dark:via-transparent dark:to-brown-50/10" />
             <CardContent className="relative p-5">
               <div className="flex items-start gap-3">
@@ -312,7 +335,7 @@ export default function InsightsView() {
 
         {/* Daily Horoscope Card */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.02 }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden">
+          <Card className="glass border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-sage via-gold to-brown-300" />
             <CardContent className="p-5">
               <div className="flex items-start gap-3">
@@ -481,8 +504,13 @@ export default function InsightsView() {
 
         {/* Header Section */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
-          <div className="flex items-start justify-between">
-            <div>
+          <div className="relative flex items-start justify-between">
+            {/* Decorative zodiac constellation pattern behind header */}
+            <div className="absolute -top-4 -left-2 text-brown-100/40 dark:text-brown-50/10 text-3xl tracking-[0.6em] leading-relaxed select-none pointer-events-none z-0" aria-hidden="true">
+              <div>♈ ♉ ♊</div>
+              <div className="ml-2">♋ ♌ ♍</div>
+            </div>
+            <div className="relative z-10">
               <h1
                 className="font-serif text-3xl font-bold text-brown-900 mb-1"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
@@ -523,7 +551,7 @@ export default function InsightsView() {
               </DialogContent>
             </Dialog>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="relative z-10 flex flex-wrap gap-2">
             {topTags.map((tag, i) => (
               <Badge
                 key={i}
@@ -537,7 +565,7 @@ export default function InsightsView() {
 
         {/* The Anchor Section */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden">
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-gold via-brown-300 to-sage" />
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
@@ -563,7 +591,7 @@ export default function InsightsView() {
 
         {/* Duality of Self Section */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
             <CardContent className="p-6">
               <h3
                 className="font-serif text-lg font-bold text-brown-900 mb-4"
@@ -627,7 +655,7 @@ export default function InsightsView() {
 
         {/* Trait Scores Display */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                 <Sparkles className="size-5 text-gold" />
@@ -673,7 +701,7 @@ export default function InsightsView() {
         {/* Numerology Summary Card */}
         {numerologyData && (
           <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.22 }}>
-            <Card className="border-0 shadow-sm bg-white">
+            <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                   <Sparkles className="size-5 text-gold" />
@@ -707,9 +735,73 @@ export default function InsightsView() {
           </motion.div>
         )}
 
+        {/* Elemental Balance Card */}
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.23 }}>
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-red-400 via-green-400 via-yellow-400 to-blue-400" />
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
+                <Sparkles className="size-5 text-gold" />
+                Elemental Balance
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                const signElements = [sunSign, moonSign, ascendant]
+                  .map(s => ZODIAC_ELEMENTS[s]?.element)
+                  .filter(Boolean);
+                const counts: Record<string, number> = { Fire: 0, Earth: 0, Air: 0, Water: 0 };
+                signElements.forEach(el => { if (el) counts[el]++; });
+                const dominantElement = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+
+                return (
+                  <div className="space-y-3">
+                    {(['Fire', 'Earth', 'Air', 'Water'] as const).map((element) => {
+                      const count = counts[element];
+                      const pct = Math.round((count / 3) * 100);
+                      const colors = ELEMENT_COLORS[element];
+                      const ElIcon = ELEMENT_ICONS[element];
+                      return (
+                        <div key={element} className={`rounded-lg p-3 ${colors.bg} ${colors.darkBg}`}>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <div className="flex items-center gap-2">
+                              <ElIcon className={`size-4 ${colors.text} ${colors.darkText}`} />
+                              <span className={`text-sm font-semibold ${colors.text} ${colors.darkText}`}>{element}</span>
+                            </div>
+                            <span className={`text-xs font-bold ${colors.text} ${colors.darkText}`}>{pct}%</span>
+                          </div>
+                          <div className="h-2.5 rounded-full bg-white/50 dark:bg-white/10 overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${pct}%` }}
+                              transition={{ duration: 0.8, ease: 'easeOut' }}
+                              className={`h-full rounded-full ${colors.bar} ${colors.darkBar}`}
+                            />
+                          </div>
+                          <p className="text-[10px] text-brown-400 dark:text-brown-300 mt-1">
+                            {count} of 3 signs • {ELEMENT_QUALITIES[element]}
+                          </p>
+                        </div>
+                      );
+                    })}
+                    <div className="rounded-lg bg-gold/5 dark:bg-gold/10 p-3">
+                      <p className="text-[10px] uppercase tracking-wider text-gold-dark dark:text-gold mb-1">Dominant Element</p>
+                      <div className="flex items-center gap-2">
+                        {(() => { const DIcon = ELEMENT_ICONS[dominantElement]; return <DIcon className="size-4 text-gold-dark" />; })()}
+                        <span className="text-sm font-semibold text-brown-900 dark:text-brown-100">{dominantElement}</span>
+                        <span className="text-xs text-brown-400">— {ELEMENT_QUALITIES[dominantElement]}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Astrology Summary Card with Kundali Chart */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.25 }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                 <Moon className="size-5 text-gold" />
@@ -772,6 +864,57 @@ export default function InsightsView() {
                 />
               </div>
 
+              {/* Planetary Positions Table */}
+              <Separator className="my-3 bg-brown-100" />
+              <Collapsible open={planetaryExpanded} onOpenChange={setPlanetaryExpanded}>
+                <CollapsibleTrigger asChild>
+                  <button className="w-full flex items-center justify-between py-2 hover:bg-brown-50 dark:hover:bg-brown-800/20 rounded-lg px-2 transition-colors">
+                    <span className="text-xs font-medium text-brown-400 uppercase tracking-wider">Planetary Positions</span>
+                    <ChevronDown className={`size-4 text-brown-300 transition-transform ${planetaryExpanded ? 'rotate-180' : ''}`} />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="overflow-x-auto -mx-1">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-brown-100 dark:border-brown-700/30">
+                          <th className="text-left py-2 px-2 text-[10px] uppercase tracking-wider text-brown-400 font-medium">Planet</th>
+                          <th className="text-left py-2 px-2 text-[10px] uppercase tracking-wider text-brown-400 font-medium">Sign</th>
+                          <th className="text-center py-2 px-2 text-[10px] uppercase tracking-wider text-brown-400 font-medium">Degree</th>
+                          <th className="text-center py-2 px-2 text-[10px] uppercase tracking-wider text-brown-400 font-medium">House</th>
+                          <th className="text-center py-2 px-2 text-[10px] uppercase tracking-wider text-brown-400 font-medium">Retro</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(astrologyData?.planetaryPositions || {}).map(([planet, data]) => (
+                          <tr key={planet} className="border-b border-brown-50 dark:border-brown-700/20 hover:bg-brown-50/50 dark:hover:bg-brown-800/10 transition-colors">
+                            <td className="py-2 px-2">
+                              <div className="flex items-center gap-1.5">
+                                <span className={`w-2 h-2 rounded-full shrink-0 ${PLANET_DOT_COLORS[planet] || 'bg-gray-400'}`} />
+                                <span className="text-base leading-none">{PLANET_SYMBOLS[planet] || '●'}</span>
+                                <span className="font-medium text-brown-900 dark:text-brown-100">{planet}</span>
+                              </div>
+                            </td>
+                            <td className="py-2 px-2">
+                              <span className="text-brown-700 dark:text-brown-300">{ZODIAC_ICONS[data.sign] || ''} {data.sign}</span>
+                            </td>
+                            <td className="py-2 px-2 text-center text-brown-500 dark:text-brown-400">{data.degree.toFixed(1)}°</td>
+                            <td className="py-2 px-2 text-center text-brown-500 dark:text-brown-400">{data.house}</td>
+                            <td className="py-2 px-2 text-center">
+                              {data.retrograde ? (
+                                <span className="text-xs font-bold text-gold-dark dark:text-gold">℞</span>
+                              ) : (
+                                <span className="text-brown-200 dark:text-brown-600">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
               {/* Yogas & Doshas */}
               {(astrologyData?.yogas?.length > 0 || astrologyData?.doshas?.length > 0) && (
                 <>
@@ -817,7 +960,7 @@ export default function InsightsView() {
 
         {/* CTA */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.3 }}>
-          <Card className="border-0 shadow-sm overflow-hidden">
+          <Card className="card-hover border-0 shadow-md overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-gold via-gold-light to-gold-dark" />
             <CardContent className="p-5 text-center">
               <p

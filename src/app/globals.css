@@ -407,6 +407,70 @@
   animation: twinkle 3s ease-in-out infinite;
 }
 
+/* Cosmic background with subtle radial gradient */
+.cosmic-bg {
+  background: radial-gradient(ellipse at center, rgba(62, 39, 35, 0.03) 0%, rgba(248, 245, 240, 0) 70%);
+}
+
+.dark .cosmic-bg {
+  background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.03) 0%, rgba(26, 20, 18, 0) 70%);
+}
+
+/* Card hover effect with elevation */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(93, 64, 55, 0.1);
+}
+
+.dark .card-hover:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Section divider with decorative gold line and zodiac symbol */
+.section-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+}
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #D4AF37, transparent);
+}
+.section-divider::before {
+  margin-right: 0.75rem;
+}
+.section-divider::after {
+  margin-left: 0.75rem;
+}
+
+.dark .section-divider::before,
+.dark .section-divider::after {
+  background: linear-gradient(90deg, transparent, #F0C14B, transparent);
+}
+
+/* Staggered card appearance animation */
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-appear {
+  animation: appear 0.4s ease-out both;
+}
+
 /* Mobile responsive text */
 @media (max-width: 640px) {
   .hero-title {

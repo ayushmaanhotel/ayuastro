@@ -18,6 +18,7 @@ import {
   Lock,
   ArrowRight,
   Download,
+  ArrowUp,
 } from 'lucide-react';
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -105,9 +106,26 @@ const fadeInUp = {
   animate: { opacity: 1, y: 0 },
 };
 
+const staggerContainer = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
 export default function ReportView() {
   const { reportSections, hasPaid, setView, userId } = useAyuAstroStore();
   const [downloading, setDownloading] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Back to top visibility
+  if (typeof window !== 'undefined') {
+    window.addEventListener('scroll', () => {
+      setShowBackToTop(window.scrollY > 400);
+    });
+  }
 
   const freeSections = reportSections.filter((s) => s.insightLevel === 'free').length > 0
     ? reportSections.filter((s) => s.insightLevel === 'free')
@@ -117,9 +135,15 @@ export default function ReportView() {
     ? reportSections.filter((s) => s.insightLevel === 'premium')
     : DEFAULT_PREMIUM_SECTIONS;
 
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
   const handleDownload = async () => {
-    if (!userId) return;
+    if (!userId) {
+      setDownloadError('Please complete onboarding first to download your report.');
+      return;
+    }
     setDownloading(true);
+    setDownloadError(null);
     try {
       const res = await fetch('/api/reports/generate-pdf', {
         method: 'POST',
@@ -136,12 +160,44 @@ export default function ReportView() {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+      } else if (res.status === 404) {
+        // User not found in database - generate client-side fallback
+        generateClientSideReport();
+      } else {
+        setDownloadError('Failed to generate report. Please try again later.');
       }
     } catch {
-      // Silently fail
+      setDownloadError('Network error. Please check your connection and try again.');
     } finally {
       setDownloading(false);
     }
+  };
+
+  const generateClientSideReport = () => {
+    const name = useAyuAstroStore.getState().birthDetails?.name || 'Seeker';
+    const dob = useAyuAstroStore.getState().birthDetails?.dateOfBirth || 'Unknown';
+    const tob = useAyuAstroStore.getState().birthDetails?.timeOfBirth || 'Unknown';
+    const pob = useAyuAstroStore.getState().birthDetails?.placeOfBirth || 'Unknown';
+    const sun = astrologyData?.sunSign || 'Unknown';
+    const moon = astrologyData?.moonSign || 'Unknown';
+    const asc = astrologyData?.ascendant || 'Unknown';
+
+    const allSections = [
+      ...freeSections.map((s, i) => `<div style="background:white;border-radius:12px;padding:2rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.05);"><h2 style="font-family:Georgia,serif;font-size:1.3rem;color:#3E2723;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #E8F0E9;">${i + 1}. ${s.title}</h2><p style="color:#5D4037;line-height:1.8;">${s.content}</p><div style="margin-top:1rem;display:flex;gap:0.4rem;flex-wrap:wrap;">${s.traits.map(t => `<span style="background:#EFEBE9;color:#5D4037;font-size:0.75rem;padding:0.2rem 0.6rem;border-radius:20px;">${t}</span>`).join('')}</div></div>`),
+      ...(hasPaid ? premiumSections.map((s, i) => `<div style="background:white;border-radius:12px;padding:2rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.05);"><h2 style="font-family:Georgia,serif;font-size:1.3rem;color:#3E2723;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #E8F0E9;">${freeSections.length + i + 1}. ${s.title} <span style="background:linear-gradient(135deg,#D4AF37,#D4A84B);color:white;font-size:0.6rem;padding:0.15rem 0.5rem;border-radius:4px;letter-spacing:0.1em;vertical-align:middle;margin-left:0.5rem;">PREMIUM</span></h2><p style="color:#5D4037;line-height:1.8;">${s.content}</p><div style="margin-top:1rem;display:flex;gap:0.4rem;flex-wrap:wrap;">${s.traits.map(t => `<span style="background:#D4AF37/10;color:#B8960C;font-size:0.75rem;padding:0.2rem 0.6rem;border-radius:20px;">${t}</span>`).join('')}</div></div>`) : []),
+    ];
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>AyuAstro Report - ${name}</title><style>body{font-family:Inter,-apple-system,sans-serif;background:#FDF6EC;color:#3E2723;line-height:1.7;max-width:800px;margin:0 auto;padding:2rem;}</style></head><body><div style="text-align:center;padding:4rem 2rem;"><h1 style="font-family:Georgia,serif;font-size:3rem;color:#3E2723;">AyuAstro</h1><p style="color:#8D6E63;letter-spacing:0.15em;text-transform:uppercase;">Deep Intelligence Report</p><p style="color:#5D4037;font-size:1.1rem;margin-top:2rem;">Prepared for <strong>${name}</strong><br>Born ${dob} at ${tob}<br>${pob}<br><br>☉ ${sun} &nbsp; ☽ ${moon} &nbsp; ↑ ${asc}</p></div>${allSections.join('\n')}<div style="text-align:center;padding:3rem;color:#8D6E63;font-size:0.8rem;border-top:2px solid #D7CCC8;margin-top:2rem;"><p style="font-family:Georgia,serif;font-size:1rem;color:#5D4037;margin-bottom:0.5rem;">AyuAstro — AI-Powered Emotional Intelligence</p><p>This report was generated for personal reflection only.</p></div></body></html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ayuastro-report.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -161,21 +217,31 @@ export default function ReportView() {
                 A comprehensive analysis of your emotional architecture.
               </p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="shrink-0 border-gold/30 text-gold-dark hover:bg-gold/5 hover:text-gold-dark"
-              onClick={handleDownload}
-              disabled={downloading || !userId}
-            >
-              <Download className="size-3.5 mr-1" />
-              {downloading ? 'Generating...' : 'Download'}
-            </Button>
+            <div className="flex flex-col items-end gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0 border-gold/30 text-gold-dark hover:bg-gold/5 hover:text-gold-dark"
+                onClick={handleDownload}
+                disabled={downloading}
+              >
+                <Download className="size-3.5 mr-1" />
+                {downloading ? 'Generating...' : 'Download'}
+              </Button>
+              {downloadError && (
+                <p className="text-[10px] text-red-500/80 max-w-[180px] text-right">{downloadError}</p>
+              )}
+            </div>
           </div>
         </motion.div>
 
         {/* Free Sections */}
-        <div className="space-y-4">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          className="space-y-4"
+        >
           <h2 className="text-xs font-semibold uppercase tracking-widest text-brown-400">
             Unlocked Insights
           </h2>
@@ -184,12 +250,15 @@ export default function ReportView() {
             return (
               <motion.div
                 key={section.id}
-                {...fadeInUp}
-                transition={{ duration: 0.4, delay: 0.1 * i }}
+                variants={fadeInUp}
+                transition={{ duration: 0.4 }}
               >
-                <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+                <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
+                      <div className="flex size-7 items-center justify-center rounded-full bg-gold/15 text-gold-dark text-xs font-bold">
+                        {i + 1}
+                      </div>
                       <div className="flex size-8 items-center justify-center rounded-lg bg-sage-muted">
                         <Icon className="size-4 text-sage-dark" />
                       </div>
@@ -197,14 +266,14 @@ export default function ReportView() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm leading-relaxed text-brown-600 mb-3">
+                    <p className="text-sm leading-relaxed text-brown-600 dark:text-brown-300 mb-3">
                       {section.content}
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {section.traits.map((trait, ti) => (
                         <Badge
                           key={ti}
-                          className="bg-brown-50 dark:bg-brown-50/20 text-brown-600 border-0 text-xs"
+                          className="bg-brown-50 dark:bg-brown-50/20 text-brown-600 dark:text-brown-300 border-0 text-xs"
                         >
                           {trait}
                         </Badge>
@@ -215,25 +284,39 @@ export default function ReportView() {
               </motion.div>
             );
           })}
+        </motion.div>
+
+        {/* Gold Divider between Free and Premium */}
+        <div className="section-divider">
+          <span className="text-gold text-lg zodiac-glow">✦</span>
         </div>
 
         {/* Premium Sections */}
-        <div className="space-y-4">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          className="space-y-4"
+        >
           <h2 className="text-xs font-semibold uppercase tracking-widest text-gold-dark">
             Premium Insights
           </h2>
           {premiumSections.map((section, i) => {
             const Icon = ICON_MAP[section.icon] || Sparkles;
             const isLocked = !hasPaid;
+            const sectionNum = freeSections.length + i + 1;
             return (
               <motion.div
                 key={section.id}
-                {...fadeInUp}
-                transition={{ duration: 0.4, delay: 0.1 * (i + freeSections.length) }}
+                variants={fadeInUp}
+                transition={{ duration: 0.4 }}
               >
-                <Card className={`border-0 shadow-sm bg-white dark:bg-white/5`}>
+                <Card className={`card-hover border-0 shadow-md bg-white dark:bg-white/5`}>
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
+                      <div className="flex size-7 items-center justify-center rounded-full bg-gold/15 text-gold-dark text-xs font-bold">
+                        {sectionNum}
+                      </div>
                       <div className="flex size-8 items-center justify-center rounded-lg bg-gold/10">
                         <Icon className="size-4 text-gold-dark" />
                       </div>
@@ -243,15 +326,15 @@ export default function ReportView() {
                   </CardHeader>
                   <CardContent>
                     {isLocked ? (
-                      <div className="relative">
+                      <div className="relative overflow-hidden rounded-lg">
                         <div className="blur-[6px] select-none">
                           <p className="text-sm leading-relaxed text-brown-600 mb-3">
                             {section.content}
                           </p>
                         </div>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 dark:bg-card/60">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-white/20 via-white/50 to-white/80 dark:from-card/20 dark:via-card/50 dark:to-card/80">
                           <Lock className="size-5 text-gold mb-2" />
-                          <p className="text-xs font-medium text-brown-700 mb-2">
+                          <p className="text-xs font-medium text-brown-700 dark:text-brown-200 mb-2">
                             Unlock to reveal
                           </p>
                           <Button
@@ -266,7 +349,7 @@ export default function ReportView() {
                       </div>
                     ) : (
                       <>
-                        <p className="text-sm leading-relaxed text-brown-600 mb-3">
+                        <p className="text-sm leading-relaxed text-brown-600 dark:text-brown-300 mb-3">
                           {section.content}
                         </p>
                         <div className="flex flex-wrap gap-1">
@@ -286,7 +369,18 @@ export default function ReportView() {
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
+
+        {/* Back to Top Button */}
+        {showBackToTop && (
+          <Button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            size="sm"
+            className="fixed bottom-20 right-4 z-40 rounded-full size-10 p-0 bg-brown-700 text-white hover:bg-brown-800 shadow-lg"
+          >
+            <ArrowUp className="size-4" />
+          </Button>
+        )}
       </div>
     </div>
   );

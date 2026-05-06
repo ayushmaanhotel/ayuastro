@@ -44,6 +44,7 @@ const INDIAN_CITIES: Record<string, { lat: number; lon: number }> = {
 };
 
 const QUESTIONS = [
+  // Emotional Category (4 questions)
   {
     id: 'q_emotional_1',
     text: 'I can easily sense when someone is upset, even before they say anything.',
@@ -55,6 +56,17 @@ const QUESTIONS = [
     category: 'emotional' as const,
   },
   {
+    id: 'q_emotional_3',
+    text: 'My emotions change quickly — I can go from calm to deeply moved in moments.',
+    category: 'emotional' as const,
+  },
+  {
+    id: 'q_emotional_4',
+    text: 'I find it difficult to hide what I am truly feeling, even when I try.',
+    category: 'emotional' as const,
+  },
+  // Social Category (4 questions)
+  {
     id: 'q_social_1',
     text: 'In group settings, I naturally take on the role of mediator or peacemaker.',
     category: 'social' as const,
@@ -64,6 +76,17 @@ const QUESTIONS = [
     text: 'I prefer deep one-on-one conversations over large social gatherings.',
     category: 'social' as const,
   },
+  {
+    id: 'q_social_3',
+    text: 'I feel energized when I can help someone work through a personal problem.',
+    category: 'social' as const,
+  },
+  {
+    id: 'q_social_4',
+    text: 'I sometimes feel drained after being around too many people, even if I enjoyed it.',
+    category: 'social' as const,
+  },
+  // Behavioral Category (4 questions)
   {
     id: 'q_behavioral_1',
     text: 'When faced with a difficult decision, I trust my gut feeling over logical analysis.',
@@ -75,6 +98,17 @@ const QUESTIONS = [
     category: 'behavioral' as const,
   },
   {
+    id: 'q_behavioral_3',
+    text: 'I am more driven by a sense of inner purpose than by external rewards or recognition.',
+    category: 'behavioral' as const,
+  },
+  {
+    id: 'q_behavioral_4',
+    text: 'When something excites me, I pursue it with full intensity — but I can lose interest just as quickly.',
+    category: 'behavioral' as const,
+  },
+  // Relational Category (4 questions)
+  {
     id: 'q_relational_1',
     text: 'I am deeply affected by the emotional tone of my close relationships.',
     category: 'relational' as const,
@@ -82,6 +116,16 @@ const QUESTIONS = [
   {
     id: 'q_relational_2',
     text: 'I often put others\' needs before my own, even when it costs me personally.',
+    category: 'relational' as const,
+  },
+  {
+    id: 'q_relational_3',
+    text: 'I crave emotional depth in my relationships — surface-level connections leave me unsatisfied.',
+    category: 'relational' as const,
+  },
+  {
+    id: 'q_relational_4',
+    text: 'I find it hard to fully trust someone until they have consistently shown they understand me.',
     category: 'relational' as const,
   },
 ];

@@ -27,6 +27,8 @@ interface WisdomCard {
   description: string;
   color: string;
   badgeColor: string;
+  accentBorder: string;
+  readingTime: string;
 }
 
 const wisdomCards: WisdomCard[] = [
@@ -38,24 +40,30 @@ const wisdomCards: WisdomCard[] = [
     description: 'In Vedic astrology, the Moon sign (Rashi) reveals your emotional nature — how you process feelings, seek comfort, and react under stress. Unlike the Sun sign which represents your outward identity, the Moon sign holds the key to your inner world. It governs your instincts, habits, and subconscious patterns that silently direct your choices. Understanding your Moon sign is the first step to emotional self-awareness — it tells you why you react the way you do, what truly nourishes you, and where your deepest emotional needs lie.',
     color: 'bg-brown-50',
     badgeColor: 'bg-sage-muted text-sage-dark',
+    accentBorder: 'border-l-sage',
+    readingTime: '3 min',
   },
   {
     icon: Star,
     title: 'What is Nakshatra?',
     category: 'Vedic Astrology',
-    preview: 'Nakshatras are 27 lunar mansions that divide the zodiac into finer segments of 13°20\' each. Your birth Nakshatra reveals your deepest psychological tendencies.',
-    description: 'Nakshatras are 27 lunar mansions that divide the zodiac into finer segments of 13°20\' each. Your birth Nakshatra reveals your deepest psychological tendencies, your life purpose (dharma), and your karmic inheritance. It is far more specific than your sign — think of it as the difference between knowing your city and knowing your exact address in the cosmos. Each Nakshatra has its own ruling deity, symbol, and psychological profile that adds remarkable depth to your astrological understanding.',
+    preview: "Nakshatras are 27 lunar mansions that divide the zodiac into finer segments of 13°20' each. Your birth Nakshatra reveals your deepest psychological tendencies.",
+    description: "Nakshatras are 27 lunar mansions that divide the zodiac into finer segments of 13°20' each. Your birth Nakshatra reveals your deepest psychological tendencies, your life purpose (dharma), and your karmic inheritance. It is far more specific than your sign — think of it as the difference between knowing your city and knowing your exact address in the cosmos. Each Nakshatra has its own ruling deity, symbol, and psychological profile that adds remarkable depth to your astrological understanding.",
     color: 'bg-white',
     badgeColor: 'bg-gold/10 text-gold-dark',
+    accentBorder: 'border-l-sage',
+    readingTime: '4 min',
   },
   {
     icon: Clock,
     title: 'Vimshottari Dasha Explained',
     category: 'Vedic Astrology',
-    preview: 'The Vimshottari Dasha system is Vedic astrology\'s most powerful timing technique. It maps your life into planetary periods, each ruled by a different planet.',
-    description: 'The Vimshottari Dasha system is Vedic astrology\'s most powerful timing technique. It maps your life into planetary periods, each ruled by a different planet. Your current Dasha reveals which themes are active in your life right now — career shifts, relationship changes, spiritual growth, or emotional transformation. Understanding your Dasha is like reading the weather forecast for your soul. The total cycle spans 120 years, with each planet ruling a specific portion based on the Moon\'s Nakshatra at birth.',
+    preview: "The Vimshottari Dasha system is Vedic astrology's most powerful timing technique. It maps your life into planetary periods, each ruled by a different planet.",
+    description: "The Vimshottari Dasha system is Vedic astrology's most powerful timing technique. It maps your life into planetary periods, each ruled by a different planet. Your current Dasha reveals which themes are active in your life right now — career shifts, relationship changes, spiritual growth, or emotional transformation. Understanding your Dasha is like reading the weather forecast for your soul. The total cycle spans 120 years, with each planet ruling a specific portion based on the Moon's Nakshatra at birth.",
     color: 'bg-brown-50',
     badgeColor: 'bg-sage-muted text-sage-dark',
+    accentBorder: 'border-l-sage',
+    readingTime: '4 min',
   },
   {
     icon: Brain,
@@ -65,6 +73,8 @@ const wisdomCards: WisdomCard[] = [
     description: 'Our 14-trait emotional intelligence model combines behavioral questionnaire responses (Likert-scale assessment), Vedic planetary influences (weighted by house and sign placement), and numerological vibration analysis (life path, destiny, and soul urge numbers). The scoring algorithm normalizes across all three data sources, creating a unified emotional profile that is greater than the sum of its parts. This multi-source approach ensures your profile reflects both your innate tendencies and your learned behaviors.',
     color: 'bg-white',
     badgeColor: 'bg-gold/10 text-gold-dark',
+    accentBorder: 'border-l-brown-500',
+    readingTime: '3 min',
   },
   {
     icon: BookOpen,
@@ -74,33 +84,41 @@ const wisdomCards: WisdomCard[] = [
     description: 'Yogas are specific planetary combinations in your birth chart that create powerful positive effects. Raj Yoga brings authority and success, Gaj Kesari Yoga grants wisdom and respect, while Panch Mahapurusha Yogas indicate extraordinary potential in specific life areas. Recognizing your Yogas helps you lean into your natural advantages. Think of Yogas as cosmic endorsements — when activated by the right timing (Dasha), they can catalyze significant positive changes in your life trajectory.',
     color: 'bg-brown-50',
     badgeColor: 'bg-sage-muted text-sage-dark',
+    accentBorder: 'border-l-sage',
+    readingTime: '3 min',
   },
   {
     icon: Hash,
     title: 'Numerology: Life Path Numbers',
     category: 'Numerology',
-    preview: 'Your Life Path Number (derived from your birth date) is the most significant number in numerology — it reveals your core purpose and the lessons you\'re here to learn.',
-    description: 'Your Life Path Number (derived from your birth date) is the most significant number in numerology — it reveals your core purpose and the lessons you\'re here to learn. Life Path 1 represents the Leader — independent, pioneering, and self-motivated. Life Path 2 is the Diplomat — sensitive, cooperative, and peace-loving. Life Path 3 is the Creative — expressive, joyful, and socially gifted. Life Path 4 is the Builder — practical, disciplined, and hardworking. Life Path 5 is the Adventurer — freedom-loving, versatile, and progressive. Life Path 6 is the Nurturer — responsible, loving, and community-oriented. Life Path 7 is the Seeker — analytical, spiritual, and introspective. Life Path 8 is the Powerhouse — ambitious, authoritative, and materially focused. Life Path 9 is the Humanitarian — compassionate, generous, and globally minded. Master numbers 11, 22, and 33 carry intensified vibrations of their root numbers (2, 4, 6) with added spiritual significance.',
+    preview: "Your Life Path Number (derived from your birth date) is the most significant number in numerology — it reveals your core purpose and the lessons you're here to learn.",
+    description: "Your Life Path Number (derived from your birth date) is the most significant number in numerology — it reveals your core purpose and the lessons you're here to learn. Life Path 1 represents the Leader — independent, pioneering, and self-motivated. Life Path 2 is the Diplomat — sensitive, cooperative, and peace-loving. Life Path 3 is the Creative — expressive, joyful, and socially gifted. Life Path 4 is the Builder — practical, disciplined, and hardworking. Life Path 5 is the Adventurer — freedom-loving, versatile, and progressive. Life Path 6 is the Nurturer — responsible, loving, and community-oriented. Life Path 7 is the Seeker — analytical, spiritual, and introspective. Life Path 8 is the Powerhouse — ambitious, authoritative, and materially focused. Life Path 9 is the Humanitarian — compassionate, generous, and globally minded. Master numbers 11, 22, and 33 carry intensified vibrations of their root numbers (2, 4, 6) with added spiritual significance.",
     color: 'bg-white',
     badgeColor: 'bg-gold/10 text-gold-dark',
+    accentBorder: 'border-l-gold',
+    readingTime: '5 min',
   },
   {
     icon: Shield,
     title: 'Doshas: Understanding Karmic Blocks',
     category: 'Vedic Astrology',
     preview: 'Doshas are planetary afflictions in your birth chart that indicate areas of karmic challenge — not curses, but invitations for growth and transformation.',
-    description: 'Doshas are planetary afflictions in your birth chart that indicate areas of karmic challenge — not curses, but invitations for growth and transformation. Mangal Dosha (Mars affliction) affects relationship harmony and can create friction in partnerships. Kaal Sarp Dosha (Rahu-Ketu axis alignment) indicates karmic patterns related to ancestral unfinished business. Pitra Dosha relates to ancestral debts and can manifest as recurring family patterns. Nadi Dosha affects health compatibility between partners. Understanding your Doshas doesn\'t mean you\'re doomed — it means you have a roadmap for the inner work that will free you from repetitive patterns. Remedies include mantras, gemstones, charitable acts, and most importantly, conscious behavioral change.',
+    description: "Doshas are planetary afflictions in your birth chart that indicate areas of karmic challenge — not curses, but invitations for growth and transformation. Mangal Dosha (Mars affliction) affects relationship harmony and can create friction in partnerships. Kaal Sarp Dosha (Rahu-Ketu axis alignment) indicates karmic patterns related to ancestral unfinished business. Pitra Dosha relates to ancestral debts and can manifest as recurring family patterns. Nadi Dosha affects health compatibility between partners. Understanding your Doshas doesn't mean you're doomed — it means you have a roadmap for the inner work that will free you from repetitive patterns. Remedies include mantras, gemstones, charitable acts, and most importantly, conscious behavioral change.",
     color: 'bg-brown-50',
     badgeColor: 'bg-sage-muted text-sage-dark',
+    accentBorder: 'border-l-sage',
+    readingTime: '4 min',
   },
   {
     icon: Compass,
     title: 'The Power of Your Ascendant',
     category: 'Vedic Astrology',
     preview: 'Your Ascendant (Lagna) is the zodiac sign rising on the eastern horizon at your moment of birth — it is the lens through which all other planetary energies are filtered.',
-    description: 'Your Ascendant (Lagna) is the zodiac sign rising on the eastern horizon at your moment of birth — it is the lens through which all other planetary energies are filtered. While your Sun sign represents your soul\'s purpose and your Moon sign reveals your emotional nature, your Ascendant is your social mask, your first impression, and your physical constitution. It determines the layout of your entire birth chart — which planets fall in which houses. A Leo Ascendant projects confidence and warmth regardless of their Sun sign. A Scorpio Ascendant emanates intensity and mystery. Understanding your Ascendant helps you bridge the gap between how you see yourself and how the world sees you, enabling more authentic self-expression.',
+    description: "Your Ascendant (Lagna) is the zodiac sign rising on the eastern horizon at your moment of birth — it is the lens through which all other planetary energies are filtered. While your Sun sign represents your soul's purpose and your Moon sign reveals your emotional nature, your Ascendant is your social mask, your first impression, and your physical constitution. It determines the layout of your entire birth chart — which planets fall in which houses. A Leo Ascendant projects confidence and warmth regardless of their Sun sign. A Scorpio Ascendant emanates intensity and mystery. Understanding your Ascendant helps you bridge the gap between how you see yourself and how the world sees you, enabling more authentic self-expression.",
     color: 'bg-white',
     badgeColor: 'bg-gold/10 text-gold-dark',
+    accentBorder: 'border-l-sage',
+    readingTime: '4 min',
   },
 ];
 
@@ -143,7 +161,7 @@ export default function WisdomView() {
   };
 
   return (
-    <div className="bg-cream px-4 py-6 pb-24">
+    <div className="cosmic-bg bg-cream px-4 py-6 pb-24">
       <div className="mx-auto max-w-lg space-y-6">
         {/* Header */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
@@ -211,7 +229,7 @@ export default function WisdomView() {
                 {...fadeInUp}
                 transition={{ duration: 0.4, delay: 0.08 * i }}
               >
-                <Card className={`border-0 shadow-sm ${card.color} dark:bg-white/5`}>
+                <Card className={`card-hover border-0 shadow-md border-l-4 ${card.accentBorder} ${card.color} dark:bg-white/5`}>
                   <CardContent className="p-6">
                     <Collapsible open={isExpanded} onOpenChange={() => toggleCard(card.title)}>
                       <div className="flex items-start gap-4">
@@ -219,9 +237,15 @@ export default function WisdomView() {
                           <Icon className="size-5 text-brown-700" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <Badge className={`${card.badgeColor} border-0 text-[10px] font-medium mb-2`}>
-                            {card.category}
-                          </Badge>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge className={`${card.badgeColor} border-0 text-[10px] font-medium`}>
+                              {card.category}
+                            </Badge>
+                            <span className="flex items-center gap-1 text-[10px] text-brown-300 dark:text-brown-400">
+                              <Clock className="size-2.5" />
+                              {card.readingTime}
+                            </span>
+                          </div>
                           <h3
                             className="font-serif text-lg font-bold text-brown-900 mb-2"
                             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}

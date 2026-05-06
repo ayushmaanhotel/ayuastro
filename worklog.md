@@ -531,3 +531,244 @@ Stage Summary:
 7. Add real authentication (Firebase Auth with Google/Apple login)
 8. Add admin dashboard for user analytics
 9. Add A/B testing for premium conversion optimization
+
+---
+Task ID: 4
+Agent: Chat Agent
+Task: Add AI Cosmic Counselor Chatbot Feature
+
+Work Log:
+- Created /api/chat/route.ts POST endpoint with:
+  - Zod validation for message (max 500 chars), sessionId, context, and conversationHistory
+  - System prompt positioning AI as "AyuAstro Cosmic Counselor" — wise, empathetic guide
+  - System prompt includes user's cosmic profile context (sun/moon/asc signs, nakshatra, dasha, yogas, doshas, numerology, archetype, traits, relationship status)
+  - AI safety rules enforced: no death predictions, fear creation, disease diagnosis, curse removal, emotional manipulation
+  - In-memory rate limiting: max 20 messages per session per hour with stale entry cleanup
+  - Conversation history support (last 10 messages) for multi-turn context
+  - Lazy singleton z-ai-web-dev-sdk client initialization
+  - Fallback responses when AI fails (4 rotating cosmic wisdom messages)
+  - Graceful error handling with proper HTTP status codes (400, 429, 500)
+- Created /components/ayuastro/chat/ChatView.tsx with:
+  - Header: "Cosmic Counselor" title with Sparkles icon, subtitle, zodiac sign badge
+  - Welcome card greeting user by name with introductory message
+  - Chat messages: user messages right-aligned (brown-700 bg, white text), AI messages left-aligned (white bg, gold left border, brown-900 text)
+  - AI avatar: golden sparkles icon in circle; User avatar: MessageCircle icon in brown circle
+  - Typing indicator: 3 bouncing dots animation while AI responds
+  - Smooth auto-scroll to bottom on new messages
+  - Fixed bottom input area with send button, character counter (500 max)
+  - 4 suggested question chips with sparkle icons (collapses after first message)
+  - Rate limit warning when ≤5 messages remaining
+  - Full dark mode support on all elements
+  - Responsive design with max-w-lg container
+  - Framer Motion animations on messages and suggestions
+- Updated store (ayuastro-store.ts):
+  - Added 'chat' to AppView type
+  - Updated BottomNavTab type to: 'insights' | 'chat' | 'sync' | 'wisdom' | 'profile'
+- Updated BottomNav.tsx:
+  - Replaced Report tab (FileText icon) with Chat tab (MessageCircle icon)
+  - New 5-tab order: Insights, Chat, Sync, Wisdom, Profile
+  - Added 'chat' to visibleViews array
+- Updated page.tsx:
+  - Imported ChatView component
+  - Added 'chat' case to renderView switch
+  - Added 'chat' to showBottomNav conditions
+- All lint checks pass with zero errors
+
+Stage Summary:
+- Complete AI chatbot feature with cosmic counselor persona
+- Chat API with LLM integration, rate limiting, safety constraints, and fallback responses
+- Beautiful chat UI with messages, typing indicator, suggested questions, welcome card
+- 5 files modified/created: route.ts, ChatView.tsx, ayuastro-store.ts, BottomNav.tsx, page.tsx
+- Full dark mode support across all new components
+- Bottom nav updated: Chat replaces Report (Report accessible from Insights CTA)
+- Zero lint errors
+
+---
+Task ID: 5
+Agent: Mood Tracker Agent
+Task: Add Mood Tracker & Journal Feature
+
+Work Log:
+- Updated Prisma schema: Added MoodEntry model with fields id, userId, mood (1-5), emoji, note (optional), tags (JSON), createdAt; Added moodEntries relation to User model; Added @@index on [userId, createdAt]
+- Ran db:push successfully — database in sync with new schema
+- Created POST /api/mood/entry — Create mood entry with Zod validation (userId, mood 1-5, emoji, note?, tags?); Verifies user exists; Returns parsed entry with tags as array
+- Created GET /api/mood/history — Fetch mood history with query params (userId, days default 30); Returns entries ordered by createdAt desc; Includes summary stats: averageMood, mostCommonEmoji, streakDays, totalEntries
+- Created MoodTrackerView component with 4 sections:
+  - Section 1: Today's Check-in — 5 emoji buttons (😔😐😌😊🤩) with gold ring selection, journal textarea, 10 tag chips (grateful, peaceful, anxious, etc.) with gold/sage filled selection, "Log Mood" submit button with loading state and success animation; Detects if already logged today
+  - Section 2: Mood Timeline — Last 7 days as horizontal chart with day names, emoji, colored mood bars (1=red, 2=orange, 3=yellow, 4=light-green, 5=sage), dotted outline for missing days; Skeleton loading state
+  - Section 3: Insights — Circular SVG progress indicator for average mood score, most frequent emoji display, streak counter with flame icon, AI-generated insight message based on average mood threshold (avg>4, 3-4, <3)
+  - Section 4: Journal History — Collapsible list with past entries showing date, emoji, mood score badge, note preview, tags; max-h-64 with scroll; Empty state with gentle CTA
+- Updated AyuAstro store: Added 'mood' to AppView type
+- Updated ProfileView: Added Mood Journal card with BookHeart icon, gradient background, emoji, "Track your emotional patterns" subtitle; Clicking navigates to 'mood' view
+- Updated page.tsx: Imported MoodTrackerView, added 'mood' case to renderView switch
+- Full dark mode support across all new components (dark: variants on all elements)
+- Smooth framer-motion animations (fadeInUp, scale, AnimatePresence)
+- Cream background matching app aesthetic, gold and sage accent colors
+- All lint checks pass with zero errors
+
+Stage Summary:
+- 6 files modified/created
+- Complete mood tracking and journaling feature
+- 2 new API endpoints with Zod validation
+- Beautiful 4-section MoodTrackerView component
+- Integrated into Profile view as Mood Journal card
+- Full dark mode support, responsive design, smooth animations
+
+---
+Task ID: 3
+Agent: Styling & Features Enhancement Agent
+Task: Enhanced styling, planetary positions table, elemental balance visualization
+
+Work Log:
+- Updated globals.css with 4 new utility classes:
+  - .cosmic-bg — subtle radial gradient background (dark center, lighter edges) with dark mode variant
+  - .card-hover — hover transform (translateY -2px) and shadow elevation with dark mode variant
+  - .section-divider — decorative gold line with zodiac symbol in center using ::before/::after pseudo-elements, dark mode gold line
+  - .animate-appear — staggered card appearance keyframe animation (opacity 0→1, translateY 12px→0)
+- Added Planetary Positions Table to InsightsView:
+  - Collapsible wrapper (starts collapsed) after Kundali Chart and before Yogas & Doshas
+  - Columns: Planet (symbol + name + colored dot), Sign (zodiac icon + name), Degree (1 decimal), House, Retrograde (℞ in gold-dark for retrograde)
+  - PLANET_SYMBOLS constant: Sun ☉, Moon ☽, Mars ♂, Mercury ☿, Jupiter ♃, Venus ♀, Saturn ♄, Rahu ☊, Ketu ☋
+  - PLANET_DOT_COLORS constant with distinct colors per planet
+  - Hover highlight on rows, premium table styling with proper dark mode
+- Added Elemental Balance Visualization card to InsightsView:
+  - Positioned between Numerology Blueprint and Vedic Astrology Summary
+  - Horizontal bar chart with 4 element rows: Fire (red/orange), Earth (green/emerald), Air (yellow/amber), Water (blue/teal)
+  - Each row: element icon + name + percentage bar + count + quality description
+  - ELEMENT_COLORS constant with gradient bars, background, text, and dark variants for all 4 elements
+  - ELEMENT_QUALITIES constant: Fire=Passion/initiative/courage, Earth=Stability/patience/practicality, Air=Communication/adaptability/intellect, Water=Emotion/intuition/depth
+  - Dominant element highlighted in gold card below bars
+  - Animated bars with framer-motion width transition
+  - Rainbow gradient top accent bar (red→green→yellow→blue)
+- Enhanced InsightsView styling:
+  - Daily Cosmic Insight card: glassmorphism (glass class), shadow-md
+  - Daily Horoscope card: glassmorphism (glass class), shadow-md
+  - Decorative zodiac constellation pattern behind "Your Emotional Resonance" header (♈ ♉ ♊ / ♋ ♌ ♍)
+  - All cards upgraded: shadow-sm → shadow-md, added card-hover class
+  - Proper z-index layering for header elements
+- Enhanced ReportView styling:
+  - Staggered animation: Added staggerContainer variant with staggerChildren: 0.1
+  - Free and premium sections wrapped in motion.div with stagger animation
+  - Section numbering: Gold circle badges (size-7, rounded-full, bg-gold/15) with section number
+  - Decorative gold divider between free and premium sections using .section-divider class with ✦ symbol
+  - Improved locked premium sections: gradient overlay (from-white/20 via-white/50 to-white/80, dark variants)
+  - All cards: shadow-sm → shadow-md, added card-hover class
+  - Back to top floating button (ArrowUp icon, appears after scrolling 400px)
+  - Added ArrowUp import from lucide-react
+- Enhanced WisdomView styling:
+  - Subtle cosmic background pattern: cosmic-bg class on root div
+  - Left accent borders per card category: border-l-4 with category-specific colors
+    - Vedic Astrology: border-l-sage
+    - Numerology: border-l-gold
+    - Behavioral Science: border-l-brown-500
+  - Reading time estimates on each card: "3 min", "4 min", "5 min" with Clock icon
+  - All cards: shadow-sm → shadow-md, added card-hover class
+  - Badge and reading time displayed in same row
+- Enhanced ProfileView styling:
+  - Cosmic Identity Card: shadow-sm → shadow-md
+  - All cards: shadow-sm → shadow-md, added card-hover class, dark:text-brown-100 on card titles
+  - Added Cosmic Age card:
+    - Gold gradient top accent bar
+    - Infinity icon from lucide-react
+    - Fun cosmic age calculation: lifePathNumber × 7 + 100
+    - 12 cosmic age descriptions (Life Path 1-9 + master numbers 11, 22, 33)
+    - Gold gradient text for the cosmic age number
+    - Dark mode support
+- Lint check passes with zero errors
+- No modifications to store, API routes, or layout.tsx
+
+Stage Summary:
+- 5 files modified: globals.css, InsightsView.tsx, ReportView.tsx, WisdomView.tsx, ProfileView.tsx
+- New features: Planetary Positions Table, Elemental Balance Visualization, Cosmic Age Card
+- Styling enhancements: glassmorphism, shadow-md elevation, card-hover, section dividers, staggered animations, gradient overlays, cosmic backgrounds, left accent borders, reading time estimates
+- 4 new CSS utility classes: .cosmic-bg, .card-hover, .section-divider, .animate-appear
+- Full dark mode support across all changes
+- Zero lint errors
+
+---
+Task ID: qa-4
+Agent: Main Coordinator (Round 4)
+Task: QA testing, bug fixes, feature development, and comprehensive enhancement
+
+Work Log:
+- Performed comprehensive QA testing via agent-browser: Landing, Onboarding, Insights, Sync, Report, Wisdom, Profile, Chat, Mood Tracker views all tested
+- Found BUG: PDF generation API returns 404 for users not in database — FIXED with client-side fallback report generation in ReportView
+- Found BUG: ReportView silently fails on download — FIXED with error state display and downloadError feedback
+- Fixed page.tsx: Added 'mood' to showBottomNav conditions so bottom nav appears in mood view
+- Fixed BottomNav: Added 'mood' to visibleViews array
+- Expanded questionnaire from 8 to 16 questions (4 per category: emotional, social, behavioral, relational)
+  - q_emotional_3: "My emotions change quickly — I can go from calm to deeply moved in moments."
+  - q_emotional_4: "I find it difficult to hide what I am truly feeling, even when I try."
+  - q_social_3: "I feel energized when I can help someone work through a personal problem."
+  - q_social_4: "I sometimes feel drained after being around too many people, even if I enjoyed it."
+  - q_behavioral_3: "I am more driven by a sense of inner purpose than by external rewards or recognition."
+  - q_behavioral_4: "When something excites me, I pursue it with full intensity — but I can lose interest just as quickly."
+  - q_relational_3: "I crave emotional depth in my relationships — surface-level connections leave me unsatisfied."
+  - q_relational_4: "I find it hard to fully trust someone until they have consistently shown they understand me."
+- Verified all new features work: Chat API responds with AI-generated cosmic counseling, Mood Tracker UI renders with all 4 sections, Planetary Positions table and Elemental Balance visualization appear in Insights
+- Verified zero console errors across all views in both light and dark modes
+- Full lint check passes with zero errors
+
+Stage Summary:
+- PDF download bug fixed with client-side fallback + error display
+- Questionnaire expanded from 8 to 16 questions for deeper analysis
+- All new features (Chat, Mood Tracker, Planetary Positions, Elemental Balance, Cosmic Age, enhanced styling) verified working
+- Zero errors, zero lint issues
+
+---
+## Current Project Status Assessment (Round 4)
+
+### Working Features:
+1. Landing page with animated hero (star-field, glowing orb, parallax), features, how-it-works, testimonials carousel, FAQ accordion, trust metrics, CTA
+2. 5-step onboarding with visual step indicator, **16-question behavioral questionnaire** (4 per category: emotional, social, behavioral, relational)
+3. Full backend pipeline: astrology → numerology → trait scoring → AI report
+4. Insights dashboard with archetype, duality, trait map, numerology, kundali chart, daily insight
+5. Daily Horoscope card with collapsible content, zodiac element badge, loading skeleton
+6. Planetary Transits card with 6 transit interpretations, house-specific effects, type badges
+7. **NEW: Planetary Positions Table** — collapsible table showing all 9 planetary positions with symbols, signs, degrees, houses, retrograde indicators
+8. **NEW: Elemental Balance Visualization** — horizontal bar chart showing Fire/Earth/Air/Water distribution with dominant element highlight
+9. Dasha Timeline — horizontal scrollable visualization of 9 Mahadasha periods
+10. Shareable Profile Card in Dialog with archetype, zodiac signs, top traits, numerology stats
+11. Report view with 3 free + 4 premium sections, Download Report button (with client-side fallback), staggered animations, section numbering, gold dividers
+12. Premium paywall with shimmer, countdown timer, benefit icons, trust badges, floating price
+13. Sync/compatibility view with sparkle effects, compatibility badges, share dialog
+14. **NEW: AI Cosmic Counselor Chat** — full chatbot with LLM integration, suggested questions, typing indicator, conversation history, rate limiting, safety constraints
+15. Enhanced Wisdom Library with 8 cards, search, category filter, left accent borders, reading time estimates
+16. Enhanced Profile with cosmic identity card, trait highlights, account stats, **NEW: Cosmic Age card**, **NEW: Mood Journal entry point**
+17. **NEW: Mood Tracker & Journal** — daily mood check-in (5 emoji levels), journal notes, 10 tag chips, 7-day mood timeline, circular progress insights, journal history
+18. Full dark mode with smooth toggle, consistent dark variants across all views
+19. 5-tab bottom navigation (Insights, Chat, Sync, Wisdom, Profile) with haptic press, glow indicator
+20. Glassmorphism effects on key cards, shadow-md elevation, card-hover animations, cosmic backgrounds
+
+### API Endpoints:
+- POST /api/onboarding — Create user with birth details
+- POST /api/astrology/calculate — Calculate Vedic astrology data
+- POST /api/numerology/calculate — Calculate numerology data
+- POST /api/traits/generate — Generate trait scores
+- POST /api/ai/generate-report — Generate AI interpretation
+- POST /api/process-all — Full pipeline (all calculations + AI report)
+- GET /api/horoscope/daily — Daily horoscope by sun/moon sign
+- GET /api/transits/current — Current planetary transits by sun/moon/ascendant
+- POST /api/reports/generate-pdf — Generate downloadable HTML report
+- **NEW: POST /api/chat** — AI cosmic counselor chat with LLM integration
+- **NEW: POST /api/mood/entry** — Create mood journal entry
+- **NEW: GET /api/mood/history** — Get mood history with summary stats
+
+### Known Issues/Risks:
+- The process-all API takes ~13s mostly due to AI report generation
+- Premium unlock is simulated (no real Razorpay integration yet)
+- No real authentication (just simulated user creation)
+- PDF is HTML-based (production would use Puppeteer/jsPDF for actual PDF)
+- Chat uses in-memory rate limiting (would need Redis in production)
+
+### Priority Recommendations for Next Phase:
+1. Add real Razorpay payment integration
+2. Optimize API response time (stream AI responses or generate in background)
+3. Add PWA support with offline caching for daily horoscope
+4. Add multi-language support (Hindi, Tamil for Indian market)
+5. Add real PDF generation with Puppeteer/jsPDF
+6. Add real authentication (Firebase Auth with Google/Apple login)
+7. Add admin dashboard for user analytics
+8. Add Redis-based rate limiting for chat API
+9. Add push notifications for daily horoscope and mood reminders
+10. Add data export (user can download all their data)

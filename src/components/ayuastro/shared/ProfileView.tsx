@@ -25,6 +25,8 @@ import {
   Sparkles,
   FileText,
   Lock,
+  BookHeart,
+  Infinity,
 } from 'lucide-react';
 
 const ZODIAC_ICONS: Record<string, string> = {
@@ -73,6 +75,27 @@ function getArchetypeEmoji(archetype: string): string {
   return map[archetype] || '✨';
 }
 
+const COSMIC_AGE_DESCRIPTIONS: Record<number, string> = {
+  1: 'The Pioneer Soul — eternally forging new paths across the cosmos',
+  2: 'The Harmonic Soul — weaving connections between the stars',
+  3: 'The Creative Soul — painting the universe with expression',
+  4: 'The Architect Soul — building foundations that span galaxies',
+  5: 'The Nomadic Soul — exploring every corner of the cosmic expanse',
+  6: 'The Nurturing Soul — tending to the garden of the universe',
+  7: 'The Mystic Soul — seeking truth beyond the veil of stars',
+  8: 'The Sovereign Soul — commanding the cosmic tides of power',
+  9: 'The Universal Soul — embracing all that the cosmos offers',
+  11: 'The Illumined Soul — a channel for cosmic radiance',
+  22: 'The Master Builder Soul — architect of cosmic dreams',
+  33: 'The Christed Soul — pure compassion in cosmic form',
+};
+
+function getCosmicAge(lifePathNumber: number): { age: number; description: string } {
+  const cosmicAge = lifePathNumber * 7 + 100;
+  const description = COSMIC_AGE_DESCRIPTIONS[lifePathNumber] || COSMIC_AGE_DESCRIPTIONS[9];
+  return { age: cosmicAge, description };
+}
+
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
@@ -109,7 +132,7 @@ export default function ProfileView() {
 
         {/* Cosmic Identity Card */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
-          <Card className="border-0 shadow-sm overflow-hidden">
+          <Card className="border-0 shadow-md overflow-hidden">
             <div className={`relative bg-gradient-to-br ${signInfo?.gradientFrom || 'from-gold/10'} ${signInfo?.gradientTo || 'to-brown-100/5'} dark:from-gold/5 dark:to-brown-50/5 p-6`}>
               {/* Decorative zodiac pattern */}
               <div className="absolute top-2 right-3 text-gold/10 text-xs tracking-[0.5em] leading-relaxed select-none">
@@ -177,9 +200,9 @@ export default function ProfileView() {
         {/* Trait Highlights */}
         {traitScores.length > 0 && (
           <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
-            <Card className="border-0 shadow-sm bg-white">
+            <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
+                <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
                   <BarChart3 className="size-5 text-gold" />
                   Trait Highlights
                 </CardTitle>
@@ -241,9 +264,9 @@ export default function ProfileView() {
 
         {/* Birth Details */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
-          <Card className="border-0 shadow-sm bg-white">
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
                 <User className="size-5 text-brown-500" />
                 Birth Details
               </CardTitle>
@@ -295,9 +318,9 @@ export default function ProfileView() {
 
         {/* Astrology Summary */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
-          <Card className="border-0 shadow-sm bg-white">
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
                 <Moon className="size-5 text-gold" />
                 Vedic Astrology
               </CardTitle>
@@ -363,9 +386,9 @@ export default function ProfileView() {
 
         {/* Numerology Summary */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }}>
-          <Card className="border-0 shadow-sm bg-white">
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
                 <Hash className="size-5 text-gold" />
                 Numerology
               </CardTitle>
@@ -424,9 +447,9 @@ export default function ProfileView() {
 
         {/* Account Stats */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.25 }}>
-          <Card className="border-0 shadow-sm bg-white">
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
                 <Sparkles className="size-5 text-gold" />
                 Account Stats
               </CardTitle>
@@ -436,12 +459,12 @@ export default function ProfileView() {
                 <div className="text-center rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3">
                   <FileText className="mx-auto mb-1 size-4 text-brown-400" />
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Analysis</p>
-                  <p className="text-sm font-semibold text-brown-900">{analysisDate !== '—' ? 'Complete' : 'Pending'}</p>
+                  <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">{analysisDate !== '—' ? 'Complete' : 'Pending'}</p>
                 </div>
                 <div className="text-center rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3">
                   <BarChart3 className="mx-auto mb-1 size-4 text-brown-400" />
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Questions</p>
-                  <p className="text-sm font-semibold text-brown-900">{questionsAnswered}</p>
+                  <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">{questionsAnswered}</p>
                 </div>
                 <div className="text-center rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3">
                   {hasPaid ? (
@@ -450,7 +473,7 @@ export default function ProfileView() {
                     <Lock className="mx-auto mb-1 size-4 text-brown-300" />
                   )}
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Unlocked</p>
-                  <p className="text-sm font-semibold text-brown-900">{sectionsUnlocked}/{reportSections.length || 7}</p>
+                  <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">{sectionsUnlocked}/{reportSections.length || 7}</p>
                 </div>
               </div>
               {!hasPaid && (
@@ -469,6 +492,71 @@ export default function ProfileView() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Mood Journal Card */}
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.28 }}>
+          <Card
+            className="card-hover border-0 shadow-md bg-gradient-to-br from-gold/5 to-sage-muted/10 dark:from-gold/5 dark:to-sage-muted/5 cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => setView('mood')}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/80 dark:bg-brown-50/20 border border-gold/20">
+                  <BookHeart className="size-6 text-gold" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-serif text-base font-semibold text-brown-900 dark:text-brown-100"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                    Mood Journal
+                  </h3>
+                  <p className="text-xs text-brown-400 dark:text-brown-500 mt-0.5">
+                    Track your emotional patterns
+                  </p>
+                </div>
+                <span className="text-2xl">🤩</span>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Cosmic Age Card */}
+        {numerologyData?.lifePathNumber && (
+          <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.29 }}>
+            <Card className="card-hover border-0 shadow-md overflow-hidden bg-white dark:bg-white/5">
+              <div className="h-1 bg-gradient-to-r from-gold via-gold-light to-gold-dark" />
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+                  <Infinity className="size-5 text-gold" />
+                  Cosmic Age
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  const cosmicAge = getCosmicAge(numerologyData.lifePathNumber);
+                  return (
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <span
+                          className="text-gold-gradient font-serif text-5xl font-bold"
+                          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        >
+                          {cosmicAge.age}
+                        </span>
+                        <span className="text-sm text-brown-400 dark:text-brown-300">cosmic<br/>years</span>
+                      </div>
+                      <p className="text-sm text-brown-500 dark:text-brown-300 leading-relaxed mt-2">
+                        {cosmicAge.description}
+                      </p>
+                      <p className="text-[10px] text-brown-300 dark:text-brown-400 mt-2">
+                        Based on Life Path {numerologyData.lifePathNumber} — your soul has traversed {cosmicAge.age} cosmic years of evolution
+                      </p>
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Start Over */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.3 }}>

@@ -15,6 +15,8 @@ import InsightsView from '@/components/ayuastro/insights/InsightsView';
 import SyncView from '@/components/ayuastro/sync/SyncView';
 import ReportView from '@/components/ayuastro/report/ReportView';
 import PremiumView from '@/components/ayuastro/premium/PremiumView';
+import ChatView from '@/components/ayuastro/chat/ChatView';
+import MoodTrackerView from '@/components/ayuastro/mood/MoodTrackerView';
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -51,6 +53,10 @@ export default function Home() {
         return <ProfileView />;
       case 'sync':
         return <SyncView />;
+      case 'chat':
+        return <ChatView />;
+      case 'mood':
+        return <MoodTrackerView />;
       case 'wisdom':
         return <WisdomView />;
       default:
@@ -59,7 +65,7 @@ export default function Home() {
   };
 
   const showHeader = currentView !== 'landing' && currentView !== 'calculating';
-  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync'].includes(currentView);
+  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood'].includes(currentView);
 
   return (
     <div className="min-h-screen flex flex-col bg-cream">
