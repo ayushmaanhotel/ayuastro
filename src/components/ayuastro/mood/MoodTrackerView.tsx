@@ -22,6 +22,7 @@ import {
   Flame,
   BookOpen,
   TrendingUp,
+  BookHeart,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
 
@@ -605,6 +606,34 @@ export default function MoodTrackerView() {
                 </CardContent>
               </CollapsibleContent>
             </Collapsible>
+          </Card>
+        </motion.div>
+
+        {/* ─── Gratitude Journal Entry Card ───────────────────────── */}
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.25 }} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
+          <Card
+            className="border-0 shadow-md bg-gradient-to-br from-gold/5 to-sage-muted/10 dark:from-gold/5 dark:to-sage-muted/5 cursor-pointer transition-shadow hover:shadow-[0_8px_30px_rgba(139,111,71,0.12)]"
+            onClick={() => setView('gratitudeJournal')}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/80 dark:bg-brown-50/20 border border-gold/20">
+                  <BookHeart className="size-6 text-gold" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3
+                    className="font-serif text-base font-semibold text-brown-900 dark:text-brown-100"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Gratitude Journal
+                  </h3>
+                  <p className="text-xs text-brown-400 dark:text-brown-500 mt-0.5">
+                    Cultivate daily gratitude
+                  </p>
+                </div>
+                <span className="text-2xl">🙏</span>
+              </div>
+            </CardContent>
           </Card>
         </motion.div>
       </div>

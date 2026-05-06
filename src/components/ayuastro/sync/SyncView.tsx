@@ -465,6 +465,7 @@ export default function SyncView() {
                 <AnimatePresence>
                   {showSignDropdown && (
                     <motion.div
+                      key="sign-dropdown"
                       initial={{ opacity: 0, y: -4, height: 0 }}
                       animate={{ opacity: 1, y: 0, height: 'auto' }}
                       exit={{ opacity: 0, y: -4, height: 0 }}
@@ -532,6 +533,7 @@ export default function SyncView() {
         <AnimatePresence>
           {result && (
             <motion.div
+              key="compat-result"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}

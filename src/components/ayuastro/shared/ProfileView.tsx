@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion } from 'framer-motion';
 import {
   User,
@@ -28,6 +29,8 @@ import {
   BookHeart,
   Infinity,
   Wind,
+  Share2,
+  HelpCircle,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
 
@@ -138,6 +141,12 @@ export default function ProfileView() {
   const top3 = sortedTraits.slice(0, 3);
   const bottom3 = sortedTraits.slice(-3).reverse();
 
+  // Cosmic Score: average of top 5 traits
+  const top5 = sortedTraits.slice(0, 5);
+  const cosmicScore = top5.length > 0
+    ? Math.round(top5.reduce((sum, t) => sum + t.score, 0) / top5.length)
+    : 0;
+
   // Account stats
   const analysisDate = birthDetails?.dateOfBirth || '—';
   const questionsAnswered = 8; // based on fixed questionnaire
@@ -218,6 +227,98 @@ export default function ProfileView() {
                 </div>
               </div>
             </div>
+          </Card>
+        </motion.div>
+
+        {/* Cosmic Score Section */}
+        <motion.div variants={staggerItem}>
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 transition-all hover:-translate-y-[3px] hover:shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center">
+                {/* SVG Progress Ring */}
+                <div className="relative mb-4">
+                  <svg width="200" height="200" viewBox="0 0 200 200" className="-rotate-90">
+                    <defs>
+                      <linearGradient id="cosmicScoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#B8960C" />
+                        <stop offset="50%" stopColor="#D4AF37" />
+                        <stop offset="100%" stopColor="#F0C14B" />
+                      </linearGradient>
+                    </defs>
+                    {/* Background circle */}
+                    <circle
+                      cx="100" cy="100" r="85"
+                      fill="none"
+                      stroke="rgba(93,64,55,0.08)"
+                      strokeWidth="10"
+                    />
+                    {/* Progress circle */}
+                    <motion.circle
+                      cx="100" cy="100" r="85"
+                      fill="none"
+                      stroke="url(#cosmicScoreGradient)"
+                      strokeWidth="10"
+                      strokeLinecap="round"
+                      strokeDasharray={`${2 * Math.PI * 85}`}
+                      initial={{ strokeDashoffset: 2 * Math.PI * 85 }}
+                      animate={{ strokeDashoffset: 2 * Math.PI * 85 * (1 - (cosmicScore / 100)) }}
+                      transition={{ duration: 1.5, ease: 'easeOut', delay: 0.3 }}
+                    />
+                  </svg>
+                  {/* Center text */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center rotate-0">
+                    <motion.span
+                      className="text-gold-gradient font-serif text-5xl font-bold"
+                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.8, type: 'spring', stiffness: 200 }}
+                    >
+                      {cosmicScore}
+                    </motion.span>
+                    <span className="text-xs text-brown-400 dark:text-brown-300 mt-1">/100</span>
+                  </div>
+                </div>
+
+                {/* Score label */}
+                <h3
+                  className="font-serif text-lg font-semibold text-brown-900 dark:text-brown-100 mb-1 text-center"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  Your Cosmic Score: {cosmicScore}/100
+                </h3>
+
+                {/* What this means tooltip */}
+                <div className="flex items-center gap-1.5 mb-4">
+                  <p className="text-xs text-brown-400 dark:text-brown-300">
+                    Based on your top 5 emotional traits
+                  </p>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button className="text-brown-300 hover:text-gold dark:text-brown-500 dark:hover:text-gold transition-colors" aria-label="What does this score mean?">
+                          <HelpCircle className="size-3.5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[240px] bg-white dark:bg-brown-800 text-brown-700 dark:text-brown-200 text-xs border border-gold/10">
+                        <p>Your Cosmic Score reflects the overall alignment of your top emotional traits. A higher score indicates stronger self-awareness and emotional harmony across key dimensions of your personality.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+
+                {/* Share Score Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => cosmicToast.info('Cosmic Score shared! ✦', `My Cosmic Score is ${cosmicScore}/100`)}
+                  className="border-gold/30 text-gold-dark dark:text-gold hover:bg-gold/5 text-xs"
+                >
+                  <Share2 className="size-3.5 mr-1.5" />
+                  Share Score
+                </Button>
+              </div>
+            </CardContent>
           </Card>
         </motion.div>
 

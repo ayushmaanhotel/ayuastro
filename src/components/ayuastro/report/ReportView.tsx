@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAyuAstroStore, type ReportSection } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,9 @@ import {
   ArrowRight,
   Download,
   ArrowUp,
+  Star,
+  BookOpen,
+  Clock,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
 
@@ -122,6 +125,8 @@ export default function ReportView() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [bookmarkedSections, setBookmarkedSections] = useState<Record<string, boolean>>({});
+  const sectionsRef = useRef<Record<string, HTMLDivElement | null>>({});
 
   // Track scroll progress
   useEffect(() => {
@@ -140,6 +145,10 @@ export default function ReportView() {
     setExpandedSections(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const toggleBookmark = (id: string) => {
+    setBookmarkedSections(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
   const freeSections = reportSections.filter((s) => s.insightLevel === 'free').length > 0
     ? reportSections.filter((s) => s.insightLevel === 'free')
     : DEFAULT_FREE_SECTIONS;
@@ -147,6 +156,27 @@ export default function ReportView() {
   const premiumSections = reportSections.filter((s) => s.insightLevel === 'premium').length > 0
     ? reportSections.filter((s) => s.insightLevel === 'premium')
     : DEFAULT_PREMIUM_SECTIONS;
+
+  const allSections = [...freeSections, ...premiumSections];
+  const totalSections = 7; // 3 free + 4 premium
+
+  // Calculate reading time based on content length (200 words per min)
+  const totalWords = allSections.reduce((sum, s) => sum + s.content.split(/\s+/).length, 0);
+  const readingTime = Math.max(1, Math.ceil(totalWords / 200));
+
+  // Count expanded sections as "read"
+  const sectionsRead = Object.values(expandedSections).filter(Boolean).length;
+
+  // Continue reading: find first unexpanded section
+  const continueReadingSection = allSections.find(s => !expandedSections[s.id] && (s.insightLevel === 'free' || hasPaid));
+
+  const scrollToSection = useCallback((id: string) => {
+    const el = sectionsRef.current[id];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setExpandedSections(prev => ({ ...prev, [id]: true }));
+    }
+  }, []);
 
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
@@ -287,6 +317,37 @@ export default function ReportView() {
               )}
             </div>
           </div>
+
+          {/* Reading Time & Progress Badges */}
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <Badge className="bg-brown-50 dark:bg-brown-50/20 text-brown-500 dark:text-brown-300 border-0 text-[10px] px-2.5 py-0.5 flex items-center gap-1">
+              <Clock className="size-2.5" />
+              Reading Time: {readingTime} min
+            </Badge>
+            <Badge className="bg-gold/10 text-gold-dark dark:bg-gold/15 dark:text-gold border-0 text-[10px] px-2.5 py-0.5 flex items-center gap-1">
+              <BookOpen className="size-2.5" />
+              {sectionsRead} of {totalSections} sections read
+            </Badge>
+            {continueReadingSection && (
+              <button
+                onClick={() => scrollToSection(continueReadingSection.id)}
+                className="text-[10px] font-medium text-gold-dark dark:text-gold hover:text-gold dark:hover:text-gold-light transition-colors flex items-center gap-0.5"
+              >
+                Continue Reading →
+              </button>
+            )}
+          </div>
+
+          {/* Progress bar */}
+          <div className="mt-3 h-1.5 w-full rounded-full bg-brown-100/30 dark:bg-brown-50/20 overflow-hidden">
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: 'linear-gradient(90deg, #B8960C, #D4AF37, #F0C14B)' }}
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.round((sectionsRead / totalSections) * 100)}%` }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+            />
+          </div>
         </motion.div>
 
         {/* Free Sections */}
@@ -301,11 +362,13 @@ export default function ReportView() {
           </h2>
           {freeSections.map((section, i) => {
             const Icon = ICON_MAP[section.icon] || Sparkles;
+            const isBookmarked = bookmarkedSections[section.id];
             return (
               <motion.div
                 key={section.id}
                 variants={fadeInUp}
                 transition={{ duration: 0.4 }}
+                ref={(el) => { sectionsRef.current[section.id] = el; }}
               >
                 <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 group hover:border-l-2 hover:border-l-gold transition-all">
                   <CardHeader className="pb-2">
@@ -317,6 +380,20 @@ export default function ReportView() {
                         <Icon className="size-4 text-sage-dark" />
                       </div>
                       {section.title}
+                      {/* Bookmark star */}
+                      <button
+                        onClick={() => toggleBookmark(section.id)}
+                        className="ml-auto shrink-0 transition-all hover:scale-110"
+                        aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark section'}
+                      >
+                        <Star
+                          className={`size-4 transition-all ${
+                            isBookmarked
+                              ? 'fill-gold text-gold'
+                              : 'text-brown-200 dark:text-brown-600 hover:text-gold/60'
+                          }`}
+                        />
+                      </button>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -359,11 +436,13 @@ export default function ReportView() {
             const Icon = ICON_MAP[section.icon] || Sparkles;
             const isLocked = !hasPaid;
             const sectionNum = freeSections.length + i + 1;
+            const isBookmarked = bookmarkedSections[section.id];
             return (
               <motion.div
                 key={section.id}
                 variants={fadeInUp}
                 transition={{ duration: 0.4 }}
+                ref={(el) => { sectionsRef.current[section.id] = el; }}
               >
                 <Card className={`card-hover border-0 shadow-md bg-white dark:bg-white/5 group hover:border-l-2 hover:border-l-gold transition-all`}>
                   <CardHeader className="pb-2">
@@ -375,7 +454,21 @@ export default function ReportView() {
                         <Icon className="size-4 text-gold-dark" />
                       </div>
                       {section.title}
-                      {isLocked && <Lock className="ml-auto size-4 text-gold" />}
+                      {/* Bookmark star */}
+                      <button
+                        onClick={() => toggleBookmark(section.id)}
+                        className="shrink-0 transition-all hover:scale-110"
+                        aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark section'}
+                      >
+                        <Star
+                          className={`size-4 transition-all ${
+                            isBookmarked
+                              ? 'fill-gold text-gold'
+                              : 'text-brown-200 dark:text-brown-600 hover:text-gold/60'
+                          }`}
+                        />
+                      </button>
+                      {isLocked && <Lock className="size-4 text-gold ml-1" />}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>

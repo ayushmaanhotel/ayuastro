@@ -27,7 +27,8 @@ model User {
   reports      Report[]
   answers      QuestionnaireAnswer[]
   transactions Transaction[]
-  moodEntries  MoodEntry[]
+  moodEntries       MoodEntry[]
+  gratitudeEntries  GratitudeEntry[]
 }
 
 model Profile {
@@ -158,6 +159,18 @@ model MoodEntry {
   note        String?  // Optional journal note
   tags        String   @default("[]") // JSON array of tags like ["grateful", "anxious", "peaceful"]
   createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model GratitudeEntry {
+  id        String   @id @default(uuid())
+  userId    String
+  slot      String   // morning, afternoon, evening
+  content   String   // max 500 chars
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
 }

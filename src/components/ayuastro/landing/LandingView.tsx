@@ -6,8 +6,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { Sparkles, Brain, Hash, Heart, Star, ArrowRight, Eye, Shield, ChevronDown } from 'lucide-react';
+import { Sparkles, Brain, Hash, Heart, Star, ArrowRight, Eye, Shield, ChevronDown, CheckCircle2 } from 'lucide-react';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -180,12 +181,22 @@ export default function LandingView() {
   const { setView } = useAyuAstroStore();
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [trustCounted, setTrustCounted] = useState(false);
+  const [heroOffsetY, setHeroOffsetY] = useState(0);
 
   // Parallax effect
   const { scrollY } = useScroll();
   const bgY = useTransform(scrollY, [0, 1000], [0, 200]);
   const contentY = useTransform(scrollY, [0, 1000], [0, 50]);
   const decorY = useTransform(scrollY, [0, 1000], [0, 300]);
+
+  // Subtle parallax on hero text via scroll event
+  useEffect(() => {
+    const handleScroll = () => {
+      setHeroOffsetY(window.scrollY * 0.3);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Auto-rotate testimonials
   useEffect(() => {
@@ -210,11 +221,18 @@ export default function LandingView() {
           0%, 100% { opacity: 0.15; transform: translate(-50%, -50%) scale(1); }
           50% { opacity: 0.25; transform: translate(-50%, -50%) scale(1.08); }
         }
+        @keyframes conic-spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
         .star-dot {
           animation: twinkle 3s ease-in-out infinite;
         }
         .glowing-orb {
           animation: pulseOrb 6s ease-in-out infinite;
+        }
+        .conic-border-spin {
+          animation: conic-spin 3s linear infinite;
         }
       `}</style>
 
@@ -261,20 +279,24 @@ export default function LandingView() {
 
         {/* Content (foreground - moves at different parallax speed) */}
         <motion.div className="relative z-10" style={{ y: contentY }}>
-          {/* Pill Badge */}
-          <motion.div variants={fadeInUp} className="mb-8">
+          {/* Pill Badge with pulsing "New" badge */}
+          <motion.div variants={fadeInUp} className="mb-8 flex items-center justify-center gap-2">
             <Badge className="border-gold/30 bg-gold/10 px-4 py-1.5 text-[11px] font-semibold tracking-[0.2em] text-gold-dark uppercase">
               Intelligence Meets Intuition
             </Badge>
+            <Badge className="bg-gold text-white text-[9px] px-2 py-0.5 font-bold tracking-wider uppercase animate-pulse shadow-sm">
+              New
+            </Badge>
           </motion.div>
 
-          {/* Main Heading */}
+          {/* Main Heading with gradient text */}
           <motion.h1
             variants={fadeInUp}
-            className="font-serif hero-title mb-6 max-w-xl text-4xl font-bold leading-[1.15] text-brown-900 dark:text-cream sm:text-5xl md:text-6xl"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-serif hero-title mb-6 max-w-xl text-4xl font-bold leading-[1.15] sm:text-5xl md:text-6xl"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif", transform: `translateY(${heroOffsetY}px)` }}
           >
-            Discover the hidden{' '}
+            <span className="text-gradient-gold">Discover</span>{' '}
+            the hidden{' '}
             <span className="text-gold-gradient">emotional patterns</span>{' '}
             shaping your relationships
           </motion.h1>
@@ -288,16 +310,35 @@ export default function LandingView() {
             to reveal the emotional architecture you were born with.
           </motion.p>
 
-          {/* CTAs */}
+          {/* Social Proof Badge */}
+          <motion.div variants={fadeInUp} className="mb-4 flex items-center justify-center gap-1.5">
+            <CheckCircle2 className="size-3.5 text-sage-dark" />
+            <span className="text-xs font-medium text-brown-500 dark:text-brown-300">
+              Trusted by 50,000+ seekers
+            </span>
+          </motion.div>
+
+          {/* CTAs with animated gradient border */}
           <motion.div variants={fadeInUp} className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Button
-              onClick={() => setView('onboarding')}
-              size="lg"
-              className="bg-brown-700 px-8 text-base font-medium text-white hover:bg-brown-800 shadow-lg shadow-brown-700/20 transition-all hover:shadow-xl hover:shadow-brown-700/30 hover:-translate-y-0.5 animate-breathe-glow"
-            >
-              Start Free Analysis
-              <ArrowRight className="ml-2 size-4" />
-            </Button>
+            <div className="relative group">
+              {/* Animated conic gradient border */}
+              <div className="absolute -inset-[2px] rounded-lg overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <div
+                  className="conic-border-spin absolute inset-0"
+                  style={{
+                    background: 'conic-gradient(from 0deg, #D4AF37, #F0C14B, #B8960C, #D4AF37)',
+                  }}
+                />
+              </div>
+              <Button
+                onClick={() => setView('onboarding')}
+                size="lg"
+                className="relative bg-brown-700 px-8 text-base font-medium text-white hover:bg-brown-800 shadow-lg shadow-brown-700/20 transition-all hover:shadow-xl hover:shadow-brown-700/30 hover:-translate-y-0.5 animate-breathe-glow"
+              >
+                Start Free Analysis
+                <ArrowRight className="ml-2 size-4" />
+              </Button>
+            </div>
             <Button
               onClick={() => setView('onboarding')}
               variant="outline"

@@ -770,6 +770,7 @@ export default function BreathingView() {
       <AnimatePresence>
         {activeMeditation && (
           <MeditationOverlay
+            key="meditation-overlay"
             meditation={activeMeditation}
             onClose={() => setActiveMeditation(null)}
           />

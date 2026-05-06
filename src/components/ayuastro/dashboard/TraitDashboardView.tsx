@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   Sparkles,
-  BarChart3,
+  BarChart2,
   PieChart as PieChartIcon,
   Activity,
   Flame,
@@ -35,7 +35,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  LineChart,
+  AreaChart,
   Line,
   Area,
   ResponsiveContainer,
@@ -455,7 +455,7 @@ export default function TraitDashboardView() {
             <div className="h-1 bg-gradient-to-r from-red-400 via-green-400 via-yellow-400 to-blue-400" />
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
-                <BarChart3 className="size-5 text-gold" />
+                <BarChart2 className="size-5 text-gold" />
                 <span style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
                   Element Balance
                 </span>
@@ -516,7 +516,7 @@ export default function TraitDashboardView() {
               <CardContent>
                 <div className="w-full h-56">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={moodTrendData}>
+                    <AreaChart data={moodTrendData}>
                       <defs>
                         <linearGradient id="moodGradient" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#d4af37" stopOpacity={0.15} />
@@ -553,7 +553,7 @@ export default function TraitDashboardView() {
                         activeDot={{ r: 6, fill: '#d4af37', stroke: '#fff', strokeWidth: 2 }}
                         connectNulls={false}
                       />
-                    </LineChart>
+                    </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>

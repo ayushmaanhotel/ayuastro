@@ -24,6 +24,7 @@ import TraitDashboardView from '@/components/ayuastro/dashboard/TraitDashboardVi
 import CosmicCalendarView from '@/components/ayuastro/calendar/CosmicCalendarView';
 import CosmicSoundsView from '@/components/ayuastro/wellness/CosmicSoundsView';
 import ZodiacDeepDiveView from '@/components/ayuastro/zodiac/ZodiacDeepDiveView';
+import GratitudeJournalView from '@/components/ayuastro/wellness/GratitudeJournalView';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -85,6 +86,8 @@ export default function Home() {
         return <CosmicSoundsView />;
       case 'zodiacDeepDive':
         return <ZodiacDeepDiveView />;
+      case 'gratitudeJournal':
+        return <GratitudeJournalView />;
       case 'yogaDosha':
         return <YogaDoshaView />;
       case 'compatibilityDetail': {
@@ -108,7 +111,7 @@ export default function Home() {
   };
 
   const showHeader = currentView !== 'landing' && currentView !== 'calculating';
-  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'zodiacDeepDive'].includes(currentView);
+  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'zodiacDeepDive', 'gratitudeJournal'].includes(currentView);
 
   return (
     <div className="min-h-screen flex flex-col bg-cream">
@@ -119,6 +122,7 @@ export default function Home() {
         <AnimatePresence>
           {showShimmer && (
             <motion.div
+              key="shimmer"
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               exit={{ scaleX: 0, opacity: 0 }}

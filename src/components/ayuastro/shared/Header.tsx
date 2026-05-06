@@ -66,7 +66,7 @@ export default function Header() {
             whileHover={{ scale: 1.02 }}
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
           >
-            <Image src="/logo.svg" alt="AyuAstro" width={24} height={24} className="size-6" />
+            <Image src="/logo.svg" alt="AyuAstro" width={24} height={24} className="size-6" priority />
             <h1
               className="font-serif text-xl font-semibold tracking-wide text-brown-900 dark:text-brown-100"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
@@ -120,6 +120,7 @@ export default function Header() {
               <AnimatePresence>
                 {needsMoodCheckIn && currentView !== 'mood' && (
                   <motion.span
+                    key="mood-dot"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { useAyuAstroStore, type BottomNavTab } from '@/store/ayuastro-store';
 import { Sparkles, Users, BookOpen, User, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,6 +37,15 @@ export default function BottomNav() {
   const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number; tabId: string }>>([]);
   const navRef = useRef<HTMLElement>(null);
   const [magneticOffsets, setMagneticOffsets] = useState<Record<string, number>>({});
+  const [chatHintDismissed, setChatHintDismissed] = useState(false);
+
+  // Check if user has previously interacted with chat
+  useEffect(() => {
+    const dismissed = localStorage.getItem('ayuastro-chat-hint-dismissed');
+    if (dismissed === 'true') {
+      setChatHintDismissed(true);
+    }
+  }, []);
 
   // Magnetic effect: move tab slightly toward mouse when nearby
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -70,6 +79,21 @@ export default function BottomNav() {
   const handleTabClick = (tab: typeof tabs[number], e?: React.MouseEvent<HTMLButtonElement>) => {
     setActiveTab(tab.id);
     setView(tab.view as 'insights' | 'chat' | 'sync' | 'wisdom' | 'profile');
+
+    // Haptic feedback vibration
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(10);
+      } catch {
+        // Silently fail - vibration not supported
+      }
+    }
+
+    // Dismiss chat hint when chat tab is clicked
+    if (tab.id === 'chat' && !chatHintDismissed) {
+      setChatHintDismissed(true);
+      localStorage.setItem('ayuastro-chat-hint-dismissed', 'true');
+    }
 
     // Create ripple from tap point
     if (e) {
@@ -149,6 +173,16 @@ export default function BottomNav() {
                     </motion.div>
                   </motion.div>
                 </AnimatePresence>
+
+                {/* Unread indicator dot on Chat tab for first-time users */}
+                {tab.id === 'chat' && !chatHintDismissed && !isActive && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-0.5 right-0.5 size-2.5 rounded-full bg-gold"
+                    style={{ boxShadow: '0 0 4px 1px rgba(212,175,55,0.5)' }}
+                  />
+                )}
 
                 {/* Glowing dot indicator — moves between tabs via layoutId */}
                 {isActive && (

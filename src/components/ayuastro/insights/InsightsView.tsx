@@ -42,11 +42,12 @@ import {
   Mountain,
   Orbit,
   Check,
-  BarChart3,
+  BarChart2,
   Calendar,
+  MessageCircle,
 } from 'lucide-react';
 import KundaliChart from './KundaliChart';
-import ShareableCard from './ShareableCard';
+import ShareableCard, { getShareText, getTopTraits as getShareTopTraits, getArchetype as getShareArchetype } from './ShareableCard';
 import DashaTimeline, { generateDashaPeriods, type DashaPeriod } from './DashaTimeline';
 
 const ZODIAC_ICONS: Record<string, string> = {
@@ -475,6 +476,14 @@ export default function InsightsView() {
 
   return (
     <div className="bg-cream px-4 py-6 pb-24 relative">
+      {/* Last Updated Badge */}
+      <div className="flex items-center justify-between mb-4">
+        <Badge className="bg-brown-50 dark:bg-brown-50/20 text-brown-400 dark:text-brown-300 border-0 text-[10px] px-2.5 py-0.5 flex items-center gap-1.5">
+          <Clock className="size-2.5" />
+          Last updated: Today
+        </Badge>
+      </div>
+
       {/* Decorative star constellation pattern at top with twinkle */}
       <div className="absolute top-0 left-0 right-0 flex items-center justify-center gap-3 py-2 select-none pointer-events-none overflow-hidden" aria-hidden="true">
         {'♈♉♊♋♌♍♎♏♐♑♒♓'.split('').map((sym, i) => (
@@ -487,6 +496,52 @@ export default function InsightsView() {
           </span>
         ))}
       </div>
+      {/* Quick Actions Floating Action Bar */}
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.4 }}
+        className="floating-action-bar"
+      >
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setView('insights')}
+            className="flex flex-col items-center gap-0.5 rounded-full p-2 text-brown-500 dark:text-brown-300 hover:text-gold-dark dark:hover:text-gold hover:bg-gold/5 dark:hover:bg-gold/10 transition-all"
+            aria-label="Daily Horoscope"
+          >
+            <Sun className="size-4" />
+            <span className="text-[8px] font-medium">Horoscope</span>
+          </button>
+          <span className="w-1 h-1 rounded-full bg-gold/40" aria-hidden="true" />
+          <button
+            onClick={() => setView('chat')}
+            className="flex flex-col items-center gap-0.5 rounded-full p-2 text-brown-500 dark:text-brown-300 hover:text-gold-dark dark:hover:text-gold hover:bg-gold/5 dark:hover:bg-gold/10 transition-all"
+            aria-label="Chat"
+          >
+            <MessageCircle className="size-4" />
+            <span className="text-[8px] font-medium">Chat</span>
+          </button>
+          <span className="w-1 h-1 rounded-full bg-gold/40" aria-hidden="true" />
+          <button
+            onClick={() => setView('breathing')}
+            className="flex flex-col items-center gap-0.5 rounded-full p-2 text-brown-500 dark:text-brown-300 hover:text-gold-dark dark:hover:text-gold hover:bg-gold/5 dark:hover:bg-gold/10 transition-all"
+            aria-label="Breathing"
+          >
+            <Wind className="size-4" />
+            <span className="text-[8px] font-medium">Breathe</span>
+          </button>
+          <span className="w-1 h-1 rounded-full bg-gold/40" aria-hidden="true" />
+          <button
+            onClick={() => setView('mood')}
+            className="flex flex-col items-center gap-0.5 rounded-full p-2 text-brown-500 dark:text-brown-300 hover:text-gold-dark dark:hover:text-gold hover:bg-gold/5 dark:hover:bg-gold/10 transition-all"
+            aria-label="Mood"
+          >
+            <Heart className="size-4" />
+            <span className="text-[8px] font-medium">Mood</span>
+          </button>
+        </div>
+      </motion.div>
+
       <motion.div
         variants={staggerContainer}
         initial="initial"
@@ -894,7 +949,7 @@ export default function InsightsView() {
                   Share
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md bg-cream">
+              <DialogContent className="sm:max-w-md bg-cream dark:bg-[#1a1410]">
                 <DialogHeader>
                   <DialogTitle
                     className="font-serif text-center text-xl"
@@ -906,9 +961,222 @@ export default function InsightsView() {
                 <div className="py-4">
                   <ShareableCard />
                 </div>
-                <p className="text-center text-xs text-brown-400">
-                  Screenshot this card to share on social media
-                </p>
+                {/* Share Actions */}
+                <div className="space-y-3 pb-2">
+                  {/* Copy Link */}
+                  <Button
+                    variant="outline"
+                    className="w-full border-gold/30 text-gold-dark dark:border-gold/20 dark:text-gold hover:bg-gold/5 text-xs h-9"
+                    onClick={async () => {
+                      const shareText = getShareText(
+                        birthDetails?.name,
+                        getShareArchetype(traitScores),
+                        getShareTopTraits(traitScores),
+                        astrologyData?.sunSign || 'Capricorn',
+                        astrologyData?.moonSign || 'Gemini',
+                        astrologyData?.ascendant || 'Taurus'
+                      );
+                      try {
+                        await navigator.clipboard.writeText(shareText);
+                        cosmicToast.success('Copied to clipboard ✦', 'Your cosmic profile text is ready to share');
+                      } catch {
+                        // Fallback: use textarea method
+                        const textarea = document.createElement('textarea');
+                        textarea.value = shareText;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        cosmicToast.success('Copied to clipboard ✦', 'Your cosmic profile text is ready to share');
+                      }
+                    }}
+                  >
+                    <svg className="size-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    Copy Profile Text
+                  </Button>
+
+                  {/* Download as Image */}
+                  <Button
+                    variant="outline"
+                    className="w-full border-gold/30 text-gold-dark dark:border-gold/20 dark:text-gold hover:bg-gold/5 text-xs h-9"
+                    onClick={async () => {
+                      try {
+                        const cardElement = document.querySelector('[data-shareable-card]') as HTMLElement;
+                        if (!cardElement) {
+                          cosmicToast.warning('Could not find card', 'Please try again');
+                          return;
+                        }
+
+                        // Use Canvas-based approach
+                        const canvas = document.createElement('canvas');
+                        const scale = 2;
+                        const width = cardElement.offsetWidth;
+                        const height = cardElement.offsetHeight;
+                        canvas.width = width * scale;
+                        canvas.height = height * scale;
+
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) return;
+
+                        ctx.scale(scale, scale);
+
+                        // Draw background
+                        ctx.fillStyle = '#FFF8F0';
+                        ctx.fillRect(0, 0, width, height);
+
+                        // Draw decorative zodiac symbols
+                        ctx.font = '10px sans-serif';
+                        ctx.fillStyle = 'rgba(212, 175, 55, 0.1)';
+                        ctx.fillText('♈ ♉ ♊ ♋', 12, 16);
+                        ctx.fillText('♌ ♍ ♎ ♏', width - 80, 16);
+                        ctx.fillText('♐ ♑ ♒ ♓', 12, height - 20);
+
+                        // Draw archetype emoji
+                        const archetype = getShareArchetype(traitScores);
+                        const archetypeEmoji = getArchetypeEmoji(archetype);
+                        ctx.font = '36px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(archetypeEmoji, width / 2, 55);
+
+                        // Draw name
+                        ctx.font = 'bold 22px Georgia, serif';
+                        ctx.fillStyle = '#3D2B1F';
+                        ctx.fillText(birthDetails?.name || 'Cosmic Seeker', width / 2, 85);
+
+                        // Draw archetype
+                        ctx.font = '600 14px Georgia, serif';
+                        ctx.fillStyle = '#8B6914';
+                        ctx.fillText(archetype, width / 2, 105);
+
+                        // Draw zodiac signs
+                        const sunSign = astrologyData?.sunSign || 'Capricorn';
+                        const moonSign = astrologyData?.moonSign || 'Gemini';
+                        const ascendant = astrologyData?.ascendant || 'Taurus';
+
+                        const signY = 145;
+                        const signSpacing = width / 4;
+                        const zodiacIcons: Record<string, string> = {
+                          Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
+                          Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
+                        };
+
+                        ctx.font = '20px sans-serif';
+                        ctx.fillText(zodiacIcons[sunSign] || '☉', signSpacing, signY);
+                        ctx.fillText(zodiacIcons[moonSign] || '☽', signSpacing * 2, signY);
+                        ctx.fillText(zodiacIcons[ascendant] || '☊', signSpacing * 3, signY);
+
+                        ctx.font = '9px sans-serif';
+                        ctx.fillStyle = '#8B7355';
+                        ctx.fillText('SUN', signSpacing, signY + 16);
+                        ctx.fillText('MOON', signSpacing * 2, signY + 16);
+                        ctx.fillText('ASC', signSpacing * 3, signY + 16);
+
+                        ctx.font = 'bold 11px sans-serif';
+                        ctx.fillStyle = '#3D2B1F';
+                        ctx.fillText(sunSign, signSpacing, signY + 30);
+                        ctx.fillText(moonSign, signSpacing * 2, signY + 30);
+                        ctx.fillText(ascendant, signSpacing * 3, signY + 30);
+
+                        // Draw top traits
+                        const topTraits = getShareTopTraits(traitScores);
+                        ctx.font = '9px sans-serif';
+                        ctx.fillStyle = '#8B7355';
+                        ctx.fillText('TOP TRAITS', width / 2, signY + 55);
+
+                        ctx.font = '12px sans-serif';
+                        ctx.fillStyle = '#3D2B1F';
+                        const traitsText = topTraits.map((t) => `${t.label || t.name} ${Math.round(t.score)}%`).join('  •  ');
+                        ctx.fillText(traitsText, width / 2, signY + 72);
+
+                        // Draw divider
+                        ctx.beginPath();
+                        ctx.moveTo(width * 0.15, signY + 90);
+                        ctx.lineTo(width * 0.85, signY + 90);
+                        ctx.strokeStyle = '#E8D5B7';
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+
+                        // Draw branding
+                        ctx.font = '9px sans-serif';
+                        ctx.fillStyle = '#8B7355';
+                        ctx.fillText('✦ Generated by AyuAstro ✦', width / 2, signY + 108);
+                        ctx.font = '7px sans-serif';
+                        ctx.fillStyle = '#C4A882';
+                        ctx.fillText('AI-Powered Emotional Intelligence Platform', width / 2, signY + 120);
+
+                        // Download
+                        const link = document.createElement('a');
+                        link.download = `ayuastro-${(birthDetails?.name || 'profile').toLowerCase().replace(/\s+/g, '-')}.png`;
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+
+                        cosmicToast.success('Downloaded ✦', 'Your cosmic profile card has been saved');
+                      } catch {
+                        cosmicToast.warning('Download failed', 'Please try taking a screenshot instead');
+                      }
+                    }}
+                  >
+                    <svg className="size-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download as Image
+                  </Button>
+
+                  {/* Social Share Buttons */}
+                  <div className="flex gap-2">
+                    {/* WhatsApp */}
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-green-300 text-green-700 dark:border-green-800 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 text-xs h-9"
+                      onClick={() => {
+                        const shareText = getShareText(
+                          birthDetails?.name,
+                          getShareArchetype(traitScores),
+                          getShareTopTraits(traitScores),
+                          astrologyData?.sunSign || 'Capricorn',
+                          astrologyData?.moonSign || 'Gemini',
+                          astrologyData?.ascendant || 'Taurus'
+                        );
+                        const url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+                        window.open(url, '_blank');
+                      }}
+                    >
+                      <svg className="size-4 mr-1.5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                      WhatsApp
+                    </Button>
+
+                    {/* Twitter/X */}
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-brown-300 text-brown-700 dark:border-brown-600 dark:text-brown-300 hover:bg-brown-50 dark:hover:bg-brown-800/20 text-xs h-9"
+                      onClick={() => {
+                        const shareText = getShareText(
+                          birthDetails?.name,
+                          getShareArchetype(traitScores),
+                          getShareTopTraits(traitScores),
+                          astrologyData?.sunSign || 'Capricorn',
+                          astrologyData?.moonSign || 'Gemini',
+                          astrologyData?.ascendant || 'Taurus'
+                        );
+                        // Try Web Share API first, fallback to Twitter
+                        if (navigator.share) {
+                          navigator.share({
+                            title: 'My AyuAstro Cosmic Profile',
+                            text: shareText,
+                          }).catch(() => {
+                            // User cancelled or error — open Twitter instead
+                            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+                            window.open(url, '_blank');
+                          });
+                        } else {
+                          const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+                          window.open(url, '_blank');
+                        }
+                      }}
+                    >
+                      <svg className="size-4 mr-1.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                      X / Twitter
+                    </Button>
+                  </div>
+                </div>
               </DialogContent>
             </Dialog>
           </div>
@@ -1072,7 +1340,7 @@ export default function InsightsView() {
                   className="w-full flex items-center justify-between rounded-xl bg-gradient-to-r from-gold/5 to-sage-muted/30 dark:from-gold/10 dark:to-sage/10 px-4 py-3 group hover:from-gold/10 hover:to-sage-muted/40 transition-all"
                 >
                   <div className="flex items-center gap-2">
-                    <BarChart3 className="size-4 text-gold-dark dark:text-gold" />
+                    <BarChart2 className="size-4 text-gold-dark dark:text-gold" />
                     <span className="text-sm font-medium text-brown-800 dark:text-brown-200" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
                       View Full Dashboard
                     </span>
