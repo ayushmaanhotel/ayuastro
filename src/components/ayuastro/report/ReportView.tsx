@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useAyuAstroStore, type ReportSection } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ import {
   Repeat,
   Lock,
   ArrowRight,
+  Download,
 } from 'lucide-react';
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -104,7 +106,8 @@ const fadeInUp = {
 };
 
 export default function ReportView() {
-  const { reportSections, hasPaid, setView } = useAyuAstroStore();
+  const { reportSections, hasPaid, setView, userId } = useAyuAstroStore();
+  const [downloading, setDownloading] = useState(false);
 
   const freeSections = reportSections.filter((s) => s.insightLevel === 'free').length > 0
     ? reportSections.filter((s) => s.insightLevel === 'free')
@@ -114,20 +117,61 @@ export default function ReportView() {
     ? reportSections.filter((s) => s.insightLevel === 'premium')
     : DEFAULT_PREMIUM_SECTIONS;
 
+  const handleDownload = async () => {
+    if (!userId) return;
+    setDownloading(true);
+    try {
+      const res = await fetch('/api/reports/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, includePremium: hasPaid }),
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ayuastro-report.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch {
+      // Silently fail
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="bg-cream px-4 py-6 pb-24">
       <div className="mx-auto max-w-lg space-y-6">
         {/* Header */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
-          <h1
-            className="font-serif text-3xl font-bold text-brown-900 mb-1"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-          >
-            Your Deep Intelligence Report
-          </h1>
-          <p className="text-sm text-brown-400">
-            A comprehensive analysis of your emotional architecture.
-          </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h1
+                className="font-serif text-3xl font-bold text-brown-900 mb-1"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
+                Your Deep Intelligence Report
+              </h1>
+              <p className="text-sm text-brown-400">
+                A comprehensive analysis of your emotional architecture.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 border-gold/30 text-gold-dark hover:bg-gold/5 hover:text-gold-dark"
+              onClick={handleDownload}
+              disabled={downloading || !userId}
+            >
+              <Download className="size-3.5 mr-1" />
+              {downloading ? 'Generating...' : 'Download'}
+            </Button>
+          </div>
         </motion.div>
 
         {/* Free Sections */}
@@ -160,7 +204,7 @@ export default function ReportView() {
                       {section.traits.map((trait, ti) => (
                         <Badge
                           key={ti}
-                          className="bg-brown-50 text-brown-600 border-0 text-xs"
+                          className="bg-brown-50 dark:bg-brown-50/20 text-brown-600 border-0 text-xs"
                         >
                           {trait}
                         </Badge>
@@ -205,7 +249,7 @@ export default function ReportView() {
                             {section.content}
                           </p>
                         </div>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 dark:bg-card/40">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 dark:bg-card/60">
                           <Lock className="size-5 text-gold mb-2" />
                           <p className="text-xs font-medium text-brown-700 mb-2">
                             Unlock to reveal

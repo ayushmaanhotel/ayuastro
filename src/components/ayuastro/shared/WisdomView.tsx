@@ -166,7 +166,7 @@ export default function WisdomView() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search wisdom topics..."
-              className="pl-10 border-brown-200 bg-white focus:border-brown-500 focus:ring-brown-500/20"
+              className="pl-10 border-brown-200 dark:border-brown-100/30 bg-white dark:bg-cream-dark dark:text-brown-900 focus:border-brown-500 focus:ring-brown-500/20"
             />
           </div>
         </motion.div>
@@ -181,7 +181,7 @@ export default function WisdomView() {
                 className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                   activeCategory === cat
                     ? 'bg-brown-700 text-white'
-                    : 'bg-white text-brown-500 hover:bg-brown-50 border border-brown-200'
+                    : 'bg-white dark:bg-cream-dark text-brown-500 dark:text-brown-300 hover:bg-brown-50 dark:hover:bg-brown-50/20 border border-brown-200 dark:border-brown-100/30'
                 }`}
               >
                 {cat}
@@ -211,7 +211,7 @@ export default function WisdomView() {
                 {...fadeInUp}
                 transition={{ duration: 0.4, delay: 0.08 * i }}
               >
-                <Card className={`border-0 shadow-sm ${card.color}`}>
+                <Card className={`border-0 shadow-sm ${card.color} dark:bg-white/5`}>
                   <CardContent className="p-6">
                     <Collapsible open={isExpanded} onOpenChange={() => toggleCard(card.title)}>
                       <div className="flex items-start gap-4">

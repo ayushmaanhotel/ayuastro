@@ -7,6 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
   Heart,
   Sun,
   Moon,
@@ -17,6 +24,7 @@ import {
   Flame,
   ChevronDown,
   Star,
+  Share2,
 } from 'lucide-react';
 
 // ─── Zodiac Data ────────────────────────────────────────────────────────────
@@ -166,6 +174,20 @@ function ScoreRing({ score, size = 120, strokeWidth = 8, color = '#D4AF37' }: { 
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
+      {/* Sparkle particles around the ring */}
+      {[...Array(8)].map((_, i) => (
+        <span
+          key={i}
+          className="absolute rounded-full bg-gold animate-twinkle"
+          style={{
+            width: 3,
+            height: 3,
+            left: `${50 + Math.cos((i * 45 * Math.PI) / 180) * 55}%`,
+            top: `${50 + Math.sin((i * 45 * Math.PI) / 180) * 55}%`,
+            animationDelay: `${i * 0.4}s`,
+          }}
+        />
+      ))}
       <svg width={size} height={size} className="-rotate-90">
         <circle
           cx={size / 2}
@@ -224,7 +246,7 @@ function SubScoreBar({ label, score, icon: Icon, delay = 0 }: { label: string; s
         </div>
         <span className="text-xs font-semibold text-brown-900">{score}%</span>
       </div>
-      <div className="h-2 rounded-full bg-brown-100 overflow-hidden">
+      <div className="h-2 rounded-full bg-brown-100 dark:bg-brown-50/20 overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${score}%` }}
@@ -233,6 +255,48 @@ function SubScoreBar({ label, score, icon: Icon, delay = 0 }: { label: string; s
         />
       </div>
     </div>
+  );
+}
+
+// ─── Compatibility Badge ────────────────────────────────────────────────────
+
+function CompatibilityBadge({ score }: { score: number }) {
+  if (score > 70) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+        className="shimmer inline-flex items-center gap-1.5 rounded-full bg-gold/10 border border-gold/30 px-4 py-1.5"
+      >
+        <Sparkles className="size-3.5 text-gold" />
+        <span className="text-sm font-bold text-gold-dark dark:text-gold">Cosmic Match!</span>
+      </motion.div>
+    );
+  }
+  if (score >= 45) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+        className="inline-flex items-center gap-1.5 rounded-full bg-sage-muted/50 border border-sage-dark/20 px-4 py-1.5"
+      >
+        <Heart className="size-3.5 text-sage-dark" />
+        <span className="text-sm font-bold text-sage-dark">Harmonious Bond</span>
+      </motion.div>
+    );
+  }
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+      className="inline-flex items-center gap-1.5 rounded-full bg-brown-50/50 dark:bg-brown-50/20 border border-brown-200/50 dark:border-brown-100/30 px-4 py-1.5"
+    >
+      <Flame className="size-3.5 text-brown-500" />
+      <span className="text-sm font-bold text-brown-600 dark:text-brown-300">Growth Journey</span>
+    </motion.div>
   );
 }
 
@@ -262,6 +326,7 @@ export default function SyncView() {
   const [showSignDropdown, setShowSignDropdown] = useState(false);
   const [result, setResult] = useState<CompatibilityResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
 
   const userSunSign = astrologyData?.sunSign || 'Taurus';
   const userMoonSign = astrologyData?.moonSign || 'Pisces';
@@ -377,7 +442,7 @@ export default function SyncView() {
                   value={partnerName}
                   onChange={(e) => setPartnerName(e.target.value)}
                   placeholder="Enter their name..."
-                  className="w-full rounded-xl border border-brown-200 dark:border-brown-200 bg-brown-50/50 dark:bg-brown-50/30 px-4 py-3 text-sm text-brown-900 dark:text-brown-900 placeholder:text-brown-300 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold/50 transition-all"
+                  className="w-full rounded-xl border border-brown-200 dark:border-brown-100/30 bg-brown-50/50 dark:bg-brown-50/30 px-4 py-3 text-sm text-brown-900 dark:text-brown-900 placeholder:text-brown-300 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold/50 transition-all"
                 />
               </div>
 
@@ -388,7 +453,7 @@ export default function SyncView() {
                 </label>
                 <button
                   onClick={() => setShowSignDropdown(!showSignDropdown)}
-                  className="w-full rounded-xl border border-brown-200 dark:border-brown-200 bg-brown-50/50 dark:bg-brown-50/30 px-4 py-3 text-sm text-left flex items-center justify-between hover:border-gold/30 transition-all"
+                  className="w-full rounded-xl border border-brown-200 dark:border-brown-100/30 bg-brown-50/50 dark:bg-brown-50/30 px-4 py-3 text-sm text-left flex items-center justify-between hover:border-gold/30 transition-all"
                 >
                   <span className={partnerSign ? 'text-brown-900' : 'text-brown-300'}>
                     {partnerSign
@@ -404,7 +469,7 @@ export default function SyncView() {
                       animate={{ opacity: 1, y: 0, height: 'auto' }}
                       exit={{ opacity: 0, y: -4, height: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute z-20 mt-1 w-full rounded-xl border border-brown-200 dark:border-brown-100 bg-white dark:bg-card shadow-lg overflow-hidden"
+                      className="absolute z-20 mt-1 w-full rounded-xl border border-brown-200 dark:border-brown-100/30 bg-white dark:bg-[#2D2320] shadow-lg overflow-hidden"
                     >
                       <div className="max-h-56 overflow-y-auto custom-scrollbar p-1">
                         {ZODIAC_SIGNS.map((sign) => (
@@ -417,7 +482,7 @@ export default function SyncView() {
                             className={`w-full rounded-lg px-3 py-2.5 text-sm text-left flex items-center gap-3 transition-colors ${
                               partnerSign === sign
                                 ? 'bg-gold/10 text-gold-dark font-medium'
-                                : 'text-brown-700 hover:bg-brown-50 dark:hover:bg-brown-50/50'
+                                : 'text-brown-700 hover:bg-brown-50 dark:hover:bg-brown-50/10'
                             }`}
                           >
                             <span className="text-lg">{ZODIAC_SYMBOLS[sign]}</span>
@@ -493,6 +558,10 @@ export default function SyncView() {
                         {userSunSign} {ZODIAC_SYMBOLS[userSunSign]} × {partnerSign} {ZODIAC_SYMBOLS[partnerSign]}
                       </p>
                     </div>
+                    {/* Compatibility Badge */}
+                    <div className="mt-3">
+                      <CompatibilityBadge score={result.overall} />
+                    </div>
                   </div>
 
                   {/* Element & Modality Match */}
@@ -525,14 +594,66 @@ export default function SyncView() {
                     </p>
                   </div>
 
-                  {/* Reset Button */}
-                  <Button
-                    variant="outline"
-                    onClick={handleReset}
-                    className="w-full border-brown-200 text-brown-600 hover:bg-brown-50 dark:hover:bg-brown-50/50"
-                  >
-                    Check Another Sign
-                  </Button>
+                  {/* Action Buttons */}
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={handleReset}
+                      className="flex-1 border-brown-200 text-brown-600 hover:bg-brown-50 dark:hover:bg-brown-50/50"
+                    >
+                      Check Another Sign
+                    </Button>
+                    <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="flex-1 border-gold/30 text-gold-dark hover:bg-gold/5"
+                        >
+                          <Share2 className="size-3.5 mr-1.5" />
+                          Share
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md bg-cream dark:bg-card">
+                        <DialogHeader>
+                          <DialogTitle
+                            className="font-serif text-center text-xl"
+                            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                          >
+                            Share Compatibility
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="py-4">
+                          <Card className="premium-card border-0 p-5 text-center">
+                            <div className="mb-3">
+                              <span className="text-2xl">{ZODIAC_SYMBOLS[userSunSign]}</span>
+                              <Heart className="inline size-4 text-gold mx-2" />
+                              <span className="text-2xl">{ZODIAC_SYMBOLS[partnerSign]}</span>
+                            </div>
+                            <p className="font-serif text-lg font-bold text-brown-900" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                              {userSunSign} × {partnerSign}
+                            </p>
+                            <p className="text-3xl font-bold text-gold-dark mt-1" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                              {result.overall}% Compatible
+                            </p>
+                            <div className="mt-2">
+                              <CompatibilityBadge score={result.overall} />
+                            </div>
+                            {partnerName && (
+                              <p className="mt-2 text-xs text-brown-400">
+                                {birthDetails?.name || 'You'} & {partnerName}
+                              </p>
+                            )}
+                            <p className="mt-3 text-[10px] text-brown-300 uppercase tracking-wider">
+                              Generated by AyuAstro
+                            </p>
+                          </Card>
+                        </div>
+                        <p className="text-center text-xs text-brown-400">
+                          Screenshot this card to share on social media
+                        </p>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -556,7 +677,7 @@ export default function SyncView() {
                     initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.05 * i, duration: 0.3 }}
-                    className="flex items-center gap-3 rounded-xl bg-brown-50/60 dark:bg-brown-50/30 p-3"
+                    className="flex items-center gap-3 rounded-xl bg-brown-50/60 dark:bg-brown-50/10 p-3"
                   >
                     <div className="flex items-center gap-1 shrink-0">
                       <span className="text-lg">{ZODIAC_SYMBOLS[sign1]}</span>

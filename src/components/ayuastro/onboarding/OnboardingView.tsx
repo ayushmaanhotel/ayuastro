@@ -423,7 +423,7 @@ export default function OnboardingView() {
                           className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
                             localGender === g.toLowerCase()
                               ? 'bg-brown-700 text-white'
-                              : 'bg-brown-50 text-brown-600 hover:bg-brown-100 dark:bg-brown-50 dark:text-brown-600 dark:hover:bg-brown-100'
+                              : 'bg-brown-50 dark:bg-brown-50/20 text-brown-600 dark:text-brown-300 hover:bg-brown-100 dark:hover:bg-brown-100'
                           }`}
                         >
                           {g}
@@ -563,7 +563,7 @@ export default function OnboardingView() {
                                 className={`flex flex-1 flex-col items-center gap-1 rounded-lg py-2 text-center transition-all ${
                                   isSelected
                                     ? 'bg-brown-700 text-white scale-105'
-                                    : 'bg-brown-50 dark:bg-brown-50 text-brown-400 hover:bg-brown-100 dark:hover:bg-brown-100'
+                                    : 'bg-brown-50 dark:bg-brown-50/20 text-brown-400 dark:text-brown-300 hover:bg-brown-100 dark:hover:bg-brown-100'
                                 }`}
                                 title={label}
                               >
@@ -633,7 +633,7 @@ export default function OnboardingView() {
         {onboardingStep !== 'name' && onboardingStep !== 'complete' && (
           <button
             onClick={handleBack}
-            className="mb-4 flex items-center gap-1 text-sm text-brown-500 hover:text-brown-700 transition-colors"
+            className="mb-4 flex items-center gap-1 text-sm text-brown-500 dark:text-brown-300 hover:text-brown-700 transition-colors"
           >
             <ArrowLeft className="size-4" />
             Back

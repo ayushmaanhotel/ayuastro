@@ -40,9 +40,11 @@ import {
   Droplets,
   Wind,
   Mountain,
+  Orbit,
 } from 'lucide-react';
 import KundaliChart from './KundaliChart';
 import ShareableCard from './ShareableCard';
+import DashaTimeline, { generateDashaPeriods, type DashaPeriod } from './DashaTimeline';
 
 const ZODIAC_ICONS: Record<string, string> = {
   Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
@@ -158,12 +160,52 @@ interface HoroscopeData {
   luckyElement: string;
 }
 
+interface TransitItem {
+  planet: string;
+  sign: string;
+  house: number;
+  type: 'major' | 'minor' | 'shadow';
+  duration: string;
+  effect: string;
+  advice: string;
+}
+
+interface TransitsData {
+  date: string;
+  transits: TransitItem[];
+  overallTheme: string;
+  focusPeriod: string;
+}
+
+const PLANET_COLORS: Record<string, string> = {
+  Saturn: 'bg-amber-900',
+  Jupiter: 'bg-amber-500',
+  Rahu: 'bg-purple-600',
+  Ketu: 'bg-gray-500',
+  Mercury: 'bg-emerald-500',
+  Venus: 'bg-pink-400',
+  Mars: 'bg-red-500',
+  Sun: 'bg-yellow-500',
+  Moon: 'bg-slate-400',
+};
+
+const TRANSIT_TYPE_STYLES: Record<string, string> = {
+  major: 'bg-sage-muted text-sage-dark',
+  shadow: 'bg-purple-100 text-purple-700',
+  minor: 'bg-brown-50 text-brown-500',
+};
+
 export default function InsightsView() {
   const { traitScores, astrologyData, numerologyData, birthDetails, setView } = useAyuAstroStore();
 
   const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
   const [horoscopeLoading, setHoroscopeLoading] = useState(true);
   const [horoscopeExpanded, setHoroscopeExpanded] = useState(false);
+  const [dashaPeriods, setDashaPeriods] = useState<DashaPeriod[]>([]);
+
+  const [transits, setTransits] = useState<TransitsData | null>(null);
+  const [transitsLoading, setTransitsLoading] = useState(true);
+  const [expandedTransits, setExpandedTransits] = useState<Record<string, boolean>>({});
 
   const topTraits = getTopTraits(traitScores);
   const archetype = getArchetype(traitScores);
@@ -201,7 +243,37 @@ export default function InsightsView() {
     fetchHoroscope();
   }, [sunSign, moonSign]);
 
+  // Fetch planetary transits
+  useEffect(() => {
+    async function fetchTransits() {
+      setTransitsLoading(true);
+      try {
+        const res = await fetch(`/api/transits/current?sunSign=${encodeURIComponent(sunSign)}&moonSign=${encodeURIComponent(moonSign)}&ascendant=${encodeURIComponent(ascendant)}`);
+        if (res.ok) {
+          const json = await res.json();
+          setTransits(json.data);
+        }
+      } catch {
+        // Silently fail — transits are a nice-to-have
+      } finally {
+        setTransitsLoading(false);
+      }
+    }
+    fetchTransits();
+  }, [sunSign, moonSign, ascendant]);
+
   const ElementIcon = ELEMENT_ICONS[sunElement?.element || 'Fire'] || Flame;
+
+  // Generate Dasha periods from birth date
+  useEffect(() => {
+    const dob = birthDetails?.dateOfBirth;
+    if (dob) {
+      setDashaPeriods(generateDashaPeriods(dob));
+    } else {
+      // Default to a reasonable birth date for demo purposes
+      setDashaPeriods(generateDashaPeriods('1995-06-15'));
+    }
+  }, [birthDetails?.dateOfBirth]);
 
   return (
     <div className="bg-cream px-4 py-6 pb-24">
@@ -210,7 +282,7 @@ export default function InsightsView() {
         {/* Daily Cosmic Insight Card */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
           <Card className="border-0 shadow-sm overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-brown-100/20" />
+            <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-brown-100/20 dark:from-gold/3 dark:via-transparent dark:to-brown-50/10" />
             <CardContent className="relative p-5">
               <div className="flex items-start gap-3">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gold/10">
@@ -240,7 +312,7 @@ export default function InsightsView() {
 
         {/* Daily Horoscope Card */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.02 }}>
-          <Card className="border-0 shadow-sm bg-white overflow-hidden">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-sage via-gold to-brown-300" />
             <CardContent className="p-5">
               <div className="flex items-start gap-3">
@@ -312,6 +384,101 @@ export default function InsightsView() {
           </Card>
         </motion.div>
 
+        {/* Planetary Transits Card */}
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.04 }}>
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-purple-400 via-amber-500 to-sage" />
+            <CardContent className="p-5">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-100 to-amber-100 dark:from-purple-900/30 dark:to-amber-900/30">
+                  <Orbit className="size-5 text-purple-600" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border-0 text-[10px] px-2 py-0 tracking-wider uppercase">
+                      Planetary Transits
+                    </Badge>
+                  </div>
+                  <h3
+                    className="font-serif text-base font-bold text-brown-900 mb-1"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Current Cosmic Weather
+                  </h3>
+                </div>
+              </div>
+
+              {transitsLoading ? (
+                <div className="space-y-3">
+                  <div className="h-3 w-full rounded bg-brown-100 animate-pulse" />
+                  <div className="h-3 w-3/4 rounded bg-brown-100 animate-pulse" />
+                  <div className="h-12 w-full rounded-lg bg-brown-50 animate-pulse" />
+                </div>
+              ) : transits ? (
+                <div className="space-y-3">
+                  {/* Overall Theme */}
+                  <div className="rounded-lg bg-gradient-to-r from-purple-50 to-amber-50 dark:from-purple-900/10 dark:to-amber-900/10 p-3">
+                    <p className="text-xs font-semibold text-purple-700 dark:text-purple-300 mb-1 uppercase tracking-wider">Overall Theme</p>
+                    <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">{transits.overallTheme}</p>
+                    <p className="text-[10px] text-brown-400 mt-1">Focus: {transits.focusPeriod}</p>
+                  </div>
+
+                  {/* Transit List */}
+                  <div className="space-y-2">
+                    {transits.transits.map((transit) => (
+                      <Collapsible
+                        key={transit.planet}
+                        open={expandedTransits[transit.planet] || false}
+                        onOpenChange={(open) =>
+                          setExpandedTransits((prev) => ({ ...prev, [transit.planet]: open }))
+                        }
+                      >
+                        <div className="rounded-lg border border-brown-100 dark:border-brown-700/30 overflow-hidden">
+                          <CollapsibleTrigger asChild>
+                            <button className="w-full text-left p-3 hover:bg-brown-50 dark:hover:bg-brown-800/20 transition-colors">
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${PLANET_COLORS[transit.planet] || 'bg-gray-400'}`} />
+                                <span className="text-sm font-semibold text-brown-900 dark:text-brown-100">{transit.planet}</span>
+                                <span className="text-xs text-brown-400">in {transit.sign}</span>
+                                <span className="text-xs text-brown-300">• House {transit.house}</span>
+                                <Badge className={`${TRANSIT_TYPE_STYLES[transit.type] || 'bg-brown-50 text-brown-500'} border-0 text-[9px] px-1.5 py-0 ml-auto`}>
+                                  {transit.type === 'major' ? 'Major' : transit.type === 'shadow' ? 'Shadow' : 'Minor'}
+                                </Badge>
+                                <ChevronDown className={`size-3.5 text-brown-300 transition-transform ${expandedTransits[transit.planet] ? 'rotate-180' : ''}`} />
+                              </div>
+                              <p className="text-xs text-brown-500 dark:text-brown-400 mt-1 line-clamp-2">
+                                {transit.effect}
+                              </p>
+                            </button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="px-3 pb-3 pt-1 space-y-2 border-t border-brown-100 dark:border-brown-700/30">
+                              <div className="rounded-lg bg-brown-50 dark:bg-brown-800/20 p-3">
+                                <p className="text-[10px] uppercase tracking-wider text-brown-400 mb-1">Full Effect</p>
+                                <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">{transit.effect}</p>
+                              </div>
+                              <div className="rounded-lg bg-gold/5 dark:bg-gold/10 p-3">
+                                <p className="text-[10px] uppercase tracking-wider text-gold-dark dark:text-gold mb-1">Advice</p>
+                                <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">{transit.advice}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-brown-400">Duration:</span>
+                                <span className="text-xs font-medium text-brown-600 dark:text-brown-300">{transit.duration}</span>
+                              </div>
+                            </div>
+                          </CollapsibleContent>
+                        </div>
+                      </Collapsible>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-brown-400">Unable to load planetary transits. Try again later.</p>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Header Section */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
           <div className="flex items-start justify-between">
@@ -370,7 +537,7 @@ export default function InsightsView() {
 
         {/* The Anchor Section */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
-          <Card className="border-0 shadow-sm bg-white overflow-hidden">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-gold via-brown-300 to-sage" />
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
@@ -396,7 +563,7 @@ export default function InsightsView() {
 
         {/* Duality of Self Section */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
-          <Card className="border-0 shadow-sm bg-white">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
             <CardContent className="p-6">
               <h3
                 className="font-serif text-lg font-bold text-brown-900 mb-4"
@@ -460,7 +627,7 @@ export default function InsightsView() {
 
         {/* Trait Scores Display */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }}>
-          <Card className="border-0 shadow-sm bg-white">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                 <Sparkles className="size-5 text-gold" />
@@ -521,7 +688,7 @@ export default function InsightsView() {
                     { label: 'Soul Urge', value: numerologyData.soulUrgeNumber, desc: numerologyData.soulUrgeDesc },
                     { label: 'Personality', value: numerologyData.personalityNumber, desc: '' },
                   ].map((item, i) => (
-                    <div key={i} className="rounded-xl bg-gradient-to-br from-brown-50 to-cream-dark p-4 text-center">
+                    <div key={i} className="rounded-xl bg-gradient-to-br from-brown-50 to-cream-dark dark:from-brown-50/50 dark:to-cream-dark/50 p-4 text-center">
                       <p className="text-[10px] uppercase tracking-widest text-brown-400 mb-1">{item.label}</p>
                       <p
                         className="font-serif text-3xl font-bold text-brown-900 mb-1"
@@ -542,7 +709,7 @@ export default function InsightsView() {
 
         {/* Astrology Summary Card with Kundali Chart */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.25 }}>
-          <Card className="border-0 shadow-sm bg-white">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                 <Moon className="size-5 text-gold" />
@@ -559,7 +726,7 @@ export default function InsightsView() {
                 ].map((item, i) => {
                   const info = ZODIAC_ELEMENTS[item.sign];
                   return (
-                    <div key={i} className="text-center rounded-xl bg-brown-50 p-3">
+                    <div key={i} className="text-center rounded-xl bg-brown-50 dark:bg-brown-50/50 p-3">
                       {item.icon}
                       <p className="text-[10px] uppercase tracking-wider text-brown-400">{item.label}</p>
                       <p className="text-sm font-semibold text-brown-900">{item.sign}</p>
@@ -640,6 +807,13 @@ export default function InsightsView() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Dasha Timeline */}
+        {dashaPeriods.length > 0 && (
+          <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.28 }}>
+            <DashaTimeline dashaPeriods={dashaPeriods} />
+          </motion.div>
+        )}
 
         {/* CTA */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.3 }}>

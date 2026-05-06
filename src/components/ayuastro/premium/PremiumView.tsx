@@ -1,12 +1,13 @@
 'use client';
 
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { motion } from 'framer-motion';
-import { Star, Eye, CheckCircle2, Shield, ArrowRight, Quote } from 'lucide-react';
+import { Star, Eye, CheckCircle2, Shield, ArrowRight, Quote, Lock, Smartphone, Diamond } from 'lucide-react';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
@@ -18,6 +19,49 @@ const benefits = [
   'Premium sections: Hidden Strengths, Blind Spots, Money Psychology, Life Patterns',
   'Lifetime access to your full profile with periodic cosmic updates',
 ];
+
+const BENEFIT_ICONS = [
+  { icon: Lock, label: 'Lifetime Access', emoji: '🔒' },
+  { icon: Smartphone, label: 'Works Everywhere', emoji: '📱' },
+  { icon: Diamond, label: 'One-Time Payment', emoji: '💎' },
+];
+
+function CountdownTimer() {
+  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const calculateTimeLeft = useCallback(() => {
+    const now = new Date();
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+    const diff = endOfDay.getTime() - now.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    return { hours, minutes, seconds };
+  }, []);
+
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [calculateTimeLeft]);
+
+  const pad = (n: number) => n.toString().padStart(2, '0');
+
+  return (
+    <div className="text-center">
+      <p className="text-xs text-brown-400 mb-1">Launch Price Ends In:</p>
+      <p className="font-mono text-lg font-bold text-gold-dark dark:text-gold tracking-wider">
+        {pad(timeLeft.hours)}:{pad(timeLeft.minutes)}:{pad(timeLeft.seconds)}
+      </p>
+    </div>
+  );
+}
 
 export default function PremiumView() {
   const { setView, setHasPaid, birthDetails } = useAyuAstroStore();
@@ -45,6 +89,21 @@ export default function PremiumView() {
           </p>
         </motion.div>
 
+        {/* Benefit Icons Grid */}
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.02 }}>
+          <div className="grid grid-cols-3 gap-3">
+            {BENEFIT_ICONS.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <div key={i} className="flex flex-col items-center gap-1.5 rounded-xl bg-white dark:bg-white/5 p-3 text-center">
+                  <span className="text-2xl">{item.emoji}</span>
+                  <span className="text-[10px] font-semibold text-brown-700 dark:text-brown-300 leading-tight">{item.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+
         {/* Rating */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }} className="text-center">
           <div className="flex items-center justify-center gap-1 mb-1">
@@ -58,7 +117,7 @@ export default function PremiumView() {
 
         {/* Premium Visual Report Card Preview */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
-          <Card className="premium-card border-0 overflow-hidden">
+          <Card className="premium-card shimmer border-0 overflow-hidden dark:bg-white/5">
             <CardContent className="p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex size-12 items-center justify-center rounded-xl bg-gold/10">
@@ -133,16 +192,19 @@ export default function PremiumView() {
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }}>
           <Card className="border-0 shadow-sm bg-white dark:bg-white/5 text-center">
             <CardContent className="p-6">
-              <div className="mb-2">
-                <span className="text-lg text-brown-300 line-through">₹1,499</span>
+              {/* Countdown Timer */}
+              <CountdownTimer />
+
+              <div className="mt-3 mb-2">
+                <span className="text-lg text-brown-300 dark:text-brown-500 line-through">₹1,499</span>
               </div>
               <div className="flex items-baseline justify-center gap-1">
-                <span
-                  className="font-serif text-5xl font-bold text-brown-900"
+                <motion.span
+                  className="font-serif text-5xl font-bold text-brown-900 animate-float"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
                   ₹499
-                </span>
+                </motion.span>
               </div>
               <p className="mt-1 text-xs text-brown-400">One-time payment</p>
 
@@ -150,7 +212,7 @@ export default function PremiumView() {
                 One-time unlock. Lifetime access.
               </Badge>
 
-              <Separator className="my-5 bg-brown-100" />
+              <Separator className="my-5 bg-brown-100 dark:bg-brown-100/30" />
 
               <Button
                 onClick={handleUnlock}
@@ -161,9 +223,22 @@ export default function PremiumView() {
                 <ArrowRight className="ml-2 size-4" />
               </Button>
 
-              <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-brown-400">
-                <Shield className="size-3.5" />
-                Secure, encrypted payment.
+              {/* Trust badges */}
+              <div className="mt-4 flex items-center justify-center gap-3 text-[10px] text-brown-400">
+                <div className="flex items-center gap-1">
+                  <Shield className="size-3" />
+                  <span>SSL Secured</span>
+                </div>
+                <span className="text-brown-200 dark:text-brown-100/30">|</span>
+                <div className="flex items-center gap-1">
+                  <CheckCircle2 className="size-3" />
+                  <span>7-Day Guarantee</span>
+                </div>
+                <span className="text-brown-200 dark:text-brown-100/30">|</span>
+                <div className="flex items-center gap-1">
+                  <Lock className="size-3" />
+                  <span>Instant Access</span>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -110,7 +110,7 @@ export default function ProfileView() {
         {/* Cosmic Identity Card */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
           <Card className="border-0 shadow-sm overflow-hidden">
-            <div className={`relative bg-gradient-to-br ${signInfo?.gradientFrom || 'from-gold/10'} ${signInfo?.gradientTo || 'to-brown-100/5'} p-6`}>
+            <div className={`relative bg-gradient-to-br ${signInfo?.gradientFrom || 'from-gold/10'} ${signInfo?.gradientTo || 'to-brown-100/5'} dark:from-gold/5 dark:to-brown-50/5 p-6`}>
               {/* Decorative zodiac pattern */}
               <div className="absolute top-2 right-3 text-gold/10 text-xs tracking-[0.5em] leading-relaxed select-none">
                 <div>♈ ♉ ♊ ♋</div>
@@ -304,21 +304,21 @@ export default function ProfileView() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 gap-3">
-                <div className="text-center rounded-xl bg-brown-50 p-3">
+                <div className="text-center rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3">
                   <Sun className="mx-auto mb-1 size-4 text-gold" />
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Sun</p>
                   <p className="text-sm font-semibold text-brown-900">
                     {astrologyData?.sunSign || '—'}
                   </p>
                 </div>
-                <div className="text-center rounded-xl bg-brown-50 p-3">
+                <div className="text-center rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3">
                   <Moon className="mx-auto mb-1 size-4 text-brown-400" />
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Moon</p>
                   <p className="text-sm font-semibold text-brown-900">
                     {astrologyData?.moonSign || '—'}
                   </p>
                 </div>
-                <div className="text-center rounded-xl bg-brown-50 p-3">
+                <div className="text-center rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3">
                   <Compass className="mx-auto mb-1 size-4 text-brown-500" />
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Ascendant</p>
                   <p className="text-sm font-semibold text-brown-900">
@@ -372,7 +372,7 @@ export default function ProfileView() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-brown-50 p-3 text-center">
+                <div className="rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3 text-center">
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Life Path</p>
                   <p
                     className="font-serif text-3xl font-bold text-brown-900"
@@ -381,7 +381,7 @@ export default function ProfileView() {
                     {numerologyData?.lifePathNumber || '—'}
                   </p>
                 </div>
-                <div className="rounded-xl bg-brown-50 p-3 text-center">
+                <div className="rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3 text-center">
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Destiny</p>
                   <p
                     className="font-serif text-3xl font-bold text-brown-900"
@@ -390,7 +390,7 @@ export default function ProfileView() {
                     {numerologyData?.destinyNumber || '—'}
                   </p>
                 </div>
-                <div className="rounded-xl bg-brown-50 p-3 text-center">
+                <div className="rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3 text-center">
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Soul Urge</p>
                   <p
                     className="font-serif text-3xl font-bold text-brown-900"
@@ -399,7 +399,7 @@ export default function ProfileView() {
                     {numerologyData?.soulUrgeNumber || '—'}
                   </p>
                 </div>
-                <div className="rounded-xl bg-brown-50 p-3 text-center">
+                <div className="rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3 text-center">
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Personality</p>
                   <p
                     className="font-serif text-3xl font-bold text-brown-900"
@@ -433,17 +433,17 @@ export default function ProfileView() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 gap-3">
-                <div className="text-center rounded-xl bg-brown-50 p-3">
+                <div className="text-center rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3">
                   <FileText className="mx-auto mb-1 size-4 text-brown-400" />
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Analysis</p>
                   <p className="text-sm font-semibold text-brown-900">{analysisDate !== '—' ? 'Complete' : 'Pending'}</p>
                 </div>
-                <div className="text-center rounded-xl bg-brown-50 p-3">
+                <div className="text-center rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3">
                   <BarChart3 className="mx-auto mb-1 size-4 text-brown-400" />
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Questions</p>
                   <p className="text-sm font-semibold text-brown-900">{questionsAnswered}</p>
                 </div>
-                <div className="text-center rounded-xl bg-brown-50 p-3">
+                <div className="text-center rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3">
                   {hasPaid ? (
                     <Star className="mx-auto mb-1 size-4 text-gold" />
                   ) : (

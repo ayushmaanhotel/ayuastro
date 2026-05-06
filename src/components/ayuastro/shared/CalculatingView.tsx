@@ -12,9 +12,17 @@ const MESSAGES = [
   'Generating your intelligence report...',
 ];
 
+const STEPS = [
+  { label: 'Mapping Stars', delay: 0 },
+  { label: 'Analyzing Numbers', delay: 3000 },
+  { label: 'Scoring Traits', delay: 6000 },
+  { label: 'Writing Your Report', delay: 9000 },
+];
+
 export default function CalculatingView() {
   const [messageIndex, setMessageIndex] = useState(0);
   const [symbolIndex, setSymbolIndex] = useState(0);
+  const [activeStep, setActiveStep] = useState(-1);
 
   useEffect(() => {
     const msgInterval = setInterval(() => {
@@ -25,16 +33,40 @@ export default function CalculatingView() {
       setSymbolIndex((prev) => (prev + 1) % ZODIAC_SYMBOLS.length);
     }, 400);
 
+    // Activate steps sequentially
+    const stepTimers = STEPS.map((step) =>
+      setTimeout(() => {
+        setActiveStep((prev) => prev + 1);
+      }, step.delay)
+    );
+
     return () => {
       clearInterval(msgInterval);
       clearInterval(symInterval);
+      stepTimers.forEach(clearTimeout);
     };
   }, []);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-cream px-6">
-      {/* Zodiac ring animation */}
+      {/* Zodiac ring animation with particles */}
       <div className="relative mb-12 flex size-56 items-center justify-center">
+        {/* CSS-only particle effect - floating dots */}
+        {[...Array(6)].map((_, i) => (
+          <span
+            key={i}
+            className="absolute rounded-full bg-gold/60 animate-particle"
+            style={{
+              width: 4 + (i % 3),
+              height: 4 + (i % 3),
+              left: `${30 + (i * 12) % 50}%`,
+              top: `${50 + (i * 8) % 30}%`,
+              animationDelay: `${i * 0.6}s`,
+              animationDuration: `${2.5 + (i % 3) * 0.5}s`,
+            }}
+          />
+        ))}
+
         {/* Outer rotating ring */}
         <motion.div
           animate={{ rotate: 360 }}
@@ -96,7 +128,7 @@ export default function CalculatingView() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.4 }}
-          className="font-serif text-center text-lg text-brown-700"
+          className="font-serif text-center text-lg text-brown-700 dark:text-brown-300"
           style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
         >
           {MESSAGES[messageIndex]}
@@ -104,13 +136,59 @@ export default function CalculatingView() {
       </AnimatePresence>
 
       {/* Subtle progress indicator */}
-      <div className="mt-8 h-1 w-48 overflow-hidden rounded-full bg-brown-100">
+      <div className="mt-8 h-1 w-48 overflow-hidden rounded-full bg-brown-100 dark:bg-brown-100/30">
         <motion.div
           initial={{ width: '0%' }}
           animate={{ width: '100%' }}
           transition={{ duration: 10, ease: 'linear' }}
           className="h-full rounded-full bg-gradient-to-r from-gold-dark via-gold to-gold-light"
         />
+      </div>
+
+      {/* Step indicators */}
+      <div className="mt-6 flex items-center gap-4">
+        {STEPS.map((step, i) => {
+          const isActive = i <= activeStep;
+          const isCurrent = i === activeStep;
+          return (
+            <motion.div
+              key={i}
+              className="flex flex-col items-center gap-1.5"
+              initial={{ opacity: 0.4 }}
+              animate={{
+                opacity: isActive ? 1 : 0.4,
+                scale: isCurrent ? 1.05 : 1,
+              }}
+              transition={{ duration: 0.4 }}
+            >
+              <div
+                className={`flex size-6 items-center justify-center rounded-full border-2 transition-all duration-500 ${
+                  isActive
+                    ? 'border-gold bg-gold text-white'
+                    : 'border-brown-200 dark:border-brown-100 bg-transparent'
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    className="size-2 rounded-full bg-white"
+                  />
+                )}
+              </div>
+              <span
+                className={`text-[10px] font-medium transition-colors duration-500 text-center leading-tight max-w-[64px] ${
+                  isActive
+                    ? 'text-gold-dark dark:text-gold'
+                    : 'text-brown-300 dark:text-brown-300'
+                }`}
+              >
+                {step.label}
+              </span>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

@@ -362,6 +362,51 @@
   fill: #D4AF37;
 }
 
+/* Tab press animation */
+.tab-press {
+  transition: transform 0.1s ease;
+}
+.tab-press:active {
+  transform: scale(0.92);
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Glow pulse for active elements */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(212, 175, 55, 0.2); }
+  50% { box-shadow: 0 0 16px rgba(212, 175, 55, 0.4); }
+}
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Particle float upward */
+@keyframes particle-float {
+  0% { opacity: 0; transform: translateY(0) scale(0); }
+  20% { opacity: 1; transform: translateY(-10px) scale(1); }
+  100% { opacity: 0; transform: translateY(-60px) scale(0.5); }
+}
+.animate-particle {
+  animation: particle-float 3s ease-out infinite;
+}
+
+/* Twinkle stars */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.8; }
+}
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
 /* Mobile responsive text */
 @media (max-width: 640px) {
   .hero-title {
