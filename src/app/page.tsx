@@ -24,6 +24,7 @@ import TraitDashboardView from '@/components/ayuastro/dashboard/TraitDashboardVi
 import CosmicCalendarView from '@/components/ayuastro/calendar/CosmicCalendarView';
 import CosmicSoundsView from '@/components/ayuastro/wellness/CosmicSoundsView';
 import ZodiacDeepDiveView from '@/components/ayuastro/zodiac/ZodiacDeepDiveView';
+import NakshatraDeepDiveView from '@/components/ayuastro/zodiac/NakshatraDeepDiveView';
 import GratitudeJournalView from '@/components/ayuastro/wellness/GratitudeJournalView';
 import ZodiacGameView from '@/components/ayuastro/sync/ZodiacGameView';
 
@@ -87,6 +88,8 @@ export default function Home() {
         return <CosmicSoundsView />;
       case 'zodiacDeepDive':
         return <ZodiacDeepDiveView />;
+      case 'nakshatraDeepDive':
+        return <NakshatraDeepDiveView />;
       case 'gratitudeJournal':
         return <GratitudeJournalView />;
       case 'zodiacGame':
@@ -114,7 +117,7 @@ export default function Home() {
   };
 
   const showHeader = currentView !== 'landing' && currentView !== 'calculating';
-  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'zodiacDeepDive', 'gratitudeJournal', 'zodiacGame'].includes(currentView);
+  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'zodiacDeepDive', 'nakshatraDeepDive', 'gratitudeJournal', 'zodiacGame'].includes(currentView);
 
   return (
     <div className="min-h-screen flex flex-col bg-cream">
