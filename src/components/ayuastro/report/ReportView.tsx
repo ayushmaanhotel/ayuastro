@@ -143,7 +143,7 @@ export default function ReportView() {
                 {...fadeInUp}
                 transition={{ duration: 0.4, delay: 0.1 * i }}
               >
-                <Card className="border-0 shadow-sm bg-white">
+                <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                       <div className="flex size-8 items-center justify-center rounded-lg bg-sage-muted">
@@ -187,7 +187,7 @@ export default function ReportView() {
                 {...fadeInUp}
                 transition={{ duration: 0.4, delay: 0.1 * (i + freeSections.length) }}
               >
-                <Card className={`border-0 shadow-sm ${isLocked ? 'bg-white' : 'bg-white'}`}>
+                <Card className={`border-0 shadow-sm bg-white dark:bg-white/5`}>
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                       <div className="flex size-8 items-center justify-center rounded-lg bg-gold/10">
@@ -205,7 +205,7 @@ export default function ReportView() {
                             {section.content}
                           </p>
                         </div>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 dark:bg-card/40">
                           <Lock className="size-5 text-gold mb-2" />
                           <p className="text-xs font-medium text-brown-700 mb-2">
                             Unlock to reveal

@@ -292,7 +292,7 @@ export default function OnboardingView() {
             transition={{ duration: 0.3 }}
             className="w-full"
           >
-            <Card className="border-0 shadow-sm bg-white">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
               <CardContent className="p-6">
                 <div className="mb-2">
                   <Badge className="bg-sage-muted text-sage-dark text-xs">Step 1 of 4</Badge>
@@ -318,7 +318,7 @@ export default function OnboardingView() {
                       value={localName}
                       onChange={(e) => setLocalName(e.target.value)}
                       placeholder="Enter your name"
-                      className="pl-10 border-brown-200 bg-cream focus:border-brown-500 focus:ring-brown-500/20"
+                      className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-brown-500 focus:ring-brown-500/20"
                     />
                   </div>
                 </div>
@@ -339,7 +339,7 @@ export default function OnboardingView() {
             transition={{ duration: 0.3 }}
             className="w-full"
           >
-            <Card className="border-0 shadow-sm bg-white">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
               <CardContent className="p-6">
                 <div className="mb-2">
                   <Badge className="bg-sage-muted text-sage-dark text-xs">Phase 1: Coordinates</Badge>
@@ -363,7 +363,7 @@ export default function OnboardingView() {
                       <Input
                         value={localName}
                         onChange={(e) => setLocalName(e.target.value)}
-                        className="pl-10 border-brown-200 bg-cream focus:border-brown-500 focus:ring-brown-500/20"
+                        className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-brown-500 focus:ring-brown-500/20"
                       />
                     </div>
                   </div>
@@ -376,7 +376,7 @@ export default function OnboardingView() {
                         type="date"
                         value={localDob}
                         onChange={(e) => setLocalDob(e.target.value)}
-                        className="pl-10 border-brown-200 bg-cream focus:border-brown-500 focus:ring-brown-500/20"
+                        className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-brown-500 focus:ring-brown-500/20"
                       />
                     </div>
                   </div>
@@ -389,7 +389,7 @@ export default function OnboardingView() {
                         type="time"
                         value={localTob}
                         onChange={(e) => setLocalTob(e.target.value)}
-                        className="pl-10 border-brown-200 bg-cream focus:border-brown-500 focus:ring-brown-500/20"
+                        className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-brown-500 focus:ring-brown-500/20"
                       />
                     </div>
                   </div>
@@ -403,7 +403,7 @@ export default function OnboardingView() {
                         onChange={(e) => setLocalPlace(e.target.value)}
                         placeholder="e.g. Mumbai, New Delhi"
                         list="indian-cities"
-                        className="pl-10 border-brown-200 bg-cream focus:border-brown-500 focus:ring-brown-500/20"
+                        className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-brown-500 focus:ring-brown-500/20"
                       />
                       <datalist id="indian-cities">
                         {Object.keys(INDIAN_CITIES).map((city) => (
@@ -423,7 +423,7 @@ export default function OnboardingView() {
                           className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
                             localGender === g.toLowerCase()
                               ? 'bg-brown-700 text-white'
-                              : 'bg-brown-50 text-brown-600 hover:bg-brown-100'
+                              : 'bg-brown-50 text-brown-600 hover:bg-brown-100 dark:bg-brown-50 dark:text-brown-600 dark:hover:bg-brown-100'
                           }`}
                         >
                           {g}
@@ -449,7 +449,7 @@ export default function OnboardingView() {
             transition={{ duration: 0.3 }}
             className="w-full"
           >
-            <Card className="border-0 shadow-sm bg-white">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
               <CardContent className="p-6">
                 <div className="mb-2">
                   <Badge className="bg-sage-muted text-sage-dark text-xs">Step 3 of 4</Badge>
@@ -474,7 +474,7 @@ export default function OnboardingView() {
                           ? option === 'Partnered'
                             ? 'border-gold bg-gold/5 text-brown-900'
                             : 'border-brown-700 bg-brown-50 text-brown-900'
-                          : 'border-brown-100 bg-white text-brown-500 hover:border-brown-200 hover:bg-brown-50/50'
+                          : 'border-brown-100 dark:border-brown-100 bg-white dark:bg-white/5 text-brown-500 hover:border-brown-200 hover:bg-brown-50/50 dark:hover:bg-white/10'
                       }`}
                     >
                       <div
@@ -483,7 +483,7 @@ export default function OnboardingView() {
                             ? option === 'Partnered'
                               ? 'border-gold bg-gold'
                               : 'border-brown-700 bg-brown-700'
-                            : 'border-brown-200'
+                            : 'border-brown-200 dark:border-brown-200'
                         }`}
                       >
                         {localRelationship === option && (
@@ -531,7 +531,7 @@ export default function OnboardingView() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
                   >
-                    <Card className="border-0 shadow-sm bg-white">
+                    <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
                       <CardContent className="p-5">
                         <div className="flex items-start gap-2 mb-3">
                           <Badge
@@ -563,7 +563,7 @@ export default function OnboardingView() {
                                 className={`flex flex-1 flex-col items-center gap-1 rounded-lg py-2 text-center transition-all ${
                                   isSelected
                                     ? 'bg-brown-700 text-white scale-105'
-                                    : 'bg-brown-50 text-brown-400 hover:bg-brown-100'
+                                    : 'bg-brown-50 dark:bg-brown-50 text-brown-400 hover:bg-brown-100 dark:hover:bg-brown-100'
                                 }`}
                                 title={label}
                               >

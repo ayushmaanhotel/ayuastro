@@ -74,7 +74,7 @@ export default function CalculatingView() {
             ],
           }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="flex size-20 items-center justify-center rounded-full bg-white shadow-lg"
+          className="flex size-20 items-center justify-center rounded-full bg-white dark:bg-card shadow-lg"
         >
           <motion.span
             key={symbolIndex}

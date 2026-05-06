@@ -1,10 +1,23 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAyuAstroStore, type TraitScore } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { motion } from 'framer-motion';
 import {
   Sparkles,
@@ -21,8 +34,15 @@ import {
   BookOpen,
   TrendingUp,
   Clock,
+  Share2,
+  ChevronDown,
+  Flame,
+  Droplets,
+  Wind,
+  Mountain,
 } from 'lucide-react';
 import KundaliChart from './KundaliChart';
+import ShareableCard from './ShareableCard';
 
 const ZODIAC_ICONS: Record<string, string> = {
   Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
@@ -42,6 +62,13 @@ const ZODIAC_ELEMENTS: Record<string, { element: string; modality: string; ruler
   Capricorn: { element: 'Earth', modality: 'Cardinal', ruler: 'Saturn', color: 'text-gray-600' },
   Aquarius: { element: 'Air', modality: 'Fixed', ruler: 'Uranus', color: 'text-cyan-500' },
   Pisces: { element: 'Water', modality: 'Mutable', ruler: 'Neptune', color: 'text-teal-400' },
+};
+
+const ELEMENT_ICONS: Record<string, React.ElementType> = {
+  Fire: Flame,
+  Earth: Mountain,
+  Air: Wind,
+  Water: Droplets,
 };
 
 // Daily cosmic insights based on current day of year
@@ -121,8 +148,22 @@ function getDailyInsight() {
   return COSMIC_INSIGHTS[dayOfYear % COSMIC_INSIGHTS.length];
 }
 
+interface HoroscopeData {
+  sunSign: string;
+  moonSign: string;
+  date: string;
+  emotionalEnergy: string;
+  focusArea: string;
+  guidance: string;
+  luckyElement: string;
+}
+
 export default function InsightsView() {
   const { traitScores, astrologyData, numerologyData, birthDetails, setView } = useAyuAstroStore();
+
+  const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
+  const [horoscopeLoading, setHoroscopeLoading] = useState(true);
+  const [horoscopeExpanded, setHoroscopeExpanded] = useState(false);
 
   const topTraits = getTopTraits(traitScores);
   const archetype = getArchetype(traitScores);
@@ -140,6 +181,27 @@ export default function InsightsView() {
   const moonSign = astrologyData?.moonSign || 'Gemini';
   const ascendant = astrologyData?.ascendant || 'Taurus';
   const sunElement = ZODIAC_ELEMENTS[sunSign];
+
+  // Fetch daily horoscope
+  useEffect(() => {
+    async function fetchHoroscope() {
+      setHoroscopeLoading(true);
+      try {
+        const res = await fetch(`/api/horoscope/daily?sunSign=${encodeURIComponent(sunSign)}&moonSign=${encodeURIComponent(moonSign)}`);
+        if (res.ok) {
+          const json = await res.json();
+          setHoroscope(json.data);
+        }
+      } catch {
+        // Silently fail — horoscope is a nice-to-have
+      } finally {
+        setHoroscopeLoading(false);
+      }
+    }
+    fetchHoroscope();
+  }, [sunSign, moonSign]);
+
+  const ElementIcon = ELEMENT_ICONS[sunElement?.element || 'Fire'] || Flame;
 
   return (
     <div className="bg-cream px-4 py-6 pb-24">
@@ -176,17 +238,124 @@ export default function InsightsView() {
           </Card>
         </motion.div>
 
+        {/* Daily Horoscope Card */}
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.02 }}>
+          <Card className="border-0 shadow-sm bg-white overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-sage via-gold to-brown-300" />
+            <CardContent className="p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gold/10 to-sage-muted">
+                  <span className="text-2xl">{ZODIAC_ICONS[sunSign]}</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge className="bg-sage-muted text-sage-dark border-0 text-[10px] px-2 py-0 tracking-wider uppercase">
+                      Daily Horoscope
+                    </Badge>
+                    {sunElement && (
+                      <Badge className="bg-brown-50 text-brown-500 border-0 text-[10px] px-2 py-0 flex items-center gap-1">
+                        <ElementIcon className="size-2.5" />
+                        {sunElement.element}
+                      </Badge>
+                    )}
+                  </div>
+                  <h3
+                    className="font-serif text-base font-bold text-brown-900 mb-1"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    {sunSign} — Today
+                  </h3>
+
+                  {horoscopeLoading ? (
+                    <div className="space-y-2">
+                      <div className="h-3 w-full rounded bg-brown-100 animate-pulse" />
+                      <div className="h-3 w-3/4 rounded bg-brown-100 animate-pulse" />
+                    </div>
+                  ) : horoscope ? (
+                    <>
+                      <p className="text-sm text-brown-500 leading-relaxed">
+                        {horoscope.emotionalEnergy}
+                      </p>
+                      <Collapsible open={horoscopeExpanded} onOpenChange={setHoroscopeExpanded}>
+                        <CollapsibleTrigger asChild>
+                          <button className="mt-2 text-xs font-medium text-gold-dark hover:text-gold flex items-center gap-1 transition-colors">
+                            {horoscopeExpanded ? 'Show Less' : 'Read More'}
+                            <ChevronDown className={`size-3 transition-transform ${horoscopeExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="mt-3 space-y-3">
+                            <div className="rounded-lg bg-brown-50 p-3">
+                              <p className="text-[10px] uppercase tracking-wider text-brown-400 mb-1">Focus Area</p>
+                              <p className="text-sm text-brown-700">{horoscope.focusArea}</p>
+                            </div>
+                            <div className="rounded-lg bg-gold/5 p-3">
+                              <p className="text-[10px] uppercase tracking-wider text-gold-dark mb-1">Guidance</p>
+                              <p className="text-sm text-brown-700">{horoscope.guidance}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] uppercase tracking-wider text-brown-400">Lucky Element:</span>
+                              <Badge className="bg-gold/10 text-gold-dark border-0 text-xs">
+                                ✦ {horoscope.luckyElement}
+                              </Badge>
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </>
+                  ) : (
+                    <p className="text-sm text-brown-400">Unable to load horoscope. Try again later.</p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Header Section */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
-          <h1
-            className="font-serif text-3xl font-bold text-brown-900 mb-1"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-          >
-            Your Emotional Resonance
-          </h1>
-          <p className="text-sm text-brown-400 mb-4">
-            The architecture of your emotional world, mapped through cosmic and behavioral patterns.
-          </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h1
+                className="font-serif text-3xl font-bold text-brown-900 mb-1"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
+                Your Emotional Resonance
+              </h1>
+              <p className="text-sm text-brown-400 mb-4">
+                The architecture of your emotional world, mapped through cosmic and behavioral patterns.
+              </p>
+            </div>
+            {/* Share Profile Button */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 border-gold/30 text-gold-dark hover:bg-gold/5 hover:text-gold-dark"
+                >
+                  <Share2 className="size-3.5 mr-1" />
+                  Share
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md bg-cream">
+                <DialogHeader>
+                  <DialogTitle
+                    className="font-serif text-center text-xl"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Share Your Cosmic Profile
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="py-4">
+                  <ShareableCard />
+                </div>
+                <p className="text-center text-xs text-brown-400">
+                  Screenshot this card to share on social media
+                </p>
+              </DialogContent>
+            </Dialog>
+          </div>
           <div className="flex flex-wrap gap-2">
             {topTags.map((tag, i) => (
               <Badge

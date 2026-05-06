@@ -91,7 +91,7 @@ export default function PremiumView() {
                   <div
                     key={i}
                     className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${
-                      i < 3 ? 'bg-sage-muted/50 text-brown-700' : 'bg-gold/5 text-brown-400'
+                      i < 3 ? 'bg-sage-muted/50 dark:bg-sage-muted/30 text-brown-700' : 'bg-gold/5 text-brown-400'
                     }`}
                   >
                     <div
@@ -114,7 +114,7 @@ export default function PremiumView() {
 
         {/* Benefits */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
-          <Card className="border-0 shadow-sm bg-white">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
             <CardContent className="p-6">
               <h3 className="text-sm font-semibold text-brown-900 mb-4">What you will unlock</h3>
               <div className="space-y-3">
@@ -131,7 +131,7 @@ export default function PremiumView() {
 
         {/* Pricing */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }}>
-          <Card className="border-0 shadow-sm bg-white text-center">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/5 text-center">
             <CardContent className="p-6">
               <div className="mb-2">
                 <span className="text-lg text-brown-300 line-through">₹1,499</span>
@@ -171,16 +171,16 @@ export default function PremiumView() {
 
         {/* Testimonial */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.25 }}>
-          <Card className="border-0 shadow-sm bg-white">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
             <CardContent className="p-6">
-              <Quote className="size-8 text-brown-100 mb-2" />
+              <Quote className="size-8 text-brown-100 dark:text-brown-50/30 mb-2" />
               <p className="text-sm leading-relaxed text-brown-600 italic mb-3">
                 &ldquo;The premium report revealed patterns I had been living with for decades
                 without understanding. The money psychology section alone was worth it — I finally
                 see why I keep repeating the same financial cycles.&rdquo;
               </p>
               <div className="flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded-full bg-brown-50 text-xs font-semibold text-brown-600">
+                <div className="flex size-8 items-center justify-center rounded-full bg-brown-50 dark:bg-brown-50/50 text-xs font-semibold text-brown-600">
                   A
                 </div>
                 <div>

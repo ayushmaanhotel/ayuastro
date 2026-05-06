@@ -39,7 +39,7 @@ export default function BottomNav() {
               onClick={() => handleTabClick(tab)}
               className={`flex flex-col items-center gap-0.5 rounded-xl px-4 py-1.5 transition-all ${
                 isActive
-                  ? 'text-brown-700'
+                  ? 'text-brown-700 dark:text-brown-700'
                   : 'text-brown-300 hover:text-brown-500'
               }`}
               aria-label={tab.label}
@@ -55,7 +55,7 @@ export default function BottomNav() {
                   />
                 )}
               </div>
-              <span className={`text-[10px] font-medium ${isActive ? 'text-brown-700' : ''}`}>
+              <span className={`text-[10px] font-medium ${isActive ? 'text-brown-700 dark:text-brown-700' : ''}`}>
                 {tab.label}
               </span>
             </button>

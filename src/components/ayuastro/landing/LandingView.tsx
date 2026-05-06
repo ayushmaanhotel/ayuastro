@@ -22,7 +22,7 @@ const features = [
     icon: Sparkles,
     title: 'Vedic Astrology + AI',
     description: 'Your kundali, interpreted by emotional intelligence — not generic horoscopes',
-    bg: 'bg-white',
+    bg: 'bg-white dark:bg-white/5',
     iconBg: 'bg-gradient-to-br from-gold/20 to-gold/5',
     iconColor: 'text-gold-dark',
   },
@@ -30,7 +30,7 @@ const features = [
     icon: Brain,
     title: 'Behavioral Science',
     description: 'Questionnaire-driven trait mapping backed by psychological patterns',
-    bg: 'bg-sage-muted/60',
+    bg: 'bg-sage-muted/60 dark:bg-sage-muted/30',
     iconBg: 'bg-gradient-to-br from-sage-dark/20 to-sage/10',
     iconColor: 'text-sage-dark',
   },
@@ -38,7 +38,7 @@ const features = [
     icon: Hash,
     title: 'Numerology Fusion',
     description: 'Numbers reveal what words cannot — your name, your date, your code',
-    bg: 'bg-white',
+    bg: 'bg-white dark:bg-white/5',
     iconBg: 'bg-gradient-to-br from-brown-700/15 to-brown-500/5',
     iconColor: 'text-brown-700',
   },
@@ -46,7 +46,7 @@ const features = [
     icon: Heart,
     title: 'Emotional Pattern AI',
     description: 'Not predictions. Pattern recognition. The architecture beneath your reactions.',
-    bg: 'bg-sage-muted/60',
+    bg: 'bg-sage-muted/60 dark:bg-sage-muted/30',
     iconBg: 'bg-gradient-to-br from-brown-400/20 to-brown-300/10',
     iconColor: 'text-brown-500',
   },
@@ -243,7 +243,7 @@ export default function LandingView() {
               <motion.div
                 key={i}
                 variants={fadeInUp}
-                className="text-center p-4 rounded-2xl bg-white/60 border border-brown-100/50"
+                className="text-center p-4 rounded-2xl bg-white/60 dark:bg-white/5 border border-brown-100/50 dark:border-brown-100/30"
               >
                 <p
                   className="font-serif text-2xl font-bold text-brown-900"
@@ -267,7 +267,7 @@ export default function LandingView() {
           transition={{ duration: 0.6 }}
           className="mx-auto max-w-lg"
         >
-          <Card className="border-0 shadow-sm bg-white p-2">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/5 p-2">
             <CardContent className="p-5">
               <div className="flex items-center gap-1 mb-3">
                 {[1, 2, 3, 4, 5].map((s) => (

@@ -45,10 +45,10 @@ const ZODIAC_MODALITIES: Record<string, string> = {
 };
 
 const ELEMENT_COLORS: Record<string, string> = {
-  Fire: 'bg-red-100 text-red-700 border-red-200',
-  Earth: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  Air: 'bg-sky-100 text-sky-700 border-sky-200',
-  Water: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  Fire: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800',
+  Earth: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800',
+  Air: 'bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-800',
+  Water: 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800',
 };
 
 const ELEMENT_COMPAT: Record<string, string[]> = {
@@ -174,6 +174,7 @@ function ScoreRing({ score, size = 120, strokeWidth = 8, color = '#D4AF37' }: { 
           fill="none"
           stroke="#E8E0D4"
           strokeWidth={strokeWidth}
+          className="dark:stroke-brown-100"
         />
         <motion.circle
           cx={size / 2}
@@ -309,7 +310,7 @@ export default function SyncView() {
 
         {/* Your Cosmic Profile Card */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
-          <Card className="border-0 shadow-sm bg-white">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                 <Star className="size-5 text-gold" />
@@ -318,7 +319,7 @@ export default function SyncView() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 gap-3">
-                <div className="text-center rounded-xl bg-brown-50 p-3">
+                <div className="text-center rounded-xl bg-brown-50 dark:bg-brown-50/50 p-3">
                   <Sun className="mx-auto mb-1 size-5 text-gold" />
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Sun</p>
                   <p className="text-sm font-semibold text-brown-900">{userSunSign}</p>
@@ -329,7 +330,7 @@ export default function SyncView() {
                     </Badge>
                   </div>
                 </div>
-                <div className="text-center rounded-xl bg-brown-50 p-3">
+                <div className="text-center rounded-xl bg-brown-50 dark:bg-brown-50/50 p-3">
                   <Moon className="mx-auto mb-1 size-5 text-brown-400" />
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Moon</p>
                   <p className="text-sm font-semibold text-brown-900">{userMoonSign}</p>
@@ -340,7 +341,7 @@ export default function SyncView() {
                     </Badge>
                   </div>
                 </div>
-                <div className="text-center rounded-xl bg-brown-50 p-3">
+                <div className="text-center rounded-xl bg-brown-50 dark:bg-brown-50/50 p-3">
                   <Compass className="mx-auto mb-1 size-5 text-brown-500" />
                   <p className="text-[10px] uppercase tracking-wider text-brown-400">Ascendant</p>
                   <p className="text-sm font-semibold text-brown-900">{userAscendant}</p>
@@ -358,7 +359,7 @@ export default function SyncView() {
 
         {/* Compatibility Check Section */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
-          <Card className="border-0 shadow-sm bg-white">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                 <Heart className="size-5 text-gold" />
@@ -376,7 +377,7 @@ export default function SyncView() {
                   value={partnerName}
                   onChange={(e) => setPartnerName(e.target.value)}
                   placeholder="Enter their name..."
-                  className="w-full rounded-xl border border-brown-200 bg-brown-50/50 px-4 py-3 text-sm text-brown-900 placeholder:text-brown-300 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold/50 transition-all"
+                  className="w-full rounded-xl border border-brown-200 dark:border-brown-200 bg-brown-50/50 dark:bg-brown-50/30 px-4 py-3 text-sm text-brown-900 dark:text-brown-900 placeholder:text-brown-300 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold/50 transition-all"
                 />
               </div>
 
@@ -387,7 +388,7 @@ export default function SyncView() {
                 </label>
                 <button
                   onClick={() => setShowSignDropdown(!showSignDropdown)}
-                  className="w-full rounded-xl border border-brown-200 bg-brown-50/50 px-4 py-3 text-sm text-left flex items-center justify-between hover:border-gold/30 transition-all"
+                  className="w-full rounded-xl border border-brown-200 dark:border-brown-200 bg-brown-50/50 dark:bg-brown-50/30 px-4 py-3 text-sm text-left flex items-center justify-between hover:border-gold/30 transition-all"
                 >
                   <span className={partnerSign ? 'text-brown-900' : 'text-brown-300'}>
                     {partnerSign
@@ -403,7 +404,7 @@ export default function SyncView() {
                       animate={{ opacity: 1, y: 0, height: 'auto' }}
                       exit={{ opacity: 0, y: -4, height: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute z-20 mt-1 w-full rounded-xl border border-brown-200 bg-white shadow-lg overflow-hidden"
+                      className="absolute z-20 mt-1 w-full rounded-xl border border-brown-200 dark:border-brown-100 bg-white dark:bg-card shadow-lg overflow-hidden"
                     >
                       <div className="max-h-56 overflow-y-auto custom-scrollbar p-1">
                         {ZODIAC_SIGNS.map((sign) => (
@@ -416,7 +417,7 @@ export default function SyncView() {
                             className={`w-full rounded-lg px-3 py-2.5 text-sm text-left flex items-center gap-3 transition-colors ${
                               partnerSign === sign
                                 ? 'bg-gold/10 text-gold-dark font-medium'
-                                : 'text-brown-700 hover:bg-brown-50'
+                                : 'text-brown-700 hover:bg-brown-50 dark:hover:bg-brown-50/50'
                             }`}
                           >
                             <span className="text-lg">{ZODIAC_SYMBOLS[sign]}</span>
@@ -471,7 +472,7 @@ export default function SyncView() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5 }}
             >
-              <Card className="border-0 shadow-sm bg-white">
+              <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                     <Flame className="size-5 text-gold" />
@@ -496,11 +497,11 @@ export default function SyncView() {
 
                   {/* Element & Modality Match */}
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-xl bg-brown-50 p-3 text-center">
+                    <div className="rounded-xl bg-brown-50 dark:bg-brown-50/50 p-3 text-center">
                       <p className="text-[10px] uppercase tracking-wider text-brown-400 mb-1">Element Match</p>
                       <p className="text-xs font-medium text-brown-800">{result.elementMatch}</p>
                     </div>
-                    <div className="rounded-xl bg-brown-50 p-3 text-center">
+                    <div className="rounded-xl bg-brown-50 dark:bg-brown-50/50 p-3 text-center">
                       <p className="text-[10px] uppercase tracking-wider text-brown-400 mb-1">Modality Match</p>
                       <p className="text-xs font-medium text-brown-800">{result.modalityMatch}</p>
                     </div>
@@ -528,7 +529,7 @@ export default function SyncView() {
                   <Button
                     variant="outline"
                     onClick={handleReset}
-                    className="w-full border-brown-200 text-brown-600 hover:bg-brown-50"
+                    className="w-full border-brown-200 text-brown-600 hover:bg-brown-50 dark:hover:bg-brown-50/50"
                   >
                     Check Another Sign
                   </Button>
@@ -540,7 +541,7 @@ export default function SyncView() {
 
         {/* Zodiac Pairings Guide */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
-          <Card className="border-0 shadow-sm bg-white">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                 <Heart className="size-5 text-gold" />
@@ -555,7 +556,7 @@ export default function SyncView() {
                     initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.05 * i, duration: 0.3 }}
-                    className="flex items-center gap-3 rounded-xl bg-brown-50/60 p-3"
+                    className="flex items-center gap-3 rounded-xl bg-brown-50/60 dark:bg-brown-50/30 p-3"
                   >
                     <div className="flex items-center gap-1 shrink-0">
                       <span className="text-lg">{ZODIAC_SYMBOLS[sign1]}</span>

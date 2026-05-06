@@ -44,25 +44,25 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* AyuAstro Custom Colors */
-  --color-cream: #F8F5F0;
-  --color-cream-dark: #F0EDEB;
-  --color-brown-900: #3E2723;
-  --color-brown-800: #4E342E;
-  --color-brown-700: #5D4037;
-  --color-brown-600: #6D4C41;
-  --color-brown-500: #795548;
-  --color-brown-400: #8D6E63;
-  --color-brown-300: #A1887F;
-  --color-brown-200: #BCAAA4;
-  --color-brown-100: #D7CCC8;
-  --color-brown-50: #EFEBE9;
-  --color-gold: #D4AF37;
-  --color-gold-light: #F0C14B;
-  --color-gold-dark: #B8960C;
-  --color-sage: #A5D6A7;
-  --color-sage-dark: #81C784;
-  --color-sage-muted: #C8E6C9;
+  /* AyuAstro Custom Colors - dynamic via CSS custom properties */
+  --color-cream: var(--ayu-cream);
+  --color-cream-dark: var(--ayu-cream-dark);
+  --color-brown-900: var(--ayu-brown-900);
+  --color-brown-800: var(--ayu-brown-800);
+  --color-brown-700: var(--ayu-brown-700);
+  --color-brown-600: var(--ayu-brown-600);
+  --color-brown-500: var(--ayu-brown-500);
+  --color-brown-400: var(--ayu-brown-400);
+  --color-brown-300: var(--ayu-brown-300);
+  --color-brown-200: var(--ayu-brown-200);
+  --color-brown-100: var(--ayu-brown-100);
+  --color-brown-50: var(--ayu-brown-50);
+  --color-gold: var(--ayu-gold);
+  --color-gold-light: var(--ayu-gold-light);
+  --color-gold-dark: var(--ayu-gold-dark);
+  --color-sage: var(--ayu-sage);
+  --color-sage-dark: var(--ayu-sage-dark);
+  --color-sage-muted: var(--ayu-sage-muted);
 }
 
 :root {
@@ -98,6 +98,26 @@
   --sidebar-accent-foreground: #3E2723;
   --sidebar-border: #D7CCC8;
   --sidebar-ring: #A1887F;
+
+  /* AyuAstro Custom Colors - Light Mode */
+  --ayu-cream: #F8F5F0;
+  --ayu-cream-dark: #F0EDEB;
+  --ayu-brown-900: #3E2723;
+  --ayu-brown-800: #4E342E;
+  --ayu-brown-700: #5D4037;
+  --ayu-brown-600: #6D4C41;
+  --ayu-brown-500: #795548;
+  --ayu-brown-400: #8D6E63;
+  --ayu-brown-300: #A1887F;
+  --ayu-brown-200: #BCAAA4;
+  --ayu-brown-100: #D7CCC8;
+  --ayu-brown-50: #EFEBE9;
+  --ayu-gold: #D4AF37;
+  --ayu-gold-light: #F0C14B;
+  --ayu-gold-dark: #B8960C;
+  --ayu-sage: #A5D6A7;
+  --ayu-sage-dark: #81C784;
+  --ayu-sage-muted: #C8E6C9;
 }
 
 .dark {
@@ -132,6 +152,26 @@
   --sidebar-accent-foreground: #EFEBE9;
   --sidebar-border: #4E342E;
   --sidebar-ring: #8D6E63;
+
+  /* AyuAstro Custom Colors - Dark Mode */
+  --ayu-cream: #1A1412;
+  --ayu-cream-dark: #2D2320;
+  --ayu-brown-900: #EFEBE9;
+  --ayu-brown-800: #D7CCC8;
+  --ayu-brown-700: #D4AF37;
+  --ayu-brown-600: #BCAAA4;
+  --ayu-brown-500: #A1887F;
+  --ayu-brown-400: #8D6E63;
+  --ayu-brown-300: #6D4C41;
+  --ayu-brown-200: #5D4037;
+  --ayu-brown-100: #4E342E;
+  --ayu-brown-50: #3E2723;
+  --ayu-gold: #F0C14B;
+  --ayu-gold-light: #FFD54F;
+  --ayu-gold-dark: #D4AF37;
+  --ayu-sage: #81C784;
+  --ayu-sage-dark: #66BB6A;
+  --ayu-sage-muted: #2E4A30;
 }
 
 @layer base {
@@ -165,6 +205,13 @@
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
+  background: #8D6E63;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #5D4037;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
   background: #8D6E63;
 }
 
@@ -228,6 +275,11 @@
   animation: shimmer 2s ease-in-out infinite;
 }
 
+.dark .shimmer {
+  background: linear-gradient(90deg, transparent, rgba(240, 193, 75, 0.08), transparent);
+  background-size: 200% 100%;
+}
+
 /* Glass morphism effect */
 .glass {
   background: rgba(255, 255, 255, 0.7);
@@ -244,6 +296,13 @@
 /* Gold gradient text */
 .text-gold-gradient {
   background: linear-gradient(135deg, #D4AF37, #F0C14B, #D4AF37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark .text-gold-gradient {
+  background: linear-gradient(135deg, #F0C14B, #FFD54F, #F0C14B);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -267,9 +326,40 @@
   text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
 }
 
+.dark .zodiac-glow {
+  text-shadow: 0 0 25px rgba(240, 193, 75, 0.4);
+}
+
 /* Bottom navigation */
 .bottom-nav {
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Kundali Chart dark mode overrides */
+.dark .kundali-chart .chart-diamond-light {
+  fill: url(#chartBgDark);
+  stroke: #D4AF37;
+}
+
+.dark .kundali-chart .chart-lines {
+  stroke: #D4AF37;
+  opacity: 0.5;
+}
+
+.dark .kundali-chart .chart-zodiac {
+  fill: #BCAAA4 !important;
+}
+
+.dark .kundali-chart .chart-house-num {
+  fill: #8D6E63 !important;
+}
+
+.dark .kundali-chart .chart-planet {
+  fill: #EFEBE9 !important;
+}
+
+.dark .kundali-chart .chart-dot {
+  fill: #D4AF37;
 }
 
 /* Mobile responsive text */

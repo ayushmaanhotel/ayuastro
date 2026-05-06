@@ -1,14 +1,20 @@
 'use client';
 
 import { useAyuAstroStore } from '@/store/ayuastro-store';
-import { Menu, User } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { Menu, User, Sun, Moon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 export default function Header() {
   const { currentView, setView, birthDetails } = useAyuAstroStore();
+  const { theme, setTheme } = useTheme();
 
   if (currentView === 'landing' || currentView === 'calculating') return null;
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   return (
     <motion.header
@@ -20,7 +26,7 @@ export default function Header() {
       <div className="mx-auto flex h-14 max-w-lg items-center justify-between px-4">
         <button
           onClick={() => setView('insights')}
-          className="flex size-9 items-center justify-center rounded-full transition-colors hover:bg-brown-50"
+          className="flex size-9 items-center justify-center rounded-full transition-colors hover:bg-brown-50 dark:hover:bg-brown-800"
           aria-label="Menu"
         >
           <Menu className="size-5 text-brown-700" />
@@ -39,19 +45,41 @@ export default function Header() {
           </h1>
         </button>
 
-        <button
-          onClick={() => setView('profile')}
-          className="flex size-9 items-center justify-center rounded-full transition-colors hover:bg-brown-50"
-          aria-label="Profile"
-        >
-          {birthDetails?.name ? (
-            <div className="flex size-8 items-center justify-center rounded-full bg-brown-700 text-xs font-medium text-white">
-              {birthDetails.name.charAt(0).toUpperCase()}
-            </div>
-          ) : (
-            <User className="size-5 text-brown-700" />
-          )}
-        </button>
+        <div className="flex items-center gap-1">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="flex size-9 items-center justify-center rounded-full transition-all duration-300 hover:bg-brown-50 dark:hover:bg-brown-800"
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <motion.div
+              initial={false}
+              animate={{ rotate: theme === 'dark' ? 180 : 0, scale: 1 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              {theme === 'dark' ? (
+                <Sun className="size-5 text-gold" />
+              ) : (
+                <Moon className="size-5 text-brown-700" />
+              )}
+            </motion.div>
+          </button>
+
+          {/* Profile Button */}
+          <button
+            onClick={() => setView('profile')}
+            className="flex size-9 items-center justify-center rounded-full transition-colors hover:bg-brown-50 dark:hover:bg-brown-800"
+            aria-label="Profile"
+          >
+            {birthDetails?.name ? (
+              <div className="flex size-8 items-center justify-center rounded-full bg-brown-700 text-xs font-medium text-white">
+                {birthDetails.name.charAt(0).toUpperCase()}
+              </div>
+            ) : (
+              <User className="size-5 text-brown-700" />
+            )}
+          </button>
+        </div>
       </div>
     </motion.header>
   );

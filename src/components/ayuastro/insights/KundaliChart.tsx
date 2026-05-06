@@ -143,15 +143,20 @@ export default function KundaliChart({ planetaryPositions, ascendant, sunSign, m
       <svg
         viewBox="0 0 300 300"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full max-w-[340px] h-auto"
+        className="w-full max-w-[340px] h-auto kundali-chart"
         role="img"
         aria-label="North Indian Kundali Chart"
       >
         <defs>
           {/* Background gradient */}
           <radialGradient id="chartBg" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#FFFDF7" />
-            <stop offset="100%" stopColor="#F5F0E6" />
+            <stop offset="0%" stopColor="#FFFDF7" className="chart-bg-light" />
+            <stop offset="100%" stopColor="#F5F0E6" className="chart-bg-light" />
+          </radialGradient>
+          {/* Dark mode background gradient */}
+          <radialGradient id="chartBgDark" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#2D2320" />
+            <stop offset="100%" stopColor="#1A1412" />
           </radialGradient>
           {/* Gold highlight for 1st house */}
           <linearGradient id="ascendantGlow" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -164,51 +169,35 @@ export default function KundaliChart({ planetaryPositions, ascendant, sunSign, m
           </filter>
         </defs>
 
-        {/* Outer diamond with shadow */}
+        {/* Outer diamond with shadow - light mode */}
         <polygon
           points={`${TOP[0]},${TOP[1]} ${RIGHT[0]},${RIGHT[1]} ${BOTTOM[0]},${BOTTOM[1]} ${LEFT[0]},${LEFT[1]}`}
           fill="url(#chartBg)"
           stroke="#5D4037"
           strokeWidth="2.5"
           filter="url(#chartShadow)"
+          className="chart-diamond-light"
         />
 
         {/* Internal grid lines */}
-        <g stroke="#5D4037" strokeWidth="1.2" opacity="0.7">
+        <g stroke="#5D4037" strokeWidth="1.2" opacity="0.7" className="chart-lines">
           {/* Vertical lines within diamond */}
-          {/* Top-left to center-left */}
           <line x1={70} y1={10} x2={70} y2={70} />
-          {/* Top-left-inner to bottom-left-inner */}
           <line x1={70} y1={70} x2={70} y2={230} />
-          {/* Bottom-left to center-left */}
           <line x1={70} y1={230} x2={70} y2={290} />
-
-          {/* Top-right to center-right */}
           <line x1={230} y1={10} x2={230} y2={70} />
-          {/* Top-right-inner to bottom-right-inner */}
           <line x1={230} y1={70} x2={230} y2={230} />
-          {/* Bottom-right to center-right */}
           <line x1={230} y1={230} x2={230} y2={290} />
-
           {/* Horizontal lines within diamond */}
-          {/* Left-top to center-top */}
           <line x1={10} y1={70} x2={70} y2={70} />
-          {/* Top-inner-left to top-inner-right */}
           <line x1={70} y1={70} x2={230} y2={70} />
-          {/* Right-top to center-top */}
           <line x1={230} y1={70} x2={290} y2={70} />
-
-          {/* Left-bottom to center-bottom */}
           <line x1={10} y1={230} x2={70} y2={230} />
-          {/* Bottom-inner-left to bottom-inner-right */}
           <line x1={70} y1={230} x2={230} y2={230} />
-          {/* Right-bottom to center-bottom */}
           <line x1={230} y1={230} x2={290} y2={230} />
-
           {/* Center cross */}
           <line x1={70} y1={150} x2={230} y2={150} />
           <line x1={150} y1={70} x2={150} y2={230} />
-
           {/* Diagonal lines from center to midpoints of diamond edges */}
           <line x1={150} y1={10} x2={150} y2={70} />
           <line x1={150} y1={230} x2={150} y2={290} />
@@ -234,7 +223,6 @@ export default function KundaliChart({ planetaryPositions, ascendant, sunSign, m
           const isFirstHouse = houseNum === 1;
 
           // Adjust label position based on house shape
-          // For triangular houses, shift label slightly
           let houseLabelOffset: [number, number] = [0, 0];
           let zodiacOffset: [number, number] = [0, -12];
           let planetStartY = cy + 6;
@@ -260,6 +248,7 @@ export default function KundaliChart({ planetaryPositions, ascendant, sunSign, m
                   dominantBaseline="middle"
                   fontSize="14"
                   fill={isFirstHouse ? '#D4AF37' : '#8D6E63'}
+                  className="chart-zodiac"
                   opacity={0.8}
                 >
                   {zodiacSymbol}
@@ -275,6 +264,7 @@ export default function KundaliChart({ planetaryPositions, ascendant, sunSign, m
                 fontSize="8"
                 fontWeight="600"
                 fill={isFirstHouse ? '#D4AF37' : '#A1887F'}
+                className="chart-house-num"
                 opacity={0.7}
               >
                 {houseNum}
@@ -282,9 +272,7 @@ export default function KundaliChart({ planetaryPositions, ascendant, sunSign, m
 
               {/* Planet abbreviations */}
               {planets.map((planet, pi) => {
-                // Distribute planets in a small column within the house
                 const pY = planetStartY + pi * 11;
-                // Keep planets within bounds
                 const clampedPY = Math.min(Math.max(pY, polygon[0][1] + 8), polygon[polygon.length - 1][1] - 4);
                 return (
                   <g key={planet.name}>
@@ -296,6 +284,7 @@ export default function KundaliChart({ planetaryPositions, ascendant, sunSign, m
                       fontSize="9"
                       fontWeight="700"
                       fill={isFirstHouse ? '#8B6914' : '#4E342E'}
+                      className="chart-planet"
                     >
                       {planet.abbr}
                     </text>
@@ -319,7 +308,7 @@ export default function KundaliChart({ planetaryPositions, ascendant, sunSign, m
           );
         })}
 
-        {/* Ascendant marker - small "Asc" label near house 1 */}
+        {/* Ascendant marker */}
         <text
           x={150}
           y={4}
@@ -341,6 +330,7 @@ export default function KundaliChart({ planetaryPositions, ascendant, sunSign, m
             cy={point[1]}
             r="3"
             fill="#5D4037"
+            className="chart-dot"
             opacity={0.5}
           />
         ))}
