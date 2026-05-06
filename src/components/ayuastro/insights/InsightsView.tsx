@@ -42,6 +42,8 @@ import {
   Mountain,
   Orbit,
   Check,
+  BarChart3,
+  Calendar,
 } from 'lucide-react';
 import KundaliChart from './KundaliChart';
 import ShareableCard from './ShareableCard';
@@ -241,6 +243,20 @@ function getRitual(moonSign: string): typeof RITUAL_SUGGESTIONS[number] {
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
+};
+
+const staggerContainer = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const staggerItem = {
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
 function getTraitColor(score: number): string {
@@ -458,11 +474,28 @@ export default function InsightsView() {
   }, [birthDetails?.dateOfBirth]);
 
   return (
-    <div className="bg-cream px-4 py-6 pb-24">
-      <div className="mx-auto max-w-lg space-y-6">
+    <div className="bg-cream px-4 py-6 pb-24 relative">
+      {/* Decorative star constellation pattern at top with twinkle */}
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-center gap-3 py-2 select-none pointer-events-none overflow-hidden" aria-hidden="true">
+        {'♈♉♊♋♌♍♎♏♐♑♒♓'.split('').map((sym, i) => (
+          <span
+            key={i}
+            className="text-brown-100/50 dark:text-brown-50/15 text-sm animate-twinkle"
+            style={{ animationDelay: `${i * 0.25}s` }}
+          >
+            {sym}
+          </span>
+        ))}
+      </div>
+      <motion.div
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+        className="mx-auto max-w-lg space-y-6"
+      >
 
         {/* Daily Cosmic Insight Card */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
+        <motion.div variants={staggerItem}>
           <Card className="glass border-0 shadow-md overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-brown-100/20 dark:from-gold/3 dark:via-transparent dark:to-brown-50/10" />
             <CardContent className="relative p-5">
@@ -492,9 +525,9 @@ export default function InsightsView() {
           </Card>
         </motion.div>
 
-        {/* Daily Affirmation & Ritual Card */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.01 }}>
-          <Card className="border-0 shadow-md overflow-hidden relative">
+        {/* Daily Affirmation & Ritual Card — pulsing glow border */}
+        <motion.div variants={staggerItem}>
+          <Card className="border-0 shadow-md overflow-hidden relative animate-breathe-glow">
             {/* Decorative top accent bar */}
             <div className="h-1 bg-gradient-to-r from-gold via-sage to-gold-dark" />
             <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-sage-muted/10 dark:from-gold/3 dark:to-sage/5" />
@@ -591,7 +624,7 @@ export default function InsightsView() {
         </motion.div>
 
         {/* Daily Horoscope Card */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.02 }}>
+        <motion.div variants={staggerItem}>
           <Card className="glass border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-sage via-gold to-brown-300" />
             <CardContent className="p-5">
@@ -665,7 +698,7 @@ export default function InsightsView() {
         </motion.div>
 
         {/* Planetary Transits Card */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.04 }}>
+        <motion.div variants={staggerItem}>
           <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-purple-400 via-amber-500 to-sage" />
             <CardContent className="p-5">
@@ -759,8 +792,42 @@ export default function InsightsView() {
           </Card>
         </motion.div>
 
-        {/* Header Section */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
+        {/* Cosmic Calendar Card */}
+        <motion.div variants={staggerItem}>
+          <Card
+            className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden card-hover cursor-pointer"
+            onClick={() => setView('calendar')}
+          >
+            <div className="h-1 bg-gradient-to-r from-gold via-amber-400 to-sage" />
+            <CardContent className="p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gold/20 to-sage/20 dark:from-gold/10 dark:to-sage/10">
+                  <Calendar className="size-5 text-gold-dark dark:text-gold" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge className="bg-gold/15 text-gold-dark dark:bg-gold/20 dark:text-gold border-0 text-[10px] px-2 py-0 tracking-wider uppercase">
+                      Calendar
+                    </Badge>
+                  </div>
+                  <h3
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Cosmic Calendar
+                  </h3>
+                  <p className="text-xs text-brown-400 dark:text-brown-400 mt-0.5">
+                    Upcoming cosmic events and their emotional impact
+                  </p>
+                </div>
+                <ArrowRight className="size-4 text-brown-300 dark:text-brown-400 shrink-0 mt-1" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Header Section — with parallax scroll effect */}
+        <motion.div variants={staggerItem} style={{ willChange: 'transform' }}>
           <div className="relative flex items-start justify-between">
             {/* Decorative zodiac constellation pattern behind header */}
             <div className="absolute -top-4 -left-2 text-brown-100/40 dark:text-brown-50/10 text-3xl tracking-[0.6em] leading-relaxed select-none pointer-events-none z-0" aria-hidden="true">
@@ -833,7 +900,11 @@ export default function InsightsView() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-3xl">{getArchetypeEmoji(archetype)}</span>
+                <motion.span
+                  className="text-3xl inline-block"
+                  animate={{ opacity: [0.7, 1, 0.7] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                >{getArchetypeEmoji(archetype)}</motion.span>
                 <p className="font-serif text-xl font-bold text-brown-900" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
                   {archetype}
                 </p>
@@ -848,7 +919,7 @@ export default function InsightsView() {
         </motion.div>
 
         {/* Duality of Self Section */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
+        <motion.div variants={staggerItem}>
           <Card className="glass-light card-hover border-0 shadow-md">
             <CardContent className="p-6">
               <h3
@@ -915,7 +986,7 @@ export default function InsightsView() {
         </motion.div>
 
         {/* Trait Scores Display */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }}>
+        <motion.div variants={staggerItem}>
           <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
@@ -942,7 +1013,8 @@ export default function InsightsView() {
                     <div className="h-2.5 rounded-full bg-brown-100 overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: `${trait.score}%` }}
+                        whileInView={{ width: `${trait.score}%` }}
+                        viewport={{ once: true, margin: '-20px' }}
                         transition={{ duration: 0.8, delay: 0.08 * i, ease: 'easeOut' }}
                         className={`h-full rounded-full ${getTraitBarColor(trait.score)}`}
                       />
@@ -956,13 +1028,28 @@ export default function InsightsView() {
                 <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-brown-600" /> Moderate (40-70)</div>
                 <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gold" /> Growth Area (&lt;40)</div>
               </div>
+              {/* Expand to Dashboard */}
+              <div className="mt-4 pt-3 border-t border-brown-100 dark:border-brown-700/30">
+                <button
+                  onClick={() => setView('dashboard')}
+                  className="w-full flex items-center justify-between rounded-xl bg-gradient-to-r from-gold/5 to-sage-muted/30 dark:from-gold/10 dark:to-sage/10 px-4 py-3 group hover:from-gold/10 hover:to-sage-muted/40 transition-all"
+                >
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="size-4 text-gold-dark dark:text-gold" />
+                    <span className="text-sm font-medium text-brown-800 dark:text-brown-200" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                      View Full Dashboard
+                    </span>
+                  </div>
+                  <ArrowRight className="size-4 text-gold-dark dark:text-gold group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
 
         {/* Numerology Summary Card */}
         {numerologyData && (
-          <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.22 }}>
+          <motion.div variants={staggerItem}>
             <Card className="glass-light card-hover border-0 shadow-md">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
@@ -999,7 +1086,7 @@ export default function InsightsView() {
         )}
 
         {/* Elemental Balance Card */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.23 }}>
+        <motion.div variants={staggerItem}>
           <Card className="glass-light card-hover border-0 shadow-md overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-red-400 via-green-400 via-yellow-400 to-blue-400" />
             <CardHeader className="pb-2">
@@ -1063,7 +1150,7 @@ export default function InsightsView() {
         </motion.div>
 
         {/* Astrology Summary Card with Kundali Chart */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.25 }}>
+        <motion.div variants={staggerItem}>
           <Card className="glass-premium zodiac-corner relative card-hover border-0 shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
@@ -1205,16 +1292,43 @@ export default function InsightsView() {
 
         {/* Dasha Timeline */}
         {dashaPeriods.length > 0 && (
-          <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.28 }}>
+          <motion.div variants={staggerItem}>
             <DashaTimeline dashaPeriods={dashaPeriods} />
           </motion.div>
         )}
 
-        {/* CTA */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.3 }}>
-          <Card className="card-hover border-0 shadow-md overflow-hidden">
+        {/* CTA — cosmic gradient background with floating dots */}
+        <motion.div variants={staggerItem}>
+          <Card className="card-hover border-0 shadow-md overflow-hidden relative">
+            {/* Cosmic gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gold/8 via-brown-700/5 to-sage/8 dark:from-gold/5 dark:via-brown-700/3 dark:to-sage/5" />
+            {/* Floating decorative dots */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+              {[0,1,2,3,4,5].map(dot => (
+                <motion.div
+                  key={dot}
+                  className="absolute rounded-full bg-gold/25"
+                  style={{
+                    width: 3 + (dot % 3),
+                    height: 3 + (dot % 3),
+                    left: `${10 + dot * 15}%`,
+                    top: `${20 + (dot * 11) % 60}%`,
+                  }}
+                  animate={{
+                    y: [0, -12, 0],
+                    opacity: [0.3, 0.7, 0.3],
+                  }}
+                  transition={{
+                    duration: 3 + dot * 0.5,
+                    repeat: Infinity,
+                    delay: dot * 0.4,
+                    ease: 'easeInOut',
+                  }}
+                />
+              ))}
+            </div>
             <div className="h-1 bg-gradient-to-r from-gold via-gold-light to-gold-dark" />
-            <CardContent className="p-5 text-center">
+            <CardContent className="relative p-5 text-center">
               <p
                 className="font-serif text-lg font-bold text-brown-900 mb-2"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
@@ -1235,7 +1349,7 @@ export default function InsightsView() {
             </CardContent>
           </Card>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   );
 }

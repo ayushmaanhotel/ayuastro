@@ -63,7 +63,10 @@ function CountdownTimer() {
   return (
     <div className="text-center">
       <p className="text-xs text-brown-400 mb-1">Launch Price Ends In:</p>
-      <p className="font-mono text-lg font-bold text-gold-dark dark:text-gold tracking-wider">
+      <p
+        className={`font-mono text-lg font-bold tracking-wider ${timeLeft.hours < 1 ? 'text-red-500 dark:text-red-400' : 'text-gold-dark dark:text-gold'}`}
+        style={timeLeft.hours < 1 ? { textShadow: '0 0 12px rgba(239,68,68,0.4)' } : undefined}
+      >
         {pad(timeLeft.hours)}:{pad(timeLeft.minutes)}:{pad(timeLeft.seconds)}
       </p>
     </div>
@@ -80,8 +83,36 @@ export default function PremiumView() {
   };
 
   return (
-    <div className="bg-cream px-4 py-6 pb-24">
-      <div className="mx-auto max-w-lg space-y-6">
+    <div className="bg-cream px-4 py-6 pb-24 relative overflow-hidden">
+      {/* Floating sparkle particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        {[0,1,2,3,4,5,6,7,8,9].map(p => (
+          <motion.div
+            key={p}
+            className="absolute rounded-full bg-gold/20"
+            style={{
+              width: 2 + (p % 4),
+              height: 2 + (p % 4),
+              left: `${5 + (p * 9) % 90}%`,
+              top: `${10 + (p * 11) % 80}%`,
+            }}
+            animate={{
+              y: [0, -30, 0],
+              x: [0, (p % 2 === 0 ? 8 : -8), 0],
+              opacity: [0.1, 0.5, 0.1],
+              scale: [0.8, 1.2, 0.8],
+            }}
+            transition={{
+              duration: 4 + p * 0.6,
+              repeat: Infinity,
+              delay: p * 0.3,
+              ease: 'easeInOut',
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="mx-auto max-w-lg space-y-6 relative z-10">
         {/* Hero */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }} className="text-center">
           <h1
@@ -220,9 +251,23 @@ export default function PremiumView() {
         </motion.div>
 
         {/* Pricing */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }}>
-          <Card className="glass-premium zodiac-corner relative border-0 shadow-sm text-center animate-border-shimmer">
-            <CardContent className="relative p-6">
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }} style={{ willChange: 'transform' }}>
+          <div className="relative">
+            {/* Rotating golden border using conic-gradient */}
+            <div
+              className="absolute -inset-[2px] rounded-xl animate-[spin_6s_linear_infinite] opacity-60"
+              style={{
+                background: 'conic-gradient(from 0deg, #B8960C, #D4AF37, #F0C14B, #D4AF37, #B8960C, transparent, #B8960C)',
+              }}
+            />
+            <Card className="glass-premium zodiac-corner relative border-0 shadow-sm text-center animate-border-shimmer z-10">
+              <CardContent className="relative p-6">
+                {/* Most Popular badge with shimmer */}
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-gold text-white border-0 text-[10px] px-3 py-1 shimmer font-semibold tracking-wider uppercase">
+                    Most Popular
+                  </Badge>
+                </div>
               {/* Countdown Timer */}
               <CountdownTimer />
 
@@ -273,6 +318,7 @@ export default function PremiumView() {
               </div>
             </CardContent>
           </Card>
+          </div>
         </motion.div>
 
         {/* Testimonial */}

@@ -17,8 +17,11 @@ import ReportView from '@/components/ayuastro/report/ReportView';
 import PremiumView from '@/components/ayuastro/premium/PremiumView';
 import ChatView from '@/components/ayuastro/chat/ChatView';
 import MoodTrackerView from '@/components/ayuastro/mood/MoodTrackerView';
+import BreathingView from '@/components/ayuastro/wellness/BreathingView';
 import YogaDoshaView from '@/components/ayuastro/insights/YogaDoshaView';
 import CompatibilityDetailView from '@/components/ayuastro/sync/CompatibilityDetailView';
+import TraitDashboardView from '@/components/ayuastro/dashboard/TraitDashboardView';
+import CosmicCalendarView from '@/components/ayuastro/calendar/CosmicCalendarView';
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -59,6 +62,12 @@ export default function Home() {
         return <ChatView />;
       case 'mood':
         return <MoodTrackerView />;
+      case 'breathing':
+        return <BreathingView />;
+      case 'dashboard':
+        return <TraitDashboardView />;
+      case 'calendar':
+        return <CosmicCalendarView />;
       case 'yogaDosha':
         return <YogaDoshaView />;
       case 'compatibilityDetail': {
@@ -82,7 +91,7 @@ export default function Home() {
   };
 
   const showHeader = currentView !== 'landing' && currentView !== 'calculating';
-  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'yogaDosha', 'compatibilityDetail'].includes(currentView);
+  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar'].includes(currentView);
 
   return (
     <div className="min-h-screen flex flex-col bg-cream">

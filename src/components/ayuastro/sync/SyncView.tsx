@@ -328,9 +328,9 @@ export default function SyncView() {
   const [isCalculating, setIsCalculating] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
 
-  const userSunSign = astrologyData?.sunSign || 'Taurus';
-  const userMoonSign = astrologyData?.moonSign || 'Pisces';
-  const userAscendant = astrologyData?.ascendant || 'Gemini';
+  const userSunSign = astrologyData?.sunSign || 'Capricorn';
+  const userMoonSign = astrologyData?.moonSign || 'Gemini';
+  const userAscendant = astrologyData?.ascendant || 'Taurus';
 
   const handleAnalyze = useCallback(() => {
     if (!partnerSign) return;

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAyuAstroStore, type ReportSection } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart,
   MessageCircle,
@@ -120,13 +120,25 @@ export default function ReportView() {
   const { reportSections, hasPaid, setView, userId, astrologyData } = useAyuAstroStore();
   const [downloading, setDownloading] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
-  // Back to top visibility
-  if (typeof window !== 'undefined') {
-    window.addEventListener('scroll', () => {
-      setShowBackToTop(window.scrollY > 400);
-    });
-  }
+  // Track scroll progress
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      setScrollProgress(Math.min(100, Math.round(progress)));
+      setShowBackToTop(scrollTop > 400);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const toggleSection = (id: string) => {
+    setExpandedSections(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const freeSections = reportSections.filter((s) => s.insightLevel === 'free').length > 0
     ? reportSections.filter((s) => s.insightLevel === 'free')
@@ -204,8 +216,47 @@ export default function ReportView() {
   };
 
   return (
-    <div className="bg-cream px-4 py-6 pb-24">
-      <div className="mx-auto max-w-lg space-y-6">
+    <div className="bg-cream px-4 py-6 pb-24 relative">
+      {/* Scroll progress bar at top */}
+      <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-brown-100/30">
+        <motion.div
+          className="h-full"
+          style={{ background: 'linear-gradient(90deg, #B8960C, #D4AF37, #F0C14B)' }}
+          initial={{ width: 0 }}
+          animate={{ width: `${scrollProgress}%` }}
+          transition={{ duration: 0.1 }}
+        />
+      </div>
+
+      {/* Reading progress circular indicator */}
+      <div className="fixed top-16 right-4 z-40 flex flex-col items-center gap-1">
+        <svg width="36" height="36" viewBox="0 0 36 36" className="-rotate-90">
+          <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(93,64,55,0.1)" strokeWidth="2" />
+          <motion.circle
+            cx="18" cy="18" r="15"
+            fill="none"
+            stroke="#D4AF37"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray={`${2 * Math.PI * 15}`}
+            animate={{ strokeDashoffset: 2 * Math.PI * 15 * (1 - scrollProgress / 100) }}
+            transition={{ duration: 0.2 }}
+          />
+        </svg>
+        <span className="text-[9px] font-bold text-gold-dark">{scrollProgress}%</span>
+      </div>
+
+      {/* Dot pattern background texture */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.02]"
+        style={{
+          backgroundImage: 'radial-gradient(circle, #5D4037 1px, transparent 1px)',
+          backgroundSize: '16px 16px',
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="mx-auto max-w-lg space-y-6 relative z-10">
         {/* Header */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
           <div className="flex items-start justify-between">
@@ -224,7 +275,7 @@ export default function ReportView() {
               <Button
                 variant="outline"
                 size="sm"
-                className="shrink-0 border-gold/30 text-gold-dark hover:bg-gold/5 hover:text-gold-dark"
+                className="shrink-0 border-gold/30 text-gold-dark hover:bg-gold/5 hover:text-gold-dark hover:animate-pulse"
                 onClick={handleDownload}
                 disabled={downloading}
               >
@@ -256,7 +307,7 @@ export default function ReportView() {
                 variants={fadeInUp}
                 transition={{ duration: 0.4 }}
               >
-                <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
+                <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 group hover:border-l-2 hover:border-l-gold transition-all">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                       <div className="flex size-7 items-center justify-center rounded-full bg-gold/15 text-gold-dark text-xs font-bold">
@@ -314,7 +365,7 @@ export default function ReportView() {
                 variants={fadeInUp}
                 transition={{ duration: 0.4 }}
               >
-                <Card className={`card-hover border-0 shadow-md bg-white dark:bg-white/5`}>
+                <Card className={`card-hover border-0 shadow-md bg-white dark:bg-white/5 group hover:border-l-2 hover:border-l-gold transition-all`}>
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                       <div className="flex size-7 items-center justify-center rounded-full bg-gold/15 text-gold-dark text-xs font-bold">

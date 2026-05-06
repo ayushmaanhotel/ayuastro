@@ -1073,3 +1073,286 @@ Stage Summary:
 - Compatibility Detail View with 6 detailed sections (Score, Element Harmony, Communication, Emotional, Strengths, Growth Areas)
 - Full dark mode support across all new components
 - Zero lint errors
+
+---
+Task ID: r6-1
+Agent: Main Coordinator (Round 6)
+Task: QA testing, bug fixes, new features, and styling enhancements
+
+Work Log:
+- Performed comprehensive QA testing via agent-browser across all views
+- Found BUG: SyncView shows incorrect fallback zodiac signs (Taurus, Pisces, Gemini instead of Capricorn, Gemini, Taurus) — FIXED
+- Found BUG: Store doesn't persist activeTab and onboardingStep, causing navigation state issues after reload — FIXED by adding to partialize config
+- Found BUG: TraitDashboardView throws "Could not find Recharts context" error due to ReferenceLine inside RadarChart — FIXED by removing ReferenceLine
+- Added Breathing & Meditation feature (BreathingView.tsx):
+  - 3 breathing techniques: Cosmic Calm (4-7-8), Moon Rhythm (box), Solar Breath (6-2-6)
+  - Animated breathing circle with expanding/contracting, orbiting particles, phase labels, play/pause/reset
+  - 4 quick meditation cards with full-screen overlay timers
+  - 144 daily mindfulness prompts (12 per zodiac sign)
+  - Entry card in ProfileView with Wind icon
+- Added Cosmic Event Calendar feature (CosmicCalendarView.tsx + /api/calendar/events):
+  - Monthly calendar with deterministic 2025-2026 astrological events
+  - Event types: Mercury Retrograde, Venus Retrograde, Eclipses, Transits, Moon Phases, Special Yogas
+  - Monthly overview with themes, top events, emotional intensity meter
+  - "Next 7 Days" upcoming highlights section
+  - Entry card in InsightsView with Calendar icon
+- Added Visual Data Dashboard (TraitDashboardView.tsx):
+  - 5 interactive Recharts: Radar Chart, Pie Chart, Element Bar Chart, Mood Trend Line Chart, Numerology Comparison
+  - Custom AyuAstro-styled tooltips
+  - Dark mode support via next-themes
+  - Mood data integration with CTA when no mood data available
+  - "View Full Dashboard" button in InsightsView
+- Major styling enhancements across 7 components:
+  - Header: glassmorphism backdrop-blur, gold gradient underline, logo hover scale
+  - InsightsView: staggered card animations, zodiac constellation twinkle, affirmation glow border, trait viewport reveal
+  - OnboardingView: gold progress bar, floating particles, shimmer buttons, staggered fields, gold focus rings
+  - ReportView: scroll progress indicator, reading progress circle, dot texture background, section hover accents
+  - PremiumView: rotating conic-gradient border, floating sparkles, "Most Popular" badge, countdown glow
+  - ProfileView: radial glow, staggered cards, hover lift, shake on Start Over, section dividers
+  - BottomNav: gold gradient top border, ripple effect, spring scale, icon bounce
+
+Stage Summary:
+- 3 bugs fixed: SyncView fallback, store persistence, Recharts ReferenceLine
+- 3 major new features: Breathing & Meditation, Cosmic Calendar, Visual Dashboard
+- 7 components with major styling enhancements
+- All features verified working via agent-browser in both light and dark modes
+- Zero lint errors
+
+---
+## Current Project Status Assessment (Round 6)
+
+### Working Features:
+1. Landing page with animated hero, star-field, testimonials carousel, how-it-works, FAQ, glass-light cards
+2. 5-step onboarding with visual step indicator, 16-question questionnaire, star-field, smart defaults, celebration overlay, gold progress bar
+3. Full backend pipeline: astrology → numerology → trait scoring → AI report
+4. Insights dashboard with archetype, duality, trait map, numerology, kundali chart, daily insight, staggered animations
+5. Daily Horoscope card with collapsible content, zodiac element badge
+6. Daily Affirmation & Ritual card with "Mark as Done"
+7. Planetary Transits card with 6 transit interpretations
+8. Planetary Positions Table — collapsible table with planet symbols, signs, degrees, houses, retrograde
+9. Elemental Balance Visualization — Fire/Earth/Air/Water bar chart
+10. Dasha Timeline — horizontal scrollable visualization of 9 Mahadasha periods
+11. **NEW: Cosmic Calendar** — monthly astrological events with emotional impact, upcoming highlights
+12. **NEW: Visual Data Dashboard** — 5 Recharts (Radar, Pie, Element Bar, Mood Line, Numerology Bar)
+13. Yoga/Dosha Detail View with 11 yogas + 4 doshas, descriptions, remedies
+14. Shareable Profile Card in Dialog
+15. Report view with Download Report, staggered animations, scroll progress, reading progress circle
+16. Premium paywall with rotating border, shimmer, countdown, floating sparkles, "Most Popular" badge
+17. Sync/compatibility view with sparkle effects, compatibility badges, share dialog
+18. Compatibility Detail View with 6 sections
+19. AI Cosmic Counselor Chat with LLM integration, glass-premium welcome, sparkle messages
+20. **NEW: Breathing & Meditation** — 3 techniques, animated circle, 4 meditations, daily mindfulness
+21. Enhanced Wisdom Library with 8 cards, search, category filter
+22. Enhanced Profile with cosmic identity card, trait highlights, account stats, Cosmic Age, **Breathing entry card**
+23. Mood Tracker & Journal — daily check-in, timeline, insights, history
+24. Full dark mode with smooth toggle, glassmorphism, consistent dark variants
+25. 5-tab bottom navigation with haptic press, glow indicator, gold gradient border, ripple effect
+26. Cosmic Toast notification system integrated across views
+27. Premium glassmorphism system (glass-light, glass-premium, zodiac-corner, border-shimmer, breathe-glow)
+
+### API Endpoints:
+- POST /api/onboarding — Create user with birth details
+- POST /api/astrology/calculate — Calculate Vedic astrology data
+- POST /api/numerology/calculate — Calculate numerology data
+- POST /api/traits/generate — Generate trait scores
+- POST /api/ai/generate-report — Generate AI interpretation
+- POST /api/process-all — Full pipeline
+- GET /api/horoscope/daily — Daily horoscope
+- GET /api/transits/current — Current planetary transits
+- POST /api/reports/generate-pdf — Generate HTML report
+- POST /api/chat — AI cosmic counselor chat
+- POST /api/mood/entry — Create mood entry (auto-creates user)
+- GET /api/mood/history — Get mood history (returns empty for unknown users)
+- **NEW: GET /api/calendar/events** — Monthly cosmic events with emotional impact
+
+### Known Issues/Risks:
+- The process-all API takes ~13s mostly due to AI report generation
+- Premium unlock is simulated (no real Razorpay integration yet)
+- No real authentication (just simulated user creation)
+- PDF is HTML-based (production would use Puppeteer/jsPDF)
+- Chat uses in-memory rate limiting (would need Redis in production)
+- Dashboard RadarChart reference line removed (Recharts limitation) — workaround via legend
+
+### Priority Recommendations for Next Phase:
+1. Add real Razorpay payment integration
+2. Optimize API response time (stream AI responses or generate in background)
+3. Add PWA support with offline caching for daily horoscope
+4. Add multi-language support (Hindi, Tamil for Indian market)
+5. Add real PDF generation with Puppeteer/jsPDF
+6. Add real authentication (Firebase Auth with Google/Apple login)
+7. Add admin dashboard for user analytics
+8. Add push notifications for daily horoscope and mood reminders
+9. Add data export functionality
+10. Add voice input for chat (ASR integration)
+
+---
+Task ID: 10
+Agent: Dashboard Agent
+Task: Add Visual Data Dashboard with Recharts Charts
+
+Work Log:
+- Created /src/components/ayuastro/dashboard/TraitDashboardView.tsx with 5 interactive charts:
+  1. RadarChart (Emotional Architecture) — all 14 traits on spider/radar chart with gold fill/10 opacity, gold stroke, dot markers, reference line at 50, interactive tooltips
+  2. PieChart (Trait Distribution) — donut chart grouping traits into High (>75), Moderate (40-75), Growth Area (<40), sage/gold/brown colors, center text showing dominant category, interactive tooltips
+  3. BarChart (Element Balance) — 4 bars for Fire/Earth/Air/Water, colored per element (red/emerald/amber/blue), rounded bar corners, animated entrance
+  4. LineChart (Mood Trend) — last 14 days mood data with smooth curved line, gold stroke, area fill with gold/10 gradient, dot markers, hover tooltip; CTA card "Start Tracking Your Mood" when no mood data
+  5. BarChart (Numerology Comparison) — horizontal bars for Life Path, Destiny, Soul Urge, Personality numbers, each bar colored differently (gold/sage/brown/cream-dark), tooltip shows number meaning
+- Custom AyuTooltip component styled with AyuAstro colors (cream/brown/gold palette, backdrop blur, rounded borders)
+- Full dark mode support on all charts using next-themes resolvedTheme detection (dark gridlines, labels, backgrounds)
+- Smooth framer-motion entrance animations on each chart card with staggered delays
+- Each chart in a Card with shadow-md and card-hover class, gradient top accent bars
+- Chart titles in serif font (Playfair Display)
+- Responsive: charts full width on mobile with proper sizing on desktop
+- Dark mode: dark:bg-white/5 for cards, adjusted chart colors for visibility
+- Empty state handling: shows "No Data Yet" with CTA when traitScores is empty
+- Back button to navigate to insights view
+- Updated store: Added 'dashboard' to AppView type
+- Updated page.tsx: Imported TraitDashboardView, added 'dashboard' case to renderView, added 'dashboard' to showBottomNav
+- Updated BottomNav: Added 'dashboard' to visibleViews array
+- Updated InsightsView: Added "View Full Dashboard →" button with BarChart3 icon after trait map legend, navigates to 'dashboard' view; Added BarChart3 import from lucide-react
+- All lint checks pass with zero errors
+
+Stage Summary:
+- 5 files modified/created: TraitDashboardView.tsx (new), ayuastro-store.ts, page.tsx, BottomNav.tsx, InsightsView.tsx
+- Complete data visualization dashboard with 5 premium Recharts charts
+- Custom styled tooltips matching AyuAstro color palette
+- Full dark mode support across all charts
+- Mood data fetched from /api/mood/history API on mount
+- "View Full Dashboard" link card in InsightsView trait map section
+- Zero lint errors
+
+---
+Task ID: 8
+Agent: Frontend Styling Expert
+Task: Major Styling Enhancement — Premium Polish & Visual Depth
+
+Work Log:
+- Enhanced Header.tsx:
+  - Replaced glass class with inline backdrop-blur for proper glassmorphism effect (bg-white/72 dark:bg-[#1A1412]/72)
+  - Added subtle gold gradient underline below header (linear-gradient transparent→#D4AF37→transparent, 0.5 opacity)
+  - Improved dark mode toggle: increased rotation animation to 0.5s duration, added gold drop-shadow glow when in dark mode (filter: drop-shadow(0 0 8px rgba(212,175,55,0.5)))
+  - Logo now uses motion.button with whileHover scale 1.02 (spring animation)
+  - Added dark:shadow-[0_2px_16px_rgba(0,0,0,0.3)] box-shadow in dark mode
+  - Added dark:text-brown-300 to menu and user icons
+- Enhanced InsightsView.tsx:
+  - Added staggerContainer + staggerItem variants with 0.05s stagger delay for all cards
+  - Added decorative zodiac constellation pattern (♈♉♊♋♌♍♎♏♐♑♒♓) at top with animate-twinkle and staggered delays
+  - Daily Affirmation card now has animate-breathe-glow pulsing glow border
+  - Archetype emoji now has shimmer animation (opacity pulse 0.7→1→0.7, 2.5s loop)
+  - CTA section enhanced with cosmic gradient background (gold/brown-700/sage) and 6 floating decorative gold dots with framer-motion y/opacity animation
+  - Trait bars now use whileInView instead of animate for viewport-triggered reveal animation
+  - All cards converted from individual fadeInUp delays to staggerContainer/staggerItem pattern
+- Enhanced OnboardingView.tsx:
+  - Added full-width gold progress bar at top (fixed, z-50, linear-gradient #B8960C→#D4AF37→#F0C14B) that fills 25%/50%/75%/100% per step
+  - Added 6 floating gold particles in background with framer-motion y/x/opacity drift (5+p second cycles)
+  - Continue/Complete buttons now have shimmer sweep effect on hover (translating white/20 gradient)
+  - Birth step form fields now staggered with motion.div (0.05s delay per field)
+  - All step badges now have spring bounce animation on step change (scale 0.9→1, stiffness 300)
+  - Input fields now have gold focus ring (focus:border-gold focus:ring-gold/20) for glowing active state
+- Enhanced ReportView.tsx:
+  - Added scroll progress bar at top (fixed, 0.5px, gold gradient) tracking window scroll position via useEffect
+  - Added circular reading progress indicator (SVG, top-right corner) showing scroll % with animated strokeDashoffset
+  - Added dot pattern background texture (radial-gradient, 16px grid, 3% opacity)
+  - Section cards now have hover:border-l-2 hover:border-l-gold gold accent line on hover
+  - Download button now has hover:animate-pulse
+  - Scroll tracking uses passive event listener for performance
+- Enhanced PremiumView.tsx:
+  - Added rotating golden border around pricing card using conic-gradient (spinning 6s linear infinite, 60% opacity)
+  - Added 10 floating sparkle particles in background with varied sizes, positions, and animation timings
+  - Added "Most Popular" badge with shimmer effect at top of pricing card
+  - Countdown timer now glows red when <1 hour remaining (text-red-500 + red text-shadow)
+  - Pricing card wrapped in relative div with rotating border layer behind it
+- Enhanced ProfileView.tsx:
+  - Added radial gradient glow behind cosmic identity card (blur-xl, from-gold/10)
+  - Added staggerContainer + staggerItem variants (0.05s stagger) for all cards
+  - All cards have hover:-translate-y-[3px] hover:shadow-lg lift effect on hover
+  - Start Over button now has shake confirmation animation on hover (whileHover x: [0,-3,3,-3,3,0])
+  - Added decorative section-divider (gold line with ✦ symbol) before Start Over button
+- Enhanced BottomNav.tsx:
+  - Replaced border-t with gold gradient top border (linear-gradient transparent→#D4AF37→transparent, 0.5 opacity)
+  - Added CSS-only ripple effect on tab hover (radial-gradient gold overlay, opacity transition)
+  - Tab spring scale improved: initial 0.92→1.0 for active tabs, exit 1.1 for active
+  - Active tab icon now has bounce animation (scale [1, 1.1, 1], 0.3s easeOut) when switching
+  - Added dark:shadow-[0_-2px_12px_rgba(0,0,0,0.3)] box-shadow in dark mode
+  - Tab button overflow-hidden for ripple containment
+- All 7 modified files pass ESLint with zero errors
+- No modifications to globals.css or layout.tsx
+
+Stage Summary:
+- 7 files modified with comprehensive premium polish across all views
+- Header: Glassmorphism, gold underline, glow toggle, logo hover scale, dark shadow
+- InsightsView: Staggered cards, zodiac twinkle, pulsing affirmation, shimmer emoji, cosmic CTA, whileInView traits
+- OnboardingView: Gold progress bar, floating particles, shimmer buttons, staggered fields, bounce step badges, glowing inputs
+- ReportView: Scroll progress bar, circular reading indicator, dot texture, gold accent hover, pulse download
+- PremiumView: Rotating golden border, sparkle particles, "Most Popular" badge, countdown glow, parallax card
+- ProfileView: Radial glow, staggered entrance, hover lift, shake start-over, section divider
+- BottomNav: Gradient border, CSS ripple, glow indicator, spring scale, bounce icon, dark shadow
+- All animations use transform/opacity only (no layout properties)
+- Full dark mode support across all changes
+- Zero lint errors on modified files
+
+---
+Task ID: 7
+Agent: Calendar Feature Developer
+Task: Add Cosmic Event Calendar Feature
+
+Work Log:
+- Created /api/calendar/events GET endpoint with month/year params, in-memory cache, and deterministic cosmic events for 2025-2026
+- Event types: Mercury Retrograde (3/yr), Venus Retrograde, Eclipses (4/yr), Major Transits (Jupiter/Saturn/Rahu/Ketu), Purnima/Amavasya, Special Yogas (1/mo)
+- Each event has: date, title, type, description, emotionalImpact (1-5), emoji, guidance
+- Created CosmicCalendarView.tsx with: month navigation header, monthly overview card (theme + top 3 events + intensity meter), event list with date badges + type color badges + impact dots + collapsible descriptions, next 7 days section, today gold highlight
+- Added 'calendar' to AppView type in store
+- Added 'calendar' case to renderView and showBottomNav in page.tsx
+- Added "Cosmic Calendar" entry card to InsightsView after Planetary Transits
+- Added 'calendar' to BottomNav visibleViews
+- Full dark mode support, cream/gold/sage styling, framer-motion animations
+- Zero lint errors on all modified files
+
+Stage Summary:
+- 6 files created/modified
+- Complete cosmic calendar feature with real 2025-2026 astronomical dates
+- Premium UI matching AyuAstro aesthetic
+- API tested: returns correct events for all months
+
+---
+Task ID: 6
+Agent: Breathing & Meditation Agent
+Task: Add Guided Breathing & Meditation Feature
+
+Work Log:
+- Created /src/components/ayuastro/wellness/BreathingView.tsx — Complete breathing & meditation component with 4 major sections
+- Updated /src/store/ayuastro-store.ts — Added 'breathing' to AppView type
+- Updated /src/app/page.tsx — Imported BreathingView, added 'breathing' case to renderView, added to showBottomNav
+- Updated /src/components/ayuastro/shared/ProfileView.tsx — Added Wind icon import, added "Breathing & Meditation" entry card with gradient background, "Find your cosmic calm" subtitle
+- Updated /src/components/ayuastro/shared/BottomNav.tsx — Added 'breathing' to visibleViews array
+
+BreathingView Features:
+1. Breathing Exercise Section — 3 techniques:
+   - "Cosmic Calm" (4-7-8): 4s inhale, 7s hold, 8s exhale — anxiety/stress relief
+   - "Moon Rhythm" (4-4-4-4 box): equal phases — focus/clarity
+   - "Solar Breath" (6-2-6): 6s inhale, 2s hold, 6s exhale — emotional balance
+2. Animated Breathing Circle (BreathingCircleWithControls):
+   - 200px central circle with gold-to-sage gradient, expands/contracts with breath phases
+   - Phase label text inside ("Breathe In", "Hold", "Breathe Out") + countdown timer
+   - 6 orbiting particles with opacity/scale animation
+   - Outer glow ring with radial gradient
+   - Cycle counter, play/pause (gold round button), reset controls
+   - animate-breathe-glow CSS class for glow effect
+3. Quick Meditation Cards — 4 cards in 2x2 grid:
+   - "Morning Intention" (2 min), "Emotional Release" (3 min), "Gratitude Flow" (2 min), "Sleep Harmony" (5 min)
+   - Each has emoji, title, duration badge, description, start button
+   - Full-screen MeditationOverlay with breathing orb animation, circular SVG progress timer, pause/resume, completion message
+4. Daily Mindfulness Prompt:
+   - 144 deterministic prompts (12 per zodiac sign × 12 signs) based on day-of-year + sun sign
+   - Decorative card with gradient accent bar, zodiac sign badge, serif font prompt
+   - "I Practiced Today" button with success animation
+
+Styling: cream bg, gold/sage accents, shadow-md, card-hover, animate-breathe-glow, dark:bg-white/5, full dark mode support, framer-motion animations
+Lint: Zero errors
+
+Stage Summary:
+- 5 files modified/created
+- Complete breathing & meditation feature with animated circle, 3 techniques, 4 meditations, 144 daily prompts
+- Fully integrated into app navigation with Profile entry card
+- Premium cinematic styling matching AyuAstro aesthetic
+- Zero lint errors

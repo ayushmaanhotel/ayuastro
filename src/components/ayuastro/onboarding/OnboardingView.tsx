@@ -475,7 +475,14 @@ export default function OnboardingView() {
                 {/* Star-field effect */}
                 <StarField />
                 <div className="mb-2 relative z-10">
-                  <Badge className="bg-sage-muted text-sage-dark text-xs">Step 1 of 4</Badge>
+                  <motion.div
+                    key={onboardingStep}
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                  >
+                    <Badge className="bg-sage-muted text-sage-dark text-xs">Step 1 of 4</Badge>
+                  </motion.div>
                 </div>
                 <h2
                   className="font-serif text-2xl font-bold text-brown-900 mb-2 relative z-10"
@@ -488,19 +495,25 @@ export default function OnboardingView() {
                 </p>
 
                 <div className="space-y-3 relative z-10">
-                  <Label htmlFor="name" className="text-sm font-medium text-brown-700">
-                    Your Name
-                  </Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
-                    <Input
-                      id="name"
-                      value={localName}
-                      onChange={(e) => setLocalName(e.target.value)}
-                      placeholder="Enter your name"
-                      className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-brown-500 focus:ring-brown-500/20"
-                    />
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.05 }}
+                  >
+                    <Label htmlFor="name" className="text-sm font-medium text-brown-700">
+                      Your Name
+                    </Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
+                      <Input
+                        id="name"
+                        value={localName}
+                        onChange={(e) => setLocalName(e.target.value)}
+                        placeholder="Enter your name"
+                        className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-gold focus:ring-gold/20 dark:focus:border-gold dark:focus:ring-gold/10 transition-shadow"
+                      />
+                    </div>
+                  </motion.div>
                 </div>
               </CardContent>
             </Card>
@@ -522,8 +535,15 @@ export default function OnboardingView() {
             <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
               <CardContent className="p-6">
                 <div className="mb-2">
-                  <Badge className="bg-sage-muted text-sage-dark text-xs">Phase 1: Coordinates</Badge>
-                  <span className="ml-2 text-xs text-brown-400">Step 2 of 4</span>
+                  <motion.div
+                    key={onboardingStep}
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                  >
+                    <Badge className="bg-sage-muted text-sage-dark text-xs">Phase 1: Coordinates</Badge>
+                    <span className="ml-2 text-xs text-brown-400">Step 2 of 4</span>
+                  </motion.div>
                 </div>
                 <h2
                   className="font-serif text-2xl font-bold text-brown-900 mb-2"
@@ -536,93 +556,102 @@ export default function OnboardingView() {
                 </p>
 
                 <div className="space-y-4">
-                  <div>
-                    <Label className="text-sm font-medium text-brown-700">Name</Label>
-                    <div className="relative mt-1">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
-                      <Input
-                        value={localName}
-                        onChange={(e) => setLocalName(e.target.value)}
-                        className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-brown-500 focus:ring-brown-500/20"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium text-brown-700">Date of Birth</Label>
-                    <div className="relative mt-1">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
-                      <Input
-                        type="date"
-                        value={localDob}
-                        onChange={(e) => setLocalDob(e.target.value)}
-                        className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-brown-500 focus:ring-brown-500/20"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Label className="text-sm font-medium text-brown-700">Time of Birth</Label>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="size-3.5 text-brown-300 cursor-help" />
-                          </TooltipTrigger>
-                          <TooltipContent className="bg-brown-900 text-cream text-xs max-w-[200px]">
-                            Exact time gives more accurate results ✦
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                    <div className="relative mt-1">
-                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
-                      <Input
-                        type="time"
-                        value={localTob}
-                        onChange={(e) => setLocalTob(e.target.value)}
-                        className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-brown-500 focus:ring-brown-500/20"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium text-brown-700">Place of Birth</Label>
-                    <div className="relative mt-1">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
-                      <Input
-                        value={localPlace}
-                        onChange={(e) => setLocalPlace(e.target.value)}
-                        placeholder="e.g. Mumbai, New Delhi"
-                        list="indian-cities"
-                        className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-brown-500 focus:ring-brown-500/20"
-                      />
-                      <datalist id="indian-cities">
-                        {Object.keys(INDIAN_CITIES).map((city) => (
-                          <option key={city} value={city} />
-                        ))}
-                      </datalist>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium text-brown-700">Gender</Label>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {['Male', 'Female', 'Other'].map((g) => (
-                        <button
-                          key={g}
-                          onClick={() => setLocalGender(g.toLowerCase())}
-                          className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                            localGender === g.toLowerCase()
-                              ? 'bg-brown-700 text-white'
-                              : 'bg-brown-50 dark:bg-brown-50/20 text-brown-600 dark:text-brown-300 hover:bg-brown-100 dark:hover:bg-brown-100'
-                          }`}
-                        >
-                          {g}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  {[0,1,2,3,4,5].map((fieldIdx) => {
+                    if (fieldIdx === 0) return (
+                      <motion.div key={fieldIdx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fieldIdx * 0.05 }}>
+                        <Label className="text-sm font-medium text-brown-700">Name</Label>
+                        <div className="relative mt-1">
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
+                          <Input
+                            value={localName}
+                            onChange={(e) => setLocalName(e.target.value)}
+                            className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-gold focus:ring-gold/20 dark:focus:border-gold dark:focus:ring-gold/10 transition-shadow"
+                          />
+                        </div>
+                      </motion.div>
+                    );
+                    if (fieldIdx === 1) return (
+                      <motion.div key={fieldIdx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fieldIdx * 0.05 }}>
+                        <Label className="text-sm font-medium text-brown-700">Date of Birth</Label>
+                        <div className="relative mt-1">
+                          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
+                          <Input
+                            type="date"
+                            value={localDob}
+                            onChange={(e) => setLocalDob(e.target.value)}
+                            className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-gold focus:ring-gold/20 dark:focus:border-gold dark:focus:ring-gold/10 transition-shadow"
+                          />
+                        </div>
+                      </motion.div>
+                    );
+                    if (fieldIdx === 2) return (
+                      <motion.div key={fieldIdx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fieldIdx * 0.05 }}>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm font-medium text-brown-700">Time of Birth</Label>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="size-3.5 text-brown-300 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent className="bg-brown-900 text-cream text-xs max-w-[200px]">
+                                Exact time gives more accurate results ✦
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                        <div className="relative mt-1">
+                          <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
+                          <Input
+                            type="time"
+                            value={localTob}
+                            onChange={(e) => setLocalTob(e.target.value)}
+                            className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-gold focus:ring-gold/20 dark:focus:border-gold dark:focus:ring-gold/10 transition-shadow"
+                          />
+                        </div>
+                      </motion.div>
+                    );
+                    if (fieldIdx === 3) return (
+                      <motion.div key={fieldIdx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fieldIdx * 0.05 }}>
+                        <Label className="text-sm font-medium text-brown-700">Place of Birth</Label>
+                        <div className="relative mt-1">
+                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
+                          <Input
+                            value={localPlace}
+                            onChange={(e) => setLocalPlace(e.target.value)}
+                            placeholder="e.g. Mumbai, New Delhi"
+                            list="indian-cities"
+                            className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-gold focus:ring-gold/20 dark:focus:border-gold dark:focus:ring-gold/10 transition-shadow"
+                          />
+                          <datalist id="indian-cities">
+                            {Object.keys(INDIAN_CITIES).map((city) => (
+                              <option key={city} value={city} />
+                            ))}
+                          </datalist>
+                        </div>
+                      </motion.div>
+                    );
+                    if (fieldIdx === 4) return (
+                      <motion.div key={fieldIdx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fieldIdx * 0.05 }}>
+                        <Label className="text-sm font-medium text-brown-700">Gender</Label>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {['Male', 'Female', 'Other'].map((g) => (
+                            <button
+                              key={g}
+                              onClick={() => setLocalGender(g.toLowerCase())}
+                              className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                                localGender === g.toLowerCase()
+                                  ? 'bg-brown-700 text-white'
+                                  : 'bg-brown-50 dark:bg-brown-50/20 text-brown-600 dark:text-brown-300 hover:bg-brown-100 dark:hover:bg-brown-100'
+                              }`}
+                            >
+                              {g}
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    );
+                    return null;
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -644,7 +673,14 @@ export default function OnboardingView() {
             <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
               <CardContent className="p-6">
                 <div className="mb-2">
-                  <Badge className="bg-sage-muted text-sage-dark text-xs">Step 3 of 4</Badge>
+                  <motion.div
+                    key={onboardingStep}
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                  >
+                    <Badge className="bg-sage-muted text-sage-dark text-xs">Step 3 of 4</Badge>
+                  </motion.div>
                 </div>
                 <h2
                   className="font-serif text-2xl font-bold text-brown-900 mb-2"
@@ -828,9 +864,51 @@ export default function OnboardingView() {
     }
   };
 
+  // Calculate overall progress (0-100) based on step
+  const stepProgress: Record<string, number> = { name: 25, birth: 50, relationship: 75, questionnaire: 100, complete: 100 };
+  const overallProgress = stepProgress[onboardingStep] || 0;
+
   return (
-    <div className="min-h-screen bg-cream px-4 py-6">
-      <div className="mx-auto max-w-lg">
+    <div className="min-h-screen bg-cream px-4 py-6 relative">
+      {/* Full-width gold progress bar at top */}
+      <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-brown-100/50">
+        <motion.div
+          className="h-full"
+          style={{ background: 'linear-gradient(90deg, #B8960C, #D4AF37, #F0C14B)' }}
+          initial={{ width: 0 }}
+          animate={{ width: `${overallProgress}%` }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        />
+      </div>
+
+      {/* Floating gold particles background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        {[0,1,2,3,4,5].map(p => (
+          <motion.div
+            key={p}
+            className="absolute rounded-full bg-gold/30"
+            style={{
+              width: 2 + (p % 3),
+              height: 2 + (p % 3),
+              left: `${10 + p * 16}%`,
+              top: `${15 + (p * 13) % 70}%`,
+            }}
+            animate={{
+              y: [0, -20, 0],
+              x: [0, (p % 2 === 0 ? 6 : -6), 0],
+              opacity: [0.2, 0.6, 0.2],
+            }}
+            transition={{
+              duration: 5 + p,
+              repeat: Infinity,
+              delay: p * 0.8,
+              ease: 'easeInOut',
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="mx-auto max-w-lg relative z-10">
         {/* Celebration overlay */}
         <AnimatePresence>
           {showCelebration && (
@@ -860,10 +938,11 @@ export default function OnboardingView() {
             <Button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="bg-brown-700 px-8 text-white hover:bg-brown-800 disabled:opacity-40"
+              className="bg-brown-700 px-8 text-white hover:bg-brown-800 disabled:opacity-40 relative overflow-hidden group"
             >
-              Continue
-              <ArrowRight className="ml-2 size-4" />
+              <span className="absolute inset-0 w-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              <span className="relative">Continue</span>
+              <ArrowRight className="ml-2 size-4 relative" />
             </Button>
           </div>
         )}
@@ -880,10 +959,11 @@ export default function OnboardingView() {
             <Button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="bg-brown-700 px-8 text-white hover:bg-brown-800 disabled:opacity-40"
+              className="bg-brown-700 px-8 text-white hover:bg-brown-800 disabled:opacity-40 relative overflow-hidden group"
             >
-              Complete Analysis
-              <ArrowRight className="ml-2 size-4" />
+              <span className="absolute inset-0 w-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              <span className="relative">Complete Analysis</span>
+              <ArrowRight className="ml-2 size-4 relative" />
             </Button>
           </div>
         )}

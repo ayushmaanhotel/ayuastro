@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // View types for the single-page app
-export type AppView = 'landing' | 'onboarding' | 'calculating' | 'insights' | 'report' | 'premium' | 'profile' | 'wisdom' | 'sync' | 'chat' | 'mood' | 'yogaDosha' | 'compatibilityDetail';
+export type AppView = 'landing' | 'onboarding' | 'calculating' | 'insights' | 'report' | 'premium' | 'profile' | 'wisdom' | 'sync' | 'chat' | 'mood' | 'breathing' | 'yogaDosha' | 'compatibilityDetail' | 'dashboard' | 'calendar';
 export type OnboardingStep = 'name' | 'birth' | 'relationship' | 'questionnaire' | 'complete';
 export type BottomNavTab = 'insights' | 'chat' | 'sync' | 'wisdom' | 'profile';
 
@@ -212,6 +212,8 @@ export const useAyuAstroStore = create<AyuAstroState>()(
         reportSummary: state.reportSummary,
         hasPaid: state.hasPaid,
         currentView: state.currentView,
+        activeTab: state.activeTab,
+        onboardingStep: state.onboardingStep,
       }),
     }
   )

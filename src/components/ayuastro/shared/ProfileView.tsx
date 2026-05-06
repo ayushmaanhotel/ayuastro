@@ -27,6 +27,7 @@ import {
   Lock,
   BookHeart,
   Infinity,
+  Wind,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
 
@@ -102,6 +103,20 @@ const fadeInUp = {
   animate: { opacity: 1, y: 0 },
 };
 
+const staggerContainer = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const staggerItem = {
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
 export default function ProfileView() {
   const { birthDetails, astrologyData, numerologyData, traitScores, hasPaid, reportSections, reset, setView } = useAyuAstroStore();
 
@@ -130,11 +145,18 @@ export default function ProfileView() {
 
   return (
     <div className="bg-cream px-4 py-6 pb-24">
-      <div className="mx-auto max-w-lg space-y-6">
+      <motion.div
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+        className="mx-auto max-w-lg space-y-6"
+      >
 
         {/* Cosmic Identity Card */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
-          <Card className="border-0 shadow-md overflow-hidden">
+        <motion.div variants={staggerItem}>
+          <Card className="border-0 shadow-md overflow-hidden relative">
+            {/* Radial gradient glow behind card */}
+            <div className="absolute -inset-4 bg-radial-[at_50%_30%] from-gold/10 to-transparent pointer-events-none blur-xl" aria-hidden="true" />
             <div className={`relative bg-gradient-to-br ${signInfo?.gradientFrom || 'from-gold/10'} ${signInfo?.gradientTo || 'to-brown-100/5'} dark:from-gold/5 dark:to-brown-50/5 p-6`}>
               {/* Decorative zodiac pattern */}
               <div className="absolute top-2 right-3 text-gold/10 text-xs tracking-[0.5em] leading-relaxed select-none">
@@ -201,8 +223,8 @@ export default function ProfileView() {
 
         {/* Trait Highlights */}
         {traitScores.length > 0 && (
-          <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
-            <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
+          <motion.div variants={staggerItem}>
+            <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 transition-all hover:-translate-y-[3px] hover:shadow-lg">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
                   <BarChart3 className="size-5 text-gold" />
@@ -265,8 +287,8 @@ export default function ProfileView() {
         )}
 
         {/* Birth Details */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
-          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
+        <motion.div variants={staggerItem}>
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 transition-all hover:-translate-y-[3px] hover:shadow-lg">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
                 <User className="size-5 text-brown-500" />
@@ -319,8 +341,8 @@ export default function ProfileView() {
         </motion.div>
 
         {/* Astrology Summary */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
-          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
+        <motion.div variants={staggerItem}>
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 transition-all hover:-translate-y-[3px] hover:shadow-lg">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
                 <Moon className="size-5 text-gold" />
@@ -387,8 +409,8 @@ export default function ProfileView() {
         </motion.div>
 
         {/* Numerology Summary */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }}>
-          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
+        <motion.div variants={staggerItem}>
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 transition-all hover:-translate-y-[3px] hover:shadow-lg">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
                 <Hash className="size-5 text-gold" />
@@ -448,8 +470,8 @@ export default function ProfileView() {
         </motion.div>
 
         {/* Account Stats */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.25 }}>
-          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
+        <motion.div variants={staggerItem}>
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 transition-all hover:-translate-y-[3px] hover:shadow-lg">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
                 <Sparkles className="size-5 text-gold" />
@@ -496,9 +518,9 @@ export default function ProfileView() {
         </motion.div>
 
         {/* Mood Journal Card */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.28 }}>
+        <motion.div variants={staggerItem}>
           <Card
-            className="card-hover border-0 shadow-md bg-gradient-to-br from-gold/5 to-sage-muted/10 dark:from-gold/5 dark:to-sage-muted/5 cursor-pointer hover:shadow-lg transition-shadow"
+            className="card-hover border-0 shadow-md bg-gradient-to-br from-gold/5 to-sage-muted/10 dark:from-gold/5 dark:to-sage-muted/5 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-[3px]"
             onClick={() => setView('mood')}
           >
             <CardContent className="p-4">
@@ -521,10 +543,36 @@ export default function ProfileView() {
           </Card>
         </motion.div>
 
+        {/* Breathing & Meditation Card */}
+        <motion.div variants={staggerItem}>
+          <Card
+            className="card-hover border-0 shadow-md bg-gradient-to-br from-sage-muted/15 to-gold/10 dark:from-sage-muted/10 dark:to-gold/5 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-[3px]"
+            onClick={() => setView('breathing')}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/80 dark:bg-brown-50/20 border border-sage/20">
+                  <Wind className="size-6 text-sage-dark dark:text-sage" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-serif text-base font-semibold text-brown-900 dark:text-brown-100"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                    Breathing & Meditation
+                  </h3>
+                  <p className="text-xs text-brown-400 dark:text-brown-500 mt-0.5">
+                    Find your cosmic calm
+                  </p>
+                </div>
+                <span className="text-2xl">🌬️</span>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Cosmic Age Card */}
         {numerologyData?.lifePathNumber && (
-          <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.29 }}>
-            <Card className="card-hover border-0 shadow-md overflow-hidden bg-white dark:bg-white/5">
+          <motion.div variants={staggerItem}>
+            <Card className="card-hover border-0 shadow-md overflow-hidden bg-white dark:bg-white/5 transition-all hover:-translate-y-[3px] hover:shadow-lg">
               <div className="h-1 bg-gradient-to-r from-gold via-gold-light to-gold-dark" />
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
@@ -560,18 +608,28 @@ export default function ProfileView() {
           </motion.div>
         )}
 
-        {/* Start Over */}
-        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.3 }}>
-          <Button
-            onClick={handleReset}
-            variant="outline"
-            className="w-full border-brown-200 text-brown-500 hover:bg-brown-50 hover:text-brown-700"
+        {/* Decorative section divider */}
+        <div className="section-divider">
+          <span className="text-gold text-lg zodiac-glow">✦</span>
+        </div>
+
+        {/* Start Over — with shake on hover */}
+        <motion.div variants={staggerItem}>
+          <motion.div
+            whileHover={{ x: [0, -3, 3, -3, 3, 0] }}
+            transition={{ duration: 0.4 }}
           >
-            <RotateCcw className="mr-2 size-4" />
-            Start Over
-          </Button>
+            <Button
+              onClick={handleReset}
+              variant="outline"
+              className="w-full border-brown-200 text-brown-500 hover:bg-brown-50 hover:text-brown-700"
+            >
+              <RotateCcw className="mr-2 size-4" />
+              Start Over
+            </Button>
+          </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   );
 }
