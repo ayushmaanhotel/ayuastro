@@ -6,8 +6,35 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Eye, CheckCircle2, Shield, ArrowRight, Quote, Lock, Smartphone, Diamond, Sparkles } from 'lucide-react';
+import {
+  Star,
+  Eye,
+  CheckCircle2,
+  Shield,
+  ArrowRight,
+  Quote,
+  Lock,
+  Smartphone,
+  Diamond,
+  Copy,
+  Check,
+  Clock,
+  Upload,
+  QrCode,
+  RefreshCw,
+  AlertCircle,
+  Info,
+} from 'lucide-react';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
@@ -166,9 +193,127 @@ function CountdownTimer() {
   );
 }
 
+// ─── Payment Step Type ─────────────────────────────────────────────────────
+
+type PaymentStep = 'qr' | 'form' | 'pending';
+
+// ─── Payment Step Indicator Component ──────────────────────────────────────
+
+const PAYMENT_STEPS: { key: PaymentStep; label: string; shortLabel: string; icon: typeof QrCode }[] = [
+  { key: 'qr', label: 'Scan & Pay', shortLabel: 'Scan', icon: QrCode },
+  { key: 'form', label: 'Submit Details', shortLabel: 'Submit', icon: Upload },
+  { key: 'pending', label: 'Verification', shortLabel: 'Verify', icon: CheckCircle2 },
+];
+
+function PaymentStepIndicator({ currentStep }: { currentStep: PaymentStep }) {
+  const stepOrder: PaymentStep[] = ['qr', 'form', 'pending'];
+  const currentIndex = stepOrder.indexOf(currentStep);
+
+  return (
+    <div className="flex items-center justify-center gap-0 mb-5" role="navigation" aria-label="Payment steps">
+      {PAYMENT_STEPS.map((step, i) => {
+        const isCompleted = i < currentIndex;
+        const isCurrent = i === currentIndex;
+        const StepIcon = step.icon;
+
+        return (
+          <div key={step.key} className="flex items-center">
+            {/* Step Circle */}
+            <div className="flex flex-col items-center gap-1">
+              <motion.div
+                className={`flex size-9 items-center justify-center rounded-full border-2 transition-all duration-300 ${
+                  isCompleted
+                    ? 'bg-sage-muted border-sage-dark dark:bg-sage/20 dark:border-sage'
+                    : isCurrent
+                      ? 'bg-gold/15 border-gold dark:bg-gold/20 dark:border-gold shadow-[0_0_12px_rgba(212,175,55,0.2)]'
+                      : 'bg-brown-50 dark:bg-brown-50/20 border-brown-200 dark:border-brown-100/30'
+                }`}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: i * 0.1, type: 'spring', stiffness: 300 }}
+              >
+                <AnimatePresence mode="wait">
+                  {isCompleted ? (
+                    <motion.div
+                      key="check"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      transition={{ type: 'spring', stiffness: 500, delay: 0.05 }}
+                    >
+                      <Check className="size-4 text-sage-dark dark:text-sage" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="icon"
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.5, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <StepIcon className={`size-4 ${
+                        isCurrent ? 'text-gold-dark dark:text-gold' : 'text-brown-300 dark:text-brown-500'
+                      }`} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+              <span className={`text-[9px] font-medium leading-tight text-center ${
+                isCompleted
+                  ? 'text-sage-dark dark:text-sage'
+                  : isCurrent
+                    ? 'text-gold-dark dark:text-gold font-semibold'
+                    : 'text-brown-300 dark:text-brown-500'
+              }`}>
+                {step.shortLabel}
+              </span>
+            </div>
+
+            {/* Connector Line */}
+            {i < PAYMENT_STEPS.length - 1 && (
+              <div className="step-connector mx-1.5 sm:mx-3 mb-4" aria-hidden="true">
+                <motion.div
+                  className="h-0.5 rounded-full origin-left"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: i < currentIndex ? 1 : 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.15, ease: 'easeOut' }}
+                  style={{
+                    width: i < currentIndex ? '100%' : '0%',
+                    background: i < currentIndex
+                      ? 'linear-gradient(90deg, #81C784, #D4AF37)'
+                      : 'transparent',
+                  }}
+                />
+                <div
+                  className="h-0.5 w-8 sm:w-14 rounded-full"
+                  style={{
+                    background: i < currentIndex
+                      ? 'transparent'
+                      : 'rgba(188, 170, 164, 0.3)',
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function PremiumView() {
-  const { setView, setHasPaid, birthDetails } = useAyuAstroStore();
+  const { setView, setHasPaid, birthDetails, userId } = useAyuAstroStore();
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+
+  // Payment flow state
+  const [paymentStep, setPaymentStep] = useState<PaymentStep>('qr');
+  const [upiCopied, setUpiCopied] = useState(false);
+  const [transactionId, setTransactionId] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'upi' | 'bank_transfer' | 'other'>('upi');
+  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
 
   // Auto-rotate testimonials every 4 seconds
   useEffect(() => {
@@ -178,8 +323,108 @@ export default function PremiumView() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleUnlock = () => {
-    // In a real app, this would integrate with a payment gateway
+  // Check for existing pending verification on mount
+  useEffect(() => {
+    const checkExistingStatus = async () => {
+      if (!userId) return;
+      try {
+        const res = await fetch(`/api/payment/status?userId=${encodeURIComponent(userId)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.verified) {
+            setHasPaid(true);
+            setView('report');
+          } else if (data.status === 'pending') {
+            setPaymentStep('pending');
+          }
+        }
+      } catch {
+        // silently ignore — user can still proceed with manual flow
+      }
+    };
+    checkExistingStatus();
+  }, [userId, setHasPaid, setView]);
+
+  const handleCopyUpi = async () => {
+    try {
+      await navigator.clipboard.writeText('9532013475@kotakbank');
+      setUpiCopied(true);
+      setTimeout(() => setUpiCopied(false), 2000);
+    } catch {
+      // Fallback: select from a temporary input
+      const tempInput = document.createElement('input');
+      tempInput.value = '9532013475@kotakbank';
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+      setUpiCopied(true);
+      setTimeout(() => setUpiCopied(false), 2000);
+    }
+  };
+
+  const handleSubmitVerification = async () => {
+    if (!transactionId.trim()) {
+      setSubmitError('Please enter your Transaction ID / UTR Number');
+      return;
+    }
+    if (!userId) {
+      setSubmitError('User ID not found. Please restart onboarding.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const res = await fetch('/api/payment/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          transactionId: transactionId.trim(),
+          paymentMethod,
+          screenshotUrl: screenshotFile ? screenshotFile.name : undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setSubmitError(data.error || 'Submission failed. Please try again.');
+        return;
+      }
+
+      setPaymentStep('pending');
+    } catch {
+      setSubmitError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCheckStatus = async () => {
+    if (!userId) return;
+    setIsCheckingStatus(true);
+
+    try {
+      const res = await fetch(`/api/payment/status?userId=${encodeURIComponent(userId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.verified) {
+          setHasPaid(true);
+          setView('report');
+        }
+        // If still pending, just keep showing pending state
+      }
+    } catch {
+      // silently ignore
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  };
+
+  const handleDemoSkip = () => {
     setHasPaid(true);
     setView('report');
   };
@@ -363,7 +608,7 @@ export default function PremiumView() {
           </Card>
         </motion.div>
 
-        {/* Pricing */}
+        {/* ─── Pricing + QR Payment Section ─────────────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }} style={{ willChange: 'transform' }}>
           <div className="relative">
             {/* Rotating golden border using conic-gradient */}
@@ -403,17 +648,356 @@ export default function PremiumView() {
 
               <Separator className="my-5 bg-brown-100 dark:bg-brown-100/20" />
 
-              <Button
-                onClick={handleUnlock}
-                size="lg"
-                className="w-full bg-brown-700 dark:bg-gold dark:text-brown-900 py-6 text-base font-medium text-white hover:bg-brown-800 dark:hover:bg-gold-light"
-              >
-                Get Full Deep Intelligence Report
-                <ArrowRight className="ml-2 size-4" />
-              </Button>
+              {/* ─── Payment Step Indicator ─────────────────────────────── */}
+              <PaymentStepIndicator currentStep={paymentStep} />
+
+              {/* Payment Steps Info Tooltip */}
+              <div className="flex items-center justify-center gap-1.5 mb-4">
+                <Info className="size-3 text-brown-300 dark:text-brown-500" />
+                <p className="text-[10px] text-brown-300 dark:text-brown-500 leading-relaxed">
+                  Complete all 3 steps to unlock your premium report. Payment is verified manually within 5–10 minutes.
+                </p>
+              </div>
+
+              {/* ─── QR Code Payment Flow ────────────────────────────────── */}
+              <AnimatePresence mode="wait">
+                {paymentStep === 'qr' && (
+                  <motion.div
+                    key="qr-step"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-5"
+                  >
+                    {/* QR Code Section Header */}
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                      <QrCode className="size-5 text-gold" />
+                      <h3
+                        className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Scan to Pay
+                      </h3>
+                    </div>
+
+                    {/* QR Code Image — Premium Decorative Border */}
+                    <div className="flex justify-center">
+                      <div className="relative p-1 rounded-2xl bg-gradient-to-br from-gold/30 via-gold-light/20 to-gold-dark/30 dark:from-gold/25 dark:via-gold-light/15 dark:to-gold-dark/25 animate-border-shimmer">
+                        {/* Glow effect */}
+                        <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-gold/10 via-transparent to-gold/10 blur-md pointer-events-none" aria-hidden="true" />
+                        <div className="relative rounded-xl overflow-hidden border border-gold/10 dark:border-gold/20 p-3 bg-white dark:bg-white/10 shadow-lg">
+                          <img
+                            src="/payment-qr.jpg"
+                            alt="UPI Payment QR Code for AyuAstro Premium Report"
+                            className="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-lg"
+                          />
+                          {/* Gold shimmer overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-gold/5 pointer-events-none" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Powered by Kotak 811 */}
+                    <p className="text-center text-[10px] text-brown-300 dark:text-brown-500 mt-2 flex items-center justify-center gap-1">
+                      <Shield className="size-2.5" />
+                      Powered by Kotak 811
+                    </p>
+
+                    {/* Payment Details */}
+                    <div className="space-y-3 bg-white/50 dark:bg-white/5 rounded-xl p-4 border border-brown-100 dark:border-brown-100/20">
+                      {/* Payee Name */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-brown-400 dark:text-brown-500">Payee Name</span>
+                        <span className="text-sm font-semibold text-brown-900 dark:text-brown-100">AYUSH UPADHYAY</span>
+                      </div>
+
+                      <Separator className="bg-brown-100/50 dark:bg-brown-100/10" />
+
+                      {/* UPI ID with Copy Button */}
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs text-brown-400 dark:text-brown-500">UPI ID</span>
+                        <div className="flex items-center gap-2">
+                          <code className="text-sm font-mono font-semibold text-brown-900 dark:text-brown-100 bg-brown-50 dark:bg-brown-50/10 px-2 py-0.5 rounded">
+                            9532013475@kotakbank
+                          </code>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleCopyUpi}
+                            className="h-7 w-7 p-0 hover:bg-gold/10 dark:hover:bg-gold/20 transition-colors"
+                            aria-label="Copy UPI ID"
+                          >
+                            {upiCopied ? (
+                              <Check className="size-3.5 text-sage-dark dark:text-sage" />
+                            ) : (
+                              <Copy className="size-3.5 text-brown-400 dark:text-brown-500" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+
+                      <Separator className="bg-brown-100/50 dark:bg-brown-100/10" />
+
+                      {/* Amount */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-brown-400 dark:text-brown-500">Amount</span>
+                        <span className="text-sm font-bold text-gold-dark dark:text-gold">₹499</span>
+                      </div>
+                    </div>
+
+                    {/* Copy UPI ID Button */}
+                    <Button
+                      onClick={handleCopyUpi}
+                      variant="outline"
+                      className="w-full border-gold/30 dark:border-gold/40 text-brown-700 dark:text-gold hover:bg-gold/10 dark:hover:bg-gold/20 py-5"
+                    >
+                      {upiCopied ? (
+                        <>
+                          <Check className="mr-2 size-4 text-sage-dark dark:text-sage" />
+                          Copied to Clipboard!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="mr-2 size-4" />
+                          Copy UPI ID
+                        </>
+                      )}
+                    </Button>
+
+                    {/* Continue to Verification */}
+                    <Button
+                      onClick={() => setPaymentStep('form')}
+                      size="lg"
+                      className="w-full bg-brown-700 dark:bg-gold dark:text-brown-900 py-6 text-base font-medium text-white hover:bg-brown-800 dark:hover:bg-gold-light"
+                    >
+                      I&apos;ve Made the Payment
+                      <ArrowRight className="ml-2 size-4" />
+                    </Button>
+
+                    <p className="text-[10px] text-brown-400 dark:text-brown-500 leading-relaxed">
+                      After completing payment via UPI, Bank Transfer, or any method, click above to submit your transaction details for verification.
+                    </p>
+                  </motion.div>
+                )}
+
+                {paymentStep === 'form' && (
+                  <motion.div
+                    key="form-step"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-5"
+                  >
+                    {/* Form Header */}
+                    <div className="text-center mb-1">
+                      <h3
+                        className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Verify Your Payment
+                      </h3>
+                      <p className="text-xs text-brown-400 dark:text-brown-500 mt-1">
+                        Enter your payment details below for manual verification
+                      </p>
+                    </div>
+
+                    {/* Transaction ID / UTR Number */}
+                    <div className="space-y-2 text-left">
+                      <Label htmlFor="transactionId" className="text-sm font-medium text-brown-700 dark:text-brown-300">
+                        Transaction ID / UTR Number <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="transactionId"
+                        placeholder="e.g. 432156789012"
+                        value={transactionId}
+                        onChange={(e) => {
+                          setTransactionId(e.target.value);
+                          setSubmitError(null);
+                        }}
+                        className="bg-white dark:bg-white/5 border-brown-200 dark:border-brown-100/30 focus-visible:border-gold dark:focus-visible:border-gold focus-visible:ring-gold/20"
+                      />
+                      <p className="text-[10px] text-brown-400 dark:text-brown-500">
+                        Find this in your UPI app or bank statement after payment
+                      </p>
+                    </div>
+
+                    {/* Payment Method */}
+                    <div className="space-y-2 text-left">
+                      <Label className="text-sm font-medium text-brown-700 dark:text-brown-300">
+                        Payment Method <span className="text-red-500">*</span>
+                      </Label>
+                      <Select
+                        value={paymentMethod}
+                        onValueChange={(val: string) => setPaymentMethod(val as 'upi' | 'bank_transfer' | 'other')}
+                      >
+                        <SelectTrigger className="w-full bg-white dark:bg-white/5 border-brown-200 dark:border-brown-100/30">
+                          <SelectValue placeholder="Select payment method" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white dark:bg-[#2A2018] border-brown-200 dark:border-brown-100/30">
+                          <SelectItem value="upi">UPI</SelectItem>
+                          <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Screenshot Upload (optional) */}
+                    <div className="space-y-2 text-left">
+                      <Label className="text-sm font-medium text-brown-700 dark:text-brown-300">
+                        Payment Screenshot <span className="text-[10px] text-brown-400 dark:text-brown-500">(optional)</span>
+                      </Label>
+                      <div className="flex items-center gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-9 border-dashed border-brown-200 dark:border-brown-100/30 text-brown-500 dark:text-brown-400 hover:bg-gold/5 dark:hover:bg-gold/10"
+                          onClick={() => document.getElementById('screenshot-input')?.click()}
+                        >
+                          <Upload className="size-4 mr-2" />
+                          {screenshotFile ? screenshotFile.name.substring(0, 20) : 'Choose File'}
+                        </Button>
+                        {screenshotFile && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-xs text-brown-400 hover:text-red-500"
+                            onClick={() => setScreenshotFile(null)}
+                          >
+                            Remove
+                          </Button>
+                        )}
+                        <input
+                          id="screenshot-input"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) setScreenshotFile(file);
+                          }}
+                        />
+                      </div>
+                      <p className="text-[10px] text-brown-400 dark:text-brown-500">
+                        Helps speed up verification
+                      </p>
+                    </div>
+
+                    {/* Error Message */}
+                    {submitError && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 p-3"
+                      >
+                        <AlertCircle className="size-4 text-red-500 dark:text-red-400 shrink-0" />
+                        <p className="text-xs text-red-700 dark:text-red-400">{submitError}</p>
+                      </motion.div>
+                    )}
+
+                    {/* Submit Button */}
+                    <Button
+                      onClick={handleSubmitVerification}
+                      size="lg"
+                      disabled={isSubmitting}
+                      className="w-full bg-brown-700 dark:bg-gold dark:text-brown-900 py-6 text-base font-medium text-white hover:bg-brown-800 dark:hover:bg-gold-light disabled:opacity-50"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <RefreshCw className="mr-2 size-4 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          Submit for Verification
+                          <ArrowRight className="ml-2 size-4" />
+                        </>
+                      )}
+                    </Button>
+
+                    {/* Back to QR */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPaymentStep('qr')}
+                      className="text-brown-400 dark:text-brown-500 hover:text-brown-600 dark:hover:text-brown-300"
+                    >
+                      ← Back to QR Code
+                    </Button>
+                  </motion.div>
+                )}
+
+                {paymentStep === 'pending' && (
+                  <motion.div
+                    key="pending-step"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-5"
+                  >
+                    {/* Pending Header */}
+                    <div className="text-center space-y-3">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 200, delay: 0.1 }}
+                        className="mx-auto flex size-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-700/40"
+                      >
+                        <Clock className="size-8 text-amber-500 dark:text-amber-400" />
+                      </motion.div>
+
+                      <h3
+                        className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Verification Pending
+                      </h3>
+
+                      <Badge className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700/40 text-xs font-medium px-3 py-1">
+                        <Clock className="size-3 mr-1.5" />
+                        Under Review
+                      </Badge>
+                    </div>
+
+                    {/* Status Message */}
+                    <div className="bg-amber-50/50 dark:bg-amber-900/10 rounded-xl p-4 border border-amber-100 dark:border-amber-800/30">
+                      <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
+                        We&apos;re verifying your payment. This usually takes <strong>5–10 minutes</strong>. You&apos;ll get access once verified.
+                      </p>
+                    </div>
+
+                    {/* Check Status Button */}
+                    <Button
+                      onClick={handleCheckStatus}
+                      size="lg"
+                      disabled={isCheckingStatus}
+                      className="w-full bg-brown-700 dark:bg-gold dark:text-brown-900 py-6 text-base font-medium text-white hover:bg-brown-800 dark:hover:bg-gold-light disabled:opacity-50"
+                    >
+                      {isCheckingStatus ? (
+                        <>
+                          <RefreshCw className="mr-2 size-4 animate-spin" />
+                          Checking...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="mr-2 size-4" />
+                          Check Status
+                        </>
+                      )}
+                    </Button>
+
+                    <p className="text-[10px] text-brown-400 dark:text-brown-500 leading-relaxed">
+                      You can close this page and come back later. Your verification request is saved securely.
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Trust badges */}
-              <div className="mt-4 flex items-center justify-center gap-3 text-[10px] text-brown-400 dark:text-brown-500">
+              <div className="mt-6 flex items-center justify-center gap-3 text-[10px] text-brown-400 dark:text-brown-500">
                 <div className="flex items-center gap-1 hover:scale-105 transition-transform">
                   <Shield className="size-3" />
                   <span>SSL Secured</span>
@@ -426,7 +1010,7 @@ export default function PremiumView() {
                 <span className="text-brown-200 dark:text-brown-100/30">•</span>
                 <div className="flex items-center gap-1 hover:scale-105 transition-transform">
                   <Lock className="size-3" />
-                  <span>Instant Access</span>
+                  <span>Secure Payments</span>
                 </div>
               </div>
             </CardContent>
@@ -492,6 +1076,16 @@ export default function PremiumView() {
               </CardContent>
             </Card>
           </div>
+        </motion.div>
+
+        {/* Demo: Skip Payment Link */}
+        <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.3 }} className="text-center">
+          <button
+            onClick={handleDemoSkip}
+            className="text-[10px] text-brown-300 dark:text-brown-500 hover:text-brown-500 dark:hover:text-brown-300 underline underline-offset-2 transition-colors"
+          >
+            Demo: Skip Payment (for testing)
+          </button>
         </motion.div>
       </div>
     </div>

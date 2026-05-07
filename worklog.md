@@ -2325,3 +2325,263 @@ Stage Summary:
 8. Add multi-language support (Hindi, Tamil)
 9. Add data visualization improvements (interactive trait comparison over time)
 10. Add admin dashboard for user analytics
+
+---
+Task ID: 1
+Agent: Payment QR Agent
+Task: Add QR code payment UI with manual verification flow to PremiumView, and create payment verification API endpoints
+
+Work Log:
+- Read existing PremiumView.tsx, ayuastro-store.ts, and prisma/schema.prisma to understand current state
+- Updated Prisma Transaction model: Added transactionId (String?), paymentMethod (String?), screenshotUrl (String?) fields
+- Ran db:push successfully — database in sync with new schema
+- Created POST /api/payment/verify/route.ts — Accepts userId, transactionId, paymentMethod (upi/bank_transfer/other), screenshotUrl (optional); Zod validation; Checks for duplicate transactionId; Creates Transaction with status "pending"; Returns verification ID
+- Created GET /api/payment/status/route.ts — Accepts userId query param; Zod validation; Checks for verified (completed) transaction, pending transaction, or no transaction; Returns { verified, status }
+- Updated PremiumView.tsx with complete QR code payment flow:
+  - 3-step payment flow: QR Code → Verification Form → Pending Status
+  - Step 1 (QR): Shows payment-qr.jpg image, UPI ID with copy button, payee name, amount ₹499, "I've Made the Payment" button
+  - Step 2 (Form): Transaction ID/UTR input, payment method selector (UPI/Bank Transfer/Other), optional screenshot file upload, "Submit for Verification" button with loading state, back to QR button
+  - Step 3 (Pending): Animated clock icon, "Verification Pending" badge, status message, "Check Status" button with loading state
+  - Auto-checks existing payment status on mount (redirects if verified, shows pending if pending)
+  - "Demo: Skip Payment" link at bottom for testing (calls setHasPaid(true))
+  - Copy UPI ID to clipboard with visual feedback (Check icon)
+  - Error handling with red alert box
+  - Full AnimatePresence transitions between steps
+  - Full dark mode support on all new elements
+  - Uses shadcn/ui components: Card, Button, Badge, Separator, Input, Label, Select
+  - Matches AyuAstro design language (cream/brown/gold/sage colors, Playfair Display serif headings)
+  - All existing premium page content preserved (testimonials, countdown timer, benefits, etc.)
+- Removed eslint-disable directive that was generating a warning
+- Lint check passes with zero errors and zero warnings
+
+Stage Summary:
+- 4 files modified/created: schema.prisma, PremiumView.tsx, /api/payment/verify/route.ts, /api/payment/status/route.ts
+- Complete QR code payment flow with manual verification
+- 2 new API endpoints with Zod validation
+- PremiumView now has real payment flow instead of simulated button
+- Full dark mode support, responsive design, smooth animations
+- Zero lint errors
+
+---
+Task ID: 2
+Agent: Vedic Enhancement Agent
+Task: Make the Vedic chart analysis more comprehensive by adding more yogas, doshas, and a dedicated AI-powered Vedic analysis endpoint that's fast
+
+Work Log:
+- Updated /src/lib/astrology/types.ts:
+  - Added 6 new YogaType values: 'Amala Yoga', 'Veshi Yoga', 'Voshi Yoga', 'Ubhayachari Yoga', 'Dhana Yoga', 'Vipreet Raj Yoga'
+  - Added 2 new DoshaType values: 'Grahan Dosha', 'Shrapit Dosha'
+- Updated /src/lib/astrology/yogas.ts:
+  - Added detectAmalaYoga(): Venus and Jupiter in Kendras (1,4,7,10) from the Moon — brings pure reputation and fame
+  - Added detectVeshiYoga(): Planets in 2nd from Sun (not Moon) — brings wealth through speech and family
+  - Added detectVoshiYoga(): Planets in 12th from Sun (not Moon) — brings happiness and comfort
+  - Added detectUbhayachariYoga(): Planets in both 2nd AND 12th from Sun — brings royal connections and status
+  - Added detectDhanaYoga(): Lords of 2nd and 11th in conjunction or mutual aspect — brings wealth and financial prosperity
+  - Added detectVipreetRajYoga(): Lords of 6th, 8th, or 12th house in 6th, 8th, or 12th house — brings rise from adversity
+  - Updated detectAllYogas() to include all 16 yogas
+  - Updated module header comment from 10 to 16 yogas
+- Updated /src/lib/astrology/doshas.ts:
+  - Added detectGrahanDosha(): Sun or Moon conjunct Rahu/Ketu (eclipse energy) — brings emotional and confidence issues, ancestral karma
+  - Added detectShrapitDosha(): Saturn and Rahu in conjunction or mutual aspect — brings curses from past lives, obstacles
+  - Both include detailed detection logic with multiple conditions, severity levels, and comprehensive remedies
+  - Updated detectAllDoshas() to include all 6 doshas
+  - Updated module header comment from 4 to 6 doshas
+- Updated /src/lib/astrology/index.ts:
+  - Added exports for all 6 new yoga detection functions
+  - Added exports for both new dosha detection functions
+- Created /src/app/api/astrology/vedic-analysis/route.ts:
+  - GET endpoint with userId query parameter
+  - Fetches user data from database (user + profile + astrology)
+  - Recalculates kundali from birth details for complete data
+  - Generates DETERMINISTIC, comprehensive Vedic analysis (no AI — instant response <500ms)
+  - Analysis includes:
+    - House-by-house analysis (12 houses) with planet placements and lord positions
+    - Detailed yoga interpretations (all 16 yogas) with present/absent status and strength
+    - Detailed dosha interpretations (all 6 doshas) with remedies and severity
+    - Nakshatra-based personality analysis with deity, symbol, gana, traits, emotional nature, life purpose
+    - Planetary strength assessment (exalted/debilitated/own sign/moolatrikona/neutral)
+    - Ascendant lord analysis with house placement and strength interpretation
+    - Current Dasha interpretation with Mahadasha and Antardasha details
+    - Overall chart strength calculation (Excellent/Good/Average/Challenging)
+  - Returns processingTimeMs for performance verification
+- Updated /src/components/ayuastro/insights/YogaDoshaView.tsx:
+  - Added detailed entries for all 6 new yogas in YOGA_DETAILS (Amala, Veshi, Voshi, Ubhayachari, Dhana, Vipreet Raj Yoga)
+  - Added detailed entries for both new doshas in DOSHA_DETAILS (Grahan Dosha, Shrapit Dosha)
+  - Replaced single-page layout with 3-tab navigation: Yogas | Doshas | Analysis
+  - Yogas tab: Shows present yogas prominently, absent yogas in collapsible grayed-out section
+  - Doshas tab: Shows present doshas prominently, absent doshas in collapsible grayed-out section
+  - Analysis tab: Fetches from /api/astrology/vedic-analysis and displays:
+    - Chart Strength Overview with summary counts (present yogas, present doshas, process time)
+    - Ascendant Lord Analysis with strength badge
+    - Nakshatra Personality with deity, ruler, traits, emotional nature, life purpose
+    - Current Dasha Period with Mahadasha/Antardasha, areas affected
+    - Planetary Strengths table with Exalted/Own/Debilitated badges, Retrograde/Combust indicators
+    - House-by-House Analysis (collapsible, max-h-96 scroll)
+    - Detailed Yoga Analysis from API (all 16 yogas with present/absent status)
+    - Detailed Dosha Analysis from API (all 6 doshas with present/absent, remedies)
+  - Extracted YogaCard and DoshaCard sub-components for reusability
+  - Each present yoga shows: emoji, name, Sanskrit, summary, description, houses, planets, emotional interpretation
+  - Each absent yoga shows: same details but with "Absent" badge, reduced opacity, no emotional interpretation
+  - Each present dosha shows: icon, name, Sanskrit, summary, description, behavioral/mindfulness/journaling remedies, severity
+  - Each absent dosha shows: same with "Clear" badge, reduced opacity, no remedies
+  - Full dark mode support across all new sections
+  - Premium cinematic styling matching the app's existing aesthetic
+  - Loading and error states for API fetch with retry button
+- All lint checks pass with zero errors
+
+Stage Summary:
+- 5 files modified: types.ts, yogas.ts, doshas.ts, index.ts, YogaDoshaView.tsx
+- 1 file created: /src/app/api/astrology/vedic-analysis/route.ts
+- Yoga detection expanded from 10 to 16 yogas (6 new: Amala, Veshi, Voshi, Ubhayachari, Dhana, Vipreet Raj)
+- Dosha detection expanded from 4 to 6 doshas (2 new: Grahan, Shrapit)
+- New fast Vedic Analysis API endpoint (<500ms, deterministic, no AI)
+- YogaDoshaView completely redesigned with 3-tab layout and comprehensive analysis display
+- Zero lint errors
+
+---
+Task ID: 3
+Agent: Styling & QoL Enhancement Agent
+Task: Improve styling with more details and add small quality-of-life features
+
+Work Log:
+- Enhanced PremiumView with 3-step payment indicator (Scan & Pay → Submit Details → Verification)
+  - Step circles with gold highlight for current, sage for completed, muted for future
+  - Animated connector lines between steps that fill with gold gradient on completion
+  - Spring animation for checkmarks on completed steps using AnimatePresence
+  - Added Info tooltip section explaining the 3-step payment process
+  - Added Info icon import from lucide-react
+- Made QR code section more premium:
+  - Decorative gold gradient border (from-gold/30 via-gold-light/20 to-gold-dark/30) around QR image
+  - Outer glow effect (blur-md) behind the QR code container
+  - Added "Powered by Kotak 811" text below QR code with Shield icon
+  - animate-border-shimmer on QR border for subtle shimmer animation
+- Added Vedic Chart Deep Dive CTA card to InsightsView near KundaliChart section
+  - Sparkles icon with gold accent background
+  - "Explore Your 16 Yogas & 6 Doshas" title with Playfair Display serif font
+  - Brief description about cosmic blessings and karmic lessons
+  - ArrowRight button with group hover animation
+  - Gold accent top border (h-0.5 via-gold gradient)
+  - Gradient background (from-gold/5 to-sage-muted/10) with hover enhancement
+  - Click navigates to yogaDosha view via setView('yogaDosha')
+  - whileHover and whileTap framer-motion animations
+- Added Payment Status section to ProfileView
+  - If hasPaid=true: Gold "Premium Member ✓" badge with Star icon, gold gradient top accent bar
+  - If hasPaid=false: "Free Plan" badge with Lock icon, brown gradient top accent bar
+  - "Upgrade to Premium" button and "Verify Payment" ghost button for free users
+  - Both buttons navigate to premium view
+  - Full dark mode support with dark: variants on all elements
+- Added .step-connector CSS utility class to globals.css
+  - Background track (brown-200/30) for connector line
+  - Animated fill gradient (sage → gold) on completion using ::after pseudo-element
+  - .step-completed modifier fills the connector width to 100%
+  - .step-active modifier adds pulse animation
+  - Dark mode variants with proper colors
+  - @keyframes step-connector-pulse for active connector animation
+- All lint checks pass with zero errors
+
+Stage Summary:
+- 4 files modified: PremiumView.tsx, InsightsView.tsx, ProfileView.tsx, globals.css
+- PremiumView: 3-step payment indicator with animated connectors, premium QR code border, Powered by Kotak 811 text, payment info tooltip
+- InsightsView: Vedic Chart Deep Dive CTA card after KundaliChart, navigates to yogaDosha view
+- ProfileView: Payment Status section with Premium Member / Free Plan badge, upgrade and verify payment CTAs
+- globals.css: .step-connector utility class with animated gradient fill and dark mode support
+- Full dark mode support across all new elements
+- Zero lint errors
+
+---
+Task ID: 11
+Agent: Main Coordinator (Round 11)
+Task: Add QR code payment with manual verification, enhance Vedic chart analysis
+
+Work Log:
+- Analyzed uploaded QR code image via VLM — identified as Kotak Mahindra Bank UPI QR for AYUSH UPADHYAY, UPI ID: 9532013475@kotakbank
+- Copied QR code image to /public/payment-qr.jpg
+- Updated PremiumView with 3-step QR payment flow: Scan & Pay → Submit Details → Verification Pending
+- QR code section shows payment-qr.jpg image, UPI ID with copy button, payee name, amount ₹499
+- Verification form: Transaction ID/UTR input, payment method selector (UPI/Bank/Other), optional screenshot upload
+- Added payment step indicator with animated connectors (3 steps: Scan, Submit, Verify)
+- Added decorative gold border and glow around QR code image
+- Added "Powered by Kotak 811" branding text
+- Added "Demo: Skip Payment" link for testing
+- Created POST /api/payment/verify endpoint with Zod validation, duplicate check, Transaction DB storage
+- Created GET /api/payment/status endpoint returning verified/pending/none status
+- Updated Prisma Transaction model with transactionId, paymentMethod, screenshotUrl fields
+- Enhanced Vedic astrology engine: expanded from 10→16 yogas and 4→6 doshas
+- NEW yogas: Amala Yoga, Veshi Yoga, Voshi Yoga, Ubhayachari Yoga, Dhana Yoga, Vipreet Raj Yoga
+- NEW doshas: Grahan Dosha, Shrapit Dosha
+- Created /api/astrology/vedic-analysis GET endpoint — fast deterministic analysis (<500ms)
+- Vedic analysis includes: 12-house analysis, yoga/dosha interpretations, nakshatra personality, planetary strengths, ascendant lord analysis, current dasha interpretation, overall chart strength
+- Redesigned YogaDoshaView with 3-tab layout (Yogas | Doshas | Analysis)
+- Added present/absent yoga/dosha categorization with collapsible absent items
+- Added "Vedic Chart Deep Dive" CTA card in InsightsView linking to YogaDoshaView
+- Added Payment Status section to ProfileView (Premium Member badge or Free Plan CTA)
+- Added .step-connector CSS utility class with animated fill
+- All changes tested via agent-browser: premium QR flow, yoga/dosha view, analysis tab, dark mode
+- Zero console errors, zero lint errors
+
+Stage Summary:
+- Complete QR code UPI payment system with manual verification
+- 2 new API endpoints: /api/payment/verify, /api/payment/status
+- Vedic astrology engine expanded: 16 yogas + 6 doshas
+- Fast Vedic analysis API endpoint (deterministic, no AI calls)
+- 3-tab YogaDoshaView with comprehensive analysis
+- Premium payment step indicator with animated connectors
+- Payment status in profile view
+- All features have full dark mode support
+
+---
+## Current Project Status Assessment (Round 11)
+
+### Working Features:
+1. Landing page with animated hero, features, how-it-works, testimonials, FAQ, trust metrics
+2. 5-step onboarding with visual step indicator and 16 questionnaire questions
+3. Full backend pipeline: astrology → numerology → trait scoring → AI report
+4. Insights dashboard with archetype, duality, trait map, numerology, kundali chart, daily insight, horoscope, transits, dasha timeline, planetary positions, elemental balance
+5. **NEW: QR Code UPI Payment** with 3-step flow (Scan → Submit → Verify), Kotak 811 QR, manual verification
+6. **NEW: 16 Yogas detection** (6 new: Amala, Veshi, Voshi, Ubhayachari, Dhana, Vipreet Raj)
+7. **NEW: 6 Doshas detection** (2 new: Grahan, Shrapit)
+8. **NEW: Fast Vedic Analysis API** — deterministic <500ms, 12-house analysis, planetary strengths, nakshatra personality
+9. **NEW: 3-tab YogaDoshaView** (Yogas | Doshas | Analysis) with present/absent categorization
+10. Report view with 3 free + 4 premium sections, download button
+11. AI Cosmic Counselor chatbot
+12. Sync/compatibility view with sparkle effects
+13. Wisdom library with search/filter
+14. Profile with cosmic identity card, trait highlights, payment status
+15. Mood tracker with journal
+16. Full dark mode across all views
+17. 5-tab bottom navigation (Insights, Chat, Sync, Wisdom, Profile)
+
+### API Endpoints:
+- POST /api/onboarding — Create user with birth details
+- POST /api/astrology/calculate — Calculate Vedic astrology data
+- GET /api/astrology/vedic-analysis — Fast deterministic Vedic analysis (NEW)
+- POST /api/numerology/calculate — Calculate numerology data
+- POST /api/traits/generate — Generate trait scores
+- POST /api/ai/generate-report — Generate AI interpretation
+- POST /api/process-all — Full pipeline
+- GET /api/horoscope/daily — Daily horoscope
+- GET /api/transits/current — Planetary transits
+- POST /api/reports/generate-pdf — Generate downloadable report
+- POST /api/chat — AI Cosmic Counselor chat
+- POST /api/mood/entry — Create mood entry
+- GET /api/mood/history — Mood history with stats
+- POST /api/payment/verify — Submit payment for verification (NEW)
+- GET /api/payment/status — Check payment verification status (NEW)
+
+### Known Issues/Risks:
+- The process-all API takes ~13s mostly due to AI report generation
+- Payment verification is manual (admin must mark transactions as verified)
+- No real authentication (just simulated user creation)
+- PDF is HTML-based (production would use Puppeteer/jsPDF)
+
+### Priority Recommendations for Next Phase:
+1. Add admin panel for payment verification management
+2. Optimize API response time (stream AI responses or generate in background)
+3. Add real PDF generation with Puppeteer/jsPDF
+4. Add real authentication (Firebase Auth with Google/Apple login)
+5. Add PWA support with offline caching for daily horoscope
+6. Add multi-language support (Hindi, Tamil for Indian market)
+7. Add email notification when payment is verified
+8. Add Razorpay integration as alternative payment method
+9. Add more comprehensive Nakshatra deep-dive analysis
+10. Add yearly forecast/horoscope generation

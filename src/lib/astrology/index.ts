@@ -23,9 +23,9 @@ export { NAKSHATRAS, getNakshatraInfo, getNakshatraLord, getNakshatraName, getNa
 
 export { calculateDashaData, calculateMahadashas, findCurrentDasha, getDashaInterpretation, calculatePratyantardashas } from './dasha';
 
-export { detectAllYogas, detectRajYoga, detectGajKesariYoga, detectNeechBhangRajYoga, detectChandraMangalYoga, detectBudhAdityaYoga, detectHansaYoga, detectMalavyaYoga, detectShashaYoga, detectRuchakaYoga, detectBhadraYoga } from './yogas';
+export { detectAllYogas, detectRajYoga, detectGajKesariYoga, detectNeechBhangRajYoga, detectChandraMangalYoga, detectBudhAdityaYoga, detectHansaYoga, detectMalavyaYoga, detectShashaYoga, detectRuchakaYoga, detectBhadraYoga, detectAmalaYoga, detectVeshiYoga, detectVoshiYoga, detectUbhayachariYoga, detectDhanaYoga, detectVipreetRajYoga } from './yogas';
 
-export { detectAllDoshas, detectMangalDosha, detectKaalSarpDosha, detectPitraDosha, detectSadeSati } from './doshas';
+export { detectAllDoshas, detectMangalDosha, detectKaalSarpDosha, detectPitraDosha, detectSadeSati, detectGrahanDosha, detectShrapitDosha } from './doshas';
 
 export {
   normalizeLongitude,

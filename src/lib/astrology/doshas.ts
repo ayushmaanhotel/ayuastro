@@ -2,12 +2,14 @@
  * AyuAstro - Dosha Detection
  * 
  * Doshas are astrological afflictions that indicate challenges in a person's life.
- * This module detects the following 4 important doshas:
+ * This module detects the following 6 important doshas:
  * 
  * 1. Mangal Dosha (Manglik) - Mars in 1,4,7,8,12 houses
  * 2. Kaal Sarp Dosha - All planets between Rahu and Ketu
  * 3. Pitra Dosha - Sun-Rahu or Sun-Saturn affliction
  * 4. Shani Sade Sati - Saturn transiting 12th, 1st, 2nd from Moon
+ * 5. Grahan Dosha - Sun or Moon conjunct Rahu/Ketu (eclipse energy)
+ * 6. Shrapit Dosha - Saturn and Rahu in conjunction or mutual aspect
  */
 
 import {
@@ -420,10 +422,193 @@ export function detectSadeSati(
   );
 }
 
+// ─── 5. Grahan Dosha ──────────────────────────────────────────────────────────
+
+/**
+ * Grahan Dosha:
+ * Caused by the Sun or Moon being conjunct with Rahu or Ketu (eclipse energy).
+ * "Grahan" means "eclipse" — this dosha carries the shadow of eclipse energy,
+ * affecting the luminaries (Sun = soul/father/confidence, Moon = mind/emotions/mother).
+ * 
+ * Indicators:
+ * - Sun conjunct Rahu (Surya Grahan) — affects confidence, authority, father relationship
+ * - Moon conjunct Rahu (Chandra Grahan) — affects mental peace, emotional stability
+ * - Sun conjunct Ketu — affects self-identity, purpose
+ * - Moon conjunct Ketu — affects emotional grounding, maternal relationship
+ */
+export function detectGrahanDosha(
+  positions: Record<string, PlanetPosition>,
+  ascendantSignIndex: number
+): DoshaData {
+  const sunPos = positions['Sun'];
+  const moonPos = positions['Moon'];
+  const rahuPos = positions['Rahu'];
+  const ketuPos = positions['Ketu'];
+
+  if (!sunPos || !moonPos || !rahuPos || !ketuPos) {
+    return createDosha('Grahan Dosha', false, 'Low', 'Luminary/Rahu-Ketu positions unknown', []);
+  }
+
+  let present = false;
+  let severity: 'High' | 'Medium' | 'Low' = 'Low';
+  const conditions: string[] = [];
+
+  // Check Sun conjunct Rahu (Surya Grahan)
+  if (sunPos.signIndex === rahuPos.signIndex) {
+    present = true;
+    conditions.push('Sun conjunct Rahu (Surya Grahan)');
+    severity = 'High';
+  }
+
+  // Check Moon conjunct Rahu (Chandra Grahan)
+  if (moonPos.signIndex === rahuPos.signIndex) {
+    present = true;
+    conditions.push('Moon conjunct Rahu (Chandra Grahan)');
+    if (severity !== 'High') severity = 'High';
+    else severity = 'High'; // Both luminaries with Rahu = maximum severity
+  }
+
+  // Check Sun conjunct Ketu
+  if (sunPos.signIndex === ketuPos.signIndex) {
+    present = true;
+    conditions.push('Sun conjunct Ketu');
+    if (severity === 'Low') severity = 'Medium';
+  }
+
+  // Check Moon conjunct Ketu
+  if (moonPos.signIndex === ketuPos.signIndex) {
+    present = true;
+    conditions.push('Moon conjunct Ketu');
+    if (severity === 'Low') severity = 'Medium';
+  }
+
+  // Also check if luminaries are in the same house as Rahu/Ketu from Lagna
+  const sunHouse = getHouseFromAscendant(sunPos.signIndex, ascendantSignIndex);
+  const moonHouse = getHouseFromAscendant(moonPos.signIndex, ascendantSignIndex);
+  const rahuHouse = getHouseFromAscendant(rahuPos.signIndex, ascendantSignIndex);
+
+  // If Rahu is in 1st, 5th, 7th, or 9th house with Sun/Moon aspect
+  if ([1, 5, 7, 9].includes(rahuHouse)) {
+    if (sunHouse === rahuHouse || moonHouse === rahuHouse) {
+      if (!present) {
+        present = true;
+        conditions.push('Rahu with luminary in key house');
+        severity = 'Medium';
+      }
+    }
+  }
+
+  const remedies = [
+    'Chant Surya Mantra: "Om Hram Hreem Hraum Sah Suryaya Namah" on Sundays',
+    'Chant Chandra Mantra: "Om Sram Sreem Sraum Sah Chandraya Namah" on Mondays',
+    'Perform Grahan Shanti Puja during eclipse periods',
+    'Donate wheat, jaggery, and copper on Sundays for Sun afflictions',
+    'Donate rice, milk, and silver on Mondays for Moon afflictions',
+    'Wear a pearl (for Moon) or ruby (for Sun) after expert consultation',
+    'Recite Gayatri Mantra 108 times daily for spiritual protection',
+    'Perform Rahu-Ketu Shanti Puja at Kalahasti or Trimbakeshwar',
+  ];
+
+  return createDosha(
+    'Grahan Dosha',
+    present,
+    severity,
+    present
+      ? `Grahan Dosha detected: ${conditions.join('; ')}. Eclipse energy on the luminaries creates challenges in confidence, emotional stability, and ancestral karma`
+      : 'No eclipse affliction on the luminaries detected',
+    present ? remedies : []
+  );
+}
+
+// ─── 6. Shrapit Dosha ────────────────────────────────────────────────────────
+
+/**
+ * Shrapit Dosha:
+ * Caused by the conjunction or mutual aspect of Saturn and Rahu.
+ * "Shrapit" means "cursed" — this dosha indicates curses from past lives
+ * that create obstacles, delays, and struggles in the current life.
+ * 
+ * Conditions:
+ * - Saturn conjunct Rahu in the same sign (strongest)
+ * - Saturn and Rahu in mutual aspect (7th aspect from each other)
+ * - Saturn aspecting Rahu or Rahu aspecting Saturn (3rd, 7th, 10th aspects)
+ */
+export function detectShrapitDosha(
+  positions: Record<string, PlanetPosition>,
+  ascendantSignIndex: number
+): DoshaData {
+  const saturnPos = positions['Saturn'];
+  const rahuPos = positions['Rahu'];
+
+  if (!saturnPos || !rahuPos) {
+    return createDosha('Shrapit Dosha', false, 'Low', 'Saturn/Rahu positions unknown', []);
+  }
+
+  let present = false;
+  let severity: 'High' | 'Medium' | 'Low' = 'Low';
+  const conditions: string[] = [];
+
+  // Condition 1: Saturn conjunct Rahu (same sign) — strongest
+  if (saturnPos.signIndex === rahuPos.signIndex) {
+    present = true;
+    conditions.push('Saturn conjunct Rahu in same sign');
+    severity = 'High';
+  }
+
+  // Condition 2: Saturn and Rahu in mutual 7th aspect
+  const saturnHouse = getHouseFromAscendant(saturnPos.signIndex, ascendantSignIndex);
+  const rahuHouse = getHouseFromAscendant(rahuPos.signIndex, ascendantSignIndex);
+
+  // 7th aspect from each other
+  const saturnToRahuDiff = ((rahuPos.signIndex - saturnPos.signIndex) % NUM_SIGNS + NUM_SIGNS) % NUM_SIGNS;
+  const rahuToSaturnDiff = ((saturnPos.signIndex - rahuPos.signIndex) % NUM_SIGNS + NUM_SIGNS) % NUM_SIGNS;
+
+  // Saturn's 3rd, 7th, and 10th aspects
+  if (saturnToRahuDiff === 2 || saturnToRahuDiff === 6 || saturnToRahuDiff === 9) {
+    present = true;
+    conditions.push('Saturn aspecting Rahu');
+    if (severity !== 'High') severity = 'Medium';
+  }
+
+  // Rahu aspects Saturn (Rahu has 5th, 7th, 9th aspects in some traditions, but mainly 7th)
+  if (rahuToSaturnDiff === 6) {
+    present = true;
+    conditions.push('Rahu aspecting Saturn (7th aspect)');
+    if (severity !== 'High') severity = 'Medium';
+  }
+
+  // Check if conjunction is in key houses (1st, 7th, 8th, 12th) — more severe
+  if (present && [1, 7, 8, 12].includes(saturnHouse)) {
+    severity = 'High';
+    conditions.push('Conjunction in key house (1st, 7th, 8th, or 12th)');
+  }
+
+  const remedies = [
+    'Perform Shrapit Dosh Nivaran Puja at Trimbakeshwar',
+    'Chant "Om Sham Shanicharaya Namah" and "Om Raahave Namah" 108 times daily',
+    'Light a mustard oil lamp for Saturn and burn camphor for Rahu on Saturdays',
+    'Donate black sesame seeds, iron, and blankets on Saturdays',
+    'Wear a Gomed (Hessonite) after expert consultation for Rahu afflictions',
+    'Recite Hanuman Chalisa daily for protection from Saturn-Rahu combination',
+    'Perform Rudrabhishek on Mondays during Shravan month',
+    'Feed crows and dogs on Saturdays to appease Saturn and Rahu',
+  ];
+
+  return createDosha(
+    'Shrapit Dosha',
+    present,
+    severity,
+    present
+      ? `Shrapit Dosha detected: ${conditions.join('; ')}. The Saturn-Rahu combination indicates karmic obstacles and challenges from past-life actions`
+      : 'No Saturn-Rahu affliction (Shrapit Dosha) detected',
+    present ? remedies : []
+  );
+}
+
 // ─── Detect All Doshas ───────────────────────────────────────────────────────
 
 /**
- * Detect all 4 doshas for the given planetary positions and ascendant.
+ * Detect all 6 doshas for the given planetary positions and ascendant.
  */
 export function detectAllDoshas(
   positions: Record<string, PlanetPosition>,
@@ -435,5 +620,7 @@ export function detectAllDoshas(
     detectKaalSarpDosha(positions, ascendantSignIndex),
     detectPitraDosha(positions, ascendantSignIndex),
     detectSadeSati(positions, birthDate),
+    detectGrahanDosha(positions, ascendantSignIndex),
+    detectShrapitDosha(positions, ascendantSignIndex),
   ];
 }

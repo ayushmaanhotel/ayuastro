@@ -141,7 +141,13 @@ export type YogaType =
   | 'Malavya Yoga'
   | 'Shasha Yoga'
   | 'Ruchaka Yoga'
-  | 'Bhadra Yoga';
+  | 'Bhadra Yoga'
+  | 'Amala Yoga'
+  | 'Veshi Yoga'
+  | 'Voshi Yoga'
+  | 'Ubhayachari Yoga'
+  | 'Dhana Yoga'
+  | 'Vipreet Raj Yoga';
 
 export interface YogaData {
   name: YogaType;
@@ -157,7 +163,9 @@ export type DoshaType =
   | 'Mangal Dosha'
   | 'Kaal Sarp Dosha'
   | 'Pitra Dosha'
-  | 'Shani Sade Sati';
+  | 'Shani Sade Sati'
+  | 'Grahan Dosha'
+  | 'Shrapit Dosha';
 
 export interface DoshaData {
   name: DoshaType;

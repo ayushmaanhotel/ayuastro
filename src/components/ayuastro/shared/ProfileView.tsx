@@ -604,6 +604,74 @@ export default function ProfileView() {
           </Card>
         </motion.div>
 
+        {/* Payment Status Section */}
+        <motion.div variants={staggerItem}>
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 transition-all hover:-translate-y-[3px] hover:shadow-lg overflow-hidden">
+            <div className={`h-1 ${hasPaid ? 'bg-gradient-to-r from-gold via-gold-light to-gold-dark' : 'bg-gradient-to-r from-brown-200 via-brown-300 to-brown-200'}`} />
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+                {hasPaid ? (
+                  <Star className="size-5 text-gold" />
+                ) : (
+                  <Lock className="size-5 text-brown-400" />
+                )}
+                Payment Status
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {hasPaid ? (
+                <div className="flex items-center gap-3">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-gold/10 dark:bg-gold/15 border border-gold/20">
+                    <Star className="size-6 text-gold" />
+                  </div>
+                  <div className="flex-1">
+                    <Badge className="bg-gold/15 text-gold-dark dark:bg-gold/20 dark:text-gold border border-gold/20 dark:border-gold/15 text-xs font-semibold px-3 py-1">
+                      Premium Member ✓
+                    </Badge>
+                    <p className="text-xs text-brown-400 dark:text-brown-500 mt-1.5">
+                      Full access to all premium sections and reports unlocked.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brown-50 dark:bg-brown-50/20 border border-brown-200 dark:border-brown-100/30">
+                      <Lock className="size-5 text-brown-300 dark:text-brown-500" />
+                    </div>
+                    <div className="flex-1">
+                      <Badge className="bg-brown-50 dark:bg-brown-50/20 text-brown-400 dark:text-brown-500 border border-brown-200 dark:border-brown-100/30 text-xs font-medium px-3 py-1">
+                        Free Plan
+                      </Badge>
+                      <p className="text-xs text-brown-400 dark:text-brown-500 mt-1.5">
+                        Upgrade to unlock all premium sections and deep analysis.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={() => setView('premium')}
+                      size="sm"
+                      className="flex-1 bg-brown-700 dark:bg-gold dark:text-brown-900 text-white hover:bg-brown-800 dark:hover:bg-gold-light text-xs"
+                    >
+                      <Star className="mr-1.5 size-3.5" />
+                      Upgrade to Premium
+                    </Button>
+                    <Button
+                      onClick={() => setView('premium')}
+                      variant="ghost"
+                      size="sm"
+                      className="text-brown-400 dark:text-brown-500 hover:text-gold-dark dark:hover:text-gold text-xs"
+                    >
+                      Verify Payment
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Account Stats */}
         <motion.div variants={staggerItem}>
           <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 transition-all hover:-translate-y-[3px] hover:shadow-lg">

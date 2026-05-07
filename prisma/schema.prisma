@@ -142,6 +142,9 @@ model Transaction {
   currency        String   @default("INR")
   razorpayOrderId String?
   razorpayPaymentId String?
+  transactionId   String?  // UTR / Transaction reference number from user
+  paymentMethod   String?  // upi, bank_transfer, other
+  screenshotUrl   String?  // optional screenshot reference
   status          String   @default("pending") // pending, completed, failed, refunded
   reportType      String?
   createdAt       DateTime @default(now())

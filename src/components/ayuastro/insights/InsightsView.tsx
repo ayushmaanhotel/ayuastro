@@ -1846,6 +1846,41 @@ export default function InsightsView() {
                 />
               </div>
 
+              {/* ─── Vedic Chart Deep Dive CTA Card ────────────────────── */}
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                className="cursor-pointer"
+                onClick={() => setView('yogaDosha')}
+              >
+                <div className="relative rounded-xl overflow-hidden border border-gold/20 dark:border-gold/15 bg-gradient-to-br from-gold/5 via-transparent to-sage-muted/10 dark:from-gold/5 dark:via-transparent dark:to-sage/5 hover:from-gold/10 hover:to-sage-muted/20 dark:hover:from-gold/8 dark:hover:to-sage/10 transition-all group">
+                  {/* Decorative gold accent top border */}
+                  <div className="h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent" />
+                  <div className="p-4 flex items-center gap-3">
+                    <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gold/10 dark:bg-gold/15 border border-gold/10 dark:border-gold/10 group-hover:bg-gold/15 dark:group-hover:bg-gold/20 transition-colors">
+                      <Sparkles className="size-5 text-gold-dark dark:text-gold" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4
+                        className="font-serif text-sm font-bold text-brown-900 dark:text-brown-100 mb-0.5"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        Explore Your 16 Yogas &amp; 6 Doshas
+                      </h4>
+                      <p className="text-[11px] text-brown-400 dark:text-brown-500 leading-snug">
+                        Deep-dive into Vedic chart analysis — discover cosmic blessings and karmic lessons shaping your life.
+                      </p>
+                    </div>
+                    <div className="shrink-0">
+                      <ArrowRight className="size-4 text-brown-300 dark:text-brown-500 group-hover:text-gold-dark dark:group-hover:text-gold group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
               {/* Planetary Positions Table */}
               <Separator className="my-3 bg-brown-100" />
               <Collapsible open={planetaryExpanded} onOpenChange={setPlanetaryExpanded}>

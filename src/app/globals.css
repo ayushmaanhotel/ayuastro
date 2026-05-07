@@ -824,3 +824,63 @@
     line-height: 1.2 !important;
   }
 }
+
+/* ─── Task 3: Payment Step Connector Utility ───────────────────────────── */
+
+/* Step connector — thin horizontal line that fills with gold gradient when step is completed */
+.step-connector {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 2rem;
+}
+
+/* Background track for the connector */
+.step-connector::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: rgba(188, 170, 164, 0.3);
+  transform: translateY(-50%);
+}
+
+.dark .step-connector::before {
+  background: rgba(78, 52, 46, 0.4);
+}
+
+/* Filled progress line — animated gradient fill */
+.step-connector::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #81C784, #D4AF37);
+  transform: translateY(-50%);
+  transition: width 0.5s ease-out;
+  width: 0%;
+}
+
+.dark .step-connector::after {
+  background: linear-gradient(90deg, #66BB6A, #F0C14B);
+}
+
+/* When the step before the connector is completed, fill the connector */
+.step-connector.step-completed::after {
+  width: 100%;
+}
+
+/* Pulse animation on the active connector */
+.step-connector.step-active::after {
+  animation: step-connector-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes step-connector-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}

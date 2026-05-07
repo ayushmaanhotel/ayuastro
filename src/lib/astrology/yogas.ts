@@ -2,7 +2,7 @@
  * AyuAstro - Yoga Detection
  * 
  * Yogas are special planetary combinations that indicate specific life patterns.
- * This module detects the following 10 important yogas:
+ * This module detects the following 16 important yogas:
  * 
  * 1. Raj Yoga - Planets in Kendra & Trikona from Lagna
  * 2. Gaj Kesari Yoga - Jupiter in Kendra from Moon
@@ -14,6 +14,12 @@
  * 8. Shasha Yoga - Saturn in its own/exaltation sign in Kendra/Trikona
  * 9. Ruchaka Yoga - Mars in its own/exaltation sign in Kendra/Trikona
  * 10. Bhadra Yoga - Mercury in its own/exaltation sign in Kendra/Trikona
+ * 11. Amala Yoga - Venus and Jupiter in Kendras from Moon
+ * 12. Veshi Yoga - Planets in 2nd from Sun (not Moon)
+ * 13. Voshi Yoga - Planets in 12th from Sun (not Moon)
+ * 14. Ubhayachari Yoga - Planets in both 2nd AND 12th from Sun
+ * 15. Dhana Yoga - Lords of 2nd and 11th in conjunction or mutual aspect
+ * 16. Vipreet Raj Yoga - Lords of 6th, 8th, or 12th in 6th, 8th, or 12th house
  */
 
 import {
@@ -429,10 +435,352 @@ export function detectBhadraYoga(
   );
 }
 
+// ─── 11. Amala Yoga ──────────────────────────────────────────────────────────
+
+/**
+ * Amala Yoga: Venus and Jupiter in Kendras (1,4,7,10) from the Moon.
+ * Brings pure reputation and fame. The word "Amala" means "pure" or "spotless".
+ * When benefics Venus and Jupiter occupy angular positions from the Moon,
+ * the native enjoys a spotless reputation and moral standing.
+ */
+export function detectAmalaYoga(
+  positions: Record<string, PlanetPosition>
+): YogaData {
+  const moonPos = positions['Moon'];
+  const venusPos = positions['Venus'];
+  const jupiterPos = positions['Jupiter'];
+
+  if (!moonPos || !venusPos || !jupiterPos) {
+    return createYoga('Amala Yoga', false, 'Venus and Jupiter in Kendras from Moon', []);
+  }
+
+  const venusInKendraFromMoon = isPlanetInKendraFromMoon(venusPos.signIndex, moonPos.signIndex);
+  const jupiterInKendraFromMoon = isPlanetInKendraFromMoon(jupiterPos.signIndex, moonPos.signIndex);
+
+  const present = venusInKendraFromMoon && jupiterInKendraFromMoon;
+
+  const involvedPlanets: Planet[] = ['Moon', 'Venus', 'Jupiter'];
+
+  // Stronger if both are in own sign or exalted
+  const venusStrong = isInOwnSign('Venus', venusPos.sign) || isExalted('Venus', venusPos.sign);
+  const jupiterStrong = isInOwnSign('Jupiter', jupiterPos.sign) || isExalted('Jupiter', jupiterPos.sign);
+  const strength = present
+    ? (venusStrong && jupiterStrong ? 'Strong' : venusStrong || jupiterStrong ? 'Moderate' : 'Moderate')
+    : 'Weak';
+
+  return createYoga(
+    'Amala Yoga',
+    present,
+    'Venus and Jupiter in Kendras from the Moon bring a pure reputation, moral standing, and lasting fame',
+    involvedPlanets,
+    present ? strength : 'Weak'
+  );
+}
+
+// ─── 12. Veshi Yoga ──────────────────────────────────────────────────────────
+
+/**
+ * Veshi Yoga: Planets (other than Moon) in the 2nd house from the Sun.
+ * Brings wealth through speech and family connections.
+ * The more planets in the 2nd from Sun, the stronger the yoga.
+ */
+export function detectVeshiYoga(
+  positions: Record<string, PlanetPosition>
+): YogaData {
+  const sunPos = positions['Sun'];
+  if (!sunPos) {
+    return createYoga('Veshi Yoga', false, 'Planets in 2nd from Sun', []);
+  }
+
+  // Find planets in the 2nd sign from the Sun (not Moon)
+  const secondFromSunSignIndex = (sunPos.signIndex + 1) % 12;
+  const planetsInSecond: Planet[] = [];
+
+  const planetsToCheck: Planet[] = ['Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
+
+  for (const planet of planetsToCheck) {
+    const pos = positions[planet];
+    if (pos && pos.signIndex === secondFromSunSignIndex) {
+      planetsInSecond.push(planet);
+    }
+  }
+
+  const present = planetsInSecond.length > 0;
+  const strength = planetsInSecond.length >= 3 ? 'Strong' : planetsInSecond.length >= 2 ? 'Moderate' : 'Weak';
+
+  return createYoga(
+    'Veshi Yoga',
+    present,
+    'Planets in the 2nd house from the Sun bring wealth through speech, family, and persuasive abilities',
+    present ? planetsInSecond : [],
+    present ? strength : 'Weak'
+  );
+}
+
+// ─── 13. Voshi Yoga ──────────────────────────────────────────────────────────
+
+/**
+ * Voshi Yoga: Planets (other than Moon) in the 12th house from the Sun.
+ * Brings happiness, comfort, and a contented life.
+ * The more planets in the 12th from Sun, the stronger the yoga.
+ */
+export function detectVoshiYoga(
+  positions: Record<string, PlanetPosition>
+): YogaData {
+  const sunPos = positions['Sun'];
+  if (!sunPos) {
+    return createYoga('Voshi Yoga', false, 'Planets in 12th from Sun', []);
+  }
+
+  // Find planets in the 12th sign from the Sun (1 sign before Sun)
+  const twelfthFromSunSignIndex = (sunPos.signIndex + 11) % 12;
+  const planetsInTwelfth: Planet[] = [];
+
+  const planetsToCheck: Planet[] = ['Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
+
+  for (const planet of planetsToCheck) {
+    const pos = positions[planet];
+    if (pos && pos.signIndex === twelfthFromSunSignIndex) {
+      planetsInTwelfth.push(planet);
+    }
+  }
+
+  const present = planetsInTwelfth.length > 0;
+  const strength = planetsInTwelfth.length >= 3 ? 'Strong' : planetsInTwelfth.length >= 2 ? 'Moderate' : 'Weak';
+
+  return createYoga(
+    'Voshi Yoga',
+    present,
+    'Planets in the 12th house from the Sun bring happiness, comfort, and inner contentment',
+    present ? planetsInTwelfth : [],
+    present ? strength : 'Weak'
+  );
+}
+
+// ─── 14. Ubhayachari Yoga ────────────────────────────────────────────────────
+
+/**
+ * Ubhayachari Yoga: Planets (other than Moon) in BOTH the 2nd AND 12th from the Sun.
+ * This is the most powerful of the three Sun-based yogas (Veshi, Voshi, Ubhayachari).
+ * Brings royal connections, high status, and a commanding personality.
+ */
+export function detectUbhayachariYoga(
+  positions: Record<string, PlanetPosition>
+): YogaData {
+  const sunPos = positions['Sun'];
+  if (!sunPos) {
+    return createYoga('Ubhayachari Yoga', false, 'Planets in both 2nd and 12th from Sun', []);
+  }
+
+  const secondFromSunSignIndex = (sunPos.signIndex + 1) % 12;
+  const twelfthFromSunSignIndex = (sunPos.signIndex + 11) % 12;
+
+  const planetsInSecond: Planet[] = [];
+  const planetsInTwelfth: Planet[] = [];
+
+  const planetsToCheck: Planet[] = ['Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
+
+  for (const planet of planetsToCheck) {
+    const pos = positions[planet];
+    if (!pos) continue;
+    if (pos.signIndex === secondFromSunSignIndex) {
+      planetsInSecond.push(planet);
+    }
+    if (pos.signIndex === twelfthFromSunSignIndex) {
+      planetsInTwelfth.push(planet);
+    }
+  }
+
+  const present = planetsInSecond.length > 0 && planetsInTwelfth.length > 0;
+  const totalPlanets = planetsInSecond.length + planetsInTwelfth.length;
+  const allInvolved: Planet[] = [...planetsInSecond, ...planetsInTwelfth];
+
+  const strength = totalPlanets >= 4 ? 'Strong' : totalPlanets >= 2 ? 'Moderate' : 'Weak';
+
+  return createYoga(
+    'Ubhayachari Yoga',
+    present,
+    'Planets flanking the Sun in both the 2nd and 12th houses bring royal connections, high status, and a commanding presence',
+    present ? allInvolved : [],
+    present ? strength : 'Weak'
+  );
+}
+
+// ─── 15. Dhana Yoga ──────────────────────────────────────────────────────────
+
+/**
+ * Dhana Yoga: Lords of the 2nd and 11th houses in conjunction or mutual aspect
+ * with each other, or with lords of Kendra/Trikona houses.
+ * Brings wealth and financial prosperity throughout life.
+ */
+export function detectDhanaYoga(
+  positions: Record<string, PlanetPosition>,
+  ascendantSignIndex: number
+): YogaData {
+  const involvedPlanets: Planet[] = [];
+  let strongCondition = false;
+
+  // Get the sign indices for the 2nd and 11th houses
+  const secondHouseSignIndex = (ascendantSignIndex + 1) % 12;
+  const eleventhHouseSignIndex = (ascendantSignIndex + 10) % 12;
+
+  // Get lords of 2nd and 11th houses
+  const secondLord = getSignLordByIndex(secondHouseSignIndex);
+  const eleventhLord = getSignLordByIndex(eleventhHouseSignIndex);
+
+  const secondLordPos = positions[secondLord];
+  const eleventhLordPos = positions[eleventhLord];
+
+  // Condition 1: Lords of 2nd and 11th in conjunction (same sign)
+  if (secondLordPos && eleventhLordPos && secondLordPos.signIndex === eleventhLordPos.signIndex) {
+    if (!involvedPlanets.includes(secondLord)) involvedPlanets.push(secondLord);
+    if (!involvedPlanets.includes(eleventhLord)) involvedPlanets.push(eleventhLord);
+    strongCondition = true;
+  }
+
+  // Condition 2: 2nd lord in 11th house or 11th lord in 2nd house
+  if (secondLordPos) {
+    const secondLordHouse = getPlanetHouse(secondLordPos.signIndex, ascendantSignIndex);
+    if (secondLordHouse === 11) {
+      if (!involvedPlanets.includes(secondLord)) involvedPlanets.push(secondLord);
+      if (!involvedPlanets.includes(eleventhLord)) involvedPlanets.push(eleventhLord);
+      strongCondition = true;
+    }
+  }
+
+  if (eleventhLordPos) {
+    const eleventhLordHouse = getPlanetHouse(eleventhLordPos.signIndex, ascendantSignIndex);
+    if (eleventhLordHouse === 2) {
+      if (!involvedPlanets.includes(secondLord)) involvedPlanets.push(secondLord);
+      if (!involvedPlanets.includes(eleventhLord)) involvedPlanets.push(eleventhLord);
+      strongCondition = true;
+    }
+  }
+
+  // Condition 3: 2nd or 11th lord in conjunction with a Kendra or Trikona lord
+  const kendraSignIndices = KENDRA_HOUSES.map(h => (ascendantSignIndex + h - 1) % 12);
+  const trikonaSignIndices = TRIKONA_HOUSES.map(h => (ascendantSignIndex + h - 1) % 12);
+
+  const kendraLords: Planet[] = kendraSignIndices.map(si => getSignLordByIndex(si));
+  const trikonaLords: Planet[] = trikonaSignIndices.map(si => getSignLordByIndex(si));
+  const angleTrineLords = Array.from(new Set([...kendraLords, ...trikonaLords]));
+
+  for (const lord of angleTrineLords) {
+    const lordPos = positions[lord];
+    if (!lordPos) continue;
+
+    // Check conjunction with 2nd lord
+    if (secondLordPos && lordPos.signIndex === secondLordPos.signIndex && lord !== secondLord) {
+      if (!involvedPlanets.includes(secondLord)) involvedPlanets.push(secondLord);
+      if (!involvedPlanets.includes(lord)) involvedPlanets.push(lord);
+    }
+
+    // Check conjunction with 11th lord
+    if (eleventhLordPos && lordPos.signIndex === eleventhLordPos.signIndex && lord !== eleventhLord) {
+      if (!involvedPlanets.includes(eleventhLord)) involvedPlanets.push(eleventhLord);
+      if (!involvedPlanets.includes(lord)) involvedPlanets.push(lord);
+    }
+  }
+
+  // Also check for mutual aspect (7th aspect) between 2nd and 11th lords
+  if (secondLordPos && eleventhLordPos) {
+    const diff = ((secondLordPos.signIndex - eleventhLordPos.signIndex) % 12 + 12) % 12;
+    if (diff === 6 || diff === 6) { // 7th aspect from each other
+      if (!involvedPlanets.includes(secondLord)) involvedPlanets.push(secondLord);
+      if (!involvedPlanets.includes(eleventhLord)) involvedPlanets.push(eleventhLord);
+    }
+  }
+
+  const present = involvedPlanets.length >= 2;
+
+  return createYoga(
+    'Dhana Yoga',
+    present,
+    'Lords of wealth houses (2nd and 11th) in auspicious connection bring financial prosperity, material abundance, and wealth through multiple sources',
+    involvedPlanets,
+    present ? (strongCondition ? 'Strong' : 'Moderate') : 'Weak'
+  );
+}
+
+// ─── 16. Vipreet Raj Yoga ────────────────────────────────────────────────────
+
+/**
+ * Vipreet Raj Yoga: Lords of the Dushtana houses (6th, 8th, 12th) occupy
+ * other Dushtana houses (6th, 8th, 12th) from each other.
+ * "Vipreet" means "opposite" or "contrary" — rise from adversity.
+ * The very challenges and obstacles become the source of power and success.
+ * 
+ * Harsha Yoga: 6th lord in 6th, 8th, or 12th house
+ * Sarala Yoga: 8th lord in 6th, 8th, or 12th house
+ * Vimala Yoga: 12th lord in 6th, 8th, or 12th house
+ */
+export function detectVipreetRajYoga(
+  positions: Record<string, PlanetPosition>,
+  ascendantSignIndex: number
+): YogaData {
+  const involvedPlanets: Planet[] = [];
+  const subYogasFound: string[] = [];
+
+  // Get sign indices for Dushtana houses
+  const sixthHouseSignIndex = (ascendantSignIndex + 5) % 12;
+  const eighthHouseSignIndex = (ascendantSignIndex + 7) % 12;
+  const twelfthHouseSignIndex = (ascendantSignIndex + 11) % 12;
+
+  const dushtanaHouseNumbers = [6, 8, 12];
+
+  // Get lords of Dushtana houses
+  const sixthLord = getSignLordByIndex(sixthHouseSignIndex);
+  const eighthLord = getSignLordByIndex(eighthHouseSignIndex);
+  const twelfthLord = getSignLordByIndex(twelfthHouseSignIndex);
+
+  // Check Harsha Yoga: 6th lord in 6th, 8th, or 12th house
+  const sixthLordPos = positions[sixthLord];
+  if (sixthLordPos) {
+    const house = getPlanetHouse(sixthLordPos.signIndex, ascendantSignIndex);
+    if (dushtanaHouseNumbers.includes(house)) {
+      involvedPlanets.push(sixthLord);
+      subYogasFound.push('Harsha');
+    }
+  }
+
+  // Check Sarala Yoga: 8th lord in 6th, 8th, or 12th house
+  const eighthLordPos = positions[eighthLord];
+  if (eighthLordPos) {
+    const house = getPlanetHouse(eighthLordPos.signIndex, ascendantSignIndex);
+    if (dushtanaHouseNumbers.includes(house)) {
+      if (!involvedPlanets.includes(eighthLord)) involvedPlanets.push(eighthLord);
+      subYogasFound.push('Sarala');
+    }
+  }
+
+  // Check Vimala Yoga: 12th lord in 6th, 8th, or 12th house
+  const twelfthLordPos = positions[twelfthLord];
+  if (twelfthLordPos) {
+    const house = getPlanetHouse(twelfthLordPos.signIndex, ascendantSignIndex);
+    if (dushtanaHouseNumbers.includes(house)) {
+      if (!involvedPlanets.includes(twelfthLord)) involvedPlanets.push(twelfthLord);
+      subYogasFound.push('Vimala');
+    }
+  }
+
+  const present = subYogasFound.length > 0;
+  const strength = subYogasFound.length >= 2 ? 'Strong' : 'Moderate';
+
+  return createYoga(
+    'Vipreet Raj Yoga',
+    present,
+    present
+      ? `Vipreet Raj Yoga detected (${subYogasFound.join(' + ')}): lords of challenging houses placed in other challenging houses, bringing extraordinary rise from adversity and obstacles`
+      : 'Lords of Dushtana houses (6th, 8th, 12th) in other Dushtana houses bring rise from adversity',
+    involvedPlanets,
+    present ? strength : 'Weak'
+  );
+}
+
 // ─── Detect All Yogas ────────────────────────────────────────────────────────
 
 /**
- * Detect all 10 yogas for the given planetary positions and ascendant.
+ * Detect all 16 yogas for the given planetary positions and ascendant.
  */
 export function detectAllYogas(
   positions: Record<string, PlanetPosition>,
@@ -449,6 +797,12 @@ export function detectAllYogas(
     detectShashaYoga(positions, ascendantSignIndex),
     detectRuchakaYoga(positions, ascendantSignIndex),
     detectBhadraYoga(positions, ascendantSignIndex),
+    detectAmalaYoga(positions),
+    detectVeshiYoga(positions),
+    detectVoshiYoga(positions),
+    detectUbhayachariYoga(positions),
+    detectDhanaYoga(positions, ascendantSignIndex),
+    detectVipreetRajYoga(positions, ascendantSignIndex),
   ];
 }
 
