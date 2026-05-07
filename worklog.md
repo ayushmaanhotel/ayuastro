@@ -2688,3 +2688,135 @@ Stage Summary:
 - Vedic analysis now 6x more comprehensive with new analysis sections
 - All changes pass lint with zero errors
 - Meeus fallback preserved for environments where sweph can't load
+
+---
+Task ID: 1
+Agent: Astrology Engine Extension Agent
+Task: Extend astrology engine with divisional charts and Jaimini karakas
+
+Work Log:
+- Read existing project files: worklog.md, types.ts, utils.ts, index.ts, calculator.ts, charts.ts to understand the codebase architecture
+- Created /src/lib/astrology/divisional.ts (~430 lines):
+  - VargaType union type: D1, D9, D10, D7, D12, D20, D24, D60
+  - DivisionalPosition interface: planet, sign, signIndex, degreeInSign, isExalted, isDebilitated, isInOwnSign
+  - DivisionalChart interface: varga, name, sanskritName, description, ascendantSign, ascendantSignIndex, positions
+  - VARGA_METADATA constant with name, sanskritName, description, divisor, degreesPerAmsa for all 8 vargas
+  - Sign modality helper (getSignModality) and odd/even sign helper (isOddSign)
+  - calculateAmsaIndex function: computes the amsa (division) index from sidereal longitude
+  - mapVargaSign function: implements all varga-specific sign mapping rules per BPHS:
+    - D9 Navamsha: Movable→same sign, Fixed→9th from it, Dual→5th from it
+    - D10 Dashamsha: Odd signs→same sign, Even signs→9th from it
+    - D7 Saptamsha: Odd signs→same sign, Even signs→7th from it
+    - D12 Dwadashamsha: Start from same sign + amsa index
+    - D20 Vimshamsha: Odd→Aries start, Even→Capricorn start
+    - D24 Chaturvimshamsha: Odd→Leo start, Even→Cancer start
+    - D60 Shashtiamsha: Start from same sign + amsa index
+  - calculateDivisionalChart: calculates a single varga chart from D1 positions
+  - calculateAllDivisionalCharts: calculates all 8 varga charts
+  - analyzeNavamsha: detailed D9 analysis with Vargottama detection, exalted/debilitated/own-sign in D9, ascendant modality, D1 ascendant lord in D9, strength summary
+  - calculateDivisionalHouses: house calculation for any divisional chart
+  - findVargottamaPlanets: planets in same sign in D1 and D9 with interpretations
+  - evaluateDivisionalStrength: scores a divisional chart (0-100) with details
+  - NavamshaAnalysis interface with full analysis results
+- Created /src/lib/astrology/jaimini.ts (~590 lines):
+  - KarakaType union: Atmakaraka, Amatyakaraka, Bhratrikaraka, Matrikaraka, Putrakaraka, Gnatikaraka, Darakaraka
+  - JAIMINI_PLANETS constant (7 visible planets, excluding Rahu/Ketu)
+  - KarakaData interface: type, planet, degree, sign, signIndex, house, description, interpretation
+  - KARAKA_ORDER constant defining the ranking from highest to lowest degree
+  - Comprehensive interpretations for all 7 karaka types × 7 planets (49 total):
+    - ATMAKARAKA_INTERPRETATIONS: soul's desire per planet
+    - DARAKARAKA_INTERPRETATIONS: spouse nature per planet
+    - AMATYAKARAKA_INTERPRETATIONS: career path per planet
+    - BHRATRIKARAKA_INTERPRETATIONS: sibling nature per planet
+    - MATRIKARAKA_INTERPRETATIONS: mother nature per planet
+    - PUTRAKARAKA_INTERPRETATIONS: children nature per planet
+    - GNATIKARAKA_INTERPRETATIONS: obstacles and remedies per planet
+  - calculateKarakas: ranks 7 planets by degree-in-sign and assigns karaka roles with deterministic tie-breaking
+  - getAtmakaraka: convenience function for the highest-degree planet
+  - getDarakaraka: convenience function for the lowest-degree planet
+  - getAmatyakaraka: convenience function for the 2nd highest-degree planet
+  - JAIMINI_SIGN_KARAKAS: sign-based karaka mapping (1-12 houses from AK)
+  - getSignFromAK: sign N houses away from Atmakaraka sign
+  - AtmakarakaNavamshaInfo interface: AK, degree, D1 sign, Navamsha sign, Navamsha lord, isVargottama, interpretation
+  - analyzeAtmakarakaNavamsha: Karakamsha analysis (AK's Navamsha sign and its lord)
+  - JaiminiRajaYoga interface and detectJaiminiRajaYogas: 5 Jaimini Raja Yogas:
+    - AK-AmK Kendra/Trikona Yoga
+    - AK in Kendra Yoga
+    - AK-PK Trikona Yoga
+    - DK in Beneficial House Yoga
+    - Multiple Karakas in Kendra Yoga
+- Updated /src/lib/astrology/index.ts:
+  - Added exports for all divisional module types and functions (VargaType, DivisionalChart, DivisionalPosition, NavamshaAnalysis, VARGA_METADATA, calculateDivisionalChart, calculateAllDivisionalCharts, analyzeNavamsha, calculateDivisionalHouses, findVargottamaPlanets, evaluateDivisionalStrength)
+  - Added exports for all Jaimini module types and functions (KarakaType, KarakaData, AtmakarakaNavamshaInfo, JaiminiRajaYoga, JAIMINI_PLANETS, JAIMINI_SIGN_KARAKAS, calculateKarakas, getAtmakaraka, getDarakaraka, getAmatyakaraka, getSignFromAK, analyzeAtmakarakaNavamsha, detectJaiminiRajaYogas)
+- Fixed TypeScript error: Added missing signIndex field to KarakaData interface and karakas.push() call
+- Lint passes with zero errors
+- TypeScript strict mode check passes with zero errors in new files
+
+Stage Summary:
+- 3 files modified/created in /src/lib/astrology/
+- Divisional chart engine supports 8 vargas (D1, D9, D10, D7, D12, D20, D24, D60) with traditional BPHS mapping rules
+- Navamsha (D9) specific analysis with Vargottama detection, strength scoring, and interpretation generation
+- Jaimini karaka system with all 7 karakas, 49 planet-specific interpretations, and Karakamsha analysis
+- Jaimini Raja Yoga detection with 5 yoga conditions
+- All calculations are deterministic using sidereal (not tropical) longitudes from D1 chart
+- No external dependencies — uses existing type system and utility functions
+- Zero lint errors, zero TypeScript errors in new files
+
+---
+Task ID: 2+3
+Agent: Full-Stack Kundali Builder
+Task: Build comprehensive Kundali API and frontend covering all 12 areas
+
+Work Log:
+- Created `/src/app/api/astrology/comprehensive-kundali/route.ts` — POST endpoint taking { userId }, returns full 12-section analysis
+- API fetches user profile from Prisma DB, calculates kundali via calculateKundali(), divisional charts, Jaimini karakas
+- All 12 analysis generators are fully deterministic (rule-based, no AI, no randomness):
+  1. generatePersonalityBlueprint — Lagna/Moon/Sun/Atmakaraka/Navamsha Lagna/Nakshatra analysis, archetype scoring (8 archetypes), Ayurvedic constitution, dominant element
+  2. generateKarmaPastLife — Rahu/Ketu house analysis with detailed past-life interpretations, unfinished karmas, repeating patterns from 6/8/12 lords
+  3. generateCareerDharma — 2/6/10/11 house analysis, D10 chart summary, industry tags from planetary positions, natural skills, entrepreneurship vs employment
+  4. generateMarriageRelationship — 7th house/Venus/Jupiter/D9/Darakaraka analysis, attraction patterns, spouse psychology, emotional compatibility
+  5. generateHealthDisease — Ayurvedic constitution (Vata/Pitta/Kapha from ascendant element), weak organs, chronic tendencies, constitution advice
+  6. generateTimingEvents — Current Vimshottari Mahadasha/Antardasha with interpretations, upcoming periods timeline, Gochar (Saturn transit) influence
+  7. generateSpiritualEvolution — Ketu/12th house/Jupiter analysis, moksha tendency, spiritual inclination, detachment level
+  8. generateFamilyLineage — 4th/9th house/Sun/Moon analysis, father/mother relationship, ancestor karma
+  9. generateHiddenPatterns — Rahu/6/8/12 analysis, self-sabotage patterns, addiction tendencies, ego traps, hidden strengths
+  10. generateRareYogas — detectAllYogas() and detectAllDoshas() with contextual notes on why yogas may or may not work
+  11. generateDivisionalChartsAnalysis — All 8 vargas (D1/D9/D10/D7/D12/D20/D24/D60) with key observations, Vargottama planets highlighted
+  12. generateNakshatraDeepAnalysis — Moon nakshatra with 27 desire natures, 27 deity influences, pada analysis, psychological coding
+- In-memory cache (Map, 30-min TTL, auto-cleanup) keyed by userId
+- Created `/src/components/ayuastro/kundali/ComprehensiveKundaliView.tsx` — premium frontend component:
+  - Sticky header with section tabs (horizontal scrollable) and progress indicator
+  - 12 collapsible section cards with distinctive gradient accent bars and icons
+  - Loading state with cosmic animation and skeleton preview
+  - Error state with back-to-insights button
+  - Section-specific renderers: archetype card (Personality), Rahu/Ketu cards (Karma), industry tags (Career), Darakaraka highlight (Marriage), Ayurvedic constitution visual (Health), Dasha timeline (Timing), Moksha card (Spiritual), Father/Mother cards (Family), Warning/Strength cards (Hidden), Yoga gold cards + Dosha remedy cards (Yogas), Varga grid + Vargottama (Divisional), Nakshatra hero card (Nakshatra)
+  - All sub-sections use Collapsible for expandable content
+  - Progress bar tracking viewed sections (X/12, percentage)
+  - Full dark mode support
+  - Responsive design (mobile-first)
+  - Framer Motion animations (fadeInUp, scale)
+- Updated store: Added 'comprehensiveKundali' to AppView type
+- Updated page.tsx: Imported ComprehensiveKundaliView, added renderView case and showBottomNav condition
+- Updated InsightsView: Added "Comprehensive Kundali — 12 Dimensions" CTA card with gold gradient, Layers icon, double gold accent bar, after the existing Yogas & Doshas CTA card
+- Added Layers import to InsightsView from lucide-react
+- All lint checks pass with zero errors
+
+Stage Summary:
+- 5 files modified/created: route.ts, ComprehensiveKundaliView.tsx, ayuastro-store.ts, page.tsx, InsightsView.tsx
+- Complete 12-section comprehensive Vedic Kundali analysis API with deterministic rule-based text
+- Premium frontend component with 12 collapsible sections, tab navigation, progress tracking
+- Each section generates specific, non-generic text based on actual planet+sign+house combinations
+- 8 personality archetypes with scoring system based on planetary strength and elements
+- Full Ayurvedic constitution mapping (Fire→Pitta, Earth→Kapha, Air→Vata, Water→Kapha-Vata)
+- 27 nakshatra-specific desire nature interpretations and 27 deity influence descriptions
+- Vargottama planet detection and interpretation across D1/D9
+- CTA card in InsightsView with prominent gold gradient styling
+- Zero lint errors
+
+## Agent Context Record
+- Task ID: 2+3
+- Agent: Full-Stack Kundali Builder
+- Files created: route.ts, ComprehensiveKundaliView.tsx
+- Files modified: ayuastro-store.ts, page.tsx, InsightsView.tsx
+- Lint: Zero errors
+- All 12 sections implemented with deterministic rule-based text

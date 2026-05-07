@@ -28,6 +28,36 @@ export { detectAllYogas, detectRajYoga, detectGajKesariYoga, detectNeechBhangRaj
 export { detectAllDoshas, detectMangalDosha, detectKaalSarpDosha, detectPitraDosha, detectSadeSati, detectGrahanDosha, detectShrapitDosha } from './doshas';
 
 export {
+  type VargaType,
+  type DivisionalChart,
+  type DivisionalPosition,
+  type NavamshaAnalysis,
+  VARGA_METADATA,
+  calculateDivisionalChart,
+  calculateAllDivisionalCharts,
+  analyzeNavamsha,
+  calculateDivisionalHouses,
+  findVargottamaPlanets,
+  evaluateDivisionalStrength,
+} from './divisional';
+
+export {
+  type KarakaType,
+  type KarakaData,
+  type AtmakarakaNavamshaInfo,
+  type JaiminiRajaYoga,
+  JAIMINI_PLANETS,
+  JAIMINI_SIGN_KARAKAS,
+  calculateKarakas,
+  getAtmakaraka,
+  getDarakaraka,
+  getAmatyakaraka,
+  getSignFromAK,
+  analyzeAtmakarakaNavamsha,
+  detectJaiminiRajaYogas,
+} from './jaimini';
+
+export {
   normalizeLongitude,
   longitudeToSignIndex,
   longitudeToSign,

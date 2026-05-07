@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // View types for the single-page app
-export type AppView = 'landing' | 'onboarding' | 'calculating' | 'insights' | 'report' | 'premium' | 'profile' | 'wisdom' | 'sync' | 'chat' | 'mood' | 'breathing' | 'yogaDosha' | 'compatibilityDetail' | 'dashboard' | 'calendar' | 'cosmicSounds' | 'zodiacDeepDive' | 'gratitudeJournal' | 'zodiacGame' | 'nakshatraDeepDive';
+export type AppView = 'landing' | 'onboarding' | 'calculating' | 'insights' | 'report' | 'premium' | 'profile' | 'wisdom' | 'sync' | 'chat' | 'mood' | 'breathing' | 'yogaDosha' | 'compatibilityDetail' | 'dashboard' | 'calendar' | 'cosmicSounds' | 'zodiacDeepDive' | 'gratitudeJournal' | 'zodiacGame' | 'nakshatraDeepDive' | 'comprehensiveKundali';
 export type OnboardingStep = 'name' | 'birth' | 'relationship' | 'questionnaire' | 'preview' | 'complete';
 export type BottomNavTab = 'insights' | 'chat' | 'sync' | 'wisdom' | 'profile';
 

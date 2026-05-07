@@ -47,6 +47,7 @@ import {
   MessageCircle,
   Gem,
   Users,
+  Layers,
 } from 'lucide-react';
 import KundaliChart from './KundaliChart';
 import ShareableCard, { getShareText, getTopTraits as getShareTopTraits, getArchetype as getShareArchetype } from './ShareableCard';
@@ -1872,6 +1873,41 @@ export default function InsightsView() {
                       </h4>
                       <p className="text-[11px] text-brown-400 dark:text-brown-500 leading-snug">
                         Deep-dive into Vedic chart analysis — discover cosmic blessings and karmic lessons shaping your life.
+                      </p>
+                    </div>
+                    <div className="shrink-0">
+                      <ArrowRight className="size-4 text-brown-300 dark:text-brown-500 group-hover:text-gold-dark dark:group-hover:text-gold group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* ─── Comprehensive Kundali CTA Card ────────────────────── */}
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                className="cursor-pointer"
+                onClick={() => setView('comprehensiveKundali')}
+              >
+                <div className="relative rounded-xl overflow-hidden border border-gold/30 dark:border-gold/20 bg-gradient-to-r from-gold/10 via-amber-50/50 to-gold/10 dark:from-gold/8 dark:via-amber-900/10 dark:to-gold/8 hover:from-gold/15 hover:to-gold/15 dark:hover:from-gold/12 dark:hover:to-gold/12 transition-all group">
+                  {/* Double gold accent bar */}
+                  <div className="h-1 bg-gradient-to-r from-amber-400 via-gold to-amber-400" />
+                  <div className="p-4 flex items-center gap-3">
+                    <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gold/20 to-amber-500/20 dark:from-gold/15 dark:to-amber-500/15 border border-gold/20 dark:border-gold/15 group-hover:from-gold/25 group-hover:to-amber-500/25 dark:group-hover:from-gold/20 dark:group-hover:to-amber-500/20 transition-colors">
+                      <Layers className="size-6 text-gold-dark dark:text-gold" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4
+                        className="font-serif text-sm font-bold text-brown-900 dark:text-brown-100 mb-0.5"
+                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      >
+                        ✦ Comprehensive Kundali — 12 Dimensions
+                      </h4>
+                      <p className="text-[11px] text-brown-500 dark:text-brown-400 leading-snug">
+                        Full Vedic birth chart analysis: personality, karma, career, marriage, health, spiritual path, nakshatras &amp; more.
                       </p>
                     </div>
                     <div className="shrink-0">
