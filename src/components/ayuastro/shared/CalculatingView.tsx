@@ -9,14 +9,12 @@ const MESSAGES = [
   'Mapping your cosmic blueprint...',
   'Calculating planetary positions...',
   'Analyzing emotional patterns...',
-  'Generating your intelligence report...',
 ];
 
 const STEPS = [
   { label: 'Mapping Stars', delay: 0 },
-  { label: 'Analyzing Numbers', delay: 3000 },
-  { label: 'Scoring Traits', delay: 6000 },
-  { label: 'Writing Your Report', delay: 9000 },
+  { label: 'Analyzing Numbers', delay: 1000 },
+  { label: 'Scoring Traits', delay: 2000 },
 ];
 
 export default function CalculatingView() {
@@ -27,13 +25,13 @@ export default function CalculatingView() {
   useEffect(() => {
     const msgInterval = setInterval(() => {
       setMessageIndex((prev) => (prev + 1) % MESSAGES.length);
-    }, 2500);
+    }, 1200);
 
     const symInterval = setInterval(() => {
       setSymbolIndex((prev) => (prev + 1) % ZODIAC_SYMBOLS.length);
-    }, 400);
+    }, 300);
 
-    // Activate steps sequentially
+    // Activate steps sequentially — fast since quick-calculate is <2s
     const stepTimers = STEPS.map((step) =>
       setTimeout(() => {
         setActiveStep((prev) => prev + 1);
@@ -135,17 +133,17 @@ export default function CalculatingView() {
         </motion.p>
       </AnimatePresence>
 
-      {/* Subtle progress indicator */}
+      {/* Subtle progress indicator — shorter duration now */}
       <div className="mt-8 h-1 w-48 overflow-hidden rounded-full bg-brown-100 dark:bg-brown-100/30">
         <motion.div
           initial={{ width: '0%' }}
           animate={{ width: '100%' }}
-          transition={{ duration: 10, ease: 'linear' }}
+          transition={{ duration: 4, ease: 'linear' }}
           className="h-full rounded-full bg-gradient-to-r from-gold-dark via-gold to-gold-light"
         />
       </div>
 
-      {/* Step indicators */}
+      {/* Step indicators — 3 steps now (no "Writing Your Report" since that's async) */}
       <div className="mt-6 flex items-center gap-4">
         {STEPS.map((step, i) => {
           const isActive = i <= activeStep;

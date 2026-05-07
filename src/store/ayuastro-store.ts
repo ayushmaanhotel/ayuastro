@@ -94,6 +94,7 @@ interface AyuAstroState {
   loadingMessage: string;
   hasPaid: boolean;
   error: string | null;
+  reportLoading: boolean;
 
   // Actions
   setView: (view: AppView) => void;
@@ -111,6 +112,8 @@ interface AyuAstroState {
   setHasPaid: (paid: boolean) => void;
   setError: (error: string | null) => void;
   setUserId: (id: string) => void;
+  setReportLoading: (loading: boolean) => void;
+  resetKundaliData: () => void;
   setCompatDetail: (data: { partnerSign: string; partnerName?: string; overall: number; emotional: number; communication: number; trust: number }) => void;
   reset: () => void;
   nextOnboardingStep: () => void;
@@ -142,6 +145,7 @@ const initialState = {
   loadingMessage: '',
   hasPaid: false,
   error: null as string | null,
+  reportLoading: false,
 };
 
 export const useAyuAstroStore = create<AyuAstroState>()(
@@ -173,6 +177,16 @@ export const useAyuAstroStore = create<AyuAstroState>()(
       setHasPaid: (paid) => set({ hasPaid: paid }),
       setError: (error) => set({ error }),
       setUserId: (id) => set({ userId: id }),
+      setReportLoading: (loading) => set({ reportLoading: loading }),
+      resetKundaliData: () => set({
+        astrologyData: null,
+        numerologyData: null,
+        traitScores: [],
+        reportSections: [],
+        reportSummary: '',
+        reportLoading: false,
+        userId: null,
+      }),
       setCompatDetail: (data) => set({
         compatPartnerSign: data.partnerSign,
         compatPartnerName: data.partnerName || null,
@@ -223,6 +237,7 @@ export const useAyuAstroStore = create<AyuAstroState>()(
         currentView: state.currentView,
         activeTab: state.activeTab,
         onboardingStep: state.onboardingStep,
+        reportLoading: state.reportLoading,
       }),
     }
   )

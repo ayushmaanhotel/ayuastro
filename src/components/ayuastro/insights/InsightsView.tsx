@@ -523,7 +523,7 @@ function getCompatibilityPercent(sign1: string, sign2: string): number {
 }
 
 export default function InsightsView() {
-  const { traitScores, astrologyData, numerologyData, birthDetails, setView, reset } = useAyuAstroStore();
+  const { traitScores, astrologyData, numerologyData, birthDetails, setView, resetKundaliData, setOnboardingStep, setBirthDetails, reportLoading } = useAyuAstroStore();
 
   const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
   const [horoscopeLoading, setHoroscopeLoading] = useState(true);
@@ -622,6 +622,12 @@ export default function InsightsView() {
             <span className="size-1.5 rounded-full bg-sage-dark dark:bg-sage animate-pulse" aria-hidden="true" />
             Live
           </Badge>
+          {reportLoading && (
+            <Badge className="bg-gold/10 dark:bg-gold/20 text-gold-dark dark:text-gold border-0 text-[10px] px-2 py-0.5 flex items-center gap-1.5">
+              <Sparkles className="size-2.5 animate-pulse" />
+              Report generating...
+            </Badge>
+          )}
         </div>
         <Dialog open={newKundaliDialogOpen} onOpenChange={setNewKundaliDialogOpen}>
           <DialogTrigger asChild>
@@ -658,7 +664,10 @@ export default function InsightsView() {
               <Button
                 size="sm"
                 onClick={() => {
-                  reset();
+                  const savedName = birthDetails?.name || '';
+                  resetKundaliData();
+                  setBirthDetails({ name: savedName });
+                  setOnboardingStep('birth');
                   setView('onboarding');
                   setNewKundaliDialogOpen(false);
                 }}

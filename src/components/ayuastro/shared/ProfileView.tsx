@@ -123,7 +123,7 @@ const staggerItem = {
 };
 
 export default function ProfileView() {
-  const { birthDetails, astrologyData, numerologyData, traitScores, hasPaid, reportSections, reset, setView, userId } = useAyuAstroStore();
+  const { birthDetails, astrologyData, numerologyData, traitScores, hasPaid, reportSections, reset, setView, userId, resetKundaliData, setOnboardingStep, setBirthDetails, reportLoading } = useAyuAstroStore();
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExportData = async () => {
@@ -161,6 +161,15 @@ export default function ProfileView() {
     cosmicToast.cosmic('Starting fresh ✦', 'Your cosmic journey awaits anew');
     reset();
     setView('landing');
+  };
+
+  const handleCreateNewKundali = () => {
+    const savedName = birthDetails?.name || '';
+    resetKundaliData();
+    setBirthDetails({ name: savedName });
+    setOnboardingStep('birth');
+    setView('onboarding');
+    cosmicToast.cosmic('New Kundali ✦', 'Enter new birth details — your name is saved');
   };
 
   const sunSign = astrologyData?.sunSign || 'Capricorn';
@@ -816,6 +825,17 @@ export default function ProfileView() {
           <span className="text-gold text-lg zodiac-glow">✦</span>
         </div>
 
+        {/* Create New Kundali Button — prominent */}
+        <motion.div variants={staggerItem}>
+          <Button
+            onClick={handleCreateNewKundali}
+            className="w-full bg-brown-700 dark:bg-gold dark:text-brown-900 text-white hover:bg-brown-800 dark:hover:bg-gold-light"
+          >
+            <Sparkles className="mr-2 size-4" />
+            Create New Kundali
+          </Button>
+        </motion.div>
+
         {/* Export My Data Button */}
         <motion.div variants={staggerItem}>
           <Button
@@ -838,6 +858,25 @@ export default function ProfileView() {
             {isExporting ? 'Exporting...' : 'Export My Data'}
           </Button>
         </motion.div>
+
+        {/* Report Loading Indicator */}
+        {reportLoading && (
+          <motion.div variants={staggerItem}>
+            <Card className="card-hover border-0 shadow-md bg-gradient-to-r from-gold/5 to-sage-muted/10 dark:from-gold/5 dark:to-sage-muted/5">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-8 items-center justify-center rounded-full bg-gold/10">
+                    <Sparkles className="size-4 text-gold animate-pulse" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-brown-900 dark:text-brown-100">AI Report Generating...</p>
+                    <p className="text-xs text-brown-400 dark:text-brown-500">Your personalized report is being written in the background</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Start Over — with shake on hover */}
         <motion.div variants={staggerItem}>

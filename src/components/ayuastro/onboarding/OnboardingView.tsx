@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   Sparkles,
   Info,
+  Crosshair,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
 import { getApproximateZodiacPreview } from '@/lib/astrology/client-approx';
@@ -500,6 +501,8 @@ export default function OnboardingView() {
     setReportSummary,
     setLoading,
     setError,
+    setUserId,
+    setReportLoading,
   } = useAyuAstroStore();
 
   const [direction, setDirection] = useState(0);
@@ -507,6 +510,8 @@ export default function OnboardingView() {
   const [localDob, setLocalDob] = useState(birthDetails?.dateOfBirth || '');
   const [localTob, setLocalTob] = useState(birthDetails?.timeOfBirth || '');
   const [localPlace, setLocalPlace] = useState(birthDetails?.placeOfBirth || 'Mumbai');
+  const [localLat, setLocalLat] = useState(birthDetails?.latitude?.toString() || '');
+  const [localLon, setLocalLon] = useState(birthDetails?.longitude?.toString() || '');
   const [localGender, setLocalGender] = useState(birthDetails?.gender || '');
   const [localRelationship, setLocalRelationship] = useState(
     birthDetails?.relationshipStatus || ''
@@ -519,10 +524,21 @@ export default function OnboardingView() {
       setLocalDob('');
       setLocalTob('');
       setLocalPlace('Mumbai');
+      setLocalLat('');
+      setLocalLon('');
       setLocalGender('');
       setLocalRelationship('');
     }
   }, [birthDetails]);
+
+  // Auto-fill lat/lon when city is selected from the datalist
+  useEffect(() => {
+    const cityData = INDIAN_CITIES[localPlace];
+    if (cityData) {
+      setLocalLat(cityData.lat.toString());
+      setLocalLon(cityData.lon.toString());
+    }
+  }, [localPlace]);
 
   const [showCelebration, setShowCelebration] = useState(false);
   const [showBirthChartPreview, setShowBirthChartPreview] = useState(false);
@@ -534,13 +550,15 @@ export default function OnboardingView() {
       setBirthDetails({ name: localName });
     } else if (onboardingStep === 'birth') {
       const cityData = INDIAN_CITIES[localPlace];
+      const lat = localLat ? parseFloat(localLat) : (cityData?.lat ?? 28.6139);
+      const lon = localLon ? parseFloat(localLon) : (cityData?.lon ?? 77.209);
       setBirthDetails({
         name: localName,
         dateOfBirth: localDob,
         timeOfBirth: localTob,
         placeOfBirth: localPlace,
-        latitude: cityData?.lat ?? 28.6139,
-        longitude: cityData?.lon ?? 77.209,
+        latitude: isNaN(lat) ? 28.6139 : lat,
+        longitude: isNaN(lon) ? 77.209 : lon,
         timezone: 'Asia/Kolkata',
         gender: localGender,
       });
@@ -617,7 +635,8 @@ export default function OnboardingView() {
     setLoading(true, 'Mapping your cosmic blueprint...');
 
     try {
-      const response = await fetch('/api/process-all', {
+      // Phase 1: Fast kundali calculation (no AI report)
+      const response = await fetch('/api/astrology/quick-calculate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -643,6 +662,7 @@ export default function OnboardingView() {
       // Map API response to store - API wraps in data.data
       const result = data.data || data;
 
+      if (result.userId) setUserId(result.userId);
       if (result.astrology) {
         setAstrologyData({
           sunSign: result.astrology.sunSign,
@@ -672,16 +692,67 @@ export default function OnboardingView() {
         soulUrgeDesc: result.numerology.descriptions?.soulUrge || '',
       });
       if (result.traits) setTraitScores(result.traits);
-      if (result.report) {
-        if (result.report.sections) setReportSections(result.report.sections);
-        if (result.report.summary) setReportSummary(result.report.summary);
-      }
 
-      // Show welcome toast
+      // Show welcome toast and navigate to insights immediately
       cosmicToast.cosmic(`Welcome, ${birthDetails?.name || 'Seeker'}! ✦`, 'Your cosmic journey begins...');
 
       setLoading(false);
       setView('insights');
+
+      // Phase 2: Trigger AI report generation in the background
+      if (result.userId && result.astrology && result.numerology && result.traits) {
+        setReportLoading(true);
+
+        // Build trait scores for AI report input
+        const traitScoresMap: Record<string, number> = {};
+        if (Array.isArray(result.traits)) {
+          for (const t of result.traits) {
+            traitScoresMap[t.id || t.name] = t.score;
+          }
+        }
+
+        // Fire and forget — update store when complete
+        fetch('/api/ai/generate-report-async', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: result.userId,
+            reportType: 'personality',
+            astrologyData: {
+              sunSign: result.astrology.sunSign,
+              moonSign: result.astrology.moonSign,
+              ascendant: result.astrology.ascendant,
+              nakshatra: typeof result.astrology.nakshatra === 'string' ? result.astrology.nakshatra : result.astrology.nakshatra?.name || '',
+              currentDasha: result.astrology.dashaPeriods?.currentMahadasha
+                ? `${result.astrology.dashaPeriods.currentMahadasha.planet}${result.astrology.dashaPeriods.currentAntardasha ? '/' + result.astrology.dashaPeriods.currentAntardasha.planet : ''}`
+                : '',
+              yogas: (result.astrology.yogas || []).filter((y: { present: boolean }) => y.present).map((y: { name: string }) => y.name),
+              doshas: (result.astrology.doshas || []).filter((d: { present: boolean }) => d.present).map((d: { name: string }) => d.name),
+            },
+            numerologyData: {
+              lifePathNumber: result.numerology.lifePathNumber,
+              destinyNumber: result.numerology.destinyNumber,
+              soulUrgeNumber: result.numerology.soulUrgeNumber,
+            },
+            traitScores: traitScoresMap,
+          }),
+        })
+          .then((res) => res.json())
+          .then((reportData) => {
+            if (reportData.success && reportData.data) {
+              if (reportData.data.sections) setReportSections(reportData.data.sections);
+              if (reportData.data.summary) setReportSummary(reportData.data.summary);
+              cosmicToast.info('Your report is ready ✦', 'AI analysis complete — check your Report tab');
+            }
+          })
+          .catch(() => {
+            // Silently fail — report is a nice-to-have, not critical
+            console.warn('[Onboarding] AI report generation failed — user can retry later');
+          })
+          .finally(() => {
+            setReportLoading(false);
+          });
+      }
     } catch (err) {
       setLoading(false);
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
@@ -807,7 +878,7 @@ export default function OnboardingView() {
                 </p>
 
                 <div className="space-y-4">
-                  {[0,1,2,3,4,5].map((fieldIdx) => {
+                  {[0,1,2,3,4,5,6].map((fieldIdx) => {
                     if (fieldIdx === 0) return (
                       <motion.div key={fieldIdx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fieldIdx * 0.05 }}>
                         <Label className="text-sm font-medium text-brown-700">Name</Label>
@@ -899,6 +970,68 @@ export default function OnboardingView() {
                             </button>
                           ))}
                         </div>
+                      </motion.div>
+                    );
+                    if (fieldIdx === 5) return (
+                      <motion.div key={fieldIdx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fieldIdx * 0.05 }}>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm font-medium text-brown-700">Latitude</Label>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="size-3.5 text-brown-300 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent className="bg-brown-900 text-cream text-xs max-w-[200px]">
+                                For higher accuracy, enter exact latitude. Auto-filled when city is selected ✦
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                        <div className="relative mt-1">
+                          <Crosshair className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
+                          <Input
+                            type="number"
+                            step="any"
+                            value={localLat}
+                            onChange={(e) => setLocalLat(e.target.value)}
+                            placeholder="e.g. 19.076"
+                            className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-gold focus:ring-gold/20 dark:focus:border-gold dark:focus:ring-gold/10 transition-shadow"
+                          />
+                        </div>
+                        {localLat && INDIAN_CITIES[localPlace] && (
+                          <p className="text-[10px] text-sage-dark mt-1">Auto-filled from {localPlace}</p>
+                        )}
+                      </motion.div>
+                    );
+                    if (fieldIdx === 6) return (
+                      <motion.div key={fieldIdx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fieldIdx * 0.05 }}>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm font-medium text-brown-700">Longitude</Label>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="size-3.5 text-brown-300 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent className="bg-brown-900 text-cream text-xs max-w-[200px]">
+                                For higher accuracy, enter exact longitude. Auto-filled when city is selected ✦
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                        <div className="relative mt-1">
+                          <Crosshair className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
+                          <Input
+                            type="number"
+                            step="any"
+                            value={localLon}
+                            onChange={(e) => setLocalLon(e.target.value)}
+                            placeholder="e.g. 72.8777"
+                            className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-gold focus:ring-gold/20 dark:focus:border-gold dark:focus:ring-gold/10 transition-shadow"
+                          />
+                        </div>
+                        {localLon && INDIAN_CITIES[localPlace] && (
+                          <p className="text-[10px] text-sage-dark mt-1">Auto-filled from {localPlace}</p>
+                        )}
                       </motion.div>
                     );
                     return null;

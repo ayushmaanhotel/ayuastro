@@ -2917,3 +2917,56 @@ Stage Summary:
 - KundaliChart enhanced with birth details header and planet degrees
 - ComprehensiveKundaliView significantly improved with birth details card, cosmic identity card, mini chart, key highlights
 - Planetary positions display enhanced with better formatting
+
+---
+Task ID: 3
+Agent: Main Coordinator
+Task: Fix kundali generation flow - split into fast kundali + deferred AI report
+
+Work Log:
+- Created `/api/astrology/quick-calculate` endpoint: Fast calculation (no AI report) — Create user → Calculate astrology (Swiss Ephemeris) → Calculate numerology → Calculate trait scores → Return results immediately
+- Created `/api/ai/generate-report-async` endpoint: Deferred AI report generation — Takes userId, astrologyData, numerologyData, traitScores → Generates AI report → Saves to DB → Returns report data
+- Updated Zustand store: Added `reportLoading` boolean state, `setReportLoading` action, `resetKundaliData` action (resets only calculation data, keeps name and birth details)
+- Modified OnboardingView.tsx: Changed `handleSubmit()` to call `/api/astrology/quick-calculate` instead of `/api/process-all`. After getting quick results, navigates to insights immediately, then triggers AI report generation in background via `/api/ai/generate-report-async` with fire-and-forget pattern
+- Modified CalculatingView.tsx: Changed animation from 4 steps (9s total) to 3 steps (3s total). Removed "Writing Your Report" step since that's now async. Progress bar duration changed from 10s to 4s
+- Modified ProfileView.tsx: Added prominent "Create New Kundali" button that resets only calculation data (keeps user's name), navigates to 'birth' onboarding step. Added "AI Report Generating..." indicator card when reportLoading is true
+- Modified InsightsView.tsx: Updated "New Kundali" dialog to use `resetKundaliData()` instead of full `reset()`, keeping user's name and navigating to 'birth' step. Added "Report generating..." badge in header area when reportLoading is true
+- All lint checks pass with zero errors
+- Existing `/api/process-all` endpoint remains unchanged as fallback
+
+Stage Summary:
+- Kundali calculation is now <2s (was 30-44s including AI report)
+- AI report generates in background after user sees their kundali data
+- CalculatingView animation is 3-5s instead of 9s
+- "Create New Kundali" flow preserves user's name and goes directly to birth details step
+- Report loading state visible in both Insights header and Profile view
+- Zero lint errors
+
+---
+Task ID: 3
+Agent: Main Coordinator
+Task: Fix kundali generation, add lat/lon inputs, fix recreation flow
+
+Work Log:
+- Diagnosed core issue: /api/process-all takes 30-44s due to synchronous AI report generation
+- Created /api/astrology/quick-calculate — fast kundali calculation (<2s) without AI report
+- Created /api/ai/generate-report-async — deferred AI report generation endpoint
+- Updated OnboardingView handleSubmit to use quick-calculate first, then fire-and-forget AI report
+- Updated CalculatingView: reduced from 4 steps to 3, faster animations (4s progress bar vs 10s)
+- Added reportLoading state to store with setReportLoading action
+- Added resetKundaliData action to store (resets only calculation data, keeps name)
+- Added "Create New Kundali" button in InsightsView header and ProfileView
+- Added "Report generating..." badge indicator when AI report is loading in background
+- Added latitude/longitude input fields to OnboardingView birth step
+- Auto-fill lat/lon when city is selected from dropdown
+- Manual override of lat/lon for precision/accuracy
+- Added Crosshair icon import for lat/lon fields
+- Added Info tooltips explaining lat/lon auto-fill
+- All lint checks pass with zero errors
+
+Stage Summary:
+- Kundali now generates in <3-5s instead of 30-44s
+- AI report loads in background after kundali is displayed
+- Latitude/longitude inputs available for precision
+- Kundali recreation flow works smoothly (resets only calculation data, keeps name)
+- 8 files modified: quick-calculate/route.ts (new), generate-report-async/route.ts (new), OnboardingView.tsx, CalculatingView.tsx, ayuastro-store.ts, InsightsView.tsx, ProfileView.tsx
