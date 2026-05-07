@@ -48,6 +48,12 @@ export interface PlanetPosition {
   nakshatraPada: number;   // 1-4
   isRetrograde: boolean;
   isCombust: boolean;
+  /** Ecliptic latitude in degrees (from Swiss Ephemeris) */
+  eclipticLatitude?: number;
+  /** Daily longitudinal speed in degrees/day (negative = retrograde) */
+  speed?: number;
+  /** Distance from Earth in astronomical units */
+  distanceAU?: number;
 }
 
 // ─── Houses ──────────────────────────────────────────────────────────────────

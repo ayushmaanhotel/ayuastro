@@ -2585,3 +2585,106 @@ Stage Summary:
 8. Add Razorpay integration as alternative payment method
 9. Add more comprehensive Nakshatra deep-dive analysis
 10. Add yearly forecast/horoscope generation
+
+---
+Task ID: 2
+Agent: Swiss Ephemeris Integration Agent
+Task: Rewrite calculator.ts to use Swiss Ephemeris for high-accuracy planetary positions
+
+Work Log:
+- Updated types.ts: Added 3 new optional fields to PlanetPosition interface (eclipticLatitude, speed, distanceAU)
+- Created swiss-ephemeris.ts: New Swiss Ephemeris wrapper module with lazy async initialization
+  - initSweph(): Async init with graceful fallback detection
+  - isSwephReady(): Sync readiness check
+  - swephCalcPlanet(): Single planet calculation (SEFLG_MOSEPH | SEFLG_SPEED)
+  - swephCalcAllPlanets(): All 9 Vedic planets at once
+  - swephCalcHouses(): Whole Sign house system via houses_ex2
+  - swephGetAyanamsa(): Lahiri ayanamsa via set_sid_mode(SE_SIDM_LAHIRI) + get_ayanamsa_ut
+  - swephDateToJD(): Date-to-Julian-Day conversion via utc_to_jd
+  - Ketu calculated as Rahu + 180° with inverted latitude
+  - SE_MEAN_NODE used for Rahu (Vedic standard)
+- Rewrote calculator.ts: Dual-path architecture with Swiss Ephemeris primary + Meeus fallback
+  - All original exported function signatures preserved: calculateAllPlanetaryPositions(), calculateLahiriAyanamsa(), calculateAscendant(), getPlanetSiderealLongitude(), dateToJulianDay()
+  - initializeSwissEphemeris() exported for explicit async init
+  - isSwissEphemerisReady() exported for sync readiness check
+  - swephReady flag tracks module availability
+  - Auto-initialization on module load via initializeSwissEphemeris() call
+  - Retrograde detection from actual speed value (negative = retrograde) instead of elongation heuristic
+  - Ascendant from Swiss Ephemeris houses_ex2 instead of manual LST formula
+  - Ayanamsa from Swiss Ephemeris get_ayanamsa_ut instead of approximate formula
+  - New fields populated when sweph is available: eclipticLatitude, speed, distanceAU
+  - All Meeus functions preserved as private fallbacks (suffixed with "Meeus")
+  - Removed unused imports (longitudeToSign, DEGREES_PER_SIGN)
+- Fixed swephGetAyanamsa: get_ayanamsa_ut returns number directly, not {data} object
+- All lint checks pass with zero errors
+
+Stage Summary:
+- Calculator upgraded from ~1-3° Meeus accuracy to arc-minute Swiss Ephemeris accuracy
+- Complete backward compatibility: all downstream code (yogas, doshas, dasha, nakshatra, charts) works unchanged
+- Graceful degradation: if sweph native module fails to load, falls back to Meeus calculations
+- New PlanetPosition fields available: eclipticLatitude, speed (daily motion), distanceAU
+- Swiss Ephemeris uses SEFLG_MOSEPH (built-in Moshier ephemeris, no external files needed)
+- Files modified/created: types.ts, swiss-ephemeris.ts (new), calculator.ts (rewritten)
+
+
+---
+Task ID: 4
+Agent: Vedic Analysis Enhancement Agent
+Task: Make Vedic chart analysis more comprehensive
+
+Work Log:
+- Read and analyzed existing vedic-analysis API route, YogaDoshaView.tsx, types.ts, utils.ts, charts.ts, nakshatra.ts
+- Added 6 new deterministic analysis generators to vedic-analysis API route:
+  1. Planetary Aspects (Drishti) — Mars aspects 4th/7th/8th, Jupiter 5th/7th/9th, Saturn 3rd/7th/10th, others 7th only; generates aspect interpretations for each planet-aspect pair
+  2. Planetary Dignity Details — exalted/debilitated degrees, moolatrikona, own signs, friendly/enemy/neutral sign relationships, combustion details (distance from Sun), retrograde notes with interpretations
+  3. Enhanced House Lord Placement Analysis — for each house: lord placement, dignity, sign relationship (friendly/enemy/neutral), house type (kendra/trikona/dushtana/upaachaya), significance interpretation
+  4. Nakshatra Compatibility (Koota) — yoni (animal type) with 13 descriptions, gana (deva/manushya/rakshasa) with descriptions, nadi (Aadi/Madhya/Antya) with Vata/Pitta/Kapha associations, compatibility notes for each attribute
+  5. Current Transit Influence — deterministic transit positions for 2025-2027 (Saturn in Pisces, Jupiter in Gemini/Cancer, Rahu in Pisces, Ketu in Virgo, fast planets by date), Sade Sati check (3 phases), Dhaiya check (4th/8th from Moon), Jupiter transit to natal Moon with house-specific interpretations
+  6. Shadbala (Simplified) — positional strength based on dignity and sign relationship, directional strength (Dig Bala) based on house, combustion penalty, retrograde strength bonus (Chesta Bala), total strength rating (Very Strong to Very Weak), ranked by strength
+- Added new imports to route.ts: getDebilitation, MOOLATRIKONA, COMBUSTION_DEGREES, isCombust, angularDistance, NUM_SIGNS, ZODIAC_SIGNS, getYoniMatch
+- Added FRIENDLY_SIGNS and ENEMY_SIGNS lookup tables for sign relationship calculations
+- Added DUSHTANA_HOUSES and UPAACHAYA_HOUSES constants
+- Updated API response to include 6 new fields: planetaryAspects, dignityDetails, enhancedHouseLordAnalysis, nakshatraCompatibility, currentTransitInfluence, shadbala
+- Updated YogaDoshaView.tsx with 7-tab navigation (Yogas, Doshas, Aspects, Dignity, Transit, Nakshatra, Full Analysis)
+- Added Planetary Aspects tab with collapsible planet cards showing aspect lines, aspect type badges, and interpretations
+- Added Dignity & Strength tab with Shadbala bar chart visualization (color-coded bars), detailed dignity cards (exalted/debilitated/moolatrikona/own signs grid), house lord placement analysis with house type badges
+- Added Transit Influence tab with Sade Sati/Dhaiya status cards, Jupiter transit card, all planetary transits list with major/minor badges
+- Added Nakshatra Details tab with personality card and Koota compatibility (yoni/gana/nadi grid with descriptions, compatibility notes)
+- All new sections support dark mode with consistent dark: variants
+- All analysis is deterministic — same inputs always produce same outputs
+- No AI generation in analysis — purely rule-based
+- Lint passes with zero errors
+
+Stage Summary:
+- 2 files modified: route.ts (API) and YogaDoshaView.tsx (frontend)
+- 6 new analysis sections added to the vedic-analysis API
+- 4 new tabs added to the YogaDoshaView component (Aspects, Dignity, Transit, Nakshatra)
+- Full Shadbala strength ranking with animated bar chart visualization
+- Sade Sati and Dhaiya status detection with phase descriptions
+- Nakshatra compatibility (Koota) with yoni, gana, nadi analysis
+- All new features have full dark mode support
+- Zero lint errors
+
+---
+Task ID: 2-3
+Agent: Main Coordinator
+Task: Swiss Ephemeris integration and Vedic analysis enhancement
+
+Work Log:
+- Installed sweph (Swiss Ephemeris) package v2.10.3-5
+- Created /src/lib/astrology/swiss-ephemeris.ts - Swiss Ephemeris wrapper module with lazy initialization
+- Rewrote /src/lib/astrology/calculator.ts - Dual-path architecture: Swiss Ephemeris (primary) + Meeus (fallback)
+- Created /src/lib/astrology/client-approx.ts - Lightweight client-side zodiac approximation for onboarding preview
+- Fixed client-side import issue: OnboardingView.tsx no longer imports server-only calculator
+- Added serverExternalPackages: ["sweph"] to next.config.ts for Turbopack compatibility
+- Swiss Ephemeris now loads successfully using require() (not import()) in Next.js server context
+- Verified Swiss Ephemeris accuracy: Ayanamsa 23.7237° (precise Lahiri value), arc-minute planetary accuracy
+- Vedic analysis API enhanced with 6 new analysis sections: Planetary Aspects (Drishti), Dignity & Strength, Enhanced House Lord Placement, Nakshatra Compatibility (Koota), Current Transit Influence, Simplified Shadbala
+- YogaDoshaView.tsx enhanced with 4 new tabs: Aspects, Dignity & Strength, Transit, Nakshatra
+
+Stage Summary:
+- Swiss Ephemeris integration COMPLETE - professional-grade accuracy achieved
+- Key technical finding: require() works for native modules in Next.js, but import() doesn't
+- Vedic analysis now 6x more comprehensive with new analysis sections
+- All changes pass lint with zero errors
+- Meeus fallback preserved for environments where sweph can't load

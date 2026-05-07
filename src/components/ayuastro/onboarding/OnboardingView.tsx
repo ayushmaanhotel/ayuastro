@@ -22,7 +22,7 @@ import {
   Info,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
-import { calculateAllPlanetaryPositions } from '@/lib/astrology/calculator';
+import { getApproximateZodiacPreview } from '@/lib/astrology/client-approx';
 
 const INDIAN_CITIES: Record<string, { lat: number; lon: number }> = {
   'New Delhi': { lat: 28.6139, lon: 77.209 },
@@ -255,22 +255,20 @@ function BirthChartPreview({ onComplete, birthDetails }: { onComplete: () => voi
   const [phase, setPhase] = useState<'cycling' | 'revealed'>('cycling');
   const [cyclingSymbol, setCyclingSymbol] = useState(0);
 
-  // Calculate zodiac signs deterministically
+  // Calculate zodiac signs using lightweight client-side approximation
+  // Accurate calculations happen server-side via the API
   const zodiacResults = useMemo(() => {
     if (!birthDetails?.dateOfBirth) {
       return { sunSign: 'Capricorn', moonSign: 'Gemini', risingSign: 'Taurus' };
     }
 
     try {
-      const dob = new Date(birthDetails.dateOfBirth + 'T' + (birthDetails.timeOfBirth || '12:00'));
-      const timezoneOffset = 5.5; // IST
-      const result = calculateAllPlanetaryPositions(dob, birthDetails.latitude || 28.6139, birthDetails.longitude || 77.209, timezoneOffset);
-
-      return {
-        sunSign: result.positions.Sun?.sign || 'Capricorn',
-        moonSign: result.positions.Moon?.sign || 'Gemini',
-        risingSign: result.ascendant?.sign || 'Taurus',
-      };
+      return getApproximateZodiacPreview({
+        dateOfBirth: birthDetails.dateOfBirth,
+        timeOfBirth: birthDetails.timeOfBirth || '12:00',
+        latitude: birthDetails.latitude || 28.6139,
+        longitude: birthDetails.longitude || 77.209,
+      });
     } catch {
       // Fallback: simple sun sign calculation from date
       const dateStr = birthDetails.dateOfBirth;
