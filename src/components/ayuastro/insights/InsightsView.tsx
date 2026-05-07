@@ -9,6 +9,8 @@ import { Separator } from '@/components/ui/separator';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -48,6 +50,7 @@ import {
   Gem,
   Users,
   Layers,
+  RotateCcw,
 } from 'lucide-react';
 import KundaliChart from './KundaliChart';
 import ShareableCard, { getShareText, getTopTraits as getShareTopTraits, getArchetype as getShareArchetype } from './ShareableCard';
@@ -520,7 +523,7 @@ function getCompatibilityPercent(sign1: string, sign2: string): number {
 }
 
 export default function InsightsView() {
-  const { traitScores, astrologyData, numerologyData, birthDetails, setView } = useAyuAstroStore();
+  const { traitScores, astrologyData, numerologyData, birthDetails, setView, reset } = useAyuAstroStore();
 
   const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
   const [horoscopeLoading, setHoroscopeLoading] = useState(true);
@@ -532,6 +535,7 @@ export default function InsightsView() {
   const [expandedTransits, setExpandedTransits] = useState<Record<string, boolean>>({});
   const [planetaryExpanded, setPlanetaryExpanded] = useState(false);
   const [ritualCompleted, setRitualCompleted] = useState(false);
+  const [newKundaliDialogOpen, setNewKundaliDialogOpen] = useState(false);
 
   const topTraits = getTopTraits(traitScores);
   const archetype = getArchetype(traitScores);
@@ -607,7 +611,7 @@ export default function InsightsView() {
 
   return (
     <div className="bg-cream px-4 py-6 pb-24 relative">
-      {/* Last Updated Badge + Live Indicator */}
+      {/* Last Updated Badge + Live Indicator + New Kundali Button */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Badge className="bg-brown-50 dark:bg-brown-50/20 text-brown-400 dark:text-brown-300 border-0 text-[10px] px-2.5 py-0.5 flex items-center gap-1.5">
@@ -619,6 +623,52 @@ export default function InsightsView() {
             Live
           </Badge>
         </div>
+        <Dialog open={newKundaliDialogOpen} onOpenChange={setNewKundaliDialogOpen}>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 gap-1.5 text-[11px] border-gold/30 text-gold-dark dark:border-gold/20 dark:text-gold hover:bg-gold/5 dark:hover:bg-gold/10 px-2.5"
+            >
+              <RotateCcw className="size-3" />
+              New Kundali
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-white dark:bg-brown-900 border-gold/20 max-w-sm">
+            <DialogHeader>
+              <DialogTitle
+                className="font-serif text-center text-xl"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
+                Create New Kundali?
+              </DialogTitle>
+              <DialogDescription className="text-center text-brown-500 dark:text-brown-400 text-sm">
+                This will clear your current chart data. You can always create a new one.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex-row gap-2 sm:justify-center pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setNewKundaliDialogOpen(false)}
+                className="flex-1 border-brown-200 dark:border-brown-700 text-brown-600 dark:text-brown-300"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  reset();
+                  setView('onboarding');
+                  setNewKundaliDialogOpen(false);
+                }}
+                className="flex-1 bg-gold-dark hover:bg-gold-dark/90 text-white"
+              >
+                Create New
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Decorative constellation dots pattern at top with twinkle */}
@@ -1844,6 +1894,13 @@ export default function InsightsView() {
                   ascendant={ascendant}
                   sunSign={sunSign}
                   moonSign={moonSign}
+                  birthDetails={birthDetails ? {
+                    name: birthDetails.name,
+                    dateOfBirth: birthDetails.dateOfBirth,
+                    timeOfBirth: birthDetails.timeOfBirth,
+                    placeOfBirth: birthDetails.placeOfBirth,
+                  } : undefined}
+                  nakshatra={astrologyData?.nakshatra}
                 />
               </div>
 
@@ -1917,7 +1974,7 @@ export default function InsightsView() {
                 </div>
               </motion.div>
 
-              {/* Planetary Positions Table */}
+              {/* Planetary Positions — Enhanced List */}
               <Separator className="my-3 bg-brown-100" />
               <Collapsible open={planetaryExpanded} onOpenChange={setPlanetaryExpanded}>
                 <CollapsibleTrigger asChild>
@@ -1927,43 +1984,33 @@ export default function InsightsView() {
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className="overflow-x-auto -mx-1">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-brown-100 dark:border-brown-700/30">
-                          <th className="text-left py-2 px-2 text-[10px] uppercase tracking-wider text-brown-400 font-medium">Planet</th>
-                          <th className="text-left py-2 px-2 text-[10px] uppercase tracking-wider text-brown-400 font-medium">Sign</th>
-                          <th className="text-center py-2 px-2 text-[10px] uppercase tracking-wider text-brown-400 font-medium">Degree</th>
-                          <th className="text-center py-2 px-2 text-[10px] uppercase tracking-wider text-brown-400 font-medium">House</th>
-                          <th className="text-center py-2 px-2 text-[10px] uppercase tracking-wider text-brown-400 font-medium">Retro</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {Object.entries(astrologyData?.planetaryPositions || {}).map(([planet, data]) => (
-                          <tr key={planet} className="border-b border-brown-50 dark:border-brown-700/20 hover:bg-brown-50/50 dark:hover:bg-brown-800/10 transition-colors">
-                            <td className="py-2 px-2">
-                              <div className="flex items-center gap-1.5">
-                                <span className={`w-2 h-2 rounded-full shrink-0 ${PLANET_DOT_COLORS[planet] || 'bg-gray-400'}`} />
-                                <span className="text-base leading-none">{PLANET_SYMBOLS[planet] || '●'}</span>
-                                <span className="font-medium text-brown-900 dark:text-brown-100">{planet}</span>
-                              </div>
-                            </td>
-                            <td className="py-2 px-2">
-                              <span className="text-brown-700 dark:text-brown-300">{ZODIAC_ICONS[data.sign] || ''} {data.sign}</span>
-                            </td>
-                            <td className="py-2 px-2 text-center text-brown-500 dark:text-brown-400">{data.degree.toFixed(1)}°</td>
-                            <td className="py-2 px-2 text-center text-brown-500 dark:text-brown-400">{data.house}</td>
-                            <td className="py-2 px-2 text-center">
-                              {data.retrograde ? (
-                                <span className="text-xs font-bold text-gold-dark dark:text-gold">℞</span>
-                              ) : (
-                                <span className="text-brown-200 dark:text-brown-600">—</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="space-y-1.5 mt-1">
+                    {Object.entries(astrologyData?.planetaryPositions || {}).map(([planet, pdata]) => {
+                      const deg = Math.floor(pdata.degree);
+                      const min = Math.floor((pdata.degree - deg) * 60);
+                      return (
+                        <div key={planet} className="flex items-center gap-2.5 py-2 px-3 rounded-lg bg-brown-50/40 dark:bg-brown-800/20 hover:bg-brown-50/70 dark:hover:bg-brown-800/30 transition-colors">
+                          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${PLANET_DOT_COLORS[planet] || 'bg-gray-400'}`} />
+                          <span className="text-lg leading-none shrink-0">{PLANET_SYMBOLS[planet] || '●'}</span>
+                          <div className="flex-1 min-w-0">
+                            <span className="font-semibold text-sm text-brown-900 dark:text-brown-100">{planet}</span>
+                            <span className="text-brown-400 dark:text-brown-500 mx-1">·</span>
+                            <span className="text-brown-700 dark:text-brown-300">{ZODIAC_ICONS[pdata.sign] || ''} {pdata.sign}</span>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-xs font-mono text-brown-500 dark:text-brown-400">
+                              {deg}°{min.toString().padStart(2, '0')}&apos;
+                            </span>
+                            <Badge className="bg-brown-100/60 dark:bg-brown-700/30 text-brown-500 dark:text-brown-400 text-[9px] px-1.5 py-0 min-w-[20px] text-center">
+                              H{pdata.house}
+                            </Badge>
+                            {pdata.retrograde && (
+                              <span className="text-[10px] font-bold text-gold-dark dark:text-gold">℞</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </CollapsibleContent>
               </Collapsible>

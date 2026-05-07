@@ -181,7 +181,16 @@ export const useAyuAstroStore = create<AyuAstroState>()(
         compatCommunicationScore: data.communication,
         compatTrustScore: data.trust,
       }),
-      reset: () => set(initialState),
+      reset: () => {
+        // Clear persisted storage first to ensure clean slate
+        try {
+          localStorage.removeItem('ayuastro-storage');
+        } catch {
+          // Ignore storage errors (e.g. private browsing)
+        }
+        // Then set state to initial values — this also triggers persist to save clean state
+        set(initialState);
+      },
 
       nextOnboardingStep: () => {
         const { onboardingStep } = get();

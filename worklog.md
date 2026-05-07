@@ -2820,3 +2820,100 @@ Stage Summary:
 - Files modified: ayuastro-store.ts, page.tsx, InsightsView.tsx
 - Lint: Zero errors
 - All 12 sections implemented with deterministic rule-based text
+
+---
+Task ID: 3
+Agent: Kundali Recreation Fix Agent
+Task: Fix kundali recreation flow - add New Kundali button, fix reset flow
+
+Work Log:
+- Added "New Kundali" button with RotateCcw icon to InsightsView header area (next to "Last Updated" and "Live" badges)
+- Implemented confirmation Dialog using shadcn Dialog component with title "Create New Kundali?", description, Cancel and "Create New" buttons
+- "Create New" button calls reset() then setView('onboarding') to start fresh onboarding flow
+- Added DialogDescription and DialogFooter imports to InsightsView
+- Added RotateCcw icon import from lucide-react
+- Added newKundaliDialogOpen state to InsightsView
+- Destructured reset from useAyuAstroStore in InsightsView
+- Fixed store reset() to explicitly clear localStorage ('ayuastro-storage') before setting state to initialState, ensuring no stale data persists
+- Fixed page.tsx auto-redirect logic: added userId check to the condition (birthDetails && astrologyData && userId && currentView === 'landing') to prevent redirect after reset when userId is null
+- Added useEffect in OnboardingView that clears all local state variables (localName, localDob, localTob, localPlace, localGender, localRelationship) when birthDetails becomes null after reset
+- All lint checks pass with zero errors
+
+Stage Summary:
+- Users can now create a new kundali from the Insights view via a prominent "New Kundali" button
+- Confirmation dialog prevents accidental resets
+- Reset flow properly clears all persisted data including userId from localStorage
+- Auto-redirect in page.tsx no longer triggers after reset (userId check added)
+- OnboardingView local state starts fresh after reset (useEffect clears state when birthDetails is null)
+- 4 files modified: InsightsView.tsx, ayuastro-store.ts, page.tsx, OnboardingView.tsx
+
+---
+Task ID: 6
+Agent: Kundali Presentation Agent
+Task: Improve kundali presentation and data display
+
+Work Log:
+- Rewrote KundaliChart.tsx with major improvements:
+  - Full mode (400x440 viewbox) with birth details header: Name, DOB, TOB, Place, Ascendant degree, Nakshatra
+  - Compact mode (300x300 viewbox) for embedding in other views
+  - Planet degree display: "Su 15°" instead of just "Su"
+  - Ascendant degree formatted as D°M'
+  - Birth details header with gold accent line and structured info rows
+  - Sun/Moon quick info at bottom of header
+  - Accept new optional props: birthDetails, ascendantDegree, nakshatra, compact
+- Major UI overhaul of ComprehensiveKundaliView.tsx:
+  - Added Birth Details Summary Card at top with gold accent bar, Name/DOB/TOB/Place in 2-col grid, Ayanamsa & Engine info
+  - Added Cosmic Identity Card with element-based gradient background, large zodiac symbols for Sun/Moon/Ascendant, element badges, Nakshatra & Life Path info
+  - Added Mini Kundali Chart using KundaliChart component with full birth details header
+  - Added Key Highlights section showing top 3 findings (archetype, current dasha, detected yogas) with icons and descriptions
+  - Added Section Navigation Dots - sticky row of 12 dots below header showing active/viewed sections
+  - Better section cards: gradient accent bars (1.5px), larger icons (9x9 rounded-xl), section summary visible when collapsed, section number badges, Separator before content
+  - Animated progress bar with framer-motion width transition
+  - Imported KundaliChart from insights folder for reuse
+  - Added ZODIAC_SYMBOLS, ZODIAC_ELEMENTS, PLANET_SYMBOLS constants
+  - Added getSectionSummary() extractor function for 1-line collapsed previews
+  - Added getKeyHighlights() function for dynamic highlight extraction
+  - getElement/getElementColor/getElementIcon helper functions
+- Enhanced InsightsView.tsx:
+  - Updated KundaliChart usage to pass birthDetails and nakshatra props
+  - Replaced basic planetary positions table with enhanced list layout:
+    - Each planet as a row with colored dot, symbol, name, sign, degree (D°M'), house badge, retrograde marker
+    - Rounded card-style rows with hover effects
+    - Degree displayed in monospace font with minutes precision
+    - House number shown as compact "H1" badge
+- All lint checks pass with zero errors
+- Dev server compiling successfully
+
+Stage Summary:
+- KundaliChart: Full/compact dual mode, birth details header, planet degrees, ascendant degree formatting
+- ComprehensiveKundaliView: Birth details card, cosmic identity card, mini kundali chart, key highlights, navigation dots, section summaries, better visual hierarchy
+- InsightsView: Enhanced planetary positions list with degree/minutes, house badges, better visual design
+- All changes have full dark mode support and responsive design
+- Zero lint errors
+
+---
+Task ID: 3
+Agent: Main Coordinator
+Task: Fix kundali accuracy, recreation flow, and improve presentation
+
+Work Log:
+- Verified Swiss Ephemeris (sweph) is properly installed and working: ayanamsa = 23.7237° for 1990 birth date, matching Lahiri ayanamsa precisely
+- Tested process-all API with test data (June 15, 1990, 14:30 IST, New Delhi) - all planetary positions calculated correctly
+- Verified timezone handling: Server runs in UTC, date construction + timezone offset subtraction is correct
+- Fixed kundali recreation flow: Added "New Kundali" button in InsightsView with confirmation Dialog
+- Fixed reset flow: Store's reset() now clears localStorage explicitly before setting initialState
+- Fixed page.tsx auto-redirect: Added userId check to prevent redirect after reset (userId is null after reset)
+- Fixed OnboardingView: Added useEffect to clear local state variables when birthDetails becomes null after reset
+- Improved KundaliChart: Added dual mode (full/compact), birth details header, planet degree display, ascendant degree
+- Improved ComprehensiveKundaliView: Added birth details summary card, cosmic identity card, mini kundali chart, key highlights section, section navigation dots, better section cards with summaries
+- Improved InsightsView: Enhanced planetary positions display with symbols, degrees in D°M' format, house badges, retrograde markers
+- All lint checks pass with zero errors
+- Dev server compiling and running without errors
+
+Stage Summary:
+- Swiss Ephemeris confirmed working with arc-minute accuracy
+- "New Kundali" button added to InsightsView for easy kundali recreation
+- Reset flow fixed: localStorage cleared, auto-redirect prevented, onboarding form resets properly
+- KundaliChart enhanced with birth details header and planet degrees
+- ComprehensiveKundaliView significantly improved with birth details card, cosmic identity card, mini chart, key highlights
+- Planetary positions display enhanced with better formatting

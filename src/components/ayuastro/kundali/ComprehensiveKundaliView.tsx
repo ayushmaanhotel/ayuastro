@@ -1,16 +1,19 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles, Brain, RotateCcw, Briefcase, Heart, Activity,
   Clock, Eye, Users, Shield, Star, Grid3X3, Moon,
   ChevronDown, ChevronUp, ArrowLeft, Loader2, AlertCircle,
+  MapPin, Calendar, Compass, Sun,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import KundaliChart from '@/components/ayuastro/insights/KundaliChart';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -30,20 +33,68 @@ interface ComprehensiveData {
   nakshatraDeepAnalysis: Record<string, any>;
 }
 
+const ZODIAC_SYMBOLS: Record<string, string> = {
+  Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
+  Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
+};
+
+const ZODIAC_ELEMENTS: Record<string, string> = {
+  Aries: 'Fire', Taurus: 'Earth', Gemini: 'Air', Cancer: 'Water', Leo: 'Fire', Virgo: 'Earth',
+  Libra: 'Air', Scorpio: 'Water', Sagittarius: 'Fire', Capricorn: 'Earth', Aquarius: 'Air', Pisces: 'Water',
+};
+
+const PLANET_SYMBOLS: Record<string, string> = {
+  Sun: '☉', Moon: '☽', Mars: '♂', Mercury: '☿', Jupiter: '♃', Venus: '♀', Saturn: '♄', Rahu: '☊', Ketu: '☋',
+};
+
 const SECTIONS = [
-  { key: 'personalityBlueprint', label: 'Personality', icon: Brain, color: 'from-amber-500 to-orange-500' },
-  { key: 'karmaPatterns', label: 'Karma', icon: RotateCcw, color: 'from-purple-500 to-indigo-500' },
-  { key: 'careerDharma', label: 'Career', icon: Briefcase, color: 'from-emerald-500 to-green-500' },
-  { key: 'marriageDynamics', label: 'Marriage', icon: Heart, color: 'from-rose-500 to-pink-500' },
-  { key: 'healthTendencies', label: 'Health', icon: Activity, color: 'from-cyan-500 to-teal-500' },
-  { key: 'timingEvents', label: 'Timing', icon: Clock, color: 'from-blue-500 to-sky-500' },
-  { key: 'spiritualEvolution', label: 'Spiritual', icon: Eye, color: 'from-violet-500 to-purple-500' },
-  { key: 'familyKarma', label: 'Family', icon: Users, color: 'from-amber-600 to-yellow-500' },
-  { key: 'hiddenPatterns', label: 'Hidden', icon: Shield, color: 'from-red-500 to-orange-500' },
-  { key: 'rareYogas', label: 'Yogas', icon: Star, color: 'from-yellow-400 to-amber-500' },
-  { key: 'divisionalCharts', label: 'Vargas', icon: Grid3X3, color: 'from-indigo-500 to-blue-500' },
-  { key: 'nakshatraDeepAnalysis', label: 'Nakshatra', icon: Moon, color: 'from-slate-500 to-gray-500' },
+  { key: 'personalityBlueprint', label: 'Personality', icon: Brain, color: 'from-amber-500 to-orange-500', emoji: '🧠' },
+  { key: 'karmaPatterns', label: 'Karma', icon: RotateCcw, color: 'from-purple-500 to-indigo-500', emoji: '♻️' },
+  { key: 'careerDharma', label: 'Career', icon: Briefcase, color: 'from-emerald-500 to-green-500', emoji: '💼' },
+  { key: 'marriageDynamics', label: 'Marriage', icon: Heart, color: 'from-rose-500 to-pink-500', emoji: '💕' },
+  { key: 'healthTendencies', label: 'Health', icon: Activity, color: 'from-cyan-500 to-teal-500', emoji: '💊' },
+  { key: 'timingEvents', label: 'Timing', icon: Clock, color: 'from-blue-500 to-sky-500', emoji: '⏳' },
+  { key: 'spiritualEvolution', label: 'Spiritual', icon: Eye, color: 'from-violet-500 to-purple-500', emoji: '👁️' },
+  { key: 'familyKarma', label: 'Family', icon: Users, color: 'from-amber-600 to-yellow-500', emoji: '👨‍👩‍👧‍👦' },
+  { key: 'hiddenPatterns', label: 'Hidden', icon: Shield, color: 'from-red-500 to-orange-500', emoji: '🛡️' },
+  { key: 'rareYogas', label: 'Yogas', icon: Star, color: 'from-yellow-400 to-amber-500', emoji: '⭐' },
+  { key: 'divisionalCharts', label: 'Vargas', icon: Grid3X3, color: 'from-indigo-500 to-blue-500', emoji: '📊' },
+  { key: 'nakshatraDeepAnalysis', label: 'Nakshatra', icon: Moon, color: 'from-slate-500 to-gray-500', emoji: '🌙' },
 ];
+
+// ─── Section Summary Extractor ──────────────────────────────────────────────
+
+function getSectionSummary(key: string, data: Record<string, any>): string {
+  if (!data) return 'Loading...';
+  switch (key) {
+    case 'personalityBlueprint':
+      return data.personalityArchetype ? `${data.personalityArchetype} archetype` : 'Mental & emotional patterns';
+    case 'karmaPatterns':
+      return data.pastLifeTendencies ? 'Past life karmic patterns identified' : 'Karmic analysis';
+    case 'careerDharma':
+      return data.naturalSkillPattern ? 'Career dharma & wealth patterns' : 'Professional analysis';
+    case 'marriageDynamics':
+      return data.attractionPattern ? 'Relationship dynamics & timing' : 'Marriage analysis';
+    case 'healthTendencies':
+      return data.ayurvedicConstitution ? `${data.ayurvedicConstitution} constitution` : 'Health analysis';
+    case 'timingEvents':
+      return data.currentMahadasha ? `Running ${data.currentMahadasha}` : 'Dasha timing';
+    case 'spiritualEvolution':
+      return data.mokshaTendency ? 'Spiritual path & moksha' : 'Spiritual analysis';
+    case 'familyKarma':
+      return data.fatherRelationship ? 'Family karmic patterns' : 'Family analysis';
+    case 'hiddenPatterns':
+      return data.selfSabotage ? 'Shadow patterns & strengths' : 'Hidden patterns';
+    case 'rareYogas':
+      return data.detectedYogas ? `${data.detectedYogas.filter((y: any) => y.present).length} yogas detected` : 'Yoga analysis';
+    case 'divisionalCharts':
+      return data.d9Navamsha ? 'D9 Navamsha & vargas' : 'Divisional charts';
+    case 'nakshatraDeepAnalysis':
+      return data.moonNakshatra ? `${data.moonNakshatra} deep dive` : 'Nakshatra analysis';
+    default:
+      return 'Section available';
+  }
+}
 
 // ─── Section Renderers ──────────────────────────────────────────────────────
 
@@ -115,13 +166,14 @@ function VargaCard({ name, ascSign, analysis }: { name: string; ascSign: string;
 // ─── Main Component ────────────────────────────────────────────────────────
 
 export default function ComprehensiveKundaliView() {
-  const { userId, setView } = useAyuAstroStore();
+  const { userId, setView, birthDetails, astrologyData, numerologyData } = useAyuAstroStore();
   const [data, setData] = useState<ComprehensiveData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState(0);
   const [openSections, setOpenSections] = useState<Set<number>>(new Set([0]));
   const [viewedSections, setViewedSections] = useState<Set<number>>(new Set());
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!userId) { setError('No user ID found. Please complete onboarding first.'); setLoading(false); return; }
@@ -152,7 +204,66 @@ export default function ComprehensiveKundaliView() {
       return next;
     });
     setViewedSections(prev => new Set(prev).add(idx));
+    setActiveSection(idx);
   }, []);
+
+  // ─── Key Highlights ──────────────────────────────────────────────────────
+  const getKeyHighlights = (): { icon: string; title: string; desc: string }[] => {
+    if (!data) return [];
+    const highlights: { icon: string; title: string; desc: string }[] = [];
+
+    // 1. Personality archetype
+    const pb = data.personalityBlueprint;
+    if (pb?.personalityArchetype) {
+      highlights.push({
+        icon: '🧠',
+        title: `${pb.personalityArchetype} Archetype`,
+        desc: pb.archetypeDescription?.split('.')[0] + '.' || 'Your core personality pattern',
+      });
+    }
+
+    // 2. Current Dasha
+    const te = data.timingEvents;
+    if (te?.currentMahadasha) {
+      highlights.push({
+        icon: '⏳',
+        title: `${te.currentMahadasha} Dasha`,
+        desc: te.dashaInterpretation?.split('.')[0] + '.' || 'Current planetary period',
+      });
+    }
+
+    // 3. Detected Yogas
+    const ry = data.rareYogas;
+    if (ry?.detectedYogas) {
+      const presentYogas = ry.detectedYogas.filter((y: any) => y.present);
+      if (presentYogas.length > 0) {
+        highlights.push({
+          icon: '⭐',
+          title: `${presentYogas.length} Yoga${presentYogas.length > 1 ? 's' : ''} Detected`,
+          desc: presentYogas.map((y: any) => y.name).join(', '),
+        });
+      }
+    }
+
+    // Fallbacks if not enough highlights
+    if (highlights.length === 0) {
+      highlights.push({ icon: '✨', title: 'Comprehensive Analysis Ready', desc: '12 dimensions of your Vedic chart analyzed' });
+    }
+    if (highlights.length === 1) {
+      const nk = data.nakshatraDeepAnalysis;
+      if (nk?.moonNakshatra) {
+        highlights.push({ icon: '🌙', title: `${nk.moonNakshatra} Nakshatra`, desc: nk.psychologicalCoding?.split('.')[0] + '.' || 'Deep lunar analysis' });
+      }
+    }
+    if (highlights.length === 2) {
+      const kd = data.karmaPatterns;
+      if (kd?.pastLifeTendencies) {
+        highlights.push({ icon: '♻️', title: 'Karmic Patterns Found', desc: 'Past life tendencies and unfinished karmas identified' });
+      }
+    }
+
+    return highlights.slice(0, 3);
+  };
 
   // ─── Loading State ──────────────────────────────────────────────────────
   if (loading) {
@@ -181,6 +292,13 @@ export default function ComprehensiveKundaliView() {
       </div>
     );
   }
+
+  const keyHighlights = getKeyHighlights();
+  const sunSign = astrologyData?.sunSign || '';
+  const moonSign = astrologyData?.moonSign || '';
+  const ascendant = astrologyData?.ascendant || '';
+  const nakshatra = astrologyData?.nakshatra || '';
+  const lifePath = numerologyData?.lifePathNumber;
 
   // ─── Section Content Renderer ──────────────────────────────────────────
   const renderSectionContent = (key: string, sectionData: Record<string, any>) => {
@@ -490,9 +608,30 @@ export default function ComprehensiveKundaliView() {
     }
   };
 
+  // Get element for cosmic identity card
+  const getElement = (sign: string): string => ZODIAC_ELEMENTS[sign] || 'Fire';
+  const getElementColor = (el: string): string => {
+    switch (el) {
+      case 'Fire': return 'from-red-500/20 to-orange-400/20';
+      case 'Earth': return 'from-green-500/20 to-emerald-400/20';
+      case 'Air': return 'from-yellow-400/20 to-amber-300/20';
+      case 'Water': return 'from-blue-500/20 to-teal-400/20';
+      default: return 'from-gold/20 to-amber-400/20';
+    }
+  };
+  const getElementIcon = (el: string): string => {
+    switch (el) {
+      case 'Fire': return '🔥';
+      case 'Earth': return '🌍';
+      case 'Air': return '💨';
+      case 'Water': return '🌊';
+      default: return '✨';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-cream dark:bg-brown-900 pb-20">
-      {/* Header */}
+      {/* ─── Sticky Header ──────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-40 bg-cream/90 dark:bg-brown-900/90 backdrop-blur-sm border-b border-brown-100/30 dark:border-brown-700/30">
         <div className="max-w-2xl mx-auto px-4 py-3">
           <div className="flex items-center gap-3 mb-3">
@@ -509,8 +648,13 @@ export default function ComprehensiveKundaliView() {
             </div>
           </div>
           {/* Progress bar */}
-          <div className="w-full bg-brown-100/30 dark:bg-brown-700/30 rounded-full h-1 mb-3">
-            <div className="bg-gradient-to-r from-gold to-gold-dark h-1 rounded-full transition-all duration-500" style={{ width: `${(viewedSections.size / 12) * 100}%` }} />
+          <div className="w-full bg-brown-100/30 dark:bg-brown-700/30 rounded-full h-1.5 mb-3">
+            <motion.div
+              className="bg-gradient-to-r from-gold to-gold-dark h-1.5 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${(viewedSections.size / 12) * 100}%` }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+            />
           </div>
           {/* Section tabs */}
           <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none">
@@ -539,32 +683,265 @@ export default function ComprehensiveKundaliView() {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-2xl mx-auto px-4 py-4 space-y-3">
+      {/* ─── Content ────────────────────────────────────────────────────────── */}
+      <div ref={contentRef} className="max-w-2xl mx-auto px-4 py-4 space-y-4">
+
+        {/* ═══════ BIRTH DETAILS SUMMARY CARD ═══════ */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <Card className="overflow-hidden shadow-lg border-0 dark:bg-white/5">
+            {/* Gold accent bar */}
+            <div className="h-1.5 bg-gradient-to-r from-gold via-gold-dark to-gold" />
+            <div className="p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-gold/10">
+                  <Sparkles className="size-5 text-gold-dark dark:text-gold" />
+                </div>
+                <div>
+                  <h2 className="font-serif text-base font-bold text-brown-900 dark:text-brown-50">Birth Details</h2>
+                  <p className="text-[10px] text-brown-400 dark:text-brown-500 uppercase tracking-wider">Foundation of your Kundali</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {birthDetails?.name && (
+                  <div className="bg-brown-50/50 dark:bg-brown-800/30 rounded-lg p-3">
+                    <p className="text-[10px] font-semibold text-brown-400 dark:text-brown-500 uppercase tracking-wider mb-0.5">Name</p>
+                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">{birthDetails.name}</p>
+                  </div>
+                )}
+                {birthDetails?.dateOfBirth && (
+                  <div className="bg-brown-50/50 dark:bg-brown-800/30 rounded-lg p-3">
+                    <p className="text-[10px] font-semibold text-brown-400 dark:text-brown-500 uppercase tracking-wider mb-0.5">Date of Birth</p>
+                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">
+                      {new Date(birthDetails.dateOfBirth).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </p>
+                  </div>
+                )}
+                {birthDetails?.timeOfBirth && (
+                  <div className="bg-brown-50/50 dark:bg-brown-800/30 rounded-lg p-3">
+                    <p className="text-[10px] font-semibold text-brown-400 dark:text-brown-500 uppercase tracking-wider mb-0.5">Time of Birth</p>
+                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">{birthDetails.timeOfBirth}</p>
+                  </div>
+                )}
+                {birthDetails?.placeOfBirth && (
+                  <div className="bg-brown-50/50 dark:bg-brown-800/30 rounded-lg p-3">
+                    <p className="text-[10px] font-semibold text-brown-400 dark:text-brown-500 uppercase tracking-wider mb-0.5">Place of Birth</p>
+                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">{birthDetails.placeOfBirth}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-3 flex items-center gap-3 text-[11px] text-brown-400 dark:text-brown-500">
+                <span className="flex items-center gap-1">
+                  <Compass className="size-3" />
+                  Ayanamsa: {data.calculationInfo.ayanamsa.toFixed(4)}° (Lahiri)
+                </span>
+                <span className="text-brown-200 dark:text-brown-700">|</span>
+                <span className="flex items-center gap-1">
+                  <Shield className="size-3" />
+                  Engine: {data.calculationInfo.engine}
+                </span>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* ═══════ COSMIC IDENTITY CARD ═══════ */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+          <Card className="overflow-hidden shadow-lg border-0 dark:bg-white/5">
+            <div className={`bg-gradient-to-br ${getElementColor(getElement(sunSign || 'Aries'))} p-5`}>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-lg">{getElementIcon(getElement(sunSign || 'Aries'))}</span>
+                <h2 className="font-serif text-base font-bold text-brown-900 dark:text-brown-50">Cosmic Identity</h2>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                {/* Sun Sign */}
+                <div className="bg-white/60 dark:bg-brown-900/60 rounded-xl p-3 text-center backdrop-blur-sm border border-gold/10 dark:border-gold/5">
+                  <div className="text-3xl mb-1">{ZODIAC_SYMBOLS[sunSign] || '☉'}</div>
+                  <p className="text-[9px] font-semibold text-gold-dark dark:text-gold uppercase tracking-wider">Sun Sign ☉</p>
+                  <p className="text-xs font-bold text-brown-900 dark:text-brown-50 mt-0.5">{sunSign || '—'}</p>
+                  <p className="text-[9px] text-brown-500 dark:text-brown-400">{getElement(sunSign || 'Aries')}</p>
+                </div>
+
+                {/* Moon Sign */}
+                <div className="bg-white/60 dark:bg-brown-900/60 rounded-xl p-3 text-center backdrop-blur-sm border border-gold/10 dark:border-gold/5">
+                  <div className="text-3xl mb-1">{ZODIAC_SYMBOLS[moonSign] || '☽'}</div>
+                  <p className="text-[9px] font-semibold text-gold-dark dark:text-gold uppercase tracking-wider">Moon Sign ☽</p>
+                  <p className="text-xs font-bold text-brown-900 dark:text-brown-50 mt-0.5">{moonSign || '—'}</p>
+                  <p className="text-[9px] text-brown-500 dark:text-brown-400">{getElement(moonSign || 'Aries')}</p>
+                </div>
+
+                {/* Ascendant */}
+                <div className="bg-white/60 dark:bg-brown-900/60 rounded-xl p-3 text-center backdrop-blur-sm border border-gold/10 dark:border-gold/5">
+                  <div className="text-3xl mb-1">{ZODIAC_SYMBOLS[ascendant] || '⬆'}</div>
+                  <p className="text-[9px] font-semibold text-gold-dark dark:text-gold uppercase tracking-wider">Ascendant ⬆</p>
+                  <p className="text-xs font-bold text-brown-900 dark:text-brown-50 mt-0.5">{ascendant || '—'}</p>
+                  <p className="text-[9px] text-brown-500 dark:text-brown-400">{getElement(ascendant || 'Aries')}</p>
+                </div>
+              </div>
+
+              {/* Nakshatra & Life Path */}
+              <div className="mt-3 flex items-center gap-3">
+                {nakshatra && (
+                  <div className="bg-white/60 dark:bg-brown-900/60 rounded-lg px-3 py-2 backdrop-blur-sm border border-gold/10 dark:border-gold/5 flex-1">
+                    <p className="text-[9px] font-semibold text-gold-dark dark:text-gold uppercase tracking-wider">Nakshatra</p>
+                    <p className="text-xs font-bold text-brown-900 dark:text-brown-50">{nakshatra}</p>
+                  </div>
+                )}
+                {lifePath && (
+                  <div className="bg-white/60 dark:bg-brown-900/60 rounded-lg px-3 py-2 backdrop-blur-sm border border-gold/10 dark:border-gold/5 flex-1">
+                    <p className="text-[9px] font-semibold text-gold-dark dark:text-gold uppercase tracking-wider">Life Path</p>
+                    <p className="text-xs font-bold text-brown-900 dark:text-brown-50">Number {lifePath}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* ═══════ MINI KUNDALI CHART ═══════ */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
+        >
+          <Card className="overflow-hidden shadow-lg border-0 dark:bg-white/5">
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-gold/10">
+                  <Grid3X3 className="size-4 text-gold-dark dark:text-gold" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-sm font-bold text-brown-900 dark:text-brown-50">Birth Chart</h3>
+                  <p className="text-[10px] text-brown-400 dark:text-brown-500">North Indian Style</p>
+                </div>
+              </div>
+              <KundaliChart
+                planetaryPositions={astrologyData?.planetaryPositions || {}}
+                ascendant={ascendant}
+                ascendantDegree={undefined}
+                sunSign={sunSign}
+                moonSign={moonSign}
+                birthDetails={birthDetails ? {
+                  name: birthDetails.name,
+                  dateOfBirth: birthDetails.dateOfBirth,
+                  timeOfBirth: birthDetails.timeOfBirth,
+                  placeOfBirth: birthDetails.placeOfBirth,
+                } : undefined}
+                nakshatra={nakshatra}
+              />
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* ═══════ KEY HIGHLIGHTS ═══════ */}
+        {keyHighlights.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            <Card className="overflow-hidden shadow-lg border-0 dark:bg-white/5">
+              <div className="h-1 bg-gradient-to-r from-gold via-sage to-gold-dark" />
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-gold/10">
+                    <Star className="size-4 text-gold-dark dark:text-gold" />
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-sm font-bold text-brown-900 dark:text-brown-50">Key Highlights</h3>
+                    <p className="text-[10px] text-brown-400 dark:text-brown-500">Most important findings from your Kundali</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {keyHighlights.map((h, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 + i * 0.1, duration: 0.3 }}
+                      className="flex items-start gap-3 bg-gradient-to-r from-gold/5 to-transparent dark:from-gold/3 dark:to-transparent rounded-lg p-3 border border-gold/10 dark:border-gold/5"
+                    >
+                      <span className="text-xl shrink-0">{h.icon}</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-brown-900 dark:text-brown-50">{h.title}</p>
+                        <p className="text-[11px] text-brown-600 dark:text-brown-300 leading-relaxed mt-0.5">{h.desc}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Section Navigation Dots (fixed sidebar on scroll) */}
+        <div className="sticky top-28 z-30 flex justify-center gap-1.5 py-1 bg-cream/80 dark:bg-brown-900/80 backdrop-blur-sm">
+          {SECTIONS.map((sec, i) => {
+            const isActive = i === activeSection;
+            const isViewed = viewedSections.has(i);
+            return (
+              <button
+                key={`dot-${sec.key}`}
+                onClick={() => { setActiveSection(i); toggleSection(i); }}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  isActive
+                    ? 'bg-gold w-4'
+                    : isViewed
+                      ? 'bg-gold/50'
+                      : 'bg-brown-200 dark:bg-brown-700'
+                }`}
+                aria-label={`Go to ${sec.label}`}
+              />
+            );
+          })}
+        </div>
+
+        {/* ═══════ SECTION CARDS ═══════ */}
         {SECTIONS.map((sec, i) => {
           const Icon = sec.icon;
           const sectionData = data[sec.key as keyof ComprehensiveData] as Record<string, any>;
           if (!sectionData) return null;
           const isOpen = openSections.has(i);
+          const summary = getSectionSummary(sec.key, sectionData);
 
           return (
             <motion.div
               key={sec.key}
+              id={`section-${i}`}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04, duration: 0.3 }}
+              transition={{ delay: i * 0.03, duration: 0.3 }}
             >
               <Collapsible open={isOpen} onOpenChange={() => toggleSection(i)}>
                 <Card className="overflow-hidden shadow-md card-hover border-brown-100/30 dark:border-brown-700/30 dark:bg-white/5">
-                  {/* Accent bar */}
-                  <div className={`h-1 bg-gradient-to-r ${sec.color}`} />
+                  {/* Gradient accent bar */}
+                  <div className={`h-1.5 bg-gradient-to-r ${sec.color}`} />
                   <CollapsibleTrigger className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-brown-50/30 dark:hover:bg-brown-800/20 transition-colors">
-                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${sec.color} flex items-center justify-center shrink-0`}>
-                      <Icon className="w-4 h-4 text-white" />
+                    <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${sec.color} flex items-center justify-center shrink-0 shadow-sm`}>
+                      <Icon className="w-4.5 h-4.5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-serif text-sm font-bold text-brown-900 dark:text-brown-50">{sec.label}</h3>
-                      <p className="text-[10px] text-brown-400 dark:text-brown-500 truncate">Section {i + 1} of 12</p>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-serif text-sm font-bold text-brown-900 dark:text-brown-50">{sec.label}</h3>
+                        <Badge className="bg-brown-100/50 dark:bg-brown-700/30 text-brown-500 dark:text-brown-400 text-[9px] px-1.5 py-0">
+                          {i + 1}/12
+                        </Badge>
+                      </div>
+                      {/* Section summary visible when collapsed */}
+                      {!isOpen && (
+                        <p className="text-[10px] text-brown-400 dark:text-brown-500 mt-0.5 truncate">{summary}</p>
+                      )}
                     </div>
                     {isOpen ? (
                       <ChevronUp className="w-4 h-4 text-brown-400 dark:text-brown-500 shrink-0" />
@@ -574,6 +951,7 @@ export default function ComprehensiveKundaliView() {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <div className="px-4 pb-4">
+                      <Separator className="mb-4 bg-brown-100/30 dark:bg-brown-700/20" />
                       {renderSectionContent(sec.key, sectionData)}
                     </div>
                   </CollapsibleContent>
@@ -585,6 +963,7 @@ export default function ComprehensiveKundaliView() {
 
         {/* Footer note */}
         <div className="text-center py-6">
+          <Separator className="mb-6 bg-brown-100/30 dark:bg-brown-700/20" />
           <p className="text-[11px] text-brown-400 dark:text-brown-500 italic">
             &ldquo;Grahas incline. They do not imprison.&rdquo; — Ancient Vedic Wisdom
           </p>

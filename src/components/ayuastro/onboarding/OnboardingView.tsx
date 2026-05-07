@@ -511,6 +511,19 @@ export default function OnboardingView() {
   const [localRelationship, setLocalRelationship] = useState(
     birthDetails?.relationshipStatus || ''
   );
+
+  // When birthDetails is null (after reset), clear all local state to ensure fresh start
+  useEffect(() => {
+    if (!birthDetails) {
+      setLocalName('');
+      setLocalDob('');
+      setLocalTob('');
+      setLocalPlace('Mumbai');
+      setLocalGender('');
+      setLocalRelationship('');
+    }
+  }, [birthDetails]);
+
   const [showCelebration, setShowCelebration] = useState(false);
   const [showBirthChartPreview, setShowBirthChartPreview] = useState(false);
   const [celebrationHandled, setCelebrationHandled] = useState(false);

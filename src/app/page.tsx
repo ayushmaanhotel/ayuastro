@@ -36,16 +36,17 @@ const pageVariants = {
 };
 
 export default function Home() {
-  const { currentView, birthDetails, astrologyData, setView, setActiveTab } = useAyuAstroStore();
+  const { currentView, birthDetails, astrologyData, userId, setView, setActiveTab } = useAyuAstroStore();
   const [showShimmer, setShowShimmer] = useState(false);
 
   // If user has persisted data, redirect to insights
+  // Also check userId to prevent redirect after reset (userId is null after reset)
   useEffect(() => {
-    if (birthDetails && astrologyData && currentView === 'landing') {
+    if (birthDetails && astrologyData && userId && currentView === 'landing') {
       setView('insights');
       setActiveTab('insights');
     }
-  }, [birthDetails, astrologyData, currentView, setView, setActiveTab]);
+  }, [birthDetails, astrologyData, userId, currentView, setView, setActiveTab]);
 
   // Trigger shimmer when view changes
   useEffect(() => {
