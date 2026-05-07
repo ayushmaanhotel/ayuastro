@@ -285,7 +285,7 @@ function getTopTraits(traits: TraitScore[], count: number = 3): TraitScore[] {
 function getArchetype(traits: TraitScore[]): string {
   if (traits.length === 0) return 'The Seeker';
   const top = getTopTraits(traits, 3);
-  const names = top.map((t) => t.name.toLowerCase());
+  const names = top.map((t) => (t.name || t.id || '').toLowerCase());
   if (names.includes('empathy') && names.includes('trust')) return 'The Empathic Guardian';
   if (names.includes('empathy')) return 'The Deep Feeler';
   if (names.includes('resilience')) return 'The Resilient Anchor';

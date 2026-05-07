@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAyuAstroStore } from '@/store/ayuastro-store';
+import { cosmicToast } from '@/lib/toast';
 
 const ZODIAC_SYMBOLS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
 
@@ -16,6 +18,8 @@ const STEPS = [
   { label: 'Analyzing Numbers', delay: 1000 },
   { label: 'Scoring Traits', delay: 2000 },
 ];
+
+const CALCULATION_TIMEOUT = 30000; // 30 seconds
 
 export default function CalculatingView() {
   const [messageIndex, setMessageIndex] = useState(0);
@@ -43,6 +47,19 @@ export default function CalculatingView() {
       clearInterval(symInterval);
       stepTimers.forEach(clearTimeout);
     };
+  }, []);
+
+  // Timeout safety: if still on calculating view after 30s, redirect to insights
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const store = useAyuAstroStore.getState();
+      if (store.currentView === 'calculating') {
+        store.setView('insights');
+        store.setLoading(false);
+        cosmicToast.info('Taking longer than expected', 'Your data is being processed — you can explore in the meantime');
+      }
+    }, CALCULATION_TIMEOUT);
+    return () => clearTimeout(timeout);
   }, []);
 
   return (

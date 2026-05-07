@@ -48,6 +48,20 @@ export default function Home() {
     }
   }, [birthDetails, astrologyData, userId, currentView, setView, setActiveTab]);
 
+  // Error recovery: detect stuck 'calculating' state and redirect after 45s
+  useEffect(() => {
+    if (currentView === 'calculating') {
+      const timer = setTimeout(() => {
+        const state = useAyuAstroStore.getState();
+        if (state.currentView === 'calculating') {
+          state.setView('insights');
+          state.setLoading(false);
+        }
+      }, 45000); // 45s ultimate timeout
+      return () => clearTimeout(timer);
+    }
+  }, [currentView]);
+
   // Trigger shimmer when view changes
   useEffect(() => {
     const raf = requestAnimationFrame(() => {

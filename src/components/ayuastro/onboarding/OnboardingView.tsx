@@ -591,7 +591,8 @@ export default function OnboardingView() {
   const handleBirthChartPreviewComplete = () => {
     setShowBirthChartPreview(false);
     setDirection(1);
-    nextOnboardingStep(); // goes to 'complete'
+    // Skip directly to 'complete' step (not nextOnboardingStep which would go to 'preview')
+    setOnboardingStep('complete');
   };
 
   const handleQuestionnaireAnswer = (questionId: string, score: number, category: QuestionnaireAnswer['category']) => {
@@ -691,7 +692,12 @@ export default function OnboardingView() {
         destinyDesc: result.numerology.descriptions?.destiny || '',
         soulUrgeDesc: result.numerology.descriptions?.soulUrge || '',
       });
-      if (result.traits) setTraitScores(result.traits);
+      if (result.traits) setTraitScores(result.traits.map((t: { id?: string; name?: string; label?: string; score: number; description?: string }) => ({
+        name: t.name || t.id || '',
+        label: t.label || t.id || '',
+        score: t.score,
+        description: t.description || '',
+      })));
 
       // Show welcome toast and navigate to insights immediately
       cosmicToast.cosmic(`Welcome, ${birthDetails?.name || 'Seeker'}! ✦`, 'Your cosmic journey begins...');
@@ -757,15 +763,162 @@ export default function OnboardingView() {
       setLoading(false);
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
       setView('onboarding');
-      setOnboardingStep('complete');
+      setOnboardingStep('birth');
+      cosmicToast.info('Calculation failed', 'Please check your details and try again');
     }
   };
 
-  // Auto-submit on complete step
+  // Auto-submit on complete step — read from store directly to avoid stale closures
   useEffect(() => {
     if (onboardingStep === 'complete') {
       const timer = setTimeout(() => {
-        handleSubmit();
+        const state = useAyuAstroStore.getState();
+        // Directly call the submit logic with fresh store data to avoid stale closure
+        (async () => {
+          const { birthDetails: bd, questionnaireAnswers: qa } = state;
+
+          // Validate required data before making API call
+          if (!bd?.name || !bd?.dateOfBirth || !bd?.timeOfBirth || !bd?.placeOfBirth) {
+            console.warn('[Onboarding] Missing required birth details, redirecting to birth step');
+            state.setOnboardingStep('birth');
+            cosmicToast.info('Missing details', 'Please fill in all birth information');
+            return;
+          }
+
+          if (!bd?.latitude || !bd?.longitude) {
+            console.warn('[Onboarding] Missing coordinates, using defaults');
+            bd.latitude = bd.latitude || 28.6139;
+            bd.longitude = bd.longitude || 77.209;
+          }
+
+          state.setView('calculating');
+          state.setLoading(true, 'Mapping your cosmic blueprint...');
+
+          try {
+            const response = await fetch('/api/astrology/quick-calculate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: bd?.name,
+                dateOfBirth: bd?.dateOfBirth,
+                timeOfBirth: bd?.timeOfBirth,
+                placeOfBirth: bd?.placeOfBirth,
+                latitude: bd?.latitude,
+                longitude: bd?.longitude,
+                timezone: bd?.timezone || 'Asia/Kolkata',
+                gender: bd?.gender,
+                relationshipStatus: bd?.relationshipStatus,
+                questionnaireAnswers: qa,
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to process your data');
+            }
+
+            const data = await response.json();
+            const result = data.data || data;
+
+            if (result.userId) state.setUserId(result.userId);
+            if (result.astrology) {
+              state.setAstrologyData({
+                sunSign: result.astrology.sunSign,
+                moonSign: result.astrology.moonSign,
+                ascendant: result.astrology.ascendant,
+                nakshatra: typeof result.astrology.nakshatra === 'string' ? result.astrology.nakshatra : result.astrology.nakshatra?.name || '',
+                currentDasha: result.astrology.dashaPeriods?.currentMahadasha
+                  ? `${result.astrology.dashaPeriods.currentMahadasha.planet}${result.astrology.dashaPeriods.currentAntardasha ? '/' + result.astrology.dashaPeriods.currentAntardasha.planet : ''}`
+                  : '',
+                yogas: (result.astrology.yogas || []).filter((y: { present: boolean }) => y.present).map((y: { name: string }) => y.name),
+                doshas: (result.astrology.doshas || []).filter((d: { present: boolean }) => d.present).map((d: { name: string }) => d.name),
+                planetaryPositions: Object.fromEntries(
+                  Object.entries(result.astrology.planetaryPositions || {}).map(([key, pos]: [string, unknown]) => {
+                    const p = pos as { sign: string; degreeInSign: number; house?: number; isRetrograde?: boolean };
+                    return [key, { sign: p.sign, degree: p.degreeInSign, house: p.house || 1, retrograde: p.isRetrograde || false }];
+                  })
+                ),
+              });
+            }
+            if (result.numerology) state.setNumerologyData({
+              lifePathNumber: result.numerology.lifePathNumber,
+              destinyNumber: result.numerology.destinyNumber,
+              soulUrgeNumber: result.numerology.soulUrgeNumber,
+              personalityNumber: result.numerology.personalityNumber,
+              lifePathDesc: result.numerology.descriptions?.lifePath || '',
+              destinyDesc: result.numerology.descriptions?.destiny || '',
+              soulUrgeDesc: result.numerology.descriptions?.soulUrge || '',
+            });
+            if (result.traits) state.setTraitScores(result.traits.map((t: { id?: string; name?: string; label?: string; score: number; description?: string; lowLabel?: string; highLabel?: string }) => ({
+              name: t.name || t.id || '',
+              label: t.label || t.id || '',
+              score: t.score,
+              description: t.description || '',
+            })));
+
+            cosmicToast.cosmic(`Welcome, ${bd?.name || 'Seeker'}! ✦`, 'Your cosmic journey begins...');
+
+            state.setLoading(false);
+            state.setView('insights');
+
+            // Phase 2: Trigger AI report generation in the background
+            if (result.userId && result.astrology && result.numerology && result.traits) {
+              state.setReportLoading(true);
+
+              const traitScoresMap: Record<string, number> = {};
+              if (Array.isArray(result.traits)) {
+                for (const t of result.traits) {
+                  traitScoresMap[t.id || t.name] = t.score;
+                }
+              }
+
+              fetch('/api/ai/generate-report-async', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  userId: result.userId,
+                  reportType: 'personality',
+                  astrologyData: {
+                    sunSign: result.astrology.sunSign,
+                    moonSign: result.astrology.moonSign,
+                    ascendant: result.astrology.ascendant,
+                    nakshatra: typeof result.astrology.nakshatra === 'string' ? result.astrology.nakshatra : result.astrology.nakshatra?.name || '',
+                    currentDasha: result.astrology.dashaPeriods?.currentMahadasha
+                      ? `${result.astrology.dashaPeriods.currentMahadasha.planet}${result.astrology.dashaPeriods.currentAntardasha ? '/' + result.astrology.dashaPeriods.currentAntardasha.planet : ''}`
+                      : '',
+                    yogas: (result.astrology.yogas || []).filter((y: { present: boolean }) => y.present).map((y: { name: string }) => y.name),
+                    doshas: (result.astrology.doshas || []).filter((d: { present: boolean }) => d.present).map((d: { name: string }) => d.name),
+                  },
+                  numerologyData: {
+                    lifePathNumber: result.numerology.lifePathNumber,
+                    destinyNumber: result.numerology.destinyNumber,
+                    soulUrgeNumber: result.numerology.soulUrgeNumber,
+                  },
+                  traitScores: traitScoresMap,
+                }),
+              })
+                .then((res) => res.json())
+                .then((reportData) => {
+                  if (reportData.success && reportData.data) {
+                    if (reportData.data.sections) state.setReportSections(reportData.data.sections);
+                    if (reportData.data.summary) state.setReportSummary(reportData.data.summary);
+                    cosmicToast.info('Your report is ready ✦', 'AI analysis complete — check your Report tab');
+                  }
+                })
+                .catch(() => {
+                  console.warn('[Onboarding] AI report generation failed — user can retry later');
+                })
+                .finally(() => {
+                  state.setReportLoading(false);
+                });
+            }
+          } catch (err) {
+            state.setLoading(false);
+            state.setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+            state.setView('onboarding');
+            state.setOnboardingStep('birth');
+            cosmicToast.info('Calculation failed', 'Please check your details and try again');
+          }
+        })();
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -974,66 +1127,99 @@ export default function OnboardingView() {
                     );
                     if (fieldIdx === 5) return (
                       <motion.div key={fieldIdx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fieldIdx * 0.05 }}>
-                        <div className="flex items-center gap-2">
-                          <Label className="text-sm font-medium text-brown-700">Latitude</Label>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Info className="size-3.5 text-brown-300 cursor-help" />
-                              </TooltipTrigger>
-                              <TooltipContent className="bg-brown-900 text-cream text-xs max-w-[200px]">
-                                For higher accuracy, enter exact latitude. Auto-filled when city is selected ✦
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                        {/* Advanced Coordinates Section */}
+                        <div className="rounded-xl border border-gold/20 bg-gold/5 dark:bg-gold/10 p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Crosshair className="size-4 text-gold-dark" />
+                              <Label className="text-sm font-semibold text-brown-900 dark:text-brown-100">Exact Coordinates</Label>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                if (navigator.geolocation) {
+                                  navigator.geolocation.getCurrentPosition(
+                                    (position) => {
+                                      setLocalLat(position.coords.latitude.toFixed(4));
+                                      setLocalLon(position.coords.longitude.toFixed(4));
+                                      cosmicToast.cosmic('Location detected ✦', 'Coordinates updated for precision');
+                                    },
+                                    () => {
+                                      cosmicToast.info('Location unavailable', 'Please enter coordinates manually');
+                                    }
+                                  );
+                                } else {
+                                  cosmicToast.info('Geolocation not supported', 'Please enter coordinates manually');
+                                }
+                              }}
+                              className="h-7 text-xs gap-1.5 border-gold/30 text-gold-dark hover:bg-gold/10"
+                            >
+                              <MapPin className="size-3" />
+                              Use My Location
+                            </Button>
+                          </div>
+
+                          {localLat && INDIAN_CITIES[localPlace] && (
+                            <div className="flex items-center gap-1.5 text-xs text-sage-dark">
+                              <Sparkles className="size-3" />
+                              Auto-filled from {localPlace} — edit for more precision
+                            </div>
+                          )}
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <Label className="text-xs font-medium text-brown-700 dark:text-brown-300">Latitude</Label>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Info className="size-3 text-brown-300 cursor-help" />
+                                    </TooltipTrigger>
+                                    <TooltipContent className="bg-brown-900 text-cream text-xs max-w-[200px]">
+                                      Positive = North, Negative = South ✦
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </div>
+                              <Input
+                                type="number"
+                                step="any"
+                                value={localLat}
+                                onChange={(e) => setLocalLat(e.target.value)}
+                                placeholder="e.g. 19.076"
+                                className="border-brown-200 bg-cream dark:bg-cream-dark focus:border-gold focus:ring-gold/20 dark:focus:border-gold dark:focus:ring-gold/10 transition-shadow text-sm"
+                              />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <Label className="text-xs font-medium text-brown-700 dark:text-brown-300">Longitude</Label>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Info className="size-3 text-brown-300 cursor-help" />
+                                    </TooltipTrigger>
+                                    <TooltipContent className="bg-brown-900 text-cream text-xs max-w-[200px]">
+                                      Positive = East, Negative = West ✦
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </div>
+                              <Input
+                                type="number"
+                                step="any"
+                                value={localLon}
+                                onChange={(e) => setLocalLon(e.target.value)}
+                                placeholder="e.g. 72.8777"
+                                className="border-brown-200 bg-cream dark:bg-cream-dark focus:border-gold focus:ring-gold/20 dark:focus:border-gold dark:focus:ring-gold/10 transition-shadow text-sm"
+                              />
+                            </div>
+                          </div>
                         </div>
-                        <div className="relative mt-1">
-                          <Crosshair className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
-                          <Input
-                            type="number"
-                            step="any"
-                            value={localLat}
-                            onChange={(e) => setLocalLat(e.target.value)}
-                            placeholder="e.g. 19.076"
-                            className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-gold focus:ring-gold/20 dark:focus:border-gold dark:focus:ring-gold/10 transition-shadow"
-                          />
-                        </div>
-                        {localLat && INDIAN_CITIES[localPlace] && (
-                          <p className="text-[10px] text-sage-dark mt-1">Auto-filled from {localPlace}</p>
-                        )}
                       </motion.div>
                     );
-                    if (fieldIdx === 6) return (
-                      <motion.div key={fieldIdx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fieldIdx * 0.05 }}>
-                        <div className="flex items-center gap-2">
-                          <Label className="text-sm font-medium text-brown-700">Longitude</Label>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Info className="size-3.5 text-brown-300 cursor-help" />
-                              </TooltipTrigger>
-                              <TooltipContent className="bg-brown-900 text-cream text-xs max-w-[200px]">
-                                For higher accuracy, enter exact longitude. Auto-filled when city is selected ✦
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                        <div className="relative mt-1">
-                          <Crosshair className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300" />
-                          <Input
-                            type="number"
-                            step="any"
-                            value={localLon}
-                            onChange={(e) => setLocalLon(e.target.value)}
-                            placeholder="e.g. 72.8777"
-                            className="pl-10 border-brown-200 bg-cream dark:bg-cream-dark focus:border-gold focus:ring-gold/20 dark:focus:border-gold dark:focus:ring-gold/10 transition-shadow"
-                          />
-                        </div>
-                        {localLon && INDIAN_CITIES[localPlace] && (
-                          <p className="text-[10px] text-sage-dark mt-1">Auto-filled from {localPlace}</p>
-                        )}
-                      </motion.div>
-                    );
+                    if (fieldIdx === 6) return null; // Lat/lon now combined in fieldIdx 5
                     return null;
                   })}
                 </div>

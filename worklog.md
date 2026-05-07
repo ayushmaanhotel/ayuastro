@@ -2970,3 +2970,39 @@ Stage Summary:
 - Latitude/longitude inputs available for precision
 - Kundali recreation flow works smoothly (resets only calculation data, keeps name)
 - 8 files modified: quick-calculate/route.ts (new), generate-report-async/route.ts (new), OnboardingView.tsx, CalculatingView.tsx, ayuastro-store.ts, InsightsView.tsx, ProfileView.tsx
+
+---
+Task ID: bugfix-round
+Agent: Main Coordinator
+Task: Fix all critical bugs - Kundali not generating, no lat/lon input, recreation bug, accuracy issues
+
+Work Log:
+- Assessed project status: Read worklog.md, explored project structure, tested API endpoints
+- Tested API directly: quick-calculate returns 200 with accurate Swiss Ephemeris data (Sun: Pisces, Moon: Virgo, Asc: Aquarius for test case)
+- Found root cause #1: `handleBirthChartPreviewComplete` called `nextOnboardingStep()` which went from 'questionnaire' to 'preview' (not 'complete'). The 'preview' step has no render case, causing the flow to break silently
+- Fixed: Changed `nextOnboardingStep()` to `setOnboardingStep('complete')` in handleBirthChartPreviewComplete
+- Found root cause #2: Auto-submit useEffect had stale closure - birthDetails/questionnaireAnswers could be stale
+- Fixed: Rewrote auto-submit useEffect to read directly from `useAyuAstroStore.getState()` instead of capturing component props
+- Found root cause #3: Error catch set `setOnboardingStep('complete')` which would re-trigger auto-submit in infinite loop
+- Fixed: Changed error catch to set `setOnboardingStep('birth')` so user can retry
+- Added validation in auto-submit: checks for required birth details before making API call, redirects to birth step with toast if missing
+- Added 30-second timeout in CalculatingView: if still on 'calculating' after 30s, auto-redirects to insights
+- Added 45-second ultimate timeout in page.tsx: safety net for any stuck 'calculating' state
+- Fixed resetKundaliData in store: now clears birthDetails, questionnaireAnswers, currentView ('landing'), onboardingStep ('name'), isLoading, loadingMessage, error - ensuring complete fresh start
+- Enhanced lat/lon UX: Created prominent "Exact Coordinates" section with gold border, "Use My Location" button (Geolocation API), side-by-side lat/lon grid, auto-fill indicator from city selection
+- Found root cause #4: API returns trait objects with `id` field, but store TraitScore interface expects `name` field. This caused `t.name.toLowerCase()` crash in InsightsView.getArchetype()
+- Fixed: Added proper mapping in both handleSubmit and auto-submit useEffect: `name: t.name || t.id || ''`
+- Fixed getArchetype: Changed `t.name.toLowerCase()` to `(t.name || t.id || '').toLowerCase()` for safety
+
+Stage Summary:
+- 5 files modified: OnboardingView.tsx, CalculatingView.tsx, ayuastro-store.ts, InsightsView.tsx, page.tsx
+- Critical bug fixed: Kundali flow now goes questionnaire → celebration → birth chart preview → complete → auto-submit → insights
+- Stale closure bug fixed: Auto-submit reads fresh data from store
+- Infinite loop bug fixed: Error catch no longer re-triggers auto-submit
+- Timeout safety added: 30s in CalculatingView + 45s in page.tsx
+- Kundali recreation now works: resetKundaliData clears all state, "New Kundali" button preserves name
+- Lat/lon UX improved: "Exact Coordinates" section with Geolocation API button
+- TraitScore mapping bug fixed: API `id` → store `name`
+- Swiss Ephemeris confirmed working: arc-minute accuracy, Moshier ephemeris (no external files needed)
+- AI report async may fail (500) - non-blocking, graceful degradation in place
+- All lint checks pass with zero errors

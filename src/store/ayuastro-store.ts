@@ -186,6 +186,13 @@ export const useAyuAstroStore = create<AyuAstroState>()(
         reportSummary: '',
         reportLoading: false,
         userId: null,
+        birthDetails: null,
+        questionnaireAnswers: [],
+        currentView: 'landing',
+        onboardingStep: 'name',
+        isLoading: false,
+        loadingMessage: '',
+        error: null,
       }),
       setCompatDetail: (data) => set({
         compatPartnerSign: data.partnerSign,
