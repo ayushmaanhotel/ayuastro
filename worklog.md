@@ -3006,3 +3006,129 @@ Stage Summary:
 - Swiss Ephemeris confirmed working: arc-minute accuracy, Moshier ephemeris (no external files needed)
 - AI report async may fail (500) - non-blocking, graceful degradation in place
 - All lint checks pass with zero errors
+
+---
+Task ID: 5
+Agent: Language, Fonts & Design Improvement Agent
+Task: Fix language, fonts, and design across the app
+
+Work Log:
+- Updated globals.css with improved typography rules:
+  - Body text: Inter font, 15px base, line-height 1.6, letter-spacing -0.01em, antialiased rendering
+  - Headings (h1/h2/h3): Playfair Display, line-height 1.25, letter-spacing -0.02em
+  - Data/numbers: Inter with tabular-nums font-variant for monospace alignment
+  - Small screen: 14px body, scaled heading sizes for readability
+  - Paragraph spacing for better flow
+- Updated store type (ayuastro-store.ts): Extended planetaryPositions to include nakshatra, nakshatraPada, isCombust fields per planet
+- Updated OnboardingView.tsx: Both setAstrologyData calls now map nakshatra, nakshatraPada, isCombust from API response
+- Updated InsightsView.tsx:
+  - Renamed "Your Emotional Resonance" → "Your Emotional Profile"
+  - Changed subtitle to simple language
+  - Renamed "Elemental Balance" → "Your Element Balance"
+  - Renamed "Vedic Astrology Summary" → "Your Star Chart Summary"
+  - Renamed "Yogas & Doshas" → "Special Patterns in Your Chart"
+  - Enhanced Planetary Positions table: expanded by default, Swiss Ephemeris badge, nakshatra/pada/combust columns, color-coded left borders, D°M format
+- Updated ComprehensiveKundaliView.tsx — all jargon replaced with simple language:
+  - All 12 section labels simplified with subtitles
+  - 70+ field labels replaced with everyday English
+  - Header/loading/subtitle text simplified
+- All lint checks pass with zero errors
+
+Stage Summary:
+- 6 files modified: globals.css, ayuastro-store.ts, OnboardingView.tsx, InsightsView.tsx, ComprehensiveKundaliView.tsx
+- Typography system: Inter for body/data, Playfair Display for headings
+- All jargon replaced with simple, everyday language
+- Planetary positions table enhanced with nakshatra, pada, combust, color-coded borders
+- Full dark mode support maintained
+
+---
+Task ID: 3
+Agent: Kundali Chart Redesign Agent
+Task: Completely redesign the KundaliChart component to be clean, visually appealing, and understandable
+
+Work Log:
+- Analyzed existing KundaliChart.tsx (510 lines) — identified 5 key problems: tiny crammed text, confusing abbreviations, no visual hierarchy, unreadable degrees, no legend
+- Studied usage in InsightsView.tsx and ComprehensiveKundaliView.tsx — confirmed props interface must remain unchanged, compact prop must work
+- Completely rewrote KundaliChart.tsx from scratch (620+ lines) with major improvements:
+  - Scaled diamond from 280px to 400px (43% larger) for better text readability
+  - Replaced all planet abbreviations (Su, Mo, Ma, etc.) with full names (Sun, Moon, Mars, etc.)
+  - Added distinct colored dots for each planet: Sun #EAB308, Moon #94A3B8, Mars #DC2626, Mercury #22C55E, Jupiter #F59E0B, Venus #EC4899, Saturn #1E3A5F, Rahu #7C3AED, Ketu #6B7280
+  - Implemented adaptive text sizing with 4 layout presets (wide/medium/narrow/compact) based on house geometry
+  - House size categories: wide (triangles/trapezoids 1,2,5,6,7,10), medium (center squares 11,12), narrow (side rectangles 3,4,8,9)
+  - Each house shows: zodiac symbol + 3-letter abbreviation, house number in circled badge, planet names with colored dots, degree in D°M' format, retrograde ℞ indicator in red
+  - 1st house (Ascendant) highlighted with gold fill
+  - Birth details header with name, DOB, TOB, Place, Ascendant sign+degree, Nakshatra, Sun/Moon sign badges
+  - Title uses Playfair Display serif font, data uses Inter sans-serif
+  - Legend at bottom explaining: house numbers, zodiac symbols, retrograde ℞, planet colors, degree format
+  - "Birth Chart (Kundali)" instead of Hindi "जन्म कुंडली"
+  - "ASCENDANT" label above diamond instead of just "ASC"
+- Updated globals.css dark mode overrides:
+  - Fixed chart background gradient ID (chartBgDark) to match both compact and full SVG defs
+  - Added 7 new dark mode CSS classes: .chart-degree, .chart-retrograde, .chart-detail-text, .chart-title, .chart-house-badge-bg, .chart-asc-label, header/legend background overrides
+  - Kept existing dark mode classes: .chart-diamond-light, .chart-lines, .chart-zodiac, .chart-house-num, .chart-planet, .chart-dot
+- Refactored grid lines into reusable GridLines component to eliminate code duplication
+- Compact mode uses 420x420 viewBox with appropriately scaled text presets
+- Full mode uses 460x710 viewBox with header (150px) + diamond (420px) + legend (100px)
+- All lint checks pass with zero errors
+- No runtime errors in dev server log
+
+Stage Summary:
+- Complete KundaliChart redesign: readable full planet names with colored dots, proper degree format, clean hierarchy, legend
+- Adaptive text sizing ensures readability across all 12 house shapes
+- Birth details header shows all key info with Playfair/Inter typography
+- Legend explains all visual elements for non-astrologer users
+- Dark mode fully supported with 7 new CSS overrides
+- 2 files modified: KundaliChart.tsx (complete rewrite), globals.css (dark mode updates)
+- Props interface unchanged — drop-in replacement, no breaking changes
+
+
+---
+Task ID: 3
+Agent: Kundali Chart Redesign Agent
+Task: Completely redesign KundaliChart component to be clean, visually appealing, and understandable
+
+Work Log:
+- Rewrote KundaliChart.tsx from scratch with 4 layout presets (wide/medium/narrow/compact)
+- Replaced planet abbreviations (Su, Mo, Ma) with full names (Sun, Moon, Mars) and distinct colored dots
+- Scaled diamond chart up 43% (280→400px) with adaptive text sizing per house shape
+- Added clear visual hierarchy: zodiac symbol + name at top, house number in circled badge, planet names with colored dots, degree in D°M' format
+- Added legend explaining house numbers, zodiac symbols, planet colors, retrograde ℞, degree format
+- Highlighted 1st house (Ascendant) with gold fill
+- Added birth details header showing Name, DOB, TOB, Place, Ascendant sign+degree, Nakshatra, Sun/Moon sign badges
+- Used "Birth Chart (Kundali)" instead of Hindi text
+- Fixed gradient ID for dark mode compatibility
+- Added 7 new dark mode CSS overrides
+- Compact mode preserved with appropriately scaled text
+- Lint passes with zero errors
+
+Stage Summary:
+- Complete KundaliChart rewrite with clean, professional design
+- Full planet names with color-coded dots
+- D°M' degree format for readability
+- Legend/guide added for non-astrologers
+- Dark mode fully supported
+- Props interface unchanged - drop-in replacement
+
+---
+Task ID: 5
+Agent: Language, Fonts & Design Improvement Agent
+Task: Fix language, fonts, and design across the app
+
+Work Log:
+- Updated globals.css with comprehensive typography system: Inter 15px body, Playfair Display headings, tabular-nums for data
+- Extended store type with nakshatra, nakshatraPada, isCombust fields in planetaryPositions
+- Updated OnboardingView to capture new planetary data fields from API
+- Enhanced InsightsView planetary positions table: expanded by default, Swiss Ephemeris badge, nakshatra+pada, combust indicator, color-coded borders
+- Replaced all jargon labels in InsightsView: "Emotional Resonance" → "Your Emotional Profile", "Vedic Astrology Summary" → "Your Star Chart Summary", etc.
+- Replaced all 12 section labels in ComprehensiveKundaliView with simple English + subtitles
+- Replaced 70+ field labels with plain language: "Mental Wiring" → "How You Think", "Karmic Debts Toward" → "People You Owe Attention To", etc.
+- Updated headers: "Comprehensive Kundali" → "Your Complete Birth Chart"
+- Lint passes with zero errors
+
+Stage Summary:
+- Complete language overhaul across InsightsView and ComprehensiveKundaliView
+- 70+ jargon labels replaced with simple, understandable English
+- Typography system established with Inter body + Playfair Display headings
+- Planetary positions table now shows nakshatra, pada, combust status
+- Swiss Ephemeris calculation method badge added for trust
+- All dark mode variants preserved

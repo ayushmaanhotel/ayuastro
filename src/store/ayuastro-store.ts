@@ -49,7 +49,7 @@ export interface AstrologyInfo {
   currentDasha: string;
   yogas: string[];
   doshas: string[];
-  planetaryPositions: Record<string, { sign: string; degree: number; house: number; retrograde: boolean }>;
+  planetaryPositions: Record<string, { sign: string; degree: number; house: number; retrograde: boolean; nakshatra?: string; nakshatraPada?: number; isCombust?: boolean }>;
 }
 
 export interface NumerologyInfo {

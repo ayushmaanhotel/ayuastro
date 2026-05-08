@@ -677,8 +677,8 @@ export default function OnboardingView() {
           doshas: (result.astrology.doshas || []).filter((d: { present: boolean }) => d.present).map((d: { name: string }) => d.name),
           planetaryPositions: Object.fromEntries(
             Object.entries(result.astrology.planetaryPositions || {}).map(([key, pos]: [string, unknown]) => {
-              const p = pos as { sign: string; degreeInSign: number; house?: number; isRetrograde?: boolean };
-              return [key, { sign: p.sign, degree: p.degreeInSign, house: p.house || 1, retrograde: p.isRetrograde || false }];
+              const p = pos as { sign: string; degreeInSign: number; house?: number; isRetrograde?: boolean; nakshatra?: string; nakshatraPada?: number; isCombust?: boolean };
+              return [key, { sign: p.sign, degree: p.degreeInSign, house: p.house || 1, retrograde: p.isRetrograde || false, nakshatra: p.nakshatra || '', nakshatraPada: p.nakshatraPada || 0, isCombust: p.isCombust || false }];
             })
           ),
         });
@@ -833,8 +833,8 @@ export default function OnboardingView() {
                 doshas: (result.astrology.doshas || []).filter((d: { present: boolean }) => d.present).map((d: { name: string }) => d.name),
                 planetaryPositions: Object.fromEntries(
                   Object.entries(result.astrology.planetaryPositions || {}).map(([key, pos]: [string, unknown]) => {
-                    const p = pos as { sign: string; degreeInSign: number; house?: number; isRetrograde?: boolean };
-                    return [key, { sign: p.sign, degree: p.degreeInSign, house: p.house || 1, retrograde: p.isRetrograde || false }];
+                    const p = pos as { sign: string; degreeInSign: number; house?: number; isRetrograde?: boolean; nakshatra?: string; nakshatraPada?: number; isCombust?: boolean };
+                    return [key, { sign: p.sign, degree: p.degreeInSign, house: p.house || 1, retrograde: p.isRetrograde || false, nakshatra: p.nakshatra || '', nakshatraPada: p.nakshatraPada || 0, isCombust: p.isCombust || false }];
                   })
                 ),
               });

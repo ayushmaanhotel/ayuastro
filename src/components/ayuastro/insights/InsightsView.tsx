@@ -533,7 +533,7 @@ export default function InsightsView() {
   const [transits, setTransits] = useState<TransitsData | null>(null);
   const [transitsLoading, setTransitsLoading] = useState(true);
   const [expandedTransits, setExpandedTransits] = useState<Record<string, boolean>>({});
-  const [planetaryExpanded, setPlanetaryExpanded] = useState(false);
+  const [planetaryExpanded, setPlanetaryExpanded] = useState(true);
   const [ritualCompleted, setRitualCompleted] = useState(false);
   const [newKundaliDialogOpen, setNewKundaliDialogOpen] = useState(false);
 
@@ -1307,10 +1307,10 @@ export default function InsightsView() {
                 className="font-serif text-3xl font-bold text-brown-900 mb-1"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
-                Your Emotional Resonance
+                Your Emotional Profile
               </h1>
               <p className="text-sm text-brown-400 mb-4">
-                The architecture of your emotional world, mapped through cosmic and behavioral patterns.
+                How the stars shape your feelings, thoughts, and natural tendencies — explained simply.
               </p>
             </div>
             {/* Share Profile Button */}
@@ -1739,6 +1739,7 @@ export default function InsightsView() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                <p className="text-xs text-brown-400 dark:text-brown-500 mb-3 italic">What your birth numbers say about you</p>
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { label: 'Life Path', value: numerologyData.lifePathNumber, desc: numerologyData.lifePathDesc },
@@ -1773,7 +1774,7 @@ export default function InsightsView() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 border-l-2 border-gold/30 pl-2">
                 <Sparkles className="size-5 text-gold" />
-                Elemental Balance
+                Your Element Balance
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1836,7 +1837,7 @@ export default function InsightsView() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 border-l-2 border-gold/30 pl-2">
                 <Moon className="size-5 text-gold" />
-                Vedic Astrology Summary
+                Your Star Chart Summary
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1983,40 +1984,81 @@ export default function InsightsView() {
                 </div>
               </motion.div>
 
-              {/* Planetary Positions — Enhanced List */}
+              {/* Planetary Positions — Enhanced Table */}
               <Separator className="my-3 bg-brown-100" />
               <Collapsible open={planetaryExpanded} onOpenChange={setPlanetaryExpanded}>
-                <CollapsibleTrigger asChild>
-                  <button className="w-full flex items-center justify-between py-2 hover:bg-brown-50 dark:hover:bg-brown-800/20 rounded-lg px-2 transition-colors">
-                    <span className="text-xs font-medium text-brown-400 uppercase tracking-wider">Planetary Positions</span>
-                    <ChevronDown className={`size-4 text-brown-300 transition-transform ${planetaryExpanded ? 'rotate-180' : ''}`} />
-                  </button>
-                </CollapsibleTrigger>
+                <div className="flex items-center justify-between mb-2">
+                  <CollapsibleTrigger asChild>
+                    <button className="flex items-center gap-2 hover:bg-brown-50 dark:hover:bg-brown-800/20 rounded-lg px-2 py-1.5 transition-colors">
+                      <span className="text-xs font-medium text-brown-400 uppercase tracking-wider">Planetary Positions</span>
+                      <ChevronDown className={`size-4 text-brown-300 transition-transform ${planetaryExpanded ? 'rotate-180' : ''}`} />
+                    </button>
+                  </CollapsibleTrigger>
+                  <Badge className="bg-sage-muted/60 dark:bg-sage/20 text-sage-dark dark:text-sage border-0 text-[9px] px-2 py-0.5 flex items-center gap-1">
+                    <Shield className="size-2.5" />
+                    Swiss Ephemeris (Lahiri Ayanamsa)
+                  </Badge>
+                </div>
+                <p className="text-[11px] text-brown-400 dark:text-brown-500 mb-3 italic px-2">
+                  Exact positions of planets at your birth time, calculated using Swiss Ephemeris for high accuracy.
+                </p>
                 <CollapsibleContent>
-                  <div className="space-y-1.5 mt-1">
+                  {/* Table Header */}
+                  <div className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-x-2 px-3 py-1.5 text-[9px] font-semibold text-brown-400 dark:text-brown-500 uppercase tracking-wider border-b border-brown-100/50 dark:border-brown-700/30 mb-1">
+                    <span>Planet</span>
+                    <span>Sign</span>
+                    <span className="text-right">Degree</span>
+                    <span className="text-center">Nakshatra</span>
+                    <span className="text-center">House</span>
+                  </div>
+                  <div className="space-y-0.5">
                     {Object.entries(astrologyData?.planetaryPositions || {}).map(([planet, pdata]) => {
                       const deg = Math.floor(pdata.degree);
                       const min = Math.floor((pdata.degree - deg) * 60);
+                      const borderColor = PLANET_DOT_COLORS[planet] || 'bg-gray-400';
                       return (
-                        <div key={planet} className="flex items-center gap-2.5 py-2 px-3 rounded-lg bg-brown-50/40 dark:bg-brown-800/20 hover:bg-brown-50/70 dark:hover:bg-brown-800/30 transition-colors">
-                          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${PLANET_DOT_COLORS[planet] || 'bg-gray-400'}`} />
-                          <span className="text-lg leading-none shrink-0">{PLANET_SYMBOLS[planet] || '●'}</span>
-                          <div className="flex-1 min-w-0">
-                            <span className="font-semibold text-sm text-brown-900 dark:text-brown-100">{planet}</span>
-                            <span className="text-brown-400 dark:text-brown-500 mx-1">·</span>
-                            <span className="text-brown-700 dark:text-brown-300">{ZODIAC_ICONS[pdata.sign] || ''} {pdata.sign}</span>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-xs font-mono text-brown-500 dark:text-brown-400">
-                              {deg}°{min.toString().padStart(2, '0')}&apos;
-                            </span>
-                            <Badge className="bg-brown-100/60 dark:bg-brown-700/30 text-brown-500 dark:text-brown-400 text-[9px] px-1.5 py-0 min-w-[20px] text-center">
-                              H{pdata.house}
-                            </Badge>
+                        <div
+                          key={planet}
+                          className={`grid grid-cols-[1fr_1fr_auto_auto_auto] gap-x-2 items-center py-2 px-3 rounded-lg bg-brown-50/30 dark:bg-brown-800/15 hover:bg-brown-50/60 dark:hover:bg-brown-800/25 transition-colors border-l-3 ${borderColor.replace('bg-', 'border-')}`}
+                          style={{ borderLeftWidth: '3px', borderLeftColor: planet === 'Sun' ? '#EAB308' : planet === 'Moon' ? '#94A3B8' : planet === 'Mars' ? '#EF4444' : planet === 'Mercury' ? '#10B981' : planet === 'Jupiter' ? '#F59E0B' : planet === 'Venus' ? '#F472B6' : planet === 'Saturn' ? '#78350F' : planet === 'Rahu' ? '#7C3AED' : '#6B7280' }}
+                        >
+                          {/* Planet name */}
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="text-base leading-none shrink-0">{PLANET_SYMBOLS[planet] || '●'}</span>
+                            <span className="font-semibold text-sm text-brown-900 dark:text-brown-100 truncate">{planet}</span>
                             {pdata.retrograde && (
-                              <span className="text-[10px] font-bold text-gold-dark dark:text-gold">℞</span>
+                              <span className="text-[10px] font-bold text-red-500 dark:text-red-400">℞</span>
+                            )}
+                            {pdata.isCombust && (
+                              <span className="text-[8px] text-amber-500 dark:text-amber-400" title="Combust (too close to Sun)">🔥</span>
                             )}
                           </div>
+                          {/* Sign */}
+                          <div className="flex items-center gap-1 min-w-0">
+                            <span className="text-sm">{ZODIAC_ICONS[pdata.sign] || ''}</span>
+                            <span className="text-brown-700 dark:text-brown-300 text-sm truncate">{pdata.sign}</span>
+                          </div>
+                          {/* Degree */}
+                          <span className="text-xs font-mono text-brown-500 dark:text-brown-400 text-right whitespace-nowrap" data-numeric>
+                            {deg}°{min.toString().padStart(2, '0')}&apos;
+                          </span>
+                          {/* Nakshatra + Pada */}
+                          <div className="text-center min-w-0">
+                            {pdata.nakshatra ? (
+                              <div className="flex flex-col items-center">
+                                <span className="text-[10px] text-brown-600 dark:text-brown-300 truncate max-w-[80px]">{pdata.nakshatra}</span>
+                                {pdata.nakshatraPada ? (
+                                  <span className="text-[8px] text-brown-400 dark:text-brown-500">P{pdata.nakshatraPada}</span>
+                                ) : null}
+                              </div>
+                            ) : (
+                              <span className="text-[10px] text-brown-300 dark:text-brown-600">—</span>
+                            )}
+                          </div>
+                          {/* House */}
+                          <Badge className="bg-brown-100/60 dark:bg-brown-700/30 text-brown-500 dark:text-brown-400 text-[9px] px-1.5 py-0 min-w-[20px] text-center justify-self-center">
+                            H{pdata.house}
+                          </Badge>
                         </div>
                       );
                     })}
@@ -2024,7 +2066,7 @@ export default function InsightsView() {
                 </CollapsibleContent>
               </Collapsible>
 
-              {/* Yogas & Doshas — Clickable Link */}
+              {/* Special Patterns in Your Chart — Clickable Link */}
               <Separator className="my-3 bg-brown-100 dark:bg-brown-100/20" />
               <button
                 onClick={() => setView('yogaDosha')}
@@ -2036,10 +2078,10 @@ export default function InsightsView() {
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">
-                      View Your Yogas ({astrologyData?.yogas?.length || 0}) &amp; Doshas ({astrologyData?.doshas?.length || 0})
+                      Special Patterns in Your Chart ({astrologyData?.yogas?.length || 0} blessings &amp; {astrologyData?.doshas?.length || 0} challenges)
                     </p>
                     <p className="text-[10px] text-brown-400 dark:text-brown-500">
-                      Cosmic blessings &amp; karmic lessons
+                      Unique planetary combinations that shape your life
                     </p>
                   </div>
                 </div>

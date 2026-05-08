@@ -181,6 +181,36 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-inter), var(--font-geist-sans), sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  /* Headings use Playfair Display */
+  h1, h2, h3, .font-serif {
+    font-family: var(--font-playfair), 'Playfair Display', Georgia, serif;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+  /* Data/numbers use Inter with tabular figures */
+  .font-mono, [data-numeric] {
+    font-family: var(--font-inter), var(--font-geist-sans), sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Small screen readability */
+  @media (max-width: 640px) {
+    body {
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.375rem; }
+    h3 { font-size: 1.125rem; }
+  }
+  /* Paragraph spacing for readability */
+  p {
+    margin-bottom: 0.25em;
   }
 }
 
@@ -346,6 +376,10 @@
   opacity: 0.5;
 }
 
+.dark .kundali-chart .chart-bg-light {
+  stop-color: #2D2320;
+}
+
 .dark .kundali-chart .chart-zodiac {
   fill: #BCAAA4 !important;
 }
@@ -358,8 +392,43 @@
   fill: #EFEBE9 !important;
 }
 
+.dark .kundali-chart .chart-degree {
+  fill: #8D6E63 !important;
+}
+
+.dark .kundali-chart .chart-retrograde {
+  fill: #EF5350 !important;
+}
+
+.dark .kundali-chart .chart-detail-text tspan {
+  fill: #D7CCC8 !important;
+}
+
+.dark .kundali-chart .chart-title {
+  fill: #EFEBE9 !important;
+}
+
+.dark .kundali-chart .chart-house-badge-bg {
+  fill: rgba(212,175,55,0.15) !important;
+}
+
+.dark .kundali-chart .chart-asc-label {
+  fill: #F0C14B !important;
+}
+
 .dark .kundali-chart .chart-dot {
   fill: #D4AF37;
+}
+
+/* Kundali header/legend dark mode */
+.dark .kundali-chart rect[fill="url(#fHeaderBg)"] {
+  fill: rgba(212,175,55,0.04);
+  stroke: rgba(212,175,55,0.15);
+}
+
+.dark .kundali-chart rect[fill="url(#fLegendBg)"] {
+  fill: rgba(212,175,55,0.03);
+  stroke: rgba(212,175,55,0.1);
 }
 
 /* Tab press animation */

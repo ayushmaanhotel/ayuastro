@@ -48,18 +48,18 @@ const PLANET_SYMBOLS: Record<string, string> = {
 };
 
 const SECTIONS = [
-  { key: 'personalityBlueprint', label: 'Personality', icon: Brain, color: 'from-amber-500 to-orange-500', emoji: '🧠' },
-  { key: 'karmaPatterns', label: 'Karma', icon: RotateCcw, color: 'from-purple-500 to-indigo-500', emoji: '♻️' },
-  { key: 'careerDharma', label: 'Career', icon: Briefcase, color: 'from-emerald-500 to-green-500', emoji: '💼' },
-  { key: 'marriageDynamics', label: 'Marriage', icon: Heart, color: 'from-rose-500 to-pink-500', emoji: '💕' },
-  { key: 'healthTendencies', label: 'Health', icon: Activity, color: 'from-cyan-500 to-teal-500', emoji: '💊' },
-  { key: 'timingEvents', label: 'Timing', icon: Clock, color: 'from-blue-500 to-sky-500', emoji: '⏳' },
-  { key: 'spiritualEvolution', label: 'Spiritual', icon: Eye, color: 'from-violet-500 to-purple-500', emoji: '👁️' },
-  { key: 'familyKarma', label: 'Family', icon: Users, color: 'from-amber-600 to-yellow-500', emoji: '👨‍👩‍👧‍👦' },
-  { key: 'hiddenPatterns', label: 'Hidden', icon: Shield, color: 'from-red-500 to-orange-500', emoji: '🛡️' },
-  { key: 'rareYogas', label: 'Yogas', icon: Star, color: 'from-yellow-400 to-amber-500', emoji: '⭐' },
-  { key: 'divisionalCharts', label: 'Vargas', icon: Grid3X3, color: 'from-indigo-500 to-blue-500', emoji: '📊' },
-  { key: 'nakshatraDeepAnalysis', label: 'Nakshatra', icon: Moon, color: 'from-slate-500 to-gray-500', emoji: '🌙' },
+  { key: 'personalityBlueprint', label: 'Your Personality', sub: 'How your stars shape who you are', icon: Brain, color: 'from-amber-500 to-orange-500', emoji: '🧠' },
+  { key: 'karmaPatterns', label: 'Life Patterns', sub: 'Repeating themes in your life journey', icon: RotateCcw, color: 'from-purple-500 to-indigo-500', emoji: '♻️' },
+  { key: 'careerDharma', label: 'Career & Money', sub: 'Your professional strengths and path', icon: Briefcase, color: 'from-emerald-500 to-green-500', emoji: '💼' },
+  { key: 'marriageDynamics', label: 'Love & Relationships', sub: 'How you connect with partners', icon: Heart, color: 'from-rose-500 to-pink-500', emoji: '💕' },
+  { key: 'healthTendencies', label: 'Health & Wellness', sub: "Your body's natural tendencies", icon: Activity, color: 'from-cyan-500 to-teal-500', emoji: '💊' },
+  { key: 'timingEvents', label: 'Life Timing', sub: 'Current and upcoming life phases', icon: Clock, color: 'from-blue-500 to-sky-500', emoji: '⏳' },
+  { key: 'spiritualEvolution', label: 'Inner Growth', sub: 'Your spiritual journey and lessons', icon: Eye, color: 'from-violet-500 to-purple-500', emoji: '👁️' },
+  { key: 'familyKarma', label: 'Family & Home', sub: 'Patterns from your family background', icon: Users, color: 'from-amber-600 to-yellow-500', emoji: '👨‍👩‍👧‍👦' },
+  { key: 'hiddenPatterns', label: 'Hidden Strengths', sub: 'Secret powers and blind spots', icon: Shield, color: 'from-red-500 to-orange-500', emoji: '🛡️' },
+  { key: 'rareYogas', label: 'Special Combinations', sub: 'Unique planetary alignments in your chart', icon: Star, color: 'from-yellow-400 to-amber-500', emoji: '⭐' },
+  { key: 'divisionalCharts', label: 'Deep Charts', sub: 'Detailed views of specific life areas', icon: Grid3X3, color: 'from-indigo-500 to-blue-500', emoji: '📊' },
+  { key: 'nakshatraDeepAnalysis', label: 'Star Analysis', sub: "Your birth star's deep influence", icon: Moon, color: 'from-slate-500 to-gray-500', emoji: '🌙' },
 ];
 
 // ─── Section Summary Extractor ──────────────────────────────────────────────
@@ -68,29 +68,29 @@ function getSectionSummary(key: string, data: Record<string, any>): string {
   if (!data) return 'Loading...';
   switch (key) {
     case 'personalityBlueprint':
-      return data.personalityArchetype ? `${data.personalityArchetype} archetype` : 'Mental & emotional patterns';
+      return data.personalityArchetype ? `${data.personalityArchetype} type` : 'How you think, feel, and act';
     case 'karmaPatterns':
-      return data.pastLifeTendencies ? 'Past life karmic patterns identified' : 'Karmic analysis';
+      return data.pastLifeTendencies ? 'Repeating life themes found' : 'Life pattern analysis';
     case 'careerDharma':
-      return data.naturalSkillPattern ? 'Career dharma & wealth patterns' : 'Professional analysis';
+      return data.naturalSkillPattern ? 'Your career strengths and money style' : 'Career analysis';
     case 'marriageDynamics':
-      return data.attractionPattern ? 'Relationship dynamics & timing' : 'Marriage analysis';
+      return data.attractionPattern ? 'How you love and connect' : 'Relationship analysis';
     case 'healthTendencies':
-      return data.ayurvedicConstitution ? `${data.ayurvedicConstitution} constitution` : 'Health analysis';
+      return data.ayurvedicConstitution ? `${data.ayurvedicConstitution} body type` : 'Health analysis';
     case 'timingEvents':
-      return data.currentMahadasha ? `Running ${data.currentMahadasha}` : 'Dasha timing';
+      return data.currentMahadasha ? `Currently in ${data.currentMahadasha} period` : 'Life timing';
     case 'spiritualEvolution':
-      return data.mokshaTendency ? 'Spiritual path & moksha' : 'Spiritual analysis';
+      return data.mokshaTendency ? 'Your spiritual path and inner peace' : 'Inner growth analysis';
     case 'familyKarma':
-      return data.fatherRelationship ? 'Family karmic patterns' : 'Family analysis';
+      return data.fatherRelationship ? 'Family patterns and home life' : 'Family analysis';
     case 'hiddenPatterns':
-      return data.selfSabotage ? 'Shadow patterns & strengths' : 'Hidden patterns';
+      return data.selfSabotage ? 'Your secret strengths and blind spots' : 'Hidden patterns';
     case 'rareYogas':
-      return data.detectedYogas ? `${data.detectedYogas.filter((y: any) => y.present).length} yogas detected` : 'Yoga analysis';
+      return data.detectedYogas ? `${data.detectedYogas.filter((y: any) => y.present).length} special combinations found` : 'Special combination analysis';
     case 'divisionalCharts':
-      return data.d9Navamsha ? 'D9 Navamsha & vargas' : 'Divisional charts';
+      return data.d9Navamsha ? 'Deep chart views' : 'Detailed charts';
     case 'nakshatraDeepAnalysis':
-      return data.moonNakshatra ? `${data.moonNakshatra} deep dive` : 'Nakshatra analysis';
+      return data.moonNakshatra ? `${data.moonNakshatra} star influence` : 'Star analysis';
     default:
       return 'Section available';
   }
@@ -247,18 +247,18 @@ export default function ComprehensiveKundaliView() {
 
     // Fallbacks if not enough highlights
     if (highlights.length === 0) {
-      highlights.push({ icon: '✨', title: 'Comprehensive Analysis Ready', desc: '12 dimensions of your Vedic chart analyzed' });
+      highlights.push({ icon: '✨', title: 'Full Analysis Ready', desc: '12 areas of your life mapped by the stars' });
     }
     if (highlights.length === 1) {
       const nk = data.nakshatraDeepAnalysis;
       if (nk?.moonNakshatra) {
-        highlights.push({ icon: '🌙', title: `${nk.moonNakshatra} Nakshatra`, desc: nk.psychologicalCoding?.split('.')[0] + '.' || 'Deep lunar analysis' });
+        highlights.push({ icon: '🌙', title: `${nk.moonNakshatra} Star`, desc: nk.psychologicalCoding?.split('.')[0] + '.' || 'Deep lunar analysis' });
       }
     }
     if (highlights.length === 2) {
       const kd = data.karmaPatterns;
       if (kd?.pastLifeTendencies) {
-        highlights.push({ icon: '♻️', title: 'Karmic Patterns Found', desc: 'Past life tendencies and unfinished karmas identified' });
+        highlights.push({ icon: '♻️', title: 'Life Patterns Found', desc: 'Repeating themes and lessons to learn identified' });
       }
     }
 
@@ -273,8 +273,8 @@ export default function ComprehensiveKundaliView() {
           <div className="w-20 h-20 rounded-full border-4 border-gold/20 border-t-gold animate-spin" />
           <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gold w-8 h-8" />
         </div>
-        <h2 className="mt-6 font-serif text-xl text-brown-800 dark:text-brown-100">Analyzing Your Cosmic Blueprint</h2>
-        <p className="text-sm text-brown-500 dark:text-brown-400 mt-2">Calculating 12 dimensions of your Vedic Kundali...</p>
+        <h2 className="mt-6 font-serif text-xl text-brown-800 dark:text-brown-100">Analyzing Your Birth Chart</h2>
+        <p className="text-sm text-brown-500 dark:text-brown-400 mt-2">Mapping 12 areas of your life through the stars...</p>
       </div>
     );
   }
@@ -311,18 +311,18 @@ export default function ComprehensiveKundaliView() {
               <AyurvedicCard dosha={sectionData.ayurvedicConstitution.dosha} note={sectionData.ayurvedicConstitution.note} />
             )}
             <div className="grid grid-cols-1 gap-3">
-              <TextBlock label="Mental Wiring" text={sectionData.mentalWiring} />
-              <TextBlock label="Emotional Tendencies" text={sectionData.emotionalTendencies} />
-              <TextBlock label="Courage & Fear" text={sectionData.courageAndFear} />
-              <TextBlock label="Leadership vs Follower" text={sectionData.leadershipVsFollower} />
-              <TextBlock label="Materialistic vs Spiritual" text={sectionData.materialisticVsSpiritual} />
-              <TextBlock label="Anger Patterns" text={sectionData.angerPatterns} />
-              <TextBlock label="Decision Style" text={sectionData.decisionStyle} />
-              <TextBlock label="Hidden Insecurities" text={sectionData.hiddenInsecurities} />
-              <TextBlock label="Public vs Private Self" text={sectionData.publicVsPrivateSelf} />
-              <TextBlock label="Intelligence Type" text={sectionData.intelligenceType} />
-              <TextBlock label="Communication Style" text={sectionData.communicationStyle} />
-              <TextBlock label="Risk Appetite" text={sectionData.riskAppetite} />
+              <TextBlock label="How You Think" text={sectionData.mentalWiring} />
+              <TextBlock label="How You Feel" text={sectionData.emotionalTendencies} />
+              <TextBlock label="Bravery & Worries" text={sectionData.courageAndFear} />
+              <TextBlock label="Leader or Supporter" text={sectionData.leadershipVsFollower} />
+              <TextBlock label="Money vs Meaning" text={sectionData.materialisticVsSpiritual} />
+              <TextBlock label="What Makes You Angry" text={sectionData.angerPatterns} />
+              <TextBlock label="How You Make Decisions" text={sectionData.decisionStyle} />
+              <TextBlock label="Secret Worries" text={sectionData.hiddenInsecurities} />
+              <TextBlock label="How Others See You vs Real You" text={sectionData.publicVsPrivateSelf} />
+              <TextBlock label="How You're Smart" text={sectionData.intelligenceType} />
+              <TextBlock label="How You Talk & Listen" text={sectionData.communicationStyle} />
+              <TextBlock label="Comfort with Risk" text={sectionData.riskAppetite} />
             </div>
             {sectionData.keyFactors && <KeyFactorsGrid factors={sectionData.keyFactors} />}
           </div>
@@ -330,12 +330,12 @@ export default function ComprehensiveKundaliView() {
       case 'karmaPatterns':
         return (
           <div className="space-y-4">
-            <TextBlock label="Past Life Tendencies" text={sectionData.pastLifeTendencies} />
-            <TextBlock label="Unfinished Karmas" text={sectionData.unfinishedKarmas} />
-            <TextBlock label="Repeating Suffering Loops" text={sectionData.repeatingSufferingLoops} />
+            <TextBlock label="Patterns You Were Born With" text={sectionData.pastLifeTendencies} />
+            <TextBlock label="Lessons Still to Learn" text={sectionData.unfinishedKarmas} />
+            <TextBlock label="Why Some Pain Keeps Coming Back" text={sectionData.repeatingSufferingLoops} />
             {sectionData.debtsToward && (
               <div>
-                <p className="text-xs font-semibold text-brown-600 dark:text-brown-300 uppercase tracking-wider mb-2">Karmic Debts Toward</p>
+                <p className="text-xs font-semibold text-brown-600 dark:text-brown-300 uppercase tracking-wider mb-2">People You Owe Attention To</p>
                 <div className="flex flex-wrap gap-2">
                   {sectionData.debtsToward.map((d: string, i: number) => (
                     <Badge key={i} className="bg-purple-500/10 text-purple-700 dark:text-purple-300 text-[10px]">{d}</Badge>
@@ -343,21 +343,21 @@ export default function ComprehensiveKundaliView() {
                 </div>
               </div>
             )}
-            <TextBlock label="Areas Forcing Humility" text={sectionData.areasForcingHumility} />
-            <TextBlock label="Why Certain Pain Repeats" text={sectionData.whyCertainPainRepeats} />
+            <TextBlock label="Where Life Keeps You Grounded" text={sectionData.areasForcingHumility} />
+            <TextBlock label="Why Some Problems Return" text={sectionData.whyCertainPainRepeats} />
             {sectionData.keyIndicators && <KeyFactorsGrid factors={sectionData.keyIndicators} />}
           </div>
         );
       case 'careerDharma':
         return (
           <div className="space-y-4">
-            <TextBlock label="Natural Skill Pattern" text={sectionData.naturalSkillPattern} />
-            <TextBlock label="Money Behavior" text={sectionData.moneyBehavior} />
-            <TextBlock label="Authority Potential" text={sectionData.authorityPotential} />
-            <TextBlock label="Entrepreneurship vs Employment" text={sectionData.entrepreneurshipVsEmployment} />
-            <TextBlock label="Fame Potential" text={sectionData.famePotential} />
-            <TextBlock label="Risk Capacity" text={sectionData.riskCapacity} />
-            <TextBlock label="Wealth Creation Cycles" text={sectionData.wealthCreationCycles} />
+            <TextBlock label="What Comes Naturally to You" text={sectionData.naturalSkillPattern} />
+            <TextBlock label="How You Handle Money" text={sectionData.moneyBehavior} />
+            <TextBlock label="Leadership Potential" text={sectionData.authorityPotential} />
+            <TextBlock label="Business vs Job" text={sectionData.entrepreneurshipVsEmployment} />
+            <TextBlock label="Chance of Getting Known" text={sectionData.famePotential} />
+            <TextBlock label="How Much Risk You Can Take" text={sectionData.riskCapacity} />
+            <TextBlock label="When Money Flows Best" text={sectionData.wealthCreationCycles} />
             {sectionData.industryCompatibility && (
               <div>
                 <p className="text-xs font-semibold text-brown-600 dark:text-brown-300 uppercase tracking-wider mb-2">Compatible Industries</p>
@@ -378,17 +378,17 @@ export default function ComprehensiveKundaliView() {
       case 'marriageDynamics':
         return (
           <div className="space-y-4">
-            <TextBlock label="Attraction Pattern" text={sectionData.attractionPattern} />
-            <TextBlock label="Emotional Compatibility" text={sectionData.emotionalCompatibility} />
-            <TextBlock label="Dominance Issues" text={sectionData.dominanceIssues} />
-            <TextBlock label="Loyalty Indicators" text={sectionData.loyaltyIndicators} />
-            <TextBlock label="Delays" text={sectionData.delays} />
-            <TextBlock label="Divorce Potential" text={sectionData.divorcePotential} />
-            <TextBlock label="Power Imbalance" text={sectionData.powerImbalance} />
-            <TextBlock label="Spouse Psychology" text={sectionData.spousePsychology} />
-            <TextBlock label="Marriage Timing" text={sectionData.marriageTiming} />
-            <TextBlock label="Quality of Married Life" text={sectionData.qualityOfMarriedLife} />
-            <TextBlock label="Repeating Patterns" text={sectionData.repeatingPatterns} />
+            <TextBlock label="Who You're Drawn To" text={sectionData.attractionPattern} />
+            <TextBlock label="Emotional Connection Style" text={sectionData.emotionalCompatibility} />
+            <TextBlock label="Power Balance in Relationships" text={sectionData.dominanceIssues} />
+            <TextBlock label="How Loyal You Tend to Be" text={sectionData.loyaltyIndicators} />
+            <TextBlock label="Possible Delays" text={sectionData.delays} />
+            <TextBlock label="Relationship Challenges" text={sectionData.divorcePotential} />
+            <TextBlock label="Who Holds More Power" text={sectionData.powerImbalance} />
+            <TextBlock label="Your Partner's Inner World" text={sectionData.spousePsychology} />
+            <TextBlock label="When Marriage Is Likely" text={sectionData.marriageTiming} />
+            <TextBlock label="What Married Life Looks Like" text={sectionData.qualityOfMarriedLife} />
+            <TextBlock label="Patterns in Relationships" text={sectionData.repeatingPatterns} />
             {sectionData.keyFactors && <KeyFactorsGrid factors={sectionData.keyFactors} />}
           </div>
         );
@@ -406,11 +406,11 @@ export default function ComprehensiveKundaliView() {
                 </div>
               </div>
             )}
-            <TextBlock label="Chronic Disease Tendency" text={sectionData.chronicDiseaseTendency} />
-            <TextBlock label="Stress Pattern" text={sectionData.stressPattern} />
-            <TextBlock label="Mental Stability" text={sectionData.mentalInstability} />
-            <TextBlock label="Accident Vulnerability" text={sectionData.accidentVulnerability} />
-            <TextBlock label="Addiction Tendencies" text={sectionData.addictionTendencies} />
+            <TextBlock label="Long-term Health Patterns" text={sectionData.chronicDiseaseTendency} />
+            <TextBlock label="How Stress Affects You" text={sectionData.stressPattern} />
+            <TextBlock label="Mental Health Patterns" text={sectionData.mentalInstability} />
+            <TextBlock label="Risk of Accidents" text={sectionData.accidentVulnerability} />
+            <TextBlock label="Habit-Forming Tendencies" text={sectionData.addictionTendencies} />
             {sectionData.keyFactors && <KeyFactorsGrid factors={sectionData.keyFactors} />}
           </div>
         );
@@ -418,13 +418,13 @@ export default function ComprehensiveKundaliView() {
         return (
           <div className="space-y-4">
             <div className="bg-gradient-to-r from-gold/15 to-gold/5 dark:from-gold/10 dark:to-gold/5 border border-gold/30 rounded-xl p-4">
-              <p className="text-xs font-semibold text-gold-dark dark:text-gold uppercase tracking-wider mb-1">Current Mahadasha</p>
+              <p className="text-xs font-semibold text-gold-dark dark:text-gold uppercase tracking-wider mb-1">Current Main Period</p>
               <p className="text-sm font-semibold text-brown-900 dark:text-brown-50">{sectionData.currentMahadasha}</p>
-              <p className="text-xs font-semibold text-gold-dark dark:text-gold uppercase tracking-wider mt-2 mb-1">Current Antardasha</p>
+              <p className="text-xs font-semibold text-gold-dark dark:text-gold uppercase tracking-wider mt-2 mb-1">Current Sub-Period</p>
               <p className="text-sm font-semibold text-brown-900 dark:text-brown-50">{sectionData.currentAntardasha}</p>
             </div>
-            <TextBlock label="Dasha Interpretation" text={sectionData.dashaInterpretation} />
-            <TextBlock label="Gochar Influence" text={sectionData.gocharInfluence} />
+            <TextBlock label="What This Period Means" text={sectionData.dashaInterpretation} />
+            <TextBlock label="Current Planet Effects" text={sectionData.gocharInfluence} />
             {sectionData.upcomingPeriods && sectionData.upcomingPeriods.length > 0 && (
               <div>
                 <p className="text-xs font-semibold text-brown-600 dark:text-brown-300 uppercase tracking-wider mb-2">Upcoming Periods</p>
@@ -444,47 +444,47 @@ export default function ComprehensiveKundaliView() {
                 ))}
               </div>
             )}
-            <TextBlock label="Key Timing Factors" text={sectionData.keyTimingFactors} />
+            <TextBlock label="Important Timing Factors" text={sectionData.keyTimingFactors} />
           </div>
         );
       case 'spiritualEvolution':
         return (
           <div className="space-y-4">
-            <TextBlock label="Moksha Tendency" text={sectionData.mokshaTendency} />
-            <TextBlock label="Spiritual Inclination" text={sectionData.spiritualInclination} />
-            <TextBlock label="Guru Karma" text={sectionData.guruKarma} />
-            <TextBlock label="Detachment Level" text={sectionData.detachmentLevel} />
-            <TextBlock label="Meditation Capacity" text={sectionData.meditationCapacity} />
-            <TextBlock label="Ego Lessons" text={sectionData.egoLessons} />
-            <TextBlock label="Material Trap vs Liberation" text={sectionData.materialTrapVsLiberation} />
+            <TextBlock label="Desire for Freedom" text={sectionData.mokshaTendency} />
+            <TextBlock label="Spiritual Interest" text={sectionData.spiritualInclination} />
+            <TextBlock label="Relationship with Teachers" text={sectionData.guruKarma} />
+            <TextBlock label="Ability to Let Go" text={sectionData.detachmentLevel} />
+            <TextBlock label="Meditation Potential" text={sectionData.meditationCapacity} />
+            <TextBlock label="Pride Lessons" text={sectionData.egoLessons} />
+            <TextBlock label="Worldly Success vs Inner Peace" text={sectionData.materialTrapVsLiberation} />
             {sectionData.keyFactors && <KeyFactorsGrid factors={sectionData.keyFactors} />}
           </div>
         );
       case 'familyKarma':
         return (
           <div className="space-y-4">
-            <TextBlock label="Father Relationship" text={sectionData.fatherRelationship} />
-            <TextBlock label="Mother Psychology" text={sectionData.motherPsychology} />
-            <TextBlock label="Ancestor Karma" text={sectionData.ancestorKarma} />
-            <TextBlock label="Family Wealth Patterns" text={sectionData.familyWealthPatterns} />
-            <TextBlock label="Family Suffering Cycles" text={sectionData.familySufferingCycles} />
-            <TextBlock label="Child Karma" text={sectionData.childKarma} />
-            <TextBlock label="Responsibility Burdens" text={sectionData.responsibilityBurdens} />
+            <TextBlock label="Relationship with Father" text={sectionData.fatherRelationship} />
+            <TextBlock label="Mother's Influence on You" text={sectionData.motherPsychology} />
+            <TextBlock label="Family Legacy" text={sectionData.ancestorKarma} />
+            <TextBlock label="Money Patterns in Family" text={sectionData.familyWealthPatterns} />
+            <TextBlock label="Recurring Family Challenges" text={sectionData.familySufferingCycles} />
+            <TextBlock label="Relationship with Children" text={sectionData.childKarma} />
+            <TextBlock label="Heavy Responsibilities" text={sectionData.responsibilityBurdens} />
             {sectionData.keyFactors && <KeyFactorsGrid factors={sectionData.keyFactors} />}
           </div>
         );
       case 'hiddenPatterns':
         return (
           <div className="space-y-4">
-            <TextBlock label="Self-Sabotage" text={sectionData.selfSabotage} />
+            <TextBlock label="Ways You Hold Yourself Back" text={sectionData.selfSabotage} />
             <TextBlock label="Addictions" text={sectionData.addictions} />
-            <TextBlock label="Manipulative Behavior" text={sectionData.manipulativeBehavior} />
-            <TextBlock label="Ego Traps" text={sectionData.egoTraps} />
-            <TextBlock label="Laziness" text={sectionData.laziness} />
-            <TextBlock label="Escapism" text={sectionData.escapism} />
-            <TextBlock label="Obsession" text={sectionData.obsession} />
-            <TextBlock label="Isolation" text={sectionData.isolation} />
-            <TextBlock label="Betrayal Tendencies" text={sectionData.betrayalTendencies} />
+            <TextBlock label="Controlling Tendencies" text={sectionData.manipulativeBehavior} />
+            <TextBlock label="Pride Traps" text={sectionData.egoTraps} />
+            <TextBlock label="Procrastination Patterns" text={sectionData.laziness} />
+            <TextBlock label="Running from Problems" text={sectionData.escapism} />
+            <TextBlock label="Fixation Tendencies" text={sectionData.obsession} />
+            <TextBlock label="Withdrawing from Others" text={sectionData.isolation} />
+            <TextBlock label="Trust Issues" text={sectionData.betrayalTendencies} />
             {sectionData.hiddenStrengths && (
               <div>
                 <p className="text-xs font-semibold text-sage dark:text-sage-light uppercase tracking-wider mb-2">Hidden Strengths</p>
@@ -504,7 +504,7 @@ export default function ComprehensiveKundaliView() {
           <div className="space-y-4">
             {sectionData.detectedYogas && (
               <div>
-                <p className="text-xs font-semibold text-brown-600 dark:text-brown-300 uppercase tracking-wider mb-2">Detected Yogas</p>
+                <p className="text-xs font-semibold text-brown-600 dark:text-brown-300 uppercase tracking-wider mb-2">Special Combinations Found</p>
                 {sectionData.detectedYogas.filter((y: any) => y.present).map((y: any, i: number) => (
                   <div key={i} className="bg-gradient-to-r from-gold/10 to-gold/5 border border-gold/20 rounded-lg p-3 mb-2">
                     <div className="flex items-center gap-2 mb-1">
@@ -522,7 +522,7 @@ export default function ComprehensiveKundaliView() {
             )}
             {sectionData.detectedDoshas && sectionData.detectedDoshas.filter((d: any) => d.present).length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider mb-2">Detected Doshas</p>
+                <p className="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider mb-2">Challenges Found</p>
                 {sectionData.detectedDoshas.filter((d: any) => d.present).map((d: any, i: number) => (
                   <div key={i} className="bg-red-500/5 border border-red-400/20 rounded-lg p-3 mb-2">
                     <div className="flex items-center gap-2 mb-1">
@@ -558,7 +558,7 @@ export default function ComprehensiveKundaliView() {
           <div className="space-y-4">
             {sectionData.d9Navamsha && (
               <div className="bg-gradient-to-r from-gold/10 to-gold/5 border border-gold/20 rounded-xl p-4">
-                <p className="text-xs font-semibold text-gold-dark dark:text-gold uppercase tracking-wider mb-1">D9 Navamsha — Soul Chart</p>
+                <p className="text-xs font-semibold text-gold-dark dark:text-gold uppercase tracking-wider mb-1">D9 Navamsha — Your Inner Self</p>
                 <p className="text-sm text-brown-800 dark:text-brown-100">{sectionData.d9Navamsha.ascendantSign} Ascendant</p>
                 <p className="text-[11px] text-brown-700 dark:text-brown-200 mt-1 leading-relaxed">{sectionData.d9Navamsha.analysis}</p>
                 <p className="text-[11px] text-brown-600 dark:text-brown-300 mt-1">{sectionData.d9Navamsha.keyPlanets}</p>
@@ -573,7 +573,7 @@ export default function ComprehensiveKundaliView() {
             {sectionData.d60DeepKarma && <VargaCard name="D60 Deep Karma" ascSign={sectionData.d60DeepKarma.ascendantSign} analysis={sectionData.d60DeepKarma.analysis} />}
             {sectionData.vargottamaPlanets && sectionData.vargottamaPlanets.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-gold-dark dark:text-gold uppercase tracking-wider mb-2">Vargottama Planets (Same Sign in D1 & D9)</p>
+                <p className="text-xs font-semibold text-gold-dark dark:text-gold uppercase tracking-wider mb-2">Planets in Same Sign (Very Strong)</p>
                 <div className="flex flex-wrap gap-2">
                   {sectionData.vargottamaPlanets.map((p: string, i: number) => (
                     <Badge key={i} className="bg-gold/15 text-gold-dark dark:text-gold text-[10px]">✦ {p}</Badge>
@@ -581,7 +581,7 @@ export default function ComprehensiveKundaliView() {
                 </div>
               </div>
             )}
-            <TextBlock label="D1 Main Chart" text={sectionData.d1Main} />
+            <TextBlock label="Main Birth Chart" text={sectionData.d1Main} />
           </div>
         );
       case 'nakshatraDeepAnalysis':
@@ -592,15 +592,15 @@ export default function ComprehensiveKundaliView() {
               <h4 className="font-serif text-lg font-bold text-brown-900 dark:text-brown-50">{sectionData.moonNakshatra}</h4>
               <p className="text-[11px] text-brown-600 dark:text-brown-300 mt-1">{sectionData.symbol && `Symbol: ${sectionData.symbol}`} • Deity: {sectionData.deity}</p>
             </div>
-            <TextBlock label="Psychological Coding" text={sectionData.psychologicalCoding} />
-            <TextBlock label="Desire Nature" text={sectionData.desireNature} />
-            <TextBlock label="Hidden Motivations" text={sectionData.hiddenMotivations} />
-            <TextBlock label="Emotional Wounds" text={sectionData.emotionalWounds} />
-            <TextBlock label="Behavioral Patterns" text={sectionData.behavioralPatterns} />
-            <TextBlock label="Deity Influence" text={sectionData.deityInfluence} />
-            <TextBlock label="Symbol Meaning" text={sectionData.symbolMeaning} />
-            <TextBlock label="Pada Analysis" text={sectionData.padaAnalysis} />
-            <TextBlock label="Nakshatra Ruler Influence" text={sectionData.nakshatraRulerInfluence} />
+            <TextBlock label="Your Mental Programming" text={sectionData.psychologicalCoding} />
+            <TextBlock label="What You Deeply Want" text={sectionData.desireNature} />
+            <TextBlock label="Secret Drivers" text={sectionData.hiddenMotivations} />
+            <TextBlock label="Emotional Hurts" text={sectionData.emotionalWounds} />
+            <TextBlock label="How You Act" text={sectionData.behavioralPatterns} />
+            <TextBlock label="Divine Influence" text={sectionData.deityInfluence} />
+            <TextBlock label="Meaning Behind Your Symbol" text={sectionData.symbolMeaning} />
+            <TextBlock label="Quarter Analysis" text={sectionData.padaAnalysis} />
+            <TextBlock label="Star Ruler's Effect" text={sectionData.nakshatraRulerInfluence} />
           </div>
         );
       default:
@@ -639,8 +639,8 @@ export default function ComprehensiveKundaliView() {
               <ArrowLeft className="w-5 h-5 text-brown-600 dark:text-brown-300" />
             </button>
             <div className="flex-1">
-              <h1 className="font-serif text-lg font-bold text-brown-900 dark:text-brown-50">Comprehensive Kundali</h1>
-              <p className="text-[11px] text-brown-500 dark:text-brown-400">12 Dimensions of Vedic Analysis</p>
+              <h1 className="font-serif text-lg font-bold text-brown-900 dark:text-brown-50">Your Complete Birth Chart</h1>
+              <p className="text-[11px] text-brown-500 dark:text-brown-400">12 Areas of Your Life, Mapped by the Stars</p>
             </div>
             <div className="text-right">
               <p className="text-xs font-semibold text-gold-dark dark:text-gold">{viewedSections.size}/12</p>
@@ -702,7 +702,7 @@ export default function ComprehensiveKundaliView() {
                 </div>
                 <div>
                   <h2 className="font-serif text-base font-bold text-brown-900 dark:text-brown-50">Birth Details</h2>
-                  <p className="text-[10px] text-brown-400 dark:text-brown-500 uppercase tracking-wider">Foundation of your Kundali</p>
+                  <p className="text-[10px] text-brown-400 dark:text-brown-500 uppercase tracking-wider">The foundation of your birth chart</p>
                 </div>
               </div>
 
@@ -938,9 +938,9 @@ export default function ComprehensiveKundaliView() {
                           {i + 1}/12
                         </Badge>
                       </div>
-                      {/* Section summary visible when collapsed */}
+                      {/* Section subtitle visible when collapsed */}
                       {!isOpen && (
-                        <p className="text-[10px] text-brown-400 dark:text-brown-500 mt-0.5 truncate">{summary}</p>
+                        <p className="text-[10px] text-brown-400 dark:text-brown-500 mt-0.5 truncate">{sec.sub || summary}</p>
                       )}
                     </div>
                     {isOpen ? (
