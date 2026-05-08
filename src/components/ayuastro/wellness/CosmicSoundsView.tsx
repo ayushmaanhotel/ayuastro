@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,9 +16,7 @@ import {
   Timer,
   Sparkles,
 } from 'lucide-react';
-
 // ─── Types ──────────────────────────────────────────────────────────────────
-
 interface SoundChannel {
   id: string;
   name: string;
@@ -27,16 +24,13 @@ interface SoundChannel {
   isPlaying: boolean;
   volume: number; // 0-100
 }
-
 interface PresetScene {
   id: string;
   name: string;
   emoji: string;
   volumes: Record<string, number>; // sound id -> volume
 }
-
 // ─── Constants ──────────────────────────────────────────────────────────────
-
 const SOUND_CHANNELS: Omit<SoundChannel, 'isPlaying' | 'volume'>[] = [
   { id: 'rain', name: 'Rain', emoji: '🌧️' },
   { id: 'ocean', name: 'Ocean', emoji: '🌊' },
@@ -47,7 +41,6 @@ const SOUND_CHANNELS: Omit<SoundChannel, 'isPlaying' | 'volume'>[] = [
   { id: 'crickets', name: 'Night Crickets', emoji: '🦗' },
   { id: 'wind', name: 'Wind', emoji: '💨' },
 ];
-
 const PRESET_SCENES: PresetScene[] = [
   {
     id: 'deep-meditation',
@@ -110,7 +103,6 @@ const PRESET_SCENES: PresetScene[] = [
     },
   },
 ];
-
 const TIMER_DURATIONS = [
   { label: '5 min', seconds: 300 },
   { label: '10 min', seconds: 600 },
@@ -118,14 +110,11 @@ const TIMER_DURATIONS = [
   { label: '30 min', seconds: 1800 },
   { label: '60 min', seconds: 3600 },
 ];
-
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
 };
-
 // ─── Waveform Bars Component ────────────────────────────────────────────────
-
 function WaveformBars({ isPlaying }: { isPlaying: boolean }) {
   return (
     <div className="flex items-end gap-[3px] h-6">
@@ -155,9 +144,7 @@ function WaveformBars({ isPlaying }: { isPlaying: boolean }) {
     </div>
   );
 }
-
 // ─── Volume Slider Component ────────────────────────────────────────────────
-
 function VolumeSlider({
   value,
   onChange,
@@ -191,9 +178,7 @@ function VolumeSlider({
     </div>
   );
 }
-
 // ─── Atmospheric Background ─────────────────────────────────────────────────
-
 function AtmosphericBackground({
   channels,
 }: {
@@ -202,7 +187,6 @@ function AtmosphericBackground({
   const hasRain = channels.find((c) => c.id === 'rain')?.isPlaying;
   const hasCosmic = channels.find((c) => c.id === 'cosmic')?.isPlaying;
   const anyPlaying = channels.some((c) => c.isPlaying);
-
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
       {/* Base gradient */}
@@ -215,7 +199,6 @@ function AtmosphericBackground({
         }}
         transition={{ duration: 2 }}
       />
-
       {/* Ambient glow when sounds are playing */}
       <motion.div
         className="absolute inset-0"
@@ -228,7 +211,6 @@ function AtmosphericBackground({
             'radial-gradient(ellipse at 50% 30%, rgba(212,175,55,0.3) 0%, rgba(165,214,167,0.1) 40%, transparent 70%)',
         }}
       />
-
       {/* Rain lines */}
       <AnimatePresence>
         {hasRain && (
@@ -263,7 +245,6 @@ function AtmosphericBackground({
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Star twinkle for cosmic */}
       <AnimatePresence>
         {hasCosmic && (
@@ -303,9 +284,7 @@ function AtmosphericBackground({
     </div>
   );
 }
-
 // ─── Circular Timer ─────────────────────────────────────────────────────────
-
 function CircularTimer({
   totalSeconds,
   remainingSeconds,
@@ -319,10 +298,8 @@ function CircularTimer({
   const circumference = 2 * Math.PI * radius;
   const progress = totalSeconds > 0 ? 1 - remainingSeconds / totalSeconds : 0;
   const strokeDashoffset = circumference * (1 - progress);
-
   const minutes = Math.floor(remainingSeconds / 60);
   const seconds = remainingSeconds % 60;
-
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg
@@ -357,7 +334,6 @@ function CircularTimer({
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span
           className="font-serif text-2xl font-bold text-cream"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
         >
           {minutes}:{seconds.toString().padStart(2, '0')}
         </span>
@@ -366,19 +342,15 @@ function CircularTimer({
     </div>
   );
 }
-
 // ─── Main CosmicSoundsView ──────────────────────────────────────────────────
-
 export default function CosmicSoundsView() {
   const { setView } = useAyuAstroStore();
-
   // Sound channels state
   const [channels, setChannels] = useState<SoundChannel[]>(
     SOUND_CHANNELS.map((s) => ({ ...s, isPlaying: false, volume: 0 }))
   );
   const [masterVolume, setMasterVolume] = useState(75);
   const [activePreset, setActivePreset] = useState<string | null>(null);
-
   // Timer state
   const [selectedDuration, setSelectedDuration] = useState(600); // 10 min default
   const [timerRunning, setTimerRunning] = useState(false);
@@ -387,7 +359,6 @@ export default function CosmicSoundsView() {
   const [timerComplete, setTimerComplete] = useState(false);
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-
   // Timer logic
   useEffect(() => {
     if (timerRunning && !timerPaused) {
@@ -408,7 +379,6 @@ export default function CosmicSoundsView() {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [timerRunning, timerPaused]);
-
   // Channel handlers
   const toggleChannel = useCallback((id: string) => {
     setChannels((prev) =>
@@ -420,14 +390,12 @@ export default function CosmicSoundsView() {
     );
     setActivePreset(null);
   }, []);
-
   const setChannelVolume = useCallback((id: string, volume: number) => {
     setChannels((prev) =>
       prev.map((c) => (c.id === id ? { ...c, volume, isPlaying: volume > 0 ? true : c.isPlaying } : c))
     );
     setActivePreset(null);
   }, []);
-
   const playAll = useCallback(() => {
     setChannels((prev) =>
       prev.map((c) => ({
@@ -437,14 +405,11 @@ export default function CosmicSoundsView() {
       }))
     );
   }, []);
-
   const pauseAll = useCallback(() => {
     setChannels((prev) => prev.map((c) => ({ ...c, isPlaying: false })));
   }, []);
-
   const allPlaying = channels.every((c) => c.isPlaying);
   const anyPlaying = channels.some((c) => c.isPlaying);
-
   // Preset handler
   const applyPreset = useCallback((preset: PresetScene) => {
     setActivePreset(preset.id);
@@ -456,7 +421,6 @@ export default function CosmicSoundsView() {
       }))
     );
   }, []);
-
   // Timer handlers
   const startTimer = () => {
     setTimeRemaining(selectedDuration);
@@ -464,11 +428,9 @@ export default function CosmicSoundsView() {
     setTimerPaused(false);
     setTimerComplete(false);
   };
-
   const pauseTimer = () => {
     setTimerPaused(!timerPaused);
   };
-
   const resetTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setTimerRunning(false);
@@ -476,7 +438,6 @@ export default function CosmicSoundsView() {
     setTimeRemaining(selectedDuration);
     setTimerComplete(false);
   };
-
   const selectDuration = (seconds: number) => {
     setSelectedDuration(seconds);
     setTimeRemaining(seconds);
@@ -484,11 +445,9 @@ export default function CosmicSoundsView() {
     setTimerPaused(false);
     setTimerComplete(false);
   };
-
   return (
     <div className="relative min-h-screen pb-24">
       <AtmosphericBackground channels={channels} />
-
       <div className="relative z-10 px-4 py-6 mx-auto max-w-lg space-y-6">
         {/* Header */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }} className="flex items-center gap-3">
@@ -503,7 +462,6 @@ export default function CosmicSoundsView() {
           <div>
             <h1
               className="font-serif text-xl font-bold text-cream"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               Cosmic Sounds
             </h1>
@@ -514,7 +472,6 @@ export default function CosmicSoundsView() {
             {channels.filter((c) => c.isPlaying).length} active
           </Badge>
         </motion.div>
-
         {/* ─── Master Volume & Controls ──────────────────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
           <Card className="border border-gold/10 shadow-lg bg-[#2D2320]/90 dark:bg-[#2D2320]/90 backdrop-blur-sm">
@@ -570,7 +527,6 @@ export default function CosmicSoundsView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* ─── Preset Scenes ─────────────────────────────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
           <Card className="border border-gold/10 shadow-lg bg-[#2D2320]/90 dark:bg-[#2D2320]/90 backdrop-blur-sm">
@@ -615,7 +571,6 @@ export default function CosmicSoundsView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* ─── Sound Mixer Channels ──────────────────────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
           <Card className="border border-gold/10 shadow-lg bg-[#2D2320]/90 dark:bg-[#2D2320]/90 backdrop-blur-sm">
@@ -653,7 +608,6 @@ export default function CosmicSoundsView() {
                       >
                         {channel.emoji}
                       </div>
-
                       {/* Name + waveform */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1.5">
@@ -678,7 +632,6 @@ export default function CosmicSoundsView() {
                           onChange={(v) => setChannelVolume(channel.id, v)}
                         />
                       </div>
-
                       {/* Play/Pause toggle */}
                       <button
                         onClick={() => toggleChannel(channel.id)}
@@ -702,7 +655,6 @@ export default function CosmicSoundsView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* ─── Session Timer ─────────────────────────────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }}>
           <Card className="border border-gold/10 shadow-lg bg-[#2D2320]/90 dark:bg-[#2D2320]/90 backdrop-blur-sm">
@@ -737,7 +689,6 @@ export default function CosmicSoundsView() {
                   </button>
                 ))}
               </div>
-
               {/* Circular timer display */}
               <div className="flex flex-col items-center">
                 <AnimatePresence mode="wait">
@@ -784,7 +735,6 @@ export default function CosmicSoundsView() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-
                 {/* Timer controls */}
                 <div className="flex items-center gap-3 mt-4">
                   {!timerRunning && !timerComplete && (
@@ -845,7 +795,6 @@ export default function CosmicSoundsView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Bottom spacing for atmospheric immersion */}
         <div className="h-4" />
       </div>

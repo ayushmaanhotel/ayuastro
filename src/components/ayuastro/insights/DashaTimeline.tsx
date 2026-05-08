@@ -1,11 +1,9 @@
 'use client';
-
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
-
 export interface DashaPeriod {
   planet: string;
   startDate: string;
@@ -13,7 +11,6 @@ export interface DashaPeriod {
   years: number;
   isCurrent: boolean;
 }
-
 const PLANET_COLORS: Record<string, { bg: string; text: string; border: string; darkBg: string }> = {
   Sun:     { bg: 'bg-amber-100',     text: 'text-amber-800',     border: 'border-amber-400',     darkBg: 'dark:bg-amber-900/30' },
   Moon:    { bg: 'bg-slate-100',      text: 'text-slate-700',     border: 'border-slate-300',     darkBg: 'dark:bg-slate-800/30' },
@@ -25,19 +22,15 @@ const PLANET_COLORS: Record<string, { bg: string; text: string; border: string; 
   Rahu:    { bg: 'bg-purple-100',     text: 'text-purple-800',    border: 'border-purple-400',    darkBg: 'dark:bg-purple-900/30' },
   Ketu:    { bg: 'bg-teal-100',       text: 'text-teal-800',      border: 'border-teal-400',      darkBg: 'dark:bg-teal-900/30' },
 };
-
 const PLANET_SYMBOLS: Record<string, string> = {
   Sun: '☉', Moon: '☽', Mars: '♂', Mercury: '☿', Jupiter: '♃', Venus: '♀', Saturn: '♄', Rahu: '☊', Ketu: '☋',
 };
-
 // Vimshottari Dasha years for each planet
 const DASHA_YEARS: Record<string, number> = {
   Ketu: 7, Venus: 20, Sun: 6, Moon: 10, Mars: 7, Rahu: 18, Jupiter: 16, Saturn: 19, Mercury: 17,
 };
-
 // Order of Mahadashas in Vimshottari system
 const DASHA_ORDER = ['Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu', 'Jupiter', 'Saturn', 'Mercury'];
-
 /**
  * Generate simplified Mahadasha periods from birth date.
  * Uses a deterministic approach: starts from Ketu at birth and cycles through.
@@ -52,25 +45,20 @@ export function generateDashaPeriods(birthDate: string): DashaPeriod[] {
     (birth.getTime() - new Date(birth.getFullYear(), 0, 0).getTime()) / 86400000
   );
   const startIndex = dayOfYear % 9;
-
   // Reorder DASHA_ORDER starting from startIndex
   const orderedPlanets = [
     ...DASHA_ORDER.slice(startIndex),
     ...DASHA_ORDER.slice(0, startIndex),
   ];
-
   const now = new Date();
   const periods: DashaPeriod[] = [];
   let currentDate = new Date(birth);
-
   for (const planet of orderedPlanets) {
     const years = DASHA_YEARS[planet];
     const startDate = new Date(currentDate);
     const endDate = new Date(currentDate);
     endDate.setFullYear(endDate.getFullYear() + years);
-
     const isCurrent = now >= startDate && now < endDate;
-
     periods.push({
       planet,
       startDate: startDate.toISOString().split('T')[0],
@@ -78,32 +66,25 @@ export function generateDashaPeriods(birthDate: string): DashaPeriod[] {
       years,
       isCurrent,
     });
-
     currentDate = new Date(endDate);
   }
-
   return periods;
 }
-
 interface DashaTimelineProps {
   dashaPeriods: DashaPeriod[];
 }
-
 export default function DashaTimeline({ dashaPeriods }: DashaTimelineProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-
   const totalYears = dashaPeriods.reduce((sum, d) => sum + d.years, 0);
-
   const checkScrollability = useCallback(() => {
     if (!scrollRef.current) return;
     const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
     setCanScrollLeft(scrollLeft > 10);
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 10);
   }, []);
-
   useEffect(() => {
     // Scroll to current Dasha on mount
     if (currentRef.current && scrollRef.current) {
@@ -114,14 +95,12 @@ export default function DashaTimeline({ dashaPeriods }: DashaTimelineProps) {
     }
     checkScrollability();
   }, [checkScrollability]);
-
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     el.addEventListener('scroll', checkScrollability);
     return () => el.removeEventListener('scroll', checkScrollability);
   }, [checkScrollability]);
-
   const scroll = (direction: 'left' | 'right') => {
     if (!scrollRef.current) return;
     const scrollAmount = scrollRef.current.clientWidth * 0.6;
@@ -130,11 +109,9 @@ export default function DashaTimeline({ dashaPeriods }: DashaTimelineProps) {
       behavior: 'smooth',
     });
   };
-
   const currentDasha = dashaPeriods.find((d) => d.isCurrent);
-
   return (
-    <Card className="border-0 shadow-sm bg-white dark:bg-white/5 dark:border dark:border-brown-700/30 overflow-hidden">
+    <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] dark:border dark:border-brown-700/30 overflow-hidden">
       <div className="h-1 bg-gradient-to-r from-purple-400 via-gold to-teal-400" />
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between">
@@ -159,7 +136,7 @@ export default function DashaTimeline({ dashaPeriods }: DashaTimelineProps) {
               className="absolute left-0 top-1/2 -translate-y-1/2 z-10 flex size-8 items-center justify-center rounded-full bg-white/90 dark:bg-brown-800/90 shadow-md border border-brown-100 dark:border-brown-600 hover:bg-cream dark:hover:bg-brown-700 transition-colors"
               aria-label="Scroll timeline left"
             >
-              <ChevronLeft className="size-4 text-brown-600 dark:text-brown-300" />
+              <ChevronLeft className="size-4 text-brown-600 dark:text-brown-500" />
             </button>
           )}
           {canScrollRight && (
@@ -168,10 +145,9 @@ export default function DashaTimeline({ dashaPeriods }: DashaTimelineProps) {
               className="absolute right-0 top-1/2 -translate-y-1/2 z-10 flex size-8 items-center justify-center rounded-full bg-white/90 dark:bg-brown-800/90 shadow-md border border-brown-100 dark:border-brown-600 hover:bg-cream dark:hover:bg-brown-700 transition-colors"
               aria-label="Scroll timeline right"
             >
-              <ChevronRight className="size-4 text-brown-600 dark:text-brown-300" />
+              <ChevronRight className="size-4 text-brown-600 dark:text-brown-500" />
             </button>
           )}
-
           {/* Timeline scroll container */}
           <div
             ref={scrollRef}
@@ -181,17 +157,14 @@ export default function DashaTimeline({ dashaPeriods }: DashaTimelineProps) {
             <div className="flex items-end gap-0 min-w-max px-4 pt-8 pb-2 relative">
               {/* Central timeline line */}
               <div className="absolute bottom-4 left-4 right-4 h-0.5 bg-brown-200 dark:bg-brown-600" />
-
               {dashaPeriods.map((period, i) => {
                 const colors = PLANET_COLORS[period.planet] || PLANET_COLORS.Mercury;
                 const symbol = PLANET_SYMBOLS[period.planet] || '?';
                 const widthPercent = (period.years / totalYears) * 100;
                 // Scale width: minimum 60px per year, ensure readability
                 const widthPx = Math.max(80, period.years * 8);
-
                 const startDate = new Date(period.startDate);
                 const endDate = new Date(period.endDate);
-
                 return (
                   <motion.div
                     key={i}
@@ -211,7 +184,6 @@ export default function DashaTimeline({ dashaPeriods }: DashaTimelineProps) {
                         <div className="w-0 h-0 border-l-[5px] border-r-[5px] border-t-[6px] border-l-transparent border-r-transparent border-t-gold dark:border-t-gold" />
                       </div>
                     )}
-
                     {/* Planet block */}
                     <div
                       className={`relative w-full rounded-lg border-2 ${
@@ -230,15 +202,14 @@ export default function DashaTimeline({ dashaPeriods }: DashaTimelineProps) {
                           {period.planet}
                         </p>
                         {/* Duration */}
-                        <p className="text-[9px] text-brown-400 dark:text-brown-400">
+                        <p className="text-[9px] text-brown-400 dark:text-brown-600">
                           {period.years}y
                         </p>
                       </div>
                     </div>
-
                     {/* Year labels below timeline */}
                     <div className="mt-2 text-center">
-                      <p className="text-[9px] text-brown-400 dark:text-brown-400 font-medium">
+                      <p className="text-[9px] text-brown-400 dark:text-brown-600 font-medium">
                         {startDate.getFullYear()}
                       </p>
                       {i === dashaPeriods.length - 1 && (
@@ -253,10 +224,9 @@ export default function DashaTimeline({ dashaPeriods }: DashaTimelineProps) {
             </div>
           </div>
         </div>
-
         {/* Legend */}
         <div className="mt-3 pt-3 border-t border-brown-100 dark:border-brown-700/40">
-          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] text-brown-400 dark:text-brown-400">
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] text-brown-400 dark:text-brown-600">
             {dashaPeriods.map((period, i) => {
               const colors = PLANET_COLORS[period.planet] || PLANET_COLORS.Mercury;
               return (

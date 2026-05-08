@@ -1,54 +1,43 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { cosmicToast } from '@/lib/toast';
-
 const ZODIAC_SYMBOLS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
-
 const MESSAGES = [
   'Mapping your cosmic blueprint...',
   'Calculating planetary positions...',
   'Analyzing emotional patterns...',
 ];
-
 const STEPS = [
   { label: 'Mapping Stars', delay: 0 },
   { label: 'Analyzing Numbers', delay: 1000 },
   { label: 'Scoring Traits', delay: 2000 },
 ];
-
 const CALCULATION_TIMEOUT = 30000; // 30 seconds
-
 export default function CalculatingView() {
   const [messageIndex, setMessageIndex] = useState(0);
   const [symbolIndex, setSymbolIndex] = useState(0);
   const [activeStep, setActiveStep] = useState(-1);
-
   useEffect(() => {
     const msgInterval = setInterval(() => {
       setMessageIndex((prev) => (prev + 1) % MESSAGES.length);
     }, 1200);
-
     const symInterval = setInterval(() => {
       setSymbolIndex((prev) => (prev + 1) % ZODIAC_SYMBOLS.length);
     }, 300);
-
     // Activate steps sequentially — fast since quick-calculate is <2s
     const stepTimers = STEPS.map((step) =>
       setTimeout(() => {
         setActiveStep((prev) => prev + 1);
       }, step.delay)
     );
-
     return () => {
       clearInterval(msgInterval);
       clearInterval(symInterval);
       stepTimers.forEach(clearTimeout);
     };
   }, []);
-
   // Timeout safety: if still on calculating view after 30s, redirect to insights
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -61,7 +50,6 @@ export default function CalculatingView() {
     }, CALCULATION_TIMEOUT);
     return () => clearTimeout(timeout);
   }, []);
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-cream px-6">
       {/* Zodiac ring animation with particles */}
@@ -81,7 +69,6 @@ export default function CalculatingView() {
             }}
           />
         ))}
-
         {/* Outer rotating ring */}
         <motion.div
           animate={{ rotate: 360 }}
@@ -109,7 +96,6 @@ export default function CalculatingView() {
             );
           })}
         </motion.div>
-
         {/* Inner pulsing circle */}
         <motion.div
           animate={{
@@ -134,7 +120,6 @@ export default function CalculatingView() {
           </motion.span>
         </motion.div>
       </div>
-
       {/* Progress messages */}
       <AnimatePresence mode="wait">
         <motion.p
@@ -143,13 +128,11 @@ export default function CalculatingView() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.4 }}
-          className="font-serif text-center text-lg text-brown-700 dark:text-brown-300"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          className="font-serif text-center text-lg text-brown-700 dark:text-brown-500"
         >
           {MESSAGES[messageIndex]}
         </motion.p>
       </AnimatePresence>
-
       {/* Subtle progress indicator — shorter duration now */}
       <div className="mt-8 h-1 w-48 overflow-hidden rounded-full bg-brown-100 dark:bg-brown-100/30">
         <motion.div
@@ -159,7 +142,6 @@ export default function CalculatingView() {
           className="h-full rounded-full bg-gradient-to-r from-gold-dark via-gold to-gold-light"
         />
       </div>
-
       {/* Step indicators — 3 steps now (no "Writing Your Report" since that's async) */}
       <div className="mt-6 flex items-center gap-4">
         {STEPS.map((step, i) => {
@@ -196,7 +178,7 @@ export default function CalculatingView() {
                 className={`text-[10px] font-medium transition-colors duration-500 text-center leading-tight max-w-[64px] ${
                   isActive
                     ? 'text-gold-dark dark:text-gold'
-                    : 'text-brown-300 dark:text-brown-300'
+                    : 'text-brown-300 dark:text-brown-500'
                 }`}
               >
                 {step.label}

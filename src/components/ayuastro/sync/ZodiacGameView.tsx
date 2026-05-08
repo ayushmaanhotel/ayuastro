@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useCallback, useMemo } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,60 +7,49 @@ import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Gamepad2, Sparkles, Trophy, RotateCcw } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
-
 // ─── Zodiac Data ────────────────────────────────────────────────────────────
-
 const ZODIAC_SIGNS = [
   'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
   'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
 ];
-
 const ZODIAC_SYMBOLS: Record<string, string> = {
   Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
   Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
 };
-
 const ZODIAC_ELEMENTS: Record<string, string> = {
   Aries: 'Fire', Leo: 'Fire', Sagittarius: 'Fire',
   Taurus: 'Earth', Virgo: 'Earth', Capricorn: 'Earth',
   Gemini: 'Air', Libra: 'Air', Aquarius: 'Air',
   Cancer: 'Water', Scorpio: 'Water', Pisces: 'Water',
 };
-
 const ZODIAC_MODALITIES: Record<string, string> = {
   Aries: 'Cardinal', Cancer: 'Cardinal', Libra: 'Cardinal', Capricorn: 'Cardinal',
   Taurus: 'Fixed', Leo: 'Fixed', Scorpio: 'Fixed', Aquarius: 'Fixed',
   Gemini: 'Mutable', Virgo: 'Mutable', Sagittarius: 'Mutable', Pisces: 'Mutable',
 };
-
 const ELEMENT_COMPAT: Record<string, string[]> = {
   Fire: ['Air', 'Fire'],
   Air: ['Fire', 'Air'],
   Earth: ['Water', 'Earth'],
   Water: ['Earth', 'Water'],
 };
-
 const MODALITY_COMPAT: Record<string, string[]> = {
   Cardinal: ['Fixed', 'Mutable'],
   Fixed: ['Cardinal', 'Mutable'],
   Mutable: ['Cardinal', 'Fixed'],
 };
-
 const ELEMENT_COLORS: Record<string, string> = {
   Fire: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800',
   Earth: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800',
   Air: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
   Water: 'bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-800',
 };
-
 // ─── Deterministic Compatibility Score ───────────────────────────────────────
-
 function calculateCompatibilityScore(sign1: string, sign2: string): number {
   const el1 = ZODIAC_ELEMENTS[sign1] || 'Fire';
   const el2 = ZODIAC_ELEMENTS[sign2] || 'Fire';
   const mod1 = ZODIAC_MODALITIES[sign1] || 'Cardinal';
   const mod2 = ZODIAC_MODALITIES[sign2] || 'Cardinal';
-
   // Element compatibility score (0-40)
   let elementScore = 20;
   if (el1 === el2) {
@@ -71,7 +59,6 @@ function calculateCompatibilityScore(sign1: string, sign2: string): number {
   } else {
     elementScore = 16;
   }
-
   // Modality compatibility (0-25)
   let modalityScore = 12;
   if (mod1 !== mod2) {
@@ -79,30 +66,23 @@ function calculateCompatibilityScore(sign1: string, sign2: string): number {
   } else {
     modalityScore = 14;
   }
-
   // Moon sign emotional compatibility (0-25)
   const moonScore = el1 === el2 ? 22 : ELEMENT_COMPAT[el1]?.includes(el2) ? 18 : 10;
-
   // Deterministic variation based on sign indices
   const idx1 = ZODIAC_SIGNS.indexOf(sign1);
   const idx2 = ZODIAC_SIGNS.indexOf(sign2);
   const phaseBonus = ((idx1 * 7 + idx2 * 13) % 11) - 5;
-
   const overall = Math.max(15, Math.min(98, elementScore + modalityScore + moonScore + phaseBonus));
   return Math.round(overall);
 }
-
 // ─── Game Types ──────────────────────────────────────────────────────────────
-
 type CompatibilityLevel = 'High' | 'Medium' | 'Low';
-
 interface GameRound {
   sign1: string;
   sign2: string;
   actualScore: number;
   actualLevel: CompatibilityLevel;
 }
-
 interface GameState {
   rounds: GameRound[];
   currentRound: number;
@@ -115,17 +95,14 @@ interface GameState {
   isRevealing: boolean;
   isComplete: boolean;
 }
-
 function getLevel(score: number): CompatibilityLevel {
   if (score > 70) return 'High';
   if (score >= 40) return 'Medium';
   return 'Low';
 }
-
 function generateRounds(): GameRound[] {
   const rounds: GameRound[] = [];
   const usedPairs = new Set<string>();
-
   while (rounds.length < 10) {
     const idx1 = Math.floor(Math.random() * 12);
     let idx2 = Math.floor(Math.random() * 12);
@@ -137,7 +114,6 @@ function generateRounds(): GameRound[] {
     const pairKey = [Math.min(idx1, idx2), Math.max(idx1, idx2)].join('-');
     if (usedPairs.has(pairKey)) continue;
     usedPairs.add(pairKey);
-
     const sign1 = ZODIAC_SIGNS[idx1];
     const sign2 = ZODIAC_SIGNS[idx2];
     const score = calculateCompatibilityScore(sign1, sign2);
@@ -148,10 +124,8 @@ function generateRounds(): GameRound[] {
       actualLevel: getLevel(score),
     });
   }
-
   return rounds;
 }
-
 function getRating(correctCount: number): { title: string; emoji: string; description: string } {
   if (correctCount >= 8) {
     return { title: 'Cosmic Matchmaker', emoji: '🌟', description: 'You have an extraordinary sense of zodiac harmony!' };
@@ -161,12 +135,9 @@ function getRating(correctCount: number): { title: string; emoji: string; descri
   }
   return { title: 'Novice Stargazer', emoji: '🔭', description: 'Keep gazing at the stars — your intuition will grow!' };
 }
-
 // ─── Main Component ──────────────────────────────────────────────────────────
-
 export default function ZodiacGameView() {
   const { setView } = useAyuAstroStore();
-
   const [game, setGame] = useState<GameState>(() => ({
     rounds: generateRounds(),
     currentRound: 0,
@@ -179,10 +150,8 @@ export default function ZodiacGameView() {
     isRevealing: false,
     isComplete: false,
   }));
-
   const currentRound = game.rounds[game.currentRound];
   const round = currentRound;
-
   const handleGuess = useCallback((level: CompatibilityLevel) => {
     if (game.isRevealing || game.isComplete) return;
     const isCorrect = level === round.actualLevel;
@@ -190,7 +159,6 @@ export default function ZodiacGameView() {
     const newWrong = isCorrect ? game.wrong : game.wrong + 1;
     const newStreak = isCorrect ? game.streak + 1 : 0;
     const newBestStreak = Math.max(game.bestStreak, newStreak);
-
     setGame((prev) => ({
       ...prev,
       guessedLevel: level,
@@ -201,7 +169,6 @@ export default function ZodiacGameView() {
       bestStreak: newBestStreak,
     }));
   }, [game, round]);
-
   const handleNextRound = useCallback(() => {
     const nextRound = game.currentRound + 1;
     if (nextRound >= 10) {
@@ -215,7 +182,6 @@ export default function ZodiacGameView() {
       }));
     }
   }, [game.currentRound]);
-
   const handleRestart = useCallback(() => {
     setGame({
       rounds: generateRounds(),
@@ -231,22 +197,18 @@ export default function ZodiacGameView() {
     });
     cosmicToast.cosmic('New Game! 🎮', 'Let\'s test your cosmic intuition');
   }, []);
-
   const rating = useMemo(() => getRating(game.correct), [game.correct]);
-
   const fadeInUp = {
     initial: { opacity: 0, y: 16 },
     animate: { opacity: 1, y: 0 },
   };
-
   // ─── Score Card (Final) ─────────────────────────────────────────────────
-
   if (game.isComplete) {
     return (
       <div className="bg-cream px-4 py-6 pb-24 min-h-screen">
         <div className="mx-auto max-w-lg space-y-6">
           <motion.div {...fadeInUp} transition={{ duration: 0.5 }}>
-            <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+            <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
               <div className="h-1.5 bg-gradient-to-r from-gold via-gold-light to-gold-dark" />
               <CardContent className="p-8 text-center">
                 <motion.div
@@ -261,8 +223,7 @@ export default function ZodiacGameView() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-100"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-600"
                 >
                   {rating.title}
                 </motion.h2>
@@ -270,11 +231,10 @@ export default function ZodiacGameView() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.6 }}
-                  className="text-sm text-brown-400 dark:text-brown-300 mt-2 mb-6"
+                  className="text-sm text-brown-400 dark:text-brown-500 mt-2 mb-6"
                 >
                   {rating.description}
                 </motion.p>
-
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -290,11 +250,10 @@ export default function ZodiacGameView() {
                     <p className="text-[10px] uppercase tracking-wider text-brown-400">Wrong</p>
                   </div>
                   <div className="rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3">
-                    <p className="text-2xl font-bold text-brown-700 dark:text-brown-300">{game.bestStreak}</p>
+                    <p className="text-2xl font-bold text-brown-700 dark:text-brown-500">{game.bestStreak}</p>
                     <p className="text-[10px] uppercase tracking-wider text-brown-400">Best Streak</p>
                   </div>
                 </motion.div>
-
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -313,7 +272,6 @@ export default function ZodiacGameView() {
                     />
                   </div>
                 </motion.div>
-
                 <div className="flex gap-3">
                   <Button
                     onClick={handleRestart}
@@ -325,7 +283,7 @@ export default function ZodiacGameView() {
                   <Button
                     variant="outline"
                     onClick={() => setView('sync')}
-                    className="flex-1 border-brown-200 dark:border-brown-100/30 text-brown-600 dark:text-brown-300 hover:bg-brown-50 dark:hover:bg-brown-50/50"
+                    className="flex-1 border-brown-200 dark:border-brown-100/30 text-brown-600 dark:text-brown-500 hover:bg-brown-50 dark:hover:bg-brown-50/50"
                   >
                     <ArrowLeft className="size-4 mr-2" />
                     Back to Sync
@@ -338,35 +296,31 @@ export default function ZodiacGameView() {
       </div>
     );
   }
-
   return (
     <div className="bg-cream px-4 py-6 pb-24 min-h-screen">
       <div className="mx-auto max-w-lg space-y-5">
-
         {/* Header */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
           <div className="flex items-center gap-3 mb-1">
             <button
               onClick={() => setView('sync')}
-              className="flex items-center gap-1 text-sm text-brown-500 dark:text-brown-300 hover:text-brown-700 transition-colors"
+              className="flex items-center gap-1 text-sm text-brown-500 dark:text-brown-500 hover:text-brown-700 transition-colors"
             >
               <ArrowLeft className="size-4" />
             </button>
             <h1
-              className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-100"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-600"
             >
               Zodiac Game 🎮
             </h1>
           </div>
-          <p className="text-sm text-brown-400 dark:text-brown-300 ml-7">
+          <p className="text-sm text-brown-400 dark:text-brown-500 ml-7">
             Guess the compatibility between zodiac signs!
           </p>
         </motion.div>
-
         {/* Score Tracker */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
-          <div className="flex items-center justify-center gap-6 rounded-xl bg-white dark:bg-white/5 shadow-md p-3">
+          <div className="flex items-center justify-center gap-6 rounded-xl bg-white dark:bg-white/[0.08] shadow-md p-3">
             <div className="text-center">
               <p className="text-lg font-bold text-sage-dark">{game.correct}</p>
               <p className="text-[9px] uppercase tracking-wider text-brown-400">Correct</p>
@@ -378,7 +332,7 @@ export default function ZodiacGameView() {
             </div>
             <div className="h-8 w-px bg-brown-100 dark:bg-brown-100/30" />
             <div className="text-center">
-              <p className="text-lg font-bold text-brown-700 dark:text-brown-300">{game.streak}</p>
+              <p className="text-lg font-bold text-brown-700 dark:text-brown-500">{game.streak}</p>
               <p className="text-[9px] uppercase tracking-wider text-brown-400">Streak</p>
             </div>
             <div className="h-8 w-px bg-brown-100 dark:bg-brown-100/30" />
@@ -389,7 +343,6 @@ export default function ZodiacGameView() {
             </div>
           </div>
         </motion.div>
-
         {/* Round: Sign Pair Display */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -399,9 +352,9 @@ export default function ZodiacGameView() {
             exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="border-0 shadow-md bg-white dark:bg-white/5">
+            <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08]">
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+                <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                   <Gamepad2 className="size-5 text-gold" />
                   Guess the Compatibility
                 </CardTitle>
@@ -419,12 +372,11 @@ export default function ZodiacGameView() {
                     <div className="flex size-20 items-center justify-center rounded-full bg-brown-50 dark:bg-brown-50/20 border-2 border-gold/20 mx-auto mb-2">
                       <span className="text-3xl">{ZODIAC_SYMBOLS[round.sign1]}</span>
                     </div>
-                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">{round.sign1}</p>
+                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-600">{round.sign1}</p>
                     <Badge className={`${ELEMENT_COLORS[ZODIAC_ELEMENTS[round.sign1]]} border text-[9px] mt-1`}>
                       {ZODIAC_ELEMENTS[round.sign1]}
                     </Badge>
                   </motion.div>
-
                   {/* VS */}
                   <motion.div
                     initial={{ scale: 0 }}
@@ -434,12 +386,10 @@ export default function ZodiacGameView() {
                   >
                     <span
                       className="font-serif text-lg font-bold text-gold-dark"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                     >
                       VS
                     </span>
                   </motion.div>
-
                   {/* Sign 2 */}
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
@@ -450,13 +400,12 @@ export default function ZodiacGameView() {
                     <div className="flex size-20 items-center justify-center rounded-full bg-brown-50 dark:bg-brown-50/20 border-2 border-gold/20 mx-auto mb-2">
                       <span className="text-3xl">{ZODIAC_SYMBOLS[round.sign2]}</span>
                     </div>
-                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">{round.sign2}</p>
+                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-600">{round.sign2}</p>
                     <Badge className={`${ELEMENT_COLORS[ZODIAC_ELEMENTS[round.sign2]]} border text-[9px] mt-1`}>
                       {ZODIAC_ELEMENTS[round.sign2]}
                     </Badge>
                   </motion.div>
                 </div>
-
                 {/* Guess Buttons */}
                 <AnimatePresence mode="wait">
                   {!game.isRevealing ? (
@@ -467,7 +416,7 @@ export default function ZodiacGameView() {
                       exit={{ opacity: 0, y: -10 }}
                       className="space-y-3 mt-4"
                     >
-                      <p className="text-center text-xs text-brown-400 dark:text-brown-300 mb-3">
+                      <p className="text-center text-xs text-brown-400 dark:text-brown-500 mb-3">
                         What&apos;s their compatibility level?
                       </p>
                       <div className="grid grid-cols-3 gap-3">
@@ -530,14 +479,12 @@ export default function ZodiacGameView() {
                               animate={{ opacity: 1 }}
                               transition={{ delay: 0.4 }}
                               className="font-serif text-3xl font-bold text-gold-dark dark:text-gold"
-                              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                             >
                               {round.actualScore}%
                             </motion.p>
                           </div>
                         </div>
                       </motion.div>
-
                       {/* Result Badge */}
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
@@ -557,19 +504,17 @@ export default function ZodiacGameView() {
                           </div>
                         )}
                       </motion.div>
-
                       {/* Level & Element Info */}
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.6 }}
-                        className="flex items-center justify-center gap-4 text-xs text-brown-400 dark:text-brown-300 mb-4"
+                        className="flex items-center justify-center gap-4 text-xs text-brown-400 dark:text-brown-500 mb-4"
                       >
                         <span>{ZODIAC_ELEMENTS[round.sign1]} × {ZODIAC_ELEMENTS[round.sign2]}</span>
                         <span>•</span>
                         <span>{ZODIAC_MODALITIES[round.sign1]} × {ZODIAC_MODALITIES[round.sign2]}</span>
                       </motion.div>
-
                       <Button
                         onClick={handleNextRound}
                         className="bg-brown-700 text-white hover:bg-brown-800 px-8"
@@ -583,12 +528,11 @@ export default function ZodiacGameView() {
             </Card>
           </motion.div>
         </AnimatePresence>
-
         {/* Zodiac Grid Reference */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
-          <Card className="border-0 shadow-md bg-white dark:bg-white/5">
+          <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08]">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm font-semibold text-brown-900 dark:text-brown-100">
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold text-brown-900 dark:text-brown-600">
                 <Sparkles className="size-4 text-gold" />
                 Quick Reference
               </CardTitle>
@@ -601,7 +545,7 @@ export default function ZodiacGameView() {
                     className="flex items-center gap-1.5 rounded-lg bg-brown-50 dark:bg-brown-50/10 p-1.5"
                   >
                     <span className="text-sm">{ZODIAC_SYMBOLS[sign]}</span>
-                    <span className="text-[10px] text-brown-500 dark:text-brown-300 truncate">{sign}</span>
+                    <span className="text-[10px] text-brown-500 dark:text-brown-500 truncate">{sign}</span>
                   </div>
                 ))}
               </div>

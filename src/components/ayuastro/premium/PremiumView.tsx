@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,33 +34,27 @@ import {
   AlertCircle,
   Info,
 } from 'lucide-react';
-
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
 };
-
 const benefits = [
   'Comprehensive 14-trait emotional intelligence analysis with depth scoring',
   'Premium sections: Hidden Strengths, Blind Spots, Money Psychology, Life Patterns',
   'Lifetime access to your full profile with periodic cosmic updates',
 ];
-
 const BENEFIT_ICONS = [
   { icon: Lock, label: 'Lifetime Access', emoji: '🔒' },
   { icon: Smartphone, label: 'Works Everywhere', emoji: '📱' },
   { icon: Diamond, label: 'One-Time Payment', emoji: '💎' },
 ];
-
 const PREMIUM_SECTIONS = [
   { title: 'Hidden Strengths', description: 'Uncover untapped powers and hidden gifts from your 12th house placements', icon: '✨' },
   { title: 'Emotional Blind Spots', description: 'See the patterns you can\'t see — self-worth, boundaries, and over-giving', icon: '👁' },
   { title: 'Money Psychology', description: 'Transform your financial trajectory by understanding 2nd house patterns', icon: '💰' },
   { title: 'Recurring Life Patterns', description: 'Break free from karmic cycles and understand your life\'s repeating themes', icon: '🔄' },
 ];
-
 // ─── Testimonials ────────────────────────────────────────────────────────────
-
 const TESTIMONIALS = [
   {
     text: 'The premium report revealed patterns I had been living with for decades without understanding. The money psychology section alone was worth it — I finally see why I keep repeating the same financial cycles.',
@@ -85,9 +78,7 @@ const TESTIMONIALS = [
     badge: 'Premium Member',
   },
 ];
-
 // ─── Animated Star Rating ────────────────────────────────────────────────────
-
 function AnimatedStars({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-0.5">
@@ -104,13 +95,10 @@ function AnimatedStars({ rating }: { rating: number }) {
     </div>
   );
 }
-
 // ─── Countdown Timer with SVG Ring ──────────────────────────────────────────
-
 function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
   const calculateTimeLeft = useCallback(() => {
     const now = new Date();
     const endOfDay = new Date(now);
@@ -121,9 +109,7 @@ function CountdownTimer() {
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     return { hours, minutes, seconds, diff };
   }, []);
-
   const [dayProgress, setDayProgress] = useState(0);
-
   useEffect(() => {
     const update = () => {
       const tl = calculateTimeLeft();
@@ -134,19 +120,15 @@ function CountdownTimer() {
     };
     update();
     timerRef.current = setInterval(update, 1000);
-
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [calculateTimeLeft]);
-
   const pad = (n: number) => n.toString().padStart(2, '0');
-
   // SVG ring
   const radius = 32;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - dayProgress * circumference;
-
   return (
     <div className="flex items-center justify-center gap-4">
       {/* Circular SVG progress ring */}
@@ -174,12 +156,11 @@ function CountdownTimer() {
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xs font-bold text-brown-400 dark:text-brown-300">
+          <span className="text-xs font-bold text-brown-400 dark:text-brown-500">
             {Math.round(dayProgress * 100)}%
           </span>
         </div>
       </div>
-
       <div className="text-left">
         <p className="text-xs text-brown-400 dark:text-brown-500 mb-1">Launch Price Ends In:</p>
         <p
@@ -192,30 +173,23 @@ function CountdownTimer() {
     </div>
   );
 }
-
 // ─── Payment Step Type ─────────────────────────────────────────────────────
-
 type PaymentStep = 'qr' | 'form' | 'pending';
-
 // ─── Payment Step Indicator Component ──────────────────────────────────────
-
 const PAYMENT_STEPS: { key: PaymentStep; label: string; shortLabel: string; icon: typeof QrCode }[] = [
   { key: 'qr', label: 'Scan & Pay', shortLabel: 'Scan', icon: QrCode },
   { key: 'form', label: 'Submit Details', shortLabel: 'Submit', icon: Upload },
   { key: 'pending', label: 'Verification', shortLabel: 'Verify', icon: CheckCircle2 },
 ];
-
 function PaymentStepIndicator({ currentStep }: { currentStep: PaymentStep }) {
   const stepOrder: PaymentStep[] = ['qr', 'form', 'pending'];
   const currentIndex = stepOrder.indexOf(currentStep);
-
   return (
     <div className="flex items-center justify-center gap-0 mb-5" role="navigation" aria-label="Payment steps">
       {PAYMENT_STEPS.map((step, i) => {
         const isCompleted = i < currentIndex;
         const isCurrent = i === currentIndex;
         const StepIcon = step.icon;
-
         return (
           <div key={step.key} className="flex items-center">
             {/* Step Circle */}
@@ -268,7 +242,6 @@ function PaymentStepIndicator({ currentStep }: { currentStep: PaymentStep }) {
                 {step.shortLabel}
               </span>
             </div>
-
             {/* Connector Line */}
             {i < PAYMENT_STEPS.length - 1 && (
               <div className="step-connector mx-1.5 sm:mx-3 mb-4" aria-hidden="true">
@@ -300,11 +273,9 @@ function PaymentStepIndicator({ currentStep }: { currentStep: PaymentStep }) {
     </div>
   );
 }
-
 export default function PremiumView() {
   const { setView, setHasPaid, birthDetails, userId } = useAyuAstroStore();
   const [activeTestimonial, setActiveTestimonial] = useState(0);
-
   // Payment flow state
   const [paymentStep, setPaymentStep] = useState<PaymentStep>('qr');
   const [upiCopied, setUpiCopied] = useState(false);
@@ -314,7 +285,6 @@ export default function PremiumView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
-
   // Auto-rotate testimonials every 4 seconds
   useEffect(() => {
     const interval = setInterval(() => {
@@ -322,7 +292,6 @@ export default function PremiumView() {
     }, 4000);
     return () => clearInterval(interval);
   }, []);
-
   // Check for existing pending verification on mount
   useEffect(() => {
     const checkExistingStatus = async () => {
@@ -344,7 +313,6 @@ export default function PremiumView() {
     };
     checkExistingStatus();
   }, [userId, setHasPaid, setView]);
-
   const handleCopyUpi = async () => {
     try {
       await navigator.clipboard.writeText('9532013475@kotakbank');
@@ -362,7 +330,6 @@ export default function PremiumView() {
       setTimeout(() => setUpiCopied(false), 2000);
     }
   };
-
   const handleSubmitVerification = async () => {
     if (!transactionId.trim()) {
       setSubmitError('Please enter your Transaction ID / UTR Number');
@@ -372,10 +339,8 @@ export default function PremiumView() {
       setSubmitError('User ID not found. Please restart onboarding.');
       return;
     }
-
     setIsSubmitting(true);
     setSubmitError(null);
-
     try {
       const res = await fetch('/api/payment/verify', {
         method: 'POST',
@@ -387,14 +352,11 @@ export default function PremiumView() {
           screenshotUrl: screenshotFile ? screenshotFile.name : undefined,
         }),
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         setSubmitError(data.error || 'Submission failed. Please try again.');
         return;
       }
-
       setPaymentStep('pending');
     } catch {
       setSubmitError('Network error. Please check your connection and try again.');
@@ -402,11 +364,9 @@ export default function PremiumView() {
       setIsSubmitting(false);
     }
   };
-
   const handleCheckStatus = async () => {
     if (!userId) return;
     setIsCheckingStatus(true);
-
     try {
       const res = await fetch(`/api/payment/status?userId=${encodeURIComponent(userId)}`);
       if (res.ok) {
@@ -423,12 +383,10 @@ export default function PremiumView() {
       setIsCheckingStatus(false);
     }
   };
-
   const handleDemoSkip = () => {
     setHasPaid(true);
     setView('report');
   };
-
   return (
     <div className="bg-cream dark:bg-[#1A1412] px-4 py-6 pb-24 relative overflow-hidden">
       {/* Floating gold particle effects — 10 floating dots */}
@@ -458,7 +416,6 @@ export default function PremiumView() {
           />
         ))}
       </div>
-
       <div className="mx-auto max-w-lg space-y-6 relative z-10">
         {/* Hero */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }} className="text-center">
@@ -474,10 +431,8 @@ export default function PremiumView() {
             </span>
             <span className="text-xs font-semibold text-red-700 dark:text-red-400">Limited Time Offer</span>
           </motion.div>
-
           <h1
-            className="font-serif text-3xl font-bold text-brown-900 dark:text-brown-100 mb-2"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-serif text-3xl font-bold text-brown-900 dark:text-brown-600 mb-2"
           >
             Unlock Your Deep Emotional Intelligence
           </h1>
@@ -486,31 +441,28 @@ export default function PremiumView() {
             cycles shaping your life decisions.
           </p>
         </motion.div>
-
         {/* Benefit Icons Grid */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.02 }}>
           <div className="grid grid-cols-3 gap-3">
             {BENEFIT_ICONS.map((item, i) => {
               const Icon = item.icon;
               return (
-                <div key={i} className="flex flex-col items-center gap-1.5 rounded-xl bg-white dark:bg-white/5 p-3 text-center card-lift">
+                <div key={i} className="flex flex-col items-center gap-1.5 rounded-xl bg-white dark:bg-white/[0.08] p-3 text-center card-lift">
                   <span className="text-2xl">{item.emoji}</span>
-                  <span className="text-[10px] font-semibold text-brown-700 dark:text-brown-300 leading-tight">{item.label}</span>
+                  <span className="text-[10px] font-semibold text-brown-700 dark:text-brown-500 leading-tight">{item.label}</span>
                 </div>
               );
             })}
           </div>
         </motion.div>
-
         {/* Rating with animated stars */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }} className="text-center">
           <div className="flex items-center justify-center gap-0.5 mb-1">
             <AnimatedStars rating={5} />
           </div>
-          <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">4.9/5</p>
+          <p className="text-sm font-semibold text-brown-900 dark:text-brown-600">4.9/5</p>
           <p className="text-xs text-brown-400 dark:text-brown-500">Trusted Seeker Rating</p>
         </motion.div>
-
         {/* Premium Visual Report Card Preview */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
           <Card className="glass-premium zodiac-corner relative premium-card shimmer overflow-hidden animate-border-shimmer">
@@ -521,8 +473,7 @@ export default function PremiumView() {
                 </div>
                 <div>
                   <h3
-                    className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
                   >
                     Premium Visual Report
                   </h3>
@@ -531,7 +482,6 @@ export default function PremiumView() {
                   </p>
                 </div>
               </div>
-
               {/* Preview sections list */}
               <div className="space-y-2">
                 {[
@@ -546,7 +496,7 @@ export default function PremiumView() {
                   <div
                     key={i}
                     className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${
-                      i < 3 ? 'bg-sage-muted/50 dark:bg-sage-muted/30 text-brown-700 dark:text-brown-300' : 'bg-gold/5 dark:bg-gold/10 text-brown-400 dark:text-brown-400'
+                      i < 3 ? 'bg-sage-muted/50 dark:bg-sage-muted/30 text-brown-700 dark:text-brown-500' : 'bg-gold/5 dark:bg-gold/10 text-brown-400 dark:text-brown-600'
                     }`}
                   >
                     <div
@@ -566,13 +516,11 @@ export default function PremiumView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* What You'll Unlock Section */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.12 }}>
           <div className="space-y-3">
             <h3
-              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 text-center mb-4"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600 text-center mb-4"
             >
               What You&apos;ll Unlock
             </h3>
@@ -583,31 +531,29 @@ export default function PremiumView() {
                     <Lock className="size-3.5 text-gold/40 group-hover:text-gold/70 transition-colors" />
                   </div>
                   <span className="text-2xl mb-2 block">{section.icon}</span>
-                  <p className="text-xs font-semibold text-brown-900 dark:text-brown-100 mb-1">{section.title}</p>
-                  <p className="text-[10px] text-brown-400 dark:text-brown-300 leading-tight">{section.description}</p>
+                  <p className="text-xs font-semibold text-brown-900 dark:text-brown-600 mb-1">{section.title}</p>
+                  <p className="text-[10px] text-brown-400 dark:text-brown-500 leading-tight">{section.description}</p>
                 </div>
               ))}
             </div>
           </div>
         </motion.div>
-
         {/* Benefits */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
-          <Card className="glass-light border-0 shadow-sm dark:bg-white/5">
+          <Card className="glass-light border-0 shadow-sm dark:bg-white/[0.08]">
             <CardContent className="p-6">
-              <h3 className="text-sm font-semibold text-brown-900 dark:text-brown-100 mb-4">What you will unlock</h3>
+              <h3 className="text-sm font-semibold text-brown-900 dark:text-brown-600 mb-4">What you will unlock</h3>
               <div className="space-y-3">
                 {benefits.map((benefit, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle2 className="size-5 shrink-0 text-sage-dark dark:text-sage mt-0.5" />
-                    <p className="text-sm text-brown-600 dark:text-brown-300 leading-relaxed">{benefit}</p>
+                    <p className="text-sm text-brown-600 dark:text-brown-500 leading-relaxed">{benefit}</p>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
         </motion.div>
-
         {/* ─── Pricing + QR Payment Section ─────────────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }} style={{ willChange: 'transform' }}>
           <div className="relative">
@@ -628,29 +574,23 @@ export default function PremiumView() {
                 </div>
               {/* Countdown Timer with SVG Ring */}
               <CountdownTimer />
-
               <div className="mt-3 mb-2">
                 <span className="text-lg text-brown-300 dark:text-brown-500 line-through">₹1,499</span>
               </div>
               <div className="flex items-baseline justify-center gap-1">
                 <motion.span
-                  className="font-serif text-5xl font-bold text-brown-900 dark:text-brown-100 animate-float"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  className="font-serif text-5xl font-bold text-brown-900 dark:text-brown-600 animate-float"
                 >
                   ₹499
                 </motion.span>
               </div>
               <p className="mt-1 text-xs text-brown-400 dark:text-brown-500">One-time payment</p>
-
               <Badge className="mt-3 bg-sage-muted text-sage-dark dark:text-sage dark:bg-sage-muted/30 border-0 text-xs font-medium">
                 One-time unlock. Lifetime access.
               </Badge>
-
               <Separator className="my-5 bg-brown-100 dark:bg-brown-100/20" />
-
               {/* ─── Payment Step Indicator ─────────────────────────────── */}
               <PaymentStepIndicator currentStep={paymentStep} />
-
               {/* Payment Steps Info Tooltip */}
               <div className="flex items-center justify-center gap-1.5 mb-4">
                 <Info className="size-3 text-brown-300 dark:text-brown-500" />
@@ -658,7 +598,6 @@ export default function PremiumView() {
                   Complete all 3 steps to unlock your premium report. Payment is verified manually within 5–10 minutes.
                 </p>
               </div>
-
               {/* ─── QR Code Payment Flow ────────────────────────────────── */}
               <AnimatePresence mode="wait">
                 {paymentStep === 'qr' && (
@@ -674,13 +613,11 @@ export default function PremiumView() {
                     <div className="flex items-center justify-center gap-2 mb-1">
                       <QrCode className="size-5 text-gold" />
                       <h3
-                        className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
                       >
                         Scan to Pay
                       </h3>
                     </div>
-
                     {/* QR Code Image — Premium Decorative Border */}
                     <div className="flex justify-center">
                       <div className="relative p-1 rounded-2xl bg-gradient-to-br from-gold/30 via-gold-light/20 to-gold-dark/30 dark:from-gold/25 dark:via-gold-light/15 dark:to-gold-dark/25 animate-border-shimmer">
@@ -697,28 +634,24 @@ export default function PremiumView() {
                         </div>
                       </div>
                     </div>
-
                     {/* Powered by Kotak 811 */}
                     <p className="text-center text-[10px] text-brown-300 dark:text-brown-500 mt-2 flex items-center justify-center gap-1">
                       <Shield className="size-2.5" />
                       Powered by Kotak 811
                     </p>
-
                     {/* Payment Details */}
-                    <div className="space-y-3 bg-white/50 dark:bg-white/5 rounded-xl p-4 border border-brown-100 dark:border-brown-100/20">
+                    <div className="space-y-3 bg-white/50 dark:bg-white/[0.08] rounded-xl p-4 border border-brown-100 dark:border-brown-100/20">
                       {/* Payee Name */}
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-brown-400 dark:text-brown-500">Payee Name</span>
-                        <span className="text-sm font-semibold text-brown-900 dark:text-brown-100">AYUSH UPADHYAY</span>
+                        <span className="text-sm font-semibold text-brown-900 dark:text-brown-600">AYUSH UPADHYAY</span>
                       </div>
-
                       <Separator className="bg-brown-100/50 dark:bg-brown-100/10" />
-
                       {/* UPI ID with Copy Button */}
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-xs text-brown-400 dark:text-brown-500">UPI ID</span>
                         <div className="flex items-center gap-2">
-                          <code className="text-sm font-mono font-semibold text-brown-900 dark:text-brown-100 bg-brown-50 dark:bg-brown-50/10 px-2 py-0.5 rounded">
+                          <code className="text-sm font-mono font-semibold text-brown-900 dark:text-brown-600 bg-brown-50 dark:bg-brown-50/10 px-2 py-0.5 rounded">
                             9532013475@kotakbank
                           </code>
                           <Button
@@ -736,16 +669,13 @@ export default function PremiumView() {
                           </Button>
                         </div>
                       </div>
-
                       <Separator className="bg-brown-100/50 dark:bg-brown-100/10" />
-
                       {/* Amount */}
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-brown-400 dark:text-brown-500">Amount</span>
                         <span className="text-sm font-bold text-gold-dark dark:text-gold">₹499</span>
                       </div>
                     </div>
-
                     {/* Copy UPI ID Button */}
                     <Button
                       onClick={handleCopyUpi}
@@ -764,7 +694,6 @@ export default function PremiumView() {
                         </>
                       )}
                     </Button>
-
                     {/* Continue to Verification */}
                     <Button
                       onClick={() => setPaymentStep('form')}
@@ -774,13 +703,11 @@ export default function PremiumView() {
                       I&apos;ve Made the Payment
                       <ArrowRight className="ml-2 size-4" />
                     </Button>
-
                     <p className="text-[10px] text-brown-400 dark:text-brown-500 leading-relaxed">
                       After completing payment via UPI, Bank Transfer, or any method, click above to submit your transaction details for verification.
                     </p>
                   </motion.div>
                 )}
-
                 {paymentStep === 'form' && (
                   <motion.div
                     key="form-step"
@@ -793,8 +720,7 @@ export default function PremiumView() {
                     {/* Form Header */}
                     <div className="text-center mb-1">
                       <h3
-                        className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
                       >
                         Verify Your Payment
                       </h3>
@@ -802,10 +728,9 @@ export default function PremiumView() {
                         Enter your payment details below for manual verification
                       </p>
                     </div>
-
                     {/* Transaction ID / UTR Number */}
                     <div className="space-y-2 text-left">
-                      <Label htmlFor="transactionId" className="text-sm font-medium text-brown-700 dark:text-brown-300">
+                      <Label htmlFor="transactionId" className="text-sm font-medium text-brown-700 dark:text-brown-500">
                         Transaction ID / UTR Number <span className="text-red-500">*</span>
                       </Label>
                       <Input
@@ -816,23 +741,22 @@ export default function PremiumView() {
                           setTransactionId(e.target.value);
                           setSubmitError(null);
                         }}
-                        className="bg-white dark:bg-white/5 border-brown-200 dark:border-brown-100/30 focus-visible:border-gold dark:focus-visible:border-gold focus-visible:ring-gold/20"
+                        className="bg-white dark:bg-white/[0.08] border-brown-200 dark:border-brown-100/30 focus-visible:border-gold dark:focus-visible:border-gold focus-visible:ring-gold/20"
                       />
                       <p className="text-[10px] text-brown-400 dark:text-brown-500">
                         Find this in your UPI app or bank statement after payment
                       </p>
                     </div>
-
                     {/* Payment Method */}
                     <div className="space-y-2 text-left">
-                      <Label className="text-sm font-medium text-brown-700 dark:text-brown-300">
+                      <Label className="text-sm font-medium text-brown-700 dark:text-brown-500">
                         Payment Method <span className="text-red-500">*</span>
                       </Label>
                       <Select
                         value={paymentMethod}
                         onValueChange={(val: string) => setPaymentMethod(val as 'upi' | 'bank_transfer' | 'other')}
                       >
-                        <SelectTrigger className="w-full bg-white dark:bg-white/5 border-brown-200 dark:border-brown-100/30">
+                        <SelectTrigger className="w-full bg-white dark:bg-white/[0.08] border-brown-200 dark:border-brown-100/30">
                           <SelectValue placeholder="Select payment method" />
                         </SelectTrigger>
                         <SelectContent className="bg-white dark:bg-[#2A2018] border-brown-200 dark:border-brown-100/30">
@@ -842,17 +766,16 @@ export default function PremiumView() {
                         </SelectContent>
                       </Select>
                     </div>
-
                     {/* Screenshot Upload (optional) */}
                     <div className="space-y-2 text-left">
-                      <Label className="text-sm font-medium text-brown-700 dark:text-brown-300">
+                      <Label className="text-sm font-medium text-brown-700 dark:text-brown-500">
                         Payment Screenshot <span className="text-[10px] text-brown-400 dark:text-brown-500">(optional)</span>
                       </Label>
                       <div className="flex items-center gap-3">
                         <Button
                           type="button"
                           variant="outline"
-                          className="h-9 border-dashed border-brown-200 dark:border-brown-100/30 text-brown-500 dark:text-brown-400 hover:bg-gold/5 dark:hover:bg-gold/10"
+                          className="h-9 border-dashed border-brown-200 dark:border-brown-100/30 text-brown-500 dark:text-brown-600 hover:bg-gold/5 dark:hover:bg-gold/10"
                           onClick={() => document.getElementById('screenshot-input')?.click()}
                         >
                           <Upload className="size-4 mr-2" />
@@ -884,7 +807,6 @@ export default function PremiumView() {
                         Helps speed up verification
                       </p>
                     </div>
-
                     {/* Error Message */}
                     {submitError && (
                       <motion.div
@@ -896,7 +818,6 @@ export default function PremiumView() {
                         <p className="text-xs text-red-700 dark:text-red-400">{submitError}</p>
                       </motion.div>
                     )}
-
                     {/* Submit Button */}
                     <Button
                       onClick={handleSubmitVerification}
@@ -916,7 +837,6 @@ export default function PremiumView() {
                         </>
                       )}
                     </Button>
-
                     {/* Back to QR */}
                     <Button
                       variant="ghost"
@@ -928,7 +848,6 @@ export default function PremiumView() {
                     </Button>
                   </motion.div>
                 )}
-
                 {paymentStep === 'pending' && (
                   <motion.div
                     key="pending-step"
@@ -948,27 +867,22 @@ export default function PremiumView() {
                       >
                         <Clock className="size-8 text-amber-500 dark:text-amber-400" />
                       </motion.div>
-
                       <h3
-                        className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
                       >
                         Verification Pending
                       </h3>
-
                       <Badge className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700/40 text-xs font-medium px-3 py-1">
                         <Clock className="size-3 mr-1.5" />
                         Under Review
                       </Badge>
                     </div>
-
                     {/* Status Message */}
                     <div className="bg-amber-50/50 dark:bg-amber-900/10 rounded-xl p-4 border border-amber-100 dark:border-amber-800/30">
-                      <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
+                      <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed">
                         We&apos;re verifying your payment. This usually takes <strong>5–10 minutes</strong>. You&apos;ll get access once verified.
                       </p>
                     </div>
-
                     {/* Check Status Button */}
                     <Button
                       onClick={handleCheckStatus}
@@ -988,32 +902,29 @@ export default function PremiumView() {
                         </>
                       )}
                     </Button>
-
                     <p className="text-[10px] text-brown-400 dark:text-brown-500 leading-relaxed">
                       You can close this page and come back later. Your verification request is saved securely.
                     </p>
                   </motion.div>
                 )}
               </AnimatePresence>
-
               {/* Trust badges */}
               <div className="mt-6 flex items-center justify-center gap-3 text-[10px] text-brown-400 dark:text-brown-500">
                 <div className="flex items-center gap-1 hover:scale-105 transition-transform">
                   <Shield className="size-3" />
                   <span>SSL Secured</span>
                 </div>
-                <span className="text-brown-200 dark:text-brown-100/30">•</span>
+                <span className="text-brown-200 dark:text-brown-600/30">•</span>
                 <div className="flex items-center gap-1 hover:scale-105 transition-transform">
                   <CheckCircle2 className="size-3" />
                   <span>7-Day Guarantee</span>
                 </div>
-                <span className="text-brown-200 dark:text-brown-100/30">•</span>
+                <span className="text-brown-200 dark:text-brown-600/30">•</span>
                 <div className="flex items-center gap-1 hover:scale-105 transition-transform">
                   <Lock className="size-3" />
                   <span>Secure Payments</span>
                 </div>
               </div>
-
               {/* "Nothing to Hide" trust badge */}
               <div className="mt-4 flex items-center justify-center">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/5 dark:bg-gold/10 border border-gold/15 dark:border-gold/20">
@@ -1025,18 +936,15 @@ export default function PremiumView() {
           </Card>
           </div>
         </motion.div>
-
         {/* What People Say — Rotating Testimonials */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.25 }}>
           <div className="space-y-4">
             <h3
-              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 text-center"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600 text-center"
             >
               What People Say
             </h3>
-
-            <Card className="glass-light border-0 shadow-sm dark:bg-white/5 relative overflow-hidden">
+            <Card className="glass-light border-0 shadow-sm dark:bg-white/[0.08] relative overflow-hidden">
               <CardContent className="p-6 relative">
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -1046,17 +954,17 @@ export default function PremiumView() {
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.4 }}
                   >
-                    <span className="absolute top-4 left-5 text-4xl text-gold/15 dark:text-gold/10 font-serif leading-none" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>&ldquo;</span>
+                    <span className="absolute top-4 left-5 text-4xl text-gold/15 dark:text-gold/10 font-serif leading-none">&ldquo;</span>
                     <Quote className="size-8 text-brown-100 dark:text-brown-50/30 mb-2" />
-                    <p className="text-sm leading-relaxed text-brown-600 dark:text-brown-300 italic mb-3">
+                    <p className="text-sm leading-relaxed text-brown-600 dark:text-brown-500 italic mb-3">
                       &ldquo;{TESTIMONIALS[activeTestimonial].text}&rdquo;
                     </p>
                     <div className="flex items-center gap-2">
-                      <div className="flex size-8 items-center justify-center rounded-full bg-brown-50 dark:bg-brown-50/50 text-xs font-semibold text-brown-600 dark:text-brown-300">
+                      <div className="flex size-8 items-center justify-center rounded-full bg-brown-50 dark:bg-brown-50/50 text-xs font-semibold text-brown-600 dark:text-brown-500">
                         {TESTIMONIALS[activeTestimonial].initial}
                       </div>
                       <div>
-                        <p className="text-xs font-medium text-brown-900 dark:text-brown-100">{TESTIMONIALS[activeTestimonial].name}</p>
+                        <p className="text-xs font-medium text-brown-900 dark:text-brown-600">{TESTIMONIALS[activeTestimonial].name}</p>
                         <p className="text-[10px] text-brown-400 dark:text-brown-500">{TESTIMONIALS[activeTestimonial].badge}</p>
                       </div>
                       <div className="ml-auto">
@@ -1065,7 +973,6 @@ export default function PremiumView() {
                     </div>
                   </motion.div>
                 </AnimatePresence>
-
                 {/* Dot indicators */}
                 <div className="flex justify-center gap-1.5 mt-4">
                   {TESTIMONIALS.map((_, i) => (
@@ -1085,7 +992,6 @@ export default function PremiumView() {
             </Card>
           </div>
         </motion.div>
-
         {/* Demo: Skip Payment Link */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.3 }} className="text-center">
           <button

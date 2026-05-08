@@ -1,53 +1,41 @@
 'use client';
-
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Sparkles, ArrowRight, MessageCircle, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cosmicToast } from '@/lib/toast';
-
 // ─── Types ──────────────────────────────────────────────────────────────────
-
 interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
 }
-
 // ─── Zodiac badge helper ────────────────────────────────────────────────────
-
 const ZODIAC_SYMBOLS: Record<string, string> = {
   Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋',
   Leo: '♌', Virgo: '♍', Libra: '♎', Scorpio: '♏',
   Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
 };
-
 // ─── Suggested Questions ─────────────────────────────────────────────────────
-
 const SUGGESTED_QUESTIONS = [
   'What does my moon sign reveal about my emotional needs?',
   'How can I improve my relationship patterns?',
   'What are my hidden emotional strengths?',
   'How do my current transits affect me?',
 ];
-
 // ─── Message entrance variants ──────────────────────────────────────────────
-
 const aiMessageVariant = {
   initial: { opacity: 0, x: -20 },
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -10 },
 };
-
 const userMessageVariant = {
   initial: { opacity: 0, x: 20 },
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: 10 },
 };
-
 // ─── Typing Indicator ───────────────────────────────────────────────────────
-
 function TypingIndicator() {
   return (
     <div className="flex items-start gap-2 mb-4">
@@ -64,7 +52,7 @@ function TypingIndicator() {
       >
         <Sparkles className="w-4 h-4 text-gold" />
       </motion.div>
-      <div className="bg-white dark:bg-white/5 border border-brown-100/50 dark:border-brown-100/20 rounded-2xl rounded-tl-sm px-4 py-3">
+      <div className="bg-white dark:bg-white/[0.08] border border-brown-100/50 dark:border-brown-100/20 rounded-2xl rounded-tl-sm px-4 py-3">
         <div className="flex gap-1.5 items-center">
           <span className="typing-dot w-2 h-2 bg-brown-300 dark:bg-brown-400 rounded-full inline-block" />
           <span className="typing-dot w-2 h-2 bg-brown-300 dark:bg-brown-400 rounded-full inline-block" />
@@ -74,15 +62,11 @@ function TypingIndicator() {
     </div>
   );
 }
-
 // ─── Format timestamp ───────────────────────────────────────────────────────
-
 function formatTime(date: Date): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
-
 // ─── Main ChatView ──────────────────────────────────────────────────────────
-
 export default function ChatView() {
   const {
     birthDetails,
@@ -90,36 +74,29 @@ export default function ChatView() {
     numerologyData,
     traitScores,
   } = useAyuAstroStore();
-
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(true);
-
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const sessionIdRef = useRef<string>(`chat-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
-
   // Generate a stable session ID
   const sessionId = sessionIdRef.current;
-
   // Auto-scroll to bottom
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
-
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading, scrollToBottom]);
-
   // Build context from store data
   const buildContext = useCallback(() => {
     const topTraits = traitScores
       .sort((a, b) => b.score - a.score)
       .slice(0, 5)
       .map((t) => t.label);
-
     return {
       name: birthDetails?.name,
       sunSign: astrologyData?.sunSign,
@@ -137,30 +114,25 @@ export default function ChatView() {
       relationshipStatus: birthDetails?.relationshipStatus,
     };
   }, [birthDetails, astrologyData, numerologyData, traitScores]);
-
   // Send message
   const sendMessage = useCallback(async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
     if (messageText.length > 500) return;
-
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
       content: messageText.trim(),
       timestamp: new Date(),
     };
-
     setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
     setShowSuggestions(false);
-
     try {
       const conversationHistory = messages.map((m) => ({
         role: m.role,
         content: m.content,
       }));
-
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -171,9 +143,7 @@ export default function ChatView() {
           conversationHistory,
         }),
       });
-
       const data = await response.json();
-
       if (!data.success) {
         const errorMessage: ChatMessage = {
           id: `error-${Date.now()}`,
@@ -210,26 +180,21 @@ export default function ChatView() {
       inputRef.current?.focus();
     }
   }, [isLoading, messages, sessionId, buildContext]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     sendMessage(inputValue);
   };
-
   const handleSuggestionClick = (question: string) => {
     sendMessage(question);
   };
-
   const handleClearChat = () => {
     setMessages([]);
     setShowSuggestions(true);
     setRemaining(null);
   };
-
   const zodiacSign = astrologyData?.sunSign || '';
   const zodiacSymbol = zodiacSign ? ZODIAC_SYMBOLS[zodiacSign] || '✨' : '✨';
   const userName = birthDetails?.name || 'Seeker';
-
   return (
     <div className="min-h-screen pb-24 flex flex-col bg-cream dark:bg-[#1A1412]">
       {/* Header */}
@@ -241,19 +206,19 @@ export default function ChatView() {
                 <Sparkles className="w-5 h-5 text-gold" />
               </div>
               <div>
-                <h1 className="text-lg font-serif font-bold text-brown-900 dark:text-brown-100">
+                <h1 className="text-lg font-serif font-bold text-brown-900 dark:text-brown-600">
                   Cosmic Counselor
                 </h1>
-                <p className="text-xs text-brown-400 dark:text-brown-300">
+                <p className="text-xs text-brown-400 dark:text-brown-500">
                   Ask about your emotional patterns & cosmic journey
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               {zodiacSign && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 dark:bg-white/5 border border-brown-100/50 dark:border-brown-100/20">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 dark:bg-white/[0.08] border border-brown-100/50 dark:border-brown-100/20">
                   <span className="text-base leading-none">{zodiacSymbol}</span>
-                  <span className="text-xs font-medium text-brown-600 dark:text-brown-300">{zodiacSign}</span>
+                  <span className="text-xs font-medium text-brown-600 dark:text-brown-500">{zodiacSign}</span>
                 </div>
               )}
               {/* Clear Chat Button */}
@@ -262,7 +227,7 @@ export default function ChatView() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   onClick={handleClearChat}
-                  className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 text-brown-400 hover:text-red-500 dark:text-brown-300 dark:hover:text-red-400"
+                  className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 text-brown-400 hover:text-red-500 dark:text-brown-500 dark:hover:text-red-400"
                   aria-label="Clear chat"
                   title="Clear chat"
                 >
@@ -278,7 +243,6 @@ export default function ChatView() {
           )}
         </div>
       </div>
-
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto px-4 py-4 max-w-lg mx-auto w-full">
         {/* Welcome Card */}
@@ -296,15 +260,14 @@ export default function ChatView() {
                 <div className="w-8 h-8 rounded-full bg-gold/20 dark:bg-gold/10 flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-gold" />
                 </div>
-                <span className="text-sm font-semibold text-brown-900 dark:text-brown-100">Cosmic Counselor</span>
+                <span className="text-sm font-semibold text-brown-900 dark:text-brown-600">Cosmic Counselor</span>
               </div>
-              <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
+              <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed">
                 Welcome{userName !== 'Seeker' ? `, ${userName}` : ''} to Cosmic Counselor! I&apos;m here to help you explore your emotional patterns through the lens of Vedic astrology and behavioral science. What would you like to explore today?
               </p>
             </div>
           </motion.div>
         )}
-
         {/* Chat Messages */}
         <AnimatePresence mode="popLayout">
           {messages.map((msg) => (
@@ -325,14 +288,13 @@ export default function ChatView() {
                   <Sparkles className="w-4 h-4 text-gold" />
                 </div>
               )}
-
               {/* Message Bubble */}
               <div className="flex flex-col">
                 <div
                   className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed ${
                     msg.role === 'user'
                       ? 'bg-brown-700 dark:bg-brown-600 text-white rounded-2xl rounded-tr-sm'
-                      : 'bg-white dark:bg-white/5 border border-brown-100/50 dark:border-brown-100/20 text-brown-900 dark:text-brown-100 rounded-2xl rounded-tl-sm border-l-2 border-l-gold/40'
+                      : 'bg-white dark:bg-white/[0.08] border border-brown-100/50 dark:border-brown-100/20 text-brown-900 dark:text-brown-600 rounded-2xl rounded-tl-sm border-l-2 border-l-gold/40'
                   }`}
                 >
                   {msg.role === 'assistant' && <span className="text-gold/50 mr-1 text-xs">✦</span>}
@@ -345,7 +307,6 @@ export default function ChatView() {
                   {formatTime(msg.timestamp)}
                 </span>
               </div>
-
               {/* User Avatar */}
               {msg.role === 'user' && (
                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-brown-700 dark:bg-brown-600 flex items-center justify-center">
@@ -355,13 +316,10 @@ export default function ChatView() {
             </motion.div>
           ))}
         </AnimatePresence>
-
         {/* Typing Indicator */}
         {isLoading && <TypingIndicator />}
-
         <div ref={messagesEndRef} />
       </div>
-
       {/* Suggested Questions */}
       <AnimatePresence>
         {showSuggestions && messages.length === 0 && !isLoading && (
@@ -378,7 +336,7 @@ export default function ChatView() {
                 <button
                   key={question}
                   onClick={() => handleSuggestionClick(question)}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs rounded-full border border-brown-200 dark:border-brown-100/30 bg-white/80 dark:bg-white/5 text-brown-700 dark:text-brown-300 transition-all duration-200 hover:border-gold/50 hover:shadow-[0_0_12px_rgba(212,175,55,0.15)] hover:scale-[1.02]"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs rounded-full border border-brown-200 dark:border-brown-100/30 bg-white/80 dark:bg-white/[0.08] text-brown-700 dark:text-brown-500 transition-all duration-200 hover:border-gold/50 hover:shadow-[0_0_12px_rgba(212,175,55,0.15)] hover:scale-[1.02]"
                 >
                   <Sparkles className="w-3 h-3 text-gold flex-shrink-0" />
                   <span className="line-clamp-1">{question}</span>
@@ -388,7 +346,6 @@ export default function ChatView() {
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Input Area */}
       <div className="sticky bottom-16 glass-light border-t border-brown-100/30 dark:border-brown-100/10 px-4 py-3 z-10">
         <form onSubmit={handleSubmit} className="max-w-lg mx-auto flex items-center gap-2">
@@ -400,7 +357,7 @@ export default function ChatView() {
             placeholder="Ask your cosmic question..."
             maxLength={500}
             disabled={isLoading}
-            className="gold-focus-ring flex-1 h-11 px-4 rounded-full bg-white dark:bg-white/5 border border-brown-200 dark:border-brown-100/20 text-brown-900 dark:text-brown-100 placeholder:text-brown-300 dark:placeholder:text-brown-400 text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="gold-focus-ring flex-1 h-11 px-4 rounded-full bg-white dark:bg-white/[0.08] border border-brown-200 dark:border-brown-100/20 text-brown-900 dark:text-brown-600 placeholder:text-brown-300 dark:placeholder:text-brown-400 text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           />
           <button
             type="submit"
@@ -412,10 +369,10 @@ export default function ChatView() {
           </button>
         </form>
         <div className="max-w-lg mx-auto mt-1 flex justify-between items-center px-2">
-          <p className="text-[10px] text-brown-300 dark:text-brown-400">
+          <p className="text-[10px] text-brown-300 dark:text-brown-600">
             AI guidance, not professional advice
           </p>
-          <p className="text-[10px] text-brown-300 dark:text-brown-400">
+          <p className="text-[10px] text-brown-300 dark:text-brown-600">
             {inputValue.length}/500
           </p>
         </div>

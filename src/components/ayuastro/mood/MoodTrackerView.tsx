@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,9 +25,7 @@ import {
   Brain,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
-
 // ─── Types ──────────────────────────────────────────────────────────────────
-
 interface MoodEntryData {
   id: string;
   mood: number;
@@ -37,16 +34,13 @@ interface MoodEntryData {
   tags: string[];
   createdAt: string;
 }
-
 interface MoodSummary {
   averageMood: number;
   mostCommonEmoji: string;
   streakDays: number;
   totalEntries: number;
 }
-
 // ─── Constants ──────────────────────────────────────────────────────────────
-
 const MOOD_OPTIONS = [
   { mood: 1, emoji: '😔', label: 'Very Low' },
   { mood: 2, emoji: '😐', label: 'Low' },
@@ -54,7 +48,6 @@ const MOOD_OPTIONS = [
   { mood: 4, emoji: '😊', label: 'Good' },
   { mood: 5, emoji: '🤩', label: 'Excellent' },
 ] as const;
-
 const TAG_OPTIONS = [
   'grateful',
   'peaceful',
@@ -67,7 +60,6 @@ const TAG_OPTIONS = [
   'inspired',
   'tired',
 ] as const;
-
 const MOOD_COLORS: Record<number, string> = {
   1: 'bg-red-400',
   2: 'bg-orange-400',
@@ -75,7 +67,6 @@ const MOOD_COLORS: Record<number, string> = {
   4: 'bg-green-300',
   5: 'bg-sage',
 };
-
 const MOOD_BAR_HEIGHTS: Record<number, string> = {
   1: 'h-4',
   2: 'h-8',
@@ -83,25 +74,19 @@ const MOOD_BAR_HEIGHTS: Record<number, string> = {
   4: 'h-16',
   5: 'h-20',
 };
-
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
 };
-
 // ─── Mood Pattern Analysis ──────────────────────────────────────────────────
-
 function getMoodPatternInsight(entries: MoodEntryData[]): string {
   if (entries.length < 3) return 'Keep logging your mood to unlock pattern insights.';
-
   // Analyze weekday vs weekend
   const weekdayMoods: number[] = [];
   const weekendMoods: number[] = [];
   const taggedEntries = entries.filter((e) => e.tags && e.tags.length > 0);
   const hasJournalEntries = entries.filter((e) => e.note && e.note.length > 0);
-
   entries.forEach((e) => {
     const day = new Date(e.createdAt).getDay();
     if (day === 0 || day === 6) {
@@ -110,14 +95,12 @@ function getMoodPatternInsight(entries: MoodEntryData[]): string {
       weekdayMoods.push(e.mood);
     }
   });
-
   const avgWeekday = weekdayMoods.length > 0
     ? weekdayMoods.reduce((a, b) => a + b, 0) / weekdayMoods.length
     : 0;
   const avgWeekend = weekendMoods.length > 0
     ? weekendMoods.reduce((a, b) => a + b, 0) / weekendMoods.length
     : 0;
-
   // Check if journaling correlates with better mood
   const avgWithJournal = hasJournalEntries.length > 0
     ? hasJournalEntries.reduce((a, b) => a + b.mood, 0) / hasJournalEntries.length
@@ -127,47 +110,36 @@ function getMoodPatternInsight(entries: MoodEntryData[]): string {
         .filter((e) => !e.note || e.note.length === 0)
         .reduce((a, b) => a + b.mood, 0) / Math.max(1, entries.length - hasJournalEntries.length)
     : 0;
-
   // Check for grateful/happy tags
   const positiveTagEntries = taggedEntries.filter((e) =>
     e.tags.some((t) => ['grateful', 'happy', 'peaceful', 'inspired'].includes(t))
   );
-
   const insights: string[] = [];
-
   if (avgWeekday > avgWeekend + 0.5) {
     insights.push('You tend to feel better on weekdays — perhaps structure and routine support your well-being.');
   } else if (avgWeekend > avgWeekday + 0.5) {
     insights.push('Your mood lifts on weekends — rest and freedom are essential for your emotional balance.');
   }
-
   if (avgWithJournal > avgWithoutJournal + 0.3 && hasJournalEntries.length >= 2) {
     insights.push('Your mood improves after journaling — self-reflection is a powerful tool for you.');
   }
-
   if (positiveTagEntries.length >= 3) {
     insights.push('Gratitude and positivity are recurring themes in your entries — keep nurturing this energy.');
   }
-
   if (insights.length === 0) {
     insights.push('Your emotional patterns are still emerging. Keep tracking to reveal deeper insights.');
   }
-
   return insights[0];
 }
-
 // ─── Confetti Effect Component ──────────────────────────────────────────────
-
 function ConfettiEffect({ active }: { active: boolean }) {
   if (!active) return null;
-
   const particles = Array.from({ length: 6 }, (_, i) => ({
     id: i,
     left: `${30 + (i * 8)}%`,
     delay: `${i * 0.05}s`,
     size: 4 + (i % 3) * 2,
   }));
-
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
       {particles.map((p) => (
@@ -187,14 +159,11 @@ function ConfettiEffect({ active }: { active: boolean }) {
     </div>
   );
 }
-
 // We need `i` in the map above but it's inside a component. Let me fix.
 // Actually, the particles array uses index already via (i * 8), so this is fine.
 // But `i` is not defined inside the map — let me fix.
-
 function ConfettiEffectFixed({ active }: { active: boolean }) {
   if (!active) return null;
-
   const particles = [
     { id: 0, left: '30%', delay: '0s', size: 6 },
     { id: 1, left: '38%', delay: '0.05s', size: 4 },
@@ -203,7 +172,6 @@ function ConfettiEffectFixed({ active }: { active: boolean }) {
     { id: 4, left: '62%', delay: '0.2s', size: 6 },
     { id: 5, left: '70%', delay: '0.25s', size: 4 },
   ];
-
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
       {particles.map((p) => (
@@ -223,36 +191,28 @@ function ConfettiEffectFixed({ active }: { active: boolean }) {
     </div>
   );
 }
-
 // ─── Helper Functions ───────────────────────────────────────────────────────
-
 function getInsightMessage(avg: number): string {
   if (avg > 4) return "You're in a beautiful emotional flow. Keep nurturing what's working.";
   if (avg >= 3) return "You're finding balance. Small acts of self-care can tip the scale upward.";
   return "It's okay to have tough periods. Consider reaching out to someone you trust.";
 }
-
 function formatEntryDate(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
   if (days === 0) return 'Today';
   if (days === 1) return 'Yesterday';
   if (days < 7) return `${days} days ago`;
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
-
 function formatFullDate(date: Date): string {
   return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
 }
-
 // ─── Component ──────────────────────────────────────────────────────────────
-
 export default function MoodTrackerView() {
   const { userId, setView } = useAyuAstroStore();
-
   // Mood check-in state
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
   const [selectedEmoji, setSelectedEmoji] = useState<string>('');
@@ -261,10 +221,8 @@ export default function MoodTrackerView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-
   // Bounce animation state for emoji
   const [bouncingEmoji, setBouncingEmoji] = useState<number | null>(null);
-
   // History state
   const [entries, setEntries] = useState<MoodEntryData[]>([]);
   const [summary, setSummary] = useState<MoodSummary>({
@@ -275,7 +233,6 @@ export default function MoodTrackerView() {
   });
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [historyOpen, setHistoryOpen] = useState(false);
-
   // Fetch mood history
   const fetchHistory = useCallback(async () => {
     if (!userId) {
@@ -296,11 +253,9 @@ export default function MoodTrackerView() {
       setIsLoadingHistory(false);
     }
   }, [userId]);
-
   useEffect(() => {
     fetchHistory();
   }, [fetchHistory]);
-
   // Check if already logged today
   const todayEntry = entries.find((e) => {
     const d = new Date(e.createdAt);
@@ -311,7 +266,6 @@ export default function MoodTrackerView() {
       d.getFullYear() === now.getFullYear()
     );
   });
-
   // Handle mood emoji selection with bounce
   const handleMoodSelect = (mood: number, emoji: string) => {
     setSelectedMood(mood);
@@ -321,14 +275,12 @@ export default function MoodTrackerView() {
     setBouncingEmoji(mood);
     setTimeout(() => setBouncingEmoji(null), 300);
   };
-
   // Handle tag toggle
   const handleTagToggle = (tag: string) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
-
   // Handle submit with confetti
   const handleSubmit = async () => {
     if (!selectedMood || !userId) return;
@@ -364,7 +316,6 @@ export default function MoodTrackerView() {
       setIsSubmitting(false);
     }
   };
-
   // Build last 7 days data for the timeline
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
@@ -379,12 +330,10 @@ export default function MoodTrackerView() {
     });
     return { dayName, date, entry, isToday: i === 6 };
   });
-
   // Circular progress for average mood
   const avgPercent = summary.averageMood > 0 ? (summary.averageMood / 5) * 100 : 0;
   const circumference = 2 * Math.PI * 40;
   const strokeDashoffset = circumference - (avgPercent / 100) * circumference;
-
   return (
     <div className="bg-cream dark:bg-[#1a1410] px-4 py-6 pb-24 min-h-screen">
       <div className="mx-auto max-w-lg space-y-6">
@@ -396,25 +345,23 @@ export default function MoodTrackerView() {
             onClick={() => setView('profile')}
             className="size-10 rounded-full hover:bg-brown-50 dark:hover:bg-brown-800"
           >
-            <ArrowLeft className="size-5 text-brown-700 dark:text-brown-300" />
+            <ArrowLeft className="size-5 text-brown-700 dark:text-brown-500" />
           </Button>
           <div>
             <h1
-              className="font-serif text-xl font-bold text-brown-900 dark:text-brown-100"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-xl font-bold text-brown-900 dark:text-brown-600"
             >
               Mood Journal
             </h1>
             <p className="text-xs text-brown-400 dark:text-brown-500">Track your emotional patterns</p>
           </div>
         </motion.div>
-
         {/* ─── Section 1: Today's Check-in ─────────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5 relative overflow-hidden">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] relative overflow-hidden">
             <ConfettiEffectFixed active={showConfetti} />
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                 <Heart className="size-5 text-gold" />
                 {todayEntry ? 'Today\'s Mood Logged ✓' : 'How are you feeling today?'}
               </CardTitle>
@@ -423,7 +370,7 @@ export default function MoodTrackerView() {
               {todayEntry ? (
                 <div className="text-center py-4">
                   <span className="text-5xl">{todayEntry.emoji}</span>
-                  <p className="mt-2 text-sm text-brown-600 dark:text-brown-400">
+                  <p className="mt-2 text-sm text-brown-600 dark:text-brown-600">
                     You logged a {MOOD_OPTIONS.find((m) => m.mood === todayEntry.mood)?.label.toLowerCase()} mood today
                   </p>
                   {todayEntry.note && (
@@ -458,16 +405,14 @@ export default function MoodTrackerView() {
                       </motion.button>
                     ))}
                   </div>
-
                   {/* Journal Note */}
                   <Textarea
                     placeholder="What's on your mind today..."
                     value={journalNote}
                     onChange={(e) => setJournalNote(e.target.value)}
-                    className="mb-4 gold-focus-ring border-brown-200 dark:border-brown-100/20 bg-cream dark:bg-brown-50/10 text-brown-900 dark:text-brown-100 placeholder:text-brown-300 dark:placeholder:text-brown-600 resize-none"
+                    className="mb-4 gold-focus-ring border-brown-200 dark:border-brown-100/20 bg-cream dark:bg-brown-50/10 text-brown-900 dark:text-brown-600 placeholder:text-brown-300 dark:placeholder:text-brown-600 resize-none"
                     rows={3}
                   />
-
                   {/* Tags */}
                   <div className="mb-5">
                     <p className="text-xs text-brown-400 dark:text-brown-500 mb-2 font-medium">How would you describe your mood?</p>
@@ -481,7 +426,7 @@ export default function MoodTrackerView() {
                             className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 border ${
                               isSelected
                                 ? 'bg-gold/15 dark:bg-gold/20 border-gold/40 text-gold-dark dark:text-gold'
-                                : 'bg-transparent border-brown-200 dark:border-brown-100/20 text-brown-500 dark:text-brown-400 hover:border-gold/30'
+                                : 'bg-transparent border-brown-200 dark:border-brown-100/20 text-brown-500 dark:text-brown-600 hover:border-gold/30'
                             }`}
                           >
                             {tag}
@@ -490,7 +435,6 @@ export default function MoodTrackerView() {
                       })}
                     </div>
                   </div>
-
                   {/* Submit Button */}
                   <AnimatePresence mode="wait">
                     {submitSuccess ? (
@@ -531,12 +475,11 @@ export default function MoodTrackerView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* ─── Section 2: Mood Timeline (Last 7 Days) ─────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08]">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                 <Sparkles className="size-5 text-gold" />
                 Your Emotional Week
               </CardTitle>
@@ -599,13 +542,12 @@ export default function MoodTrackerView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* ─── Section 3: Insights ─────────────────────────────────── */}
         {summary.totalEntries > 0 && (
           <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08]">
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+                <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                   <TrendingUp className="size-5 text-gold" />
                   Insights
                 </CardTitle>
@@ -638,55 +580,50 @@ export default function MoodTrackerView() {
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-                          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                        <span className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
+                         >
                           {summary.averageMood}
                         </span>
                       </div>
                     </div>
                     <span className="text-[10px] text-brown-400 dark:text-brown-500 mt-1">Avg Mood</span>
                   </div>
-
                   {/* Most Frequent Emoji */}
                   <div className="flex flex-col items-center justify-center">
                     <span className="text-4xl">{summary.mostCommonEmoji}</span>
                     <span className="text-[10px] text-brown-400 dark:text-brown-500 mt-1">Most Frequent</span>
                   </div>
-
                   {/* Streak */}
                   <div className="flex flex-col items-center justify-center">
                     <div className="flex items-center gap-1">
                       <Flame className="size-5 text-gold" />
-                      <span className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-100"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                      <span className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-600"
+                       >
                         {summary.streakDays}
                       </span>
                     </div>
                     <span className="text-[10px] text-brown-400 dark:text-brown-500 mt-1">Day Streak</span>
                   </div>
                 </div>
-
                 <Separator className="my-3 bg-brown-100 dark:bg-brown-100/20" />
-
                 {/* AI Insight */}
                 <div className="rounded-xl bg-gold/5 dark:bg-gold/10 border border-gold/10 dark:border-gold/20 p-3">
                   <p className="text-xs font-semibold text-gold-dark dark:text-gold mb-1 flex items-center gap-1">
                     <Sparkles className="size-3" />
                     Emotional Insight
                   </p>
-                  <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">
+                  <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">
                     {getInsightMessage(summary.averageMood)}
                   </p>
                 </div>
-
                 {/* Mood Pattern Insight Card */}
                 {entries.length >= 3 && (
                   <div className="mt-3 rounded-xl bg-brown-50/50 dark:bg-brown-50/10 border border-brown-100/50 dark:border-brown-100/20 p-3">
-                    <p className="text-xs font-semibold text-brown-900 dark:text-brown-100 mb-1 flex items-center gap-1">
+                    <p className="text-xs font-semibold text-brown-900 dark:text-brown-600 mb-1 flex items-center gap-1">
                       <Brain className="size-3 text-gold" />
                       Mood Pattern
                     </p>
-                    <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">
+                    <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">
                       {getMoodPatternInsight(entries)}
                     </p>
                   </div>
@@ -695,14 +632,13 @@ export default function MoodTrackerView() {
             </Card>
           </motion.div>
         )}
-
         {/* ─── Section 4: Journal History ──────────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08]">
             <Collapsible open={historyOpen} onOpenChange={setHistoryOpen}>
               <CollapsibleTrigger asChild>
                 <CardHeader className="pb-3 cursor-pointer hover:bg-brown-50/50 dark:hover:bg-brown-50/5 transition-colors rounded-t-lg">
-                  <CardTitle className="flex items-center justify-between text-base font-semibold text-brown-900 dark:text-brown-100">
+                  <CardTitle className="flex items-center justify-between text-base font-semibold text-brown-900 dark:text-brown-600">
                     <span className="flex items-center gap-2">
                       <BookOpen className="size-5 text-gold" />
                       Journal History
@@ -730,7 +666,7 @@ export default function MoodTrackerView() {
                   ) : entries.length === 0 ? (
                     <div className="text-center py-8">
                       <span className="text-4xl">✨</span>
-                      <p className="mt-2 text-sm text-brown-500 dark:text-brown-400">
+                      <p className="mt-2 text-sm text-brown-500 dark:text-brown-600">
                         Your journal is waiting for you
                       </p>
                       <p className="text-xs text-brown-300 dark:text-brown-600 mt-1">
@@ -748,11 +684,10 @@ export default function MoodTrackerView() {
                           <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white dark:bg-brown-50/20 border border-brown-100 dark:border-brown-100/20">
                             <span className="text-lg">{entry.emoji}</span>
                           </div>
-
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-xs font-semibold text-brown-900 dark:text-brown-100">
+                              <span className="text-xs font-semibold text-brown-900 dark:text-brown-600">
                                 {formatEntryDate(entry.createdAt)}
                               </span>
                               <Badge className="bg-gold/10 text-gold-dark dark:text-gold border-0 text-[10px] px-1.5 py-0">
@@ -760,7 +695,7 @@ export default function MoodTrackerView() {
                               </Badge>
                             </div>
                             {entry.note && (
-                              <p className="text-xs text-brown-500 dark:text-brown-400 line-clamp-2 leading-relaxed">
+                              <p className="text-xs text-brown-500 dark:text-brown-600 line-clamp-2 leading-relaxed">
                                 {entry.note}
                               </p>
                             )}
@@ -786,7 +721,6 @@ export default function MoodTrackerView() {
             </Collapsible>
           </Card>
         </motion.div>
-
         {/* ─── Gratitude Journal Entry Card ───────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.25 }} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
           <Card
@@ -800,8 +734,7 @@ export default function MoodTrackerView() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3
-                    className="font-serif text-base font-semibold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-base font-semibold text-brown-900 dark:text-brown-600"
                   >
                     Gratitude Journal
                   </h3>

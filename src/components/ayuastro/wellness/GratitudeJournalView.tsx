@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,30 +15,24 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
-
 // ─── Types ──────────────────────────────────────────────────────────────────
-
 interface GratitudeEntryData {
   id: string;
   slot: 'morning' | 'afternoon' | 'evening';
   content: string;
   createdAt: string;
 }
-
 interface GratitudeSummary {
   streakDays: number;
   totalEntries: number;
   mostCommonSlot: 'morning' | 'afternoon' | 'evening';
 }
-
 // ─── Constants ──────────────────────────────────────────────────────────────
-
 const SLOTS = [
   { key: 'morning' as const, emoji: '🌅', label: 'Morning', time: 'Start your day with gratitude' },
   { key: 'afternoon' as const, emoji: '☀️', label: 'Afternoon', time: 'Pause and reflect mid-day' },
   { key: 'evening' as const, emoji: '🌙', label: 'Evening', time: 'Close your day with thanks' },
 ];
-
 // 84 prompts — 7 per zodiac sign (12 signs × 7 = 84)
 const GRATITUDE_PROMPTS: Record<string, string[]> = {
   Aries: [
@@ -151,9 +144,7 @@ const GRATITUDE_PROMPTS: Record<string, string[]> = {
     'What emotional release are you thankful for?',
   ],
 };
-
 // ─── Helpers ────────────────────────────────────────────────────────────────
-
 function deterministicHash(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -163,33 +154,27 @@ function deterministicHash(str: string): number {
   }
   return Math.abs(hash);
 }
-
 function getDailyPrompt(sunSign: string, slot: 'morning' | 'afternoon' | 'evening'): string {
   const today = new Date().toISOString().split('T')[0];
   const hash = deterministicHash(today + sunSign + slot);
   const pool = GRATITUDE_PROMPTS[sunSign] || GRATITUDE_PROMPTS['Capricorn'];
   return pool[hash % pool.length];
 }
-
 function formatTimelineDate(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
   if (days === 0) return 'Today';
   if (days === 1) return 'Yesterday';
   if (days < 7) return `${days}d ago`;
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
-
 // ─── Animation Variants ────────────────────────────────────────────────────
-
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
 };
-
 const staggerContainer = {
   initial: {},
   animate: {
@@ -198,18 +183,14 @@ const staggerContainer = {
     },
   },
 };
-
 const staggerItem = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
-
 // ─── Component ──────────────────────────────────────────────────────────────
-
 export default function GratitudeJournalView() {
   const { userId, astrologyData, setView } = useAyuAstroStore();
   const sunSign = astrologyData?.sunSign || 'Capricorn';
-
   // Slot states
   const [slotContents, setSlotContents] = useState<Record<string, string>>({
     morning: '',
@@ -223,10 +204,8 @@ export default function GratitudeJournalView() {
   });
   const [activeSlot, setActiveSlot] = useState<'morning' | 'afternoon' | 'evening'>('morning');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   // Practice success animation
   const [practiceSuccess, setPracticeSuccess] = useState(false);
-
   // History state
   const [entries, setEntries] = useState<GratitudeEntryData[]>([]);
   const [summary, setSummary] = useState<GratitudeSummary>({
@@ -235,7 +214,6 @@ export default function GratitudeJournalView() {
     mostCommonSlot: 'morning',
   });
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
-
   // Fetch gratitude history
   const fetchHistory = useCallback(async () => {
     if (!userId) {
@@ -249,7 +227,6 @@ export default function GratitudeJournalView() {
       if (json.success) {
         setEntries(json.data.entries);
         setSummary(json.data.summary);
-
         // Pre-fill today's entries
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -258,15 +235,12 @@ export default function GratitudeJournalView() {
           d.setHours(0, 0, 0, 0);
           return d.getTime() === today.getTime();
         });
-
         const newSlotContents = { morning: '', afternoon: '', evening: '' };
         const newSubmittedSlots = { morning: false, afternoon: false, evening: false };
-
         for (const entry of todayEntries) {
           newSlotContents[entry.slot] = entry.content;
           newSubmittedSlots[entry.slot] = true;
         }
-
         setSlotContents(newSlotContents);
         setSubmittedSlots(newSubmittedSlots);
       }
@@ -276,18 +250,15 @@ export default function GratitudeJournalView() {
       setIsLoadingHistory(false);
     }
   }, [userId]);
-
   useEffect(() => {
     fetchHistory();
   }, [fetchHistory]);
-
   // Handle content change
   const handleContentChange = (slot: 'morning' | 'afternoon' | 'evening', content: string) => {
     if (content.length <= 500) {
       setSlotContents((prev) => ({ ...prev, [slot]: content }));
     }
   };
-
   // Handle submit for a slot
   const handleSubmit = async (slot: 'morning' | 'afternoon' | 'evening') => {
     if (!userId || !slotContents[slot].trim()) return;
@@ -307,7 +278,6 @@ export default function GratitudeJournalView() {
         setSubmittedSlots((prev) => ({ ...prev, [slot]: true }));
         cosmicToast.success('Gratitude saved ✦', `Your ${slot} reflection has been recorded`);
         await fetchHistory();
-
         // Show "I Practiced Today" success animation
         setPracticeSuccess(true);
         setTimeout(() => setPracticeSuccess(false), 3000);
@@ -318,20 +288,17 @@ export default function GratitudeJournalView() {
       setIsSubmitting(false);
     }
   };
-
   // Build past 7 days for mini-timeline
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - (6 - i));
     date.setHours(0, 0, 0, 0);
     const dayKey = date.toISOString().split('T')[0];
-
     const dayEntries = entries.filter((e) => {
       const d = new Date(e.createdAt);
       d.setHours(0, 0, 0, 0);
       return d.toISOString().split('T')[0] === dayKey;
     });
-
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     return {
       dayName: dayNames[date.getDay()],
@@ -341,10 +308,8 @@ export default function GratitudeJournalView() {
       isToday: i === 6,
     };
   });
-
   // Check if all slots for today are done
   const allSlotsDone = submittedSlots.morning && submittedSlots.afternoon && submittedSlots.evening;
-
   return (
     <div className="bg-cream dark:bg-[#1a1410] px-4 py-6 pb-24 min-h-screen">
       <div className="mx-auto max-w-lg space-y-6">
@@ -356,12 +321,11 @@ export default function GratitudeJournalView() {
             onClick={() => setView('mood')}
             className="size-10 rounded-full hover:bg-brown-50 dark:hover:bg-brown-800"
           >
-            <ArrowLeft className="size-5 text-brown-700 dark:text-brown-300" />
+            <ArrowLeft className="size-5 text-brown-700 dark:text-brown-500" />
           </Button>
           <div className="flex-1">
             <h1
-              className="font-serif text-xl font-bold text-brown-900 dark:text-brown-100"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-xl font-bold text-brown-900 dark:text-brown-600"
             >
               Gratitude Journal
             </h1>
@@ -375,7 +339,6 @@ export default function GratitudeJournalView() {
             </div>
           )}
         </motion.div>
-
         {/* "I Practiced Today" Success Animation */}
         <AnimatePresence>
           {practiceSuccess && (
@@ -397,18 +360,17 @@ export default function GratitudeJournalView() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-sage-dark dark:text-sage">I Practiced Today!</p>
-                <p className="text-xs text-brown-500 dark:text-brown-400">Your gratitude is shaping your world</p>
+                <p className="text-xs text-brown-500 dark:text-brown-600">Your gratitude is shaping your world</p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-
         {/* ─── Section 1: Today I'm grateful for... ─────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
-          <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+          <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-gold via-sage to-gold-dark" />
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                 <BookOpen className="size-5 text-gold" />
                 Today I&apos;m grateful for...
               </CardTitle>
@@ -443,22 +405,20 @@ export default function GratitudeJournalView() {
                   </button>
                 ))}
               </div>
-
               {/* Active Slot Content */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg">{SLOTS.find(s => s.key === activeSlot)?.emoji}</span>
-                  <span className="text-sm font-medium text-brown-700 dark:text-brown-300">
+                  <span className="text-sm font-medium text-brown-700 dark:text-brown-500">
                     {SLOTS.find(s => s.key === activeSlot)?.label} Gratitude
                   </span>
                   <span className="text-xs text-brown-300 dark:text-brown-600 ml-auto">
                     {slotContents[activeSlot].length}/500
                   </span>
                 </div>
-
                 {submittedSlots[activeSlot] ? (
                   <div className="rounded-xl bg-cream dark:bg-brown-50/10 border border-sage/20 p-4">
-                    <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed italic">
+                    <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed italic">
                       &ldquo;{slotContents[activeSlot]}&rdquo;
                     </p>
                     <div className="flex items-center gap-1 mt-2">
@@ -472,7 +432,7 @@ export default function GratitudeJournalView() {
                       placeholder={`What are you grateful for this ${activeSlot}...`}
                       value={slotContents[activeSlot]}
                       onChange={(e) => handleContentChange(activeSlot, e.target.value)}
-                      className="border-brown-200 dark:border-brown-100/20 bg-cream dark:bg-brown-50/10 text-brown-900 dark:text-brown-100 placeholder:text-brown-300 dark:placeholder:text-brown-600 resize-none focus-visible:ring-gold/30"
+                      className="border-brown-200 dark:border-brown-100/20 bg-cream dark:bg-brown-50/10 text-brown-900 dark:text-brown-600 placeholder:text-brown-300 dark:placeholder:text-brown-600 resize-none focus-visible:ring-gold/30"
                       rows={4}
                     />
                     <Button
@@ -498,13 +458,12 @@ export default function GratitudeJournalView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* ─── Section 2: All Slots Summary ──────────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
-          <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+          <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-sage via-gold/50 to-sage" />
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                 <Sparkles className="size-5 text-gold" />
                 Today&apos;s Gratitude Flow
               </CardTitle>
@@ -524,7 +483,6 @@ export default function GratitudeJournalView() {
                   </div>
                   <p
                     className="font-serif text-base font-bold text-sage-dark dark:text-sage"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                   >
                     Complete Gratitude Day!
                   </p>
@@ -545,7 +503,7 @@ export default function GratitudeJournalView() {
                     >
                       <span className="text-xl">{slot.emoji}</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-brown-900 dark:text-brown-100">
+                        <p className="text-xs font-semibold text-brown-900 dark:text-brown-600">
                           {slot.label}
                         </p>
                         <p className="text-[10px] text-brown-400 dark:text-brown-500 truncate">
@@ -568,10 +526,9 @@ export default function GratitudeJournalView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* ─── Section 3: Streak & Stats ─────────────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
-          <Card className="border-0 shadow-md bg-white dark:bg-white/5">
+          <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08]">
             <CardContent className="p-5">
               <div className="grid grid-cols-3 gap-4">
                 {/* Streak */}
@@ -579,26 +536,22 @@ export default function GratitudeJournalView() {
                   <div className="flex items-center gap-1">
                     <Flame className="size-5 text-gold" />
                     <span
-                      className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-100"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-600"
                     >
                       {summary.streakDays}
                     </span>
                   </div>
                   <span className="text-[10px] text-brown-400 dark:text-brown-500 mt-1">Day Streak</span>
                 </div>
-
                 {/* Total Entries */}
                 <div className="flex flex-col items-center justify-center">
                   <span
-                    className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-600"
                   >
                     {summary.totalEntries}
                   </span>
                   <span className="text-[10px] text-brown-400 dark:text-brown-500 mt-1">Total Entries</span>
                 </div>
-
                 {/* Most Common Slot */}
                 <div className="flex flex-col items-center justify-center">
                   <span className="text-2xl">
@@ -610,12 +563,11 @@ export default function GratitudeJournalView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* ─── Section 4: Gratitude History (Past 7 Days Mini-Timeline) ─ */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.2 }}>
-          <Card className="border-0 shadow-md bg-white dark:bg-white/5">
+          <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08]">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                 <BookOpen className="size-5 text-gold" />
                 Gratitude History
               </CardTitle>
@@ -648,12 +600,11 @@ export default function GratitudeJournalView() {
                         <p className={`text-xs font-semibold ${
                           day.isToday
                             ? 'text-gold-dark dark:text-gold'
-                            : 'text-brown-500 dark:text-brown-400'
+                            : 'text-brown-500 dark:text-brown-600'
                         }`}>
                           {day.dayName}
                         </p>
                       </div>
-
                       {/* Timeline Connector */}
                       <div className="flex flex-col items-center gap-0.5 shrink-0">
                         <div className={`size-3 rounded-full ${
@@ -667,7 +618,6 @@ export default function GratitudeJournalView() {
                           <div className="w-0.5 h-4 bg-brown-100 dark:bg-brown-100/20" />
                         )}
                       </div>
-
                       {/* Slots Filled */}
                       <div className="flex-1 flex items-center gap-2">
                         {SLOTS.map((slot) => {
@@ -694,10 +644,8 @@ export default function GratitudeJournalView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Decorative section divider */}
         <Separator className="bg-brown-100 dark:bg-brown-100/20" />
-
         {/* Insights message */}
         {summary.totalEntries > 0 && (
           <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.25 }}>
@@ -706,7 +654,7 @@ export default function GratitudeJournalView() {
                 <Sparkles className="size-3" />
                 Gratitude Insight
               </p>
-              <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">
+              <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">
                 {summary.streakDays >= 7
                   ? 'Amazing! A week-long gratitude streak. Your mind is rewiring itself for positivity and abundance.'
                   : summary.streakDays >= 3

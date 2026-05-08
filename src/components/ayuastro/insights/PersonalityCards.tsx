@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,9 +22,7 @@ import {
   ChevronsUpDown,
 } from 'lucide-react';
 import type { AstrologyInfo, NumerologyInfo, TraitScore } from '@/store/ayuastro-store';
-
 // ─── Personality Card Interface ─────────────────────────────────────────────
-
 export interface PersonalityCard {
   id: string;
   title: string;
@@ -40,9 +37,7 @@ export interface PersonalityCard {
   iconBg: string;             // Icon background
   iconColor: string;          // Icon text color
 }
-
 // ─── Zodiac Personality Data (Simple, Honest, No Jargon) ────────────────────
-
 const PERSONALITY: Record<string, { summary: string; strength: string; challenge: string }> = {
   Aries: {
     summary: 'You are a firecracker — bold, impulsive, and impossible to ignore. You jump into things headfirst and figure out the details later. People either love your energy or find you a bit much, and honestly, you don\'t care which. You get bored fast and hate waiting.',
@@ -105,9 +100,7 @@ const PERSONALITY: Record<string, { summary: string; strength: string; challenge
     challenge: 'You avoid reality when it gets uncomfortable, and reality always catches up.',
   },
 };
-
 // ─── Love Style Data ────────────────────────────────────────────────────────
-
 const LOVE_STYLE: Record<string, { summary: string; strength: string; challenge: string }> = {
   Aries: {
     summary: 'You fall hard and fast, chasing the thrill of new love like a sport. The chase excites you more than the relationship sometimes. You need a partner who keeps things exciting or you\'ll start looking elsewhere. Passion is your love language, and without it, you feel dead inside.',
@@ -170,9 +163,7 @@ const LOVE_STYLE: Record<string, { summary: string; strength: string; challenge:
     challenge: 'You lose yourself in your partner and stay in bad relationships because you feel too much empathy to leave.',
   },
 };
-
 // ─── Career Path Data ───────────────────────────────────────────────────────
-
 const CAREER_PATH: Record<string, { summary: string; strength: string; challenge: string }> = {
   Aries: {
     summary: 'You are built for leadership, or at least for being the one who starts things. You thrive in competitive, fast-paced environments where you can take charge. Corporate bureaucracy kills your soul. You do best when you can move fast and break things, literally or figuratively.',
@@ -235,9 +226,7 @@ const CAREER_PATH: Record<string, { summary: string; strength: string; challenge
     challenge: 'You struggle with structure and deadlines, preferring to work in your own dreamy timeline.',
   },
 };
-
 // ─── Money Pattern Data ─────────────────────────────────────────────────────
-
 const MONEY_PATTERN: Record<string, { summary: string; strength: string; challenge: string }> = {
   Aries: {
     summary: 'You spend money as fast as you make it because impulse buying is your love language. You see something, you want it, you buy it — budget be damned. You are generous to a fault with friends but terrible at long-term financial planning.',
@@ -300,9 +289,7 @@ const MONEY_PATTERN: Record<string, { summary: string; strength: string; challen
     challenge: 'You avoid managing money entirely and often don\'t know where yours actually goes.',
   },
 };
-
 // ─── Emotional Nature Data ──────────────────────────────────────────────────
-
 const EMOTIONAL_NATURE: Record<string, { summary: string; strength: string; challenge: string }> = {
   Aries: {
     summary: 'Your emotions are like a match — they flare up fast and hot, then burn out quickly. You feel anger before any other emotion and you express it before you even process it. You don\'t hold grudges, which is great, but you also don\'t sit with uncomfortable feelings long enough to learn from them.',
@@ -365,9 +352,7 @@ const EMOTIONAL_NATURE: Record<string, { summary: string; strength: string; chal
     challenge: 'You escape painful emotions instead of facing them, and your avoidance makes everything worse.',
   },
 };
-
 // ─── Communication Style Data ───────────────────────────────────────────────
-
 const COMMUNICATION_STYLE: Record<string, { summary: string; strength: string; challenge: string }> = {
   Aries: {
     summary: 'You say what you think the moment you think it — no filter, no pause, no regrets (until later). Your communication is direct, sometimes aggressive, and always honest. You don\'t do subtle hints. If something bothers you, people will know immediately.',
@@ -430,9 +415,7 @@ const COMMUNICATION_STYLE: Record<string, { summary: string; strength: string; c
     challenge: 'You are so vague that people don\'t know what you actually want or need from them.',
   },
 };
-
 // ─── Life Purpose Data ──────────────────────────────────────────────────────
-
 const LIFE_PURPOSE: Record<string, { summary: string; strength: string; challenge: string }> = {
   Aries: {
     summary: 'You are here to learn courage — not the reckless kind you already have, but the kind that means staying when you want to run and being vulnerable when you want to fight. Your purpose is to lead by example, showing others that fear is not the enemy. The lesson you keep avoiding? Patience and persistence.',
@@ -495,9 +478,7 @@ const LIFE_PURPOSE: Record<string, { summary: string; strength: string; challeng
     challenge: 'The lesson you keep avoiding is that you can\'t save others if you keep drowning yourself.',
   },
 };
-
 // ─── Numerology Modifiers ───────────────────────────────────────────────────
-
 const LIFE_PATH_MODIFIER: Record<number, { personality: string; love: string; career: string; money: string; emotional: string; communication: string; purpose: string }> = {
   1: {
     personality: 'Your Life Path 1 adds a fierce independence to everything you do — you are not built to follow.',
@@ -608,15 +589,12 @@ const LIFE_PATH_MODIFIER: Record<number, { personality: string; love: string; ca
     purpose: 'Your Life Path 33 means you\'re here to heal — to be the compassionate force the world desperately needs.',
   },
 };
-
 // ─── Generate Personality Cards ─────────────────────────────────────────────
-
 function getSignFromPosition(positions: Record<string, { sign: string }>, planet: string, fallback: string): string {
   const pos = positions[planet];
   if (pos?.sign) return pos.sign;
   return fallback;
 }
-
 export function generatePersonalityCards(
   astrologyData: AstrologyInfo | null,
   numerologyData: NumerologyInfo | null,
@@ -626,60 +604,48 @@ export function generatePersonalityCards(
   const moonSign = astrologyData?.moonSign || 'Gemini';
   const ascendant = astrologyData?.ascendant || 'Taurus';
   const positions = astrologyData?.planetaryPositions || {};
-
   const venusSign = getSignFromPosition(positions, 'Venus', sunSign);
   const marsSign = getSignFromPosition(positions, 'Mars', sunSign);
   const mercurySign = getSignFromPosition(positions, 'Mercury', sunSign);
   const saturnSign = getSignFromPosition(positions, 'Saturn', sunSign);
-
   const lifePath = numerologyData?.lifePathNumber || 1;
   const soulUrge = numerologyData?.soulUrgeNumber || 1;
   const destiny = numerologyData?.destinyNumber || 1;
-
   // Top 2 trait names for personality enrichment
   const sortedTraits = [...traitScores].sort((a, b) => b.score - a.score);
   const topTraitName = sortedTraits[0]?.label || sortedTraits[0]?.name || 'Resilience';
   const secondTraitName = sortedTraits[1]?.label || sortedTraits[1]?.name || 'Empathy';
-
   // Numerology modifiers
   const lpModifier = LIFE_PATH_MODIFIER[lifePath] || LIFE_PATH_MODIFIER[1];
-
   // Build personality content combining sun + ascendant + traits + numerology
   const personalityContent = PERSONALITY[sunSign]
     ? `${PERSONALITY[sunSign].summary} With ${ascendant} rising, you come across as ${getAscendantVibe(ascendant)}. ${lpModifier.personality} Your strongest traits — ${topTraitName} and ${secondTraitName} — show up in everything you do.`
     : `You are a complex blend of ${sunSign} energy and ${ascendant} presence. ${lpModifier.personality} Your top traits of ${topTraitName} and ${secondTraitName} define how you move through the world.`;
-
   // Love style: Venus sign + Moon sign + numerology
   const loveContent = LOVE_STYLE[venusSign]
     ? `${LOVE_STYLE[venusSign].summary} Your Moon in ${moonSign} means you need emotional ${getMoonEmotionalNeed(moonSign)} to feel truly connected. ${lpModifier.love}`
     : `You approach love through the lens of ${venusSign}, seeking deep emotional connection. Your Moon in ${moonSign} means you need ${getMoonEmotionalNeed(moonSign)}. ${lpModifier.love}`;
-
   // Career: Mars sign + Saturn + 10th house relevance (use sun sign for base) + numerology
   const careerContent = CAREER_PATH[sunSign]
     ? `${CAREER_PATH[sunSign].summary} Your Mars in ${marsSign} gives you ${getMarsCareerDrive(marsSign)} at work. Saturn in ${saturnSign} means your career may ${getSaturnCareerDelay(saturnSign)}. ${lpModifier.career}`
     : `You are driven in your career by ${marsSign} energy. Saturn in ${saturnSign} means you\'ll face career lessons around patience. ${lpModifier.career}`;
-
   // Money: 2nd house relevance (use sun sign) + Jupiter + Life Path
   const moneyContent = MONEY_PATTERN[sunSign]
     ? `${MONEY_PATTERN[sunSign].summary} ${lpModifier.money}`
     : `Your relationship with money reflects your ${sunSign} nature. ${lpModifier.money}`;
-
   // Emotional: Moon sign + 4th house relevance + Soul Urge
   const emotionalContent = EMOTIONAL_NATURE[moonSign]
     ? `${EMOTIONAL_NATURE[moonSign].summary} With Soul Urge number ${soulUrge}, your deepest emotional need is ${getSoulUrgeNeed(soulUrge)}. ${lpModifier.emotional}`
     : `You process emotions through your ${moonSign} nature. Your Soul Urge number ${soulUrge} reveals your deepest emotional needs. ${lpModifier.emotional}`;
-
   // Communication: Mercury sign + Destiny number
   const communicationContent = COMMUNICATION_STYLE[mercurySign]
     ? `${COMMUNICATION_STYLE[mercurySign].summary} With Destiny number ${destiny}, you are meant to ${getDestinyCommunication(destiny)}. ${lpModifier.communication}`
     : `Your communication style is shaped by ${mercurySign}. With Destiny number ${destiny}, your words carry purpose. ${lpModifier.communication}`;
-
   // Life Purpose: 9th house relevance + Rahu/North Node + Life Path
   const rahuSign = getSignFromPosition(positions, 'Rahu', 'Aquarius');
   const purposeContent = LIFE_PURPOSE[rahuSign]
     ? `${LIFE_PURPOSE[rahuSign].summary} ${lpModifier.purpose}`
     : `Your life purpose is shaped by ${rahuSign} energy calling you toward growth. ${lpModifier.purpose}`;
-
   return [
     {
       id: 'personality',
@@ -781,9 +747,7 @@ export function generatePersonalityCards(
     },
   ];
 }
-
 // ─── Helper functions for contextual content ────────────────────────────────
-
 function getAscendantVibe(sign: string): string {
   const vibes: Record<string, string> = {
     Aries: 'bold and energized, even when you\'re tired',
@@ -801,7 +765,6 @@ function getAscendantVibe(sign: string): string {
   };
   return vibes[sign] || 'someone who has it more together than you feel';
 }
-
 function getMoonEmotionalNeed(sign: string): string {
   const needs: Record<string, string> = {
     Aries: 'independence and excitement',
@@ -819,7 +782,6 @@ function getMoonEmotionalNeed(sign: string): string {
   };
   return needs[sign] || 'deep emotional connection';
 }
-
 function getMarsCareerDrive(sign: string): string {
   const drives: Record<string, string> = {
     Aries: 'a relentless, pioneering drive',
@@ -837,7 +799,6 @@ function getMarsCareerDrive(sign: string): string {
   };
   return drives[sign] || 'strong, focused energy';
 }
-
 function getSaturnCareerDelay(sign: string): string {
   const delays: Record<string, string> = {
     Aries: 'take time to take off — patience is your career lesson',
@@ -855,7 +816,6 @@ function getSaturnCareerDelay(sign: string): string {
   };
   return delays[sign] || 'require patience and persistence to overcome';
 }
-
 function getSoulUrgeNeed(num: number): string {
   const needs: Record<number, string> = {
     1: 'to lead and create on your own terms',
@@ -873,7 +833,6 @@ function getSoulUrgeNeed(num: number): string {
   };
   return needs[num] || 'to find your true purpose and live it fully';
 }
-
 function getDestinyCommunication(num: number): string {
   const destinies: Record<number, string> = {
     1: 'use your voice to lead and innovate',
@@ -891,9 +850,7 @@ function getDestinyCommunication(num: number): string {
   };
   return destinies[num] || 'communicate with purpose and impact';
 }
-
 // ─── Animation variants ─────────────────────────────────────────────────────
-
 const staggerContainer = {
   initial: {},
   animate: {
@@ -902,23 +859,18 @@ const staggerContainer = {
     },
   },
 };
-
 const staggerItem = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
 };
-
 // ─── PersonalityCards Component ─────────────────────────────────────────────
-
 interface PersonalityCardsProps {
   astrologyData: AstrologyInfo | null;
   numerologyData: NumerologyInfo | null;
   traitScores: TraitScore[];
 }
-
 export default function PersonalityCards({ astrologyData, numerologyData, traitScores }: PersonalityCardsProps) {
   const cards = generatePersonalityCards(astrologyData, numerologyData, traitScores);
-
   // First 3 cards expanded by default
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -927,13 +879,10 @@ export default function PersonalityCards({ astrologyData, numerologyData, traitS
     });
     return initial;
   });
-
   const [allExpanded, setAllExpanded] = useState(false);
-
   const toggleCard = (id: string) => {
     setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
   };
-
   const toggleAll = () => {
     const newState = !allExpanded;
     setAllExpanded(newState);
@@ -943,15 +892,13 @@ export default function PersonalityCards({ astrologyData, numerologyData, traitS
     });
     setExpandedCards(newExpanded);
   };
-
   return (
     <div>
       {/* Section Header */}
       <div className="flex items-start justify-between mb-4">
         <div>
           <h3
-            className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
           >
             Your Life, Card by Card
           </h3>
@@ -978,7 +925,6 @@ export default function PersonalityCards({ astrologyData, numerologyData, traitS
           )}
         </Button>
       </div>
-
       {/* Cards */}
       <motion.div
         variants={staggerContainer}
@@ -989,7 +935,6 @@ export default function PersonalityCards({ astrologyData, numerologyData, traitS
         {cards.map((card) => {
           const Icon = card.icon;
           const isExpanded = expandedCards[card.id] ?? false;
-
           return (
             <motion.div key={card.id} variants={staggerItem}>
               <Collapsible
@@ -1001,7 +946,6 @@ export default function PersonalityCards({ astrologyData, numerologyData, traitS
                 >
                   {/* Gradient background */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${card.accentBg} pointer-events-none`} />
-
                   <div className="relative">
                     {/* Card Header - Always visible */}
                     <CollapsibleTrigger asChild>
@@ -1011,8 +955,7 @@ export default function PersonalityCards({ astrologyData, numerologyData, traitS
                             <Icon className={`size-4.5 ${card.iconColor}`} />
                           </div>
                           <h4
-                            className="font-serif text-sm font-bold text-brown-900 dark:text-brown-100"
-                            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                            className="font-serif text-sm font-bold text-brown-900 dark:text-brown-600"
                           >
                             {card.title}
                           </h4>
@@ -1022,15 +965,13 @@ export default function PersonalityCards({ astrologyData, numerologyData, traitS
                         />
                       </button>
                     </CollapsibleTrigger>
-
                     {/* Collapsible Content */}
                     <CollapsibleContent>
                       <div className="px-4 pt-3 pb-4">
                         {/* Main content */}
-                        <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
+                        <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed">
                           {card.content}
                         </p>
-
                         {/* Strength & Challenge badges */}
                         <div className="flex flex-col sm:flex-row gap-2 mt-4">
                           <div className={`flex items-start gap-2 rounded-lg px-3 py-2 flex-1 ${card.strengthBadge}`}>
@@ -1044,7 +985,6 @@ export default function PersonalityCards({ astrologyData, numerologyData, traitS
                         </div>
                       </div>
                     </CollapsibleContent>
-
                     {/* Collapsed preview - only show when collapsed */}
                     {!isExpanded && (
                       <div className="px-4 pb-3 pt-1">

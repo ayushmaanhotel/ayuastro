@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useCallback } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,54 +26,44 @@ import {
   Share2,
   Gamepad2,
 } from 'lucide-react';
-
 // ─── Zodiac Data ────────────────────────────────────────────────────────────
-
 const ZODIAC_SIGNS = [
   'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
   'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
 ];
-
 const ZODIAC_SYMBOLS: Record<string, string> = {
   Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
   Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
 };
-
 const ZODIAC_ELEMENTS: Record<string, string> = {
   Aries: 'Fire', Leo: 'Fire', Sagittarius: 'Fire',
   Taurus: 'Earth', Virgo: 'Earth', Capricorn: 'Earth',
   Gemini: 'Air', Libra: 'Air', Aquarius: 'Air',
   Cancer: 'Water', Scorpio: 'Water', Pisces: 'Water',
 };
-
 const ZODIAC_MODALITIES: Record<string, string> = {
   Aries: 'Cardinal', Cancer: 'Cardinal', Libra: 'Cardinal', Capricorn: 'Cardinal',
   Taurus: 'Fixed', Leo: 'Fixed', Scorpio: 'Fixed', Aquarius: 'Fixed',
   Gemini: 'Mutable', Virgo: 'Mutable', Sagittarius: 'Mutable', Pisces: 'Mutable',
 };
-
 const ELEMENT_COLORS: Record<string, string> = {
   Fire: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800',
   Earth: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800',
   Air: 'bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-800',
   Water: 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800',
 };
-
 const ELEMENT_COMPAT: Record<string, string[]> = {
   Fire: ['Air', 'Fire'],
   Air: ['Fire', 'Air'],
   Earth: ['Water', 'Earth'],
   Water: ['Earth', 'Water'],
 };
-
 const MODALITY_COMPAT: Record<string, string[]> = {
   Cardinal: ['Fixed', 'Mutable'],
   Fixed: ['Cardinal', 'Mutable'],
   Mutable: ['Cardinal', 'Fixed'],
 };
-
 // ─── Compatibility Calculation ──────────────────────────────────────────────
-
 interface CompatibilityResult {
   overall: number;
   emotional: number;
@@ -84,7 +73,6 @@ interface CompatibilityResult {
   elementMatch: string;
   modalityMatch: string;
 }
-
 function calculateCompatibility(
   userSunSign: string,
   userMoonSign: string,
@@ -96,7 +84,6 @@ function calculateCompatibility(
   const partnerModality = ZODIAC_MODALITIES[partnerSign] || 'Cardinal';
   const userMoonElement = ZODIAC_ELEMENTS[userMoonSign] || 'Water';
   const partnerMoonCompat = ZODIAC_ELEMENTS[partnerSign] || 'Fire';
-
   // Element compatibility score (0-40)
   let elementScore = 20; // base
   if (userElement === partnerElement) {
@@ -106,7 +93,6 @@ function calculateCompatibility(
   } else {
     elementScore = 16;
   }
-
   // Modality compatibility (0-25)
   let modalityScore = 12;
   if (userModality !== partnerModality) {
@@ -114,7 +100,6 @@ function calculateCompatibility(
   } else {
     modalityScore = 14;
   }
-
   // Moon sign emotional compatibility (0-25)
   let moonScore = 12;
   if (userMoonElement === partnerElement) {
@@ -124,37 +109,30 @@ function calculateCompatibility(
   } else {
     moonScore = 10;
   }
-
   // Deterministic variation based on sign indices
   const userIdx = ZODIAC_SIGNS.indexOf(userSunSign);
   const partnerIdx = ZODIAC_SIGNS.indexOf(partnerSign);
   const phaseBonus = ((userIdx * 7 + partnerIdx * 13) % 11) - 5; // -5 to +5
-
   const overall = Math.max(15, Math.min(98, elementScore + modalityScore + moonScore + phaseBonus));
   const emotional = Math.max(15, Math.min(98, moonScore * 4 + phaseBonus + 5));
   const communication = Math.max(15, Math.min(98, modalityScore * 4 + elementScore + phaseBonus - 8));
   const trust = Math.max(15, Math.min(98, elementScore * 2.2 + moonScore * 1.5 + phaseBonus));
-
   const elementMatch =
     userElement === partnerElement
       ? 'Same Element — Deep Understanding'
       : ELEMENT_COMPAT[userElement]?.includes(partnerElement)
         ? 'Complementary Elements — Natural Balance'
         : 'Challenging Elements — Growth Opportunity';
-
   const modalityMatch =
     userModality === partnerModality
       ? 'Same Modality — Similar Approach'
       : 'Different Modalities — Complementary Action';
-
   const insights: Record<string, string> = {
     high: `Your ${userSunSign} Sun and ${partnerSign} energy create a powerful resonance. There's a natural flow of understanding between you — emotionally, intellectually, and spiritually. This connection invites both of you to grow while feeling deeply seen.`,
     moderate: `Your ${userSunSign} Sun and ${partnerSign} energy share a complementary bond. While you approach life differently, these differences create a dynamic balance. The key is honoring each other's emotional rhythms rather than trying to change them.`,
     low: `Your ${userSunSign} Sun and ${partnerSign} energy represent different elemental worlds. This doesn't mean incompatibility — it means your connection will be a journey of growth. The friction you feel is actually the universe asking you to expand beyond your comfort zone.`,
   };
-
   const insightLevel = overall >= 65 ? 'high' : overall >= 45 ? 'moderate' : 'low';
-
   return {
     overall: Math.round(overall),
     emotional: Math.round(emotional),
@@ -165,14 +143,11 @@ function calculateCompatibility(
     modalityMatch,
   };
 }
-
 // ─── Circular Score Ring ────────────────────────────────────────────────────
-
 function ScoreRing({ score, size = 120, strokeWidth = 8, color = '#D4AF37' }: { score: number; size?: number; strokeWidth?: number; color?: string }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
-
   return (
     <div className="relative" style={{ width: size, height: size }}>
       {/* Sparkle particles around the ring */}
@@ -216,7 +191,6 @@ function ScoreRing({ score, size = 120, strokeWidth = 8, color = '#D4AF37' }: { 
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <motion.span
           className="text-2xl font-bold text-brown-900"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, duration: 0.4 }}
@@ -228,16 +202,13 @@ function ScoreRing({ score, size = 120, strokeWidth = 8, color = '#D4AF37' }: { 
     </div>
   );
 }
-
 // ─── Sub-Score Bar ──────────────────────────────────────────────────────────
-
 function SubScoreBar({ label, score, icon: Icon, delay = 0 }: { label: string; score: number; icon: React.ElementType; delay?: number }) {
   const getBarColor = (s: number) => {
     if (s >= 70) return 'bg-sage';
     if (s >= 45) return 'bg-gold';
     return 'bg-brown-400';
   };
-
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
@@ -258,9 +229,7 @@ function SubScoreBar({ label, score, icon: Icon, delay = 0 }: { label: string; s
     </div>
   );
 }
-
 // ─── Compatibility Badge ────────────────────────────────────────────────────
-
 function CompatibilityBadge({ score }: { score: number }) {
   if (score > 70) {
     return (
@@ -296,13 +265,11 @@ function CompatibilityBadge({ score }: { score: number }) {
       className="inline-flex items-center gap-1.5 rounded-full bg-brown-50/50 dark:bg-brown-50/20 border border-brown-200/50 dark:border-brown-100/30 px-4 py-1.5"
     >
       <Flame className="size-3.5 text-brown-500" />
-      <span className="text-sm font-bold text-brown-600 dark:text-brown-300">Growth Journey</span>
+      <span className="text-sm font-bold text-brown-600 dark:text-brown-500">Growth Journey</span>
     </motion.div>
   );
 }
-
 // ─── Zodiac Pairings Guide ──────────────────────────────────────────────────
-
 const BEST_PAIRINGS: [string, string, string][] = [
   ['Aries', 'Leo', 'Passionate fire meets fearless flame'],
   ['Taurus', 'Cancer', 'Steady earth meets nurturing waters'],
@@ -317,9 +284,7 @@ const BEST_PAIRINGS: [string, string, string][] = [
   ['Aquarius', 'Libra', 'Progressive vision, harmonious ideals'],
   ['Pisces', 'Cancer', 'Emotional sanctuary, intuitive bond'],
 ];
-
 // ─── Main SyncView ──────────────────────────────────────────────────────────
-
 export default function SyncView() {
   const { astrologyData, birthDetails, setView, setCompatDetail } = useAyuAstroStore();
   const [partnerName, setPartnerName] = useState('');
@@ -328,16 +293,13 @@ export default function SyncView() {
   const [result, setResult] = useState<CompatibilityResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
-
   const userSunSign = astrologyData?.sunSign || 'Capricorn';
   const userMoonSign = astrologyData?.moonSign || 'Gemini';
   const userAscendant = astrologyData?.ascendant || 'Taurus';
-
   const handleAnalyze = useCallback(() => {
     if (!partnerSign) return;
     setIsCalculating(true);
     setResult(null);
-
     // Simulate calculation delay for UX
     setTimeout(() => {
       const compat = calculateCompatibility(userSunSign, userMoonSign, partnerSign);
@@ -345,27 +307,22 @@ export default function SyncView() {
       setIsCalculating(false);
     }, 800);
   }, [userSunSign, userMoonSign, partnerSign]);
-
   const handleReset = () => {
     setResult(null);
     setPartnerName('');
     setPartnerSign('');
   };
-
   const fadeInUp = {
     initial: { opacity: 0, y: 16 },
     animate: { opacity: 1, y: 0 },
   };
-
   return (
     <div className="bg-cream px-4 py-6 pb-24">
       <div className="mx-auto max-w-lg space-y-6">
-
         {/* Header */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
           <h1
             className="font-serif text-3xl font-bold text-brown-900 mb-1"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
             Cosmic Sync
           </h1>
@@ -373,7 +330,6 @@ export default function SyncView() {
             Discover the resonance between your stars. Explore how your emotional and cosmic patterns align with others.
           </p>
         </motion.div>
-
         {/* Zodiac Game Entry */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.02 }} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
           <Card
@@ -386,8 +342,8 @@ export default function SyncView() {
                   <Gamepad2 className="size-6 text-gold" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-serif text-base font-semibold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  <h3 className="font-serif text-base font-semibold text-brown-900 dark:text-brown-600"
+                   >
                     Zodiac Game 🎮
                   </h3>
                   <p className="text-xs text-brown-400 dark:text-brown-500 mt-0.5">
@@ -399,10 +355,9 @@ export default function SyncView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Your Cosmic Profile Card */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }} whileHover={{ y: -2, boxShadow: "0 8px 30px rgba(139,111,71,0.12)" }} whileTap={{ scale: 0.98 }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08]">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                 <Star className="size-5 text-gold" />
@@ -448,10 +403,9 @@ export default function SyncView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Compatibility Check Section */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }} whileHover={{ y: -2, boxShadow: "0 8px 30px rgba(139,111,71,0.12)" }} whileTap={{ scale: 0.98 }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08]">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                 <Heart className="size-5 text-gold" />
@@ -472,7 +426,6 @@ export default function SyncView() {
                   className="w-full rounded-xl border border-brown-200 dark:border-brown-100/30 bg-brown-50/50 dark:bg-brown-50/30 px-4 py-3 text-sm text-brown-900 dark:text-brown-900 placeholder:text-brown-300 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold/50 transition-all"
                 />
               </div>
-
               {/* Partner Sign Dropdown */}
               <div className="relative">
                 <label className="text-xs font-medium text-brown-500 mb-1.5 block">
@@ -527,7 +480,6 @@ export default function SyncView() {
                   )}
                 </AnimatePresence>
               </div>
-
               {/* Analyze Button */}
               <Button
                 onClick={handleAnalyze}
@@ -555,7 +507,6 @@ export default function SyncView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Compatibility Results */}
         <AnimatePresence>
           {result && (
@@ -566,7 +517,7 @@ export default function SyncView() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5 }}
             >
-              <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+              <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08]">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                     <Flame className="size-5 text-gold" />
@@ -592,7 +543,6 @@ export default function SyncView() {
                       <CompatibilityBadge score={result.overall} />
                     </div>
                   </div>
-
                   {/* Element & Modality Match */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-xl bg-brown-50 dark:bg-brown-50/50 p-3 text-center">
@@ -604,14 +554,12 @@ export default function SyncView() {
                       <p className="text-xs font-medium text-brown-800">{result.modalityMatch}</p>
                     </div>
                   </div>
-
                   {/* Sub-scores */}
                   <div className="space-y-3">
                     <SubScoreBar label="Emotional Sync" score={result.emotional} icon={Heart} delay={0} />
                     <SubScoreBar label="Communication Style" score={result.communication} icon={MessageCircle} delay={1} />
                     <SubScoreBar label="Trust & Loyalty" score={result.trust} icon={Shield} delay={2} />
                   </div>
-
                   {/* AI Insight */}
                   <div className="rounded-xl bg-gold/5 border border-gold/10 p-4">
                     <div className="flex items-center gap-2 mb-2">
@@ -622,7 +570,6 @@ export default function SyncView() {
                       {result.insight}
                     </p>
                   </div>
-
                   {/* Action Buttons */}
                   <div className="flex gap-3">
                     <Button
@@ -646,7 +593,6 @@ export default function SyncView() {
                         <DialogHeader>
                           <DialogTitle
                             className="font-serif text-center text-xl"
-                            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                           >
                             Share Compatibility
                           </DialogTitle>
@@ -658,10 +604,10 @@ export default function SyncView() {
                               <Heart className="inline size-4 text-gold mx-2" />
                               <span className="text-2xl">{ZODIAC_SYMBOLS[partnerSign]}</span>
                             </div>
-                            <p className="font-serif text-lg font-bold text-brown-900" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                            <p className="font-serif text-lg font-bold text-brown-900">
                               {userSunSign} × {partnerSign}
                             </p>
-                            <p className="text-3xl font-bold text-gold-dark mt-1" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                            <p className="text-3xl font-bold text-gold-dark mt-1">
                               {result.overall}% Compatible
                             </p>
                             <div className="mt-2">
@@ -683,7 +629,6 @@ export default function SyncView() {
                       </DialogContent>
                     </Dialog>
                   </div>
-
                   {/* View Full Details Button */}
                   <Button
                     onClick={() => {
@@ -707,10 +652,9 @@ export default function SyncView() {
             </motion.div>
           )}
         </AnimatePresence>
-
         {/* Zodiac Pairings Guide */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }} whileHover={{ y: -2, boxShadow: "0 8px 30px rgba(139,111,71,0.12)" }}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08]">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                 <Heart className="size-5 text-gold" />

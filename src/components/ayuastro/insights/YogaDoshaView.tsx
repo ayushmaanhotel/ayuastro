@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Card, CardContent } from '@/components/ui/card';
@@ -40,9 +39,7 @@ import {
   TrendingUp,
   Gauge,
 } from 'lucide-react';
-
 // ─── Yoga Detail Data ────────────────────────────────────────────────────────
-
 interface YogaDetail {
   name: string;
   sanskrit: string;
@@ -53,7 +50,6 @@ interface YogaDetail {
   planets: string;
   emotionalInterpretation: string;
 }
-
 const YOGA_DETAILS: Record<string, YogaDetail> = {
   'Gaj Kesari Yoga': {
     name: 'Gaj Kesari Yoga',
@@ -216,9 +212,7 @@ const YOGA_DETAILS: Record<string, YogaDetail> = {
     emotionalInterpretation: 'Your deepest emotional wounds are portals to your greatest strengths.',
   },
 };
-
 // ─── Dosha Detail Data ───────────────────────────────────────────────────────
-
 interface DoshaDetail {
   name: string;
   sanskrit: string;
@@ -231,7 +225,6 @@ interface DoshaDetail {
   };
   severity: 'Mild' | 'Moderate' | 'Significant';
 }
-
 const DOSHA_DETAILS: Record<string, DoshaDetail> = {
   'Mangal Dosha': {
     name: 'Mangal Dosha',
@@ -306,9 +299,7 @@ const DOSHA_DETAILS: Record<string, DoshaDetail> = {
     severity: 'Moderate',
   },
 };
-
 // ─── Vedic Analysis Types ────────────────────────────────────────────────────
-
 interface VedicAnalysisData {
   houseAnalysis: Array<{
     houseNumber: number;
@@ -481,12 +472,10 @@ interface VedicAnalysisData {
     overallChartStrength: string;
   };
 }
-
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
 };
-
 function getSeverityColor(severity: string): string {
   switch (severity) {
     case 'Mild': return 'bg-sage-muted text-sage-dark';
@@ -495,7 +484,6 @@ function getSeverityColor(severity: string): string {
     default: return 'bg-brown-50 text-brown-500';
   }
 }
-
 function getStrengthBadge(strength: string): { className: string; label: string } {
   switch (strength) {
     case 'Strong': return { className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300', label: 'Strong' };
@@ -504,7 +492,6 @@ function getStrengthBadge(strength: string): { className: string; label: string 
     default: return { className: 'bg-gray-100 text-gray-500 dark:bg-gray-800/30 dark:text-gray-400', label: strength };
   }
 }
-
 function getSeverityBadge(severity: string): { className: string; label: string } {
   switch (severity) {
     case 'High': return { className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300', label: 'High' };
@@ -513,17 +500,15 @@ function getSeverityBadge(severity: string): { className: string; label: string 
     default: return { className: 'bg-gray-100 text-gray-500 dark:bg-gray-800/30 dark:text-gray-400', label: severity };
   }
 }
-
 function getChartStrengthColor(strength: string): string {
   switch (strength) {
     case 'Excellent': return 'text-emerald-600 dark:text-emerald-400';
     case 'Good': return 'text-blue-600 dark:text-blue-400';
     case 'Average': return 'text-amber-600 dark:text-amber-400';
     case 'Challenging': return 'text-red-600 dark:text-red-400';
-    default: return 'text-brown-500 dark:text-brown-400';
+    default: return 'text-brown-500 dark:text-brown-600';
   }
 }
-
 function getDignityBadge(dignity: string): { className: string; label: string } {
   switch (dignity) {
     case 'Exalted': return { className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300', label: '★ Exalted' };
@@ -533,7 +518,6 @@ function getDignityBadge(dignity: string): { className: string; label: string } 
     default: return { className: 'bg-gray-100 text-gray-500 dark:bg-gray-800/30 dark:text-gray-400', label: '○ Neutral' };
   }
 }
-
 function getShadbalaRatingColor(rating: string): { text: string; bg: string } {
   switch (rating) {
     case 'Very Strong': return { text: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-100 dark:bg-emerald-900/30' };
@@ -544,16 +528,12 @@ function getShadbalaRatingColor(rating: string): { text: string; bg: string } {
     default: return { text: 'text-gray-500 dark:text-gray-400', bg: 'bg-gray-100 dark:bg-gray-800/30' };
   }
 }
-
 function getShadbalaBarWidth(strength: number): number {
   // Max is ~8, scale to 0-100
   return Math.min(100, Math.max(5, (strength / 8) * 100));
 }
-
 // ─── Component ───────────────────────────────────────────────────────────────
-
 type TabId = 'yogas' | 'doshas' | 'aspects' | 'dignity' | 'transit' | 'nakshatra' | 'analysis';
-
 export default function YogaDoshaView() {
   const { astrologyData, setView, userId } = useAyuAstroStore();
   const [expandedYogas, setExpandedYogas] = useState<Record<string, boolean>>({});
@@ -561,7 +541,6 @@ export default function YogaDoshaView() {
   const [showAbsentYogas, setShowAbsentYogas] = useState(false);
   const [showAbsentDoshas, setShowAbsentDoshas] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('yogas');
-
   // Vedic analysis state
   const [vedicAnalysis, setVedicAnalysis] = useState<VedicAnalysisData | null>(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
@@ -573,15 +552,12 @@ export default function YogaDoshaView() {
   const [expandedDignity, setExpandedDignity] = useState<Record<string, boolean>>({});
   const [expandedHouseLords, setExpandedHouseLords] = useState<Record<number, boolean>>({});
   const [expandedTransits, setExpandedTransits] = useState<Record<string, boolean>>({});
-
   const userYogas = (astrologyData?.yogas || []).filter((y) => YOGA_DETAILS[y]);
   const userDoshas = (astrologyData?.doshas || []).filter((d) => DOSHA_DETAILS[d]);
-
   const presentYogas = userYogas;
   const absentYogas = Object.keys(YOGA_DETAILS).filter(y => !userYogas.includes(y));
   const presentDoshas = userDoshas;
   const absentDoshas = Object.keys(DOSHA_DETAILS).filter(d => !userDoshas.includes(d));
-
   // Fetch Vedic analysis
   const fetchVedicAnalysis = useCallback(async () => {
     if (!userId) return;
@@ -601,15 +577,12 @@ export default function YogaDoshaView() {
       setAnalysisLoading(false);
     }
   }, [userId]);
-
   useEffect(() => {
     if (activeTab !== 'yogas' && activeTab !== 'doshas' && !vedicAnalysis && !analysisLoading) {
       fetchVedicAnalysis();
     }
   }, [activeTab, vedicAnalysis, analysisLoading, fetchVedicAnalysis]);
-
   const needsAnalysis = activeTab !== 'yogas' && activeTab !== 'doshas';
-
   const tabs: Array<{ id: TabId; label: string; icon: React.ReactNode; count: number | null }> = [
     { id: 'yogas', label: 'Yogas', icon: <Sparkles className="size-3" />, count: presentYogas.length },
     { id: 'doshas', label: 'Doshas', icon: <AlertTriangle className="size-3" />, count: presentDoshas.length },
@@ -619,7 +592,6 @@ export default function YogaDoshaView() {
     { id: 'nakshatra', label: 'Nakshatra', icon: <Moon className="size-3" />, count: null },
     { id: 'analysis', label: 'Full', icon: <BookOpen className="size-3" />, count: null },
   ];
-
   return (
     <div className="bg-cream dark:bg-[#1a1410] px-4 py-6 pb-24 min-h-screen">
       <div className="mx-auto max-w-lg space-y-6">
@@ -631,19 +603,17 @@ export default function YogaDoshaView() {
             onClick={() => setView('insights')}
             className="size-10 rounded-full hover:bg-brown-50 dark:hover:bg-brown-800"
           >
-            <ArrowLeft className="size-5 text-brown-700 dark:text-brown-300" />
+            <ArrowLeft className="size-5 text-brown-700 dark:text-brown-500" />
           </Button>
           <div>
             <h1
-              className="font-serif text-xl font-bold text-brown-900 dark:text-brown-100"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-xl font-bold text-brown-900 dark:text-brown-600"
             >
               Cosmic Blessings & Karmic Lessons
             </h1>
             <p className="text-xs text-brown-400 dark:text-brown-500">Your yogas and doshas explained</p>
           </div>
         </motion.div>
-
         {/* Count Badges */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.02 }} className="flex items-center gap-3 flex-wrap">
           <Badge className="bg-sage-muted text-sage-dark dark:bg-sage/20 dark:text-sage border-0 text-sm px-3 py-1">
@@ -653,23 +623,22 @@ export default function YogaDoshaView() {
             {presentDoshas.length}/{Object.keys(DOSHA_DETAILS).length} Karmic Lessons ⚠️
           </Badge>
           {vedicAnalysis && (
-            <Badge className={`${getChartStrengthColor(vedicAnalysis.summary.overallChartStrength)} border-0 text-sm px-3 py-1 bg-white/50 dark:bg-white/5`}>
+            <Badge className={`${getChartStrengthColor(vedicAnalysis.summary.overallChartStrength)} border-0 text-sm px-3 py-1 bg-white/50 dark:bg-white/[0.08]`}>
               <Star className="size-3 mr-1" />
               {vedicAnalysis.summary.overallChartStrength}
             </Badge>
           )}
         </motion.div>
-
         {/* Tab Navigation */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.03 }}>
-          <div className="flex gap-0.5 p-1 rounded-xl bg-white/50 dark:bg-white/5 border border-brown-100 dark:border-brown-800 overflow-x-auto">
+          <div className="flex gap-0.5 p-1 rounded-xl bg-white/50 dark:bg-white/[0.08] border border-brown-100 dark:border-brown-800 overflow-x-auto">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-1 py-1.5 px-2.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
                   activeTab === tab.id
-                    ? 'bg-white dark:bg-white/10 text-brown-900 dark:text-brown-100 shadow-sm'
+                    ? 'bg-white dark:bg-white/10 text-brown-900 dark:text-brown-600 shadow-sm'
                     : 'text-brown-400 dark:text-brown-500 hover:text-brown-600 dark:hover:text-brown-300'
                 }`}
               >
@@ -682,21 +651,19 @@ export default function YogaDoshaView() {
             ))}
           </div>
         </motion.div>
-
         {/* ─── Loading/Error for analysis-dependent tabs ────────── */}
         {needsAnalysis && analysisLoading && (
           <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08]">
               <CardContent className="p-6 flex flex-col items-center gap-3">
                 <div className="relative">
                   <RefreshCw className="size-8 text-gold dark:text-gold animate-spin" />
                 </div>
-                <p className="text-sm text-brown-500 dark:text-brown-400">Generating comprehensive Vedic analysis...</p>
+                <p className="text-sm text-brown-500 dark:text-brown-600">Generating comprehensive Vedic analysis...</p>
               </CardContent>
             </Card>
           </motion.div>
         )}
-
         {needsAnalysis && analysisError && (
           <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
             <Card className="border-0 shadow-sm bg-red-50 dark:bg-red-900/10">
@@ -717,13 +684,11 @@ export default function YogaDoshaView() {
             </Card>
           </motion.div>
         )}
-
         {/* ─── Yogas Tab ────────────────────────────────────────── */}
         {activeTab === 'yogas' && (
           <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
             <h2
-              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 mb-3"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600 mb-3"
             >
               ✦ Cosmic Blessings
             </h2>
@@ -786,13 +751,11 @@ export default function YogaDoshaView() {
             )}
           </motion.div>
         )}
-
         {/* ─── Doshas Tab ───────────────────────────────────────── */}
         {activeTab === 'doshas' && (
           <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
             <h2
-              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 mb-3"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600 mb-3"
             >
               ⚠️ Karmic Lessons
             </h2>
@@ -855,13 +818,11 @@ export default function YogaDoshaView() {
             )}
           </motion.div>
         )}
-
         {/* ─── Aspects Tab ──────────────────────────────────────── */}
         {activeTab === 'aspects' && vedicAnalysis && (
           <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }} className="space-y-4">
             <h2
-              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
             >
               <ArrowRightLeft className="size-5 inline mr-2 text-gold-dark dark:text-gold" />
               Planetary Aspects (Drishti)
@@ -874,7 +835,7 @@ export default function YogaDoshaView() {
               {vedicAnalysis.planetaryAspects.filter(pa => pa.aspects.length > 0).map(pa => {
                 const isOpen = expandedAspects[pa.planet] || false;
                 return (
-                  <Card key={pa.planet} className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden">
+                  <Card key={pa.planet} className="border-0 shadow-sm bg-white dark:bg-white/[0.08] overflow-hidden">
                     <Collapsible open={isOpen} onOpenChange={(open) => setExpandedAspects(prev => ({ ...prev, [pa.planet]: open }))}>
                       <CollapsibleTrigger asChild>
                         <button className="w-full text-left p-4 hover:bg-brown-50/30 dark:hover:bg-brown-800/10 transition-colors">
@@ -884,7 +845,7 @@ export default function YogaDoshaView() {
                                 <span className="text-sm font-bold text-gold-dark dark:text-gold">{pa.planet.slice(0, 2)}</span>
                               </div>
                               <div>
-                                <span className="text-sm font-medium text-brown-900 dark:text-brown-100">{pa.planet}</span>
+                                <span className="text-sm font-medium text-brown-900 dark:text-brown-600">{pa.planet}</span>
                                 <span className="text-xs text-brown-400 dark:text-brown-500 ml-1.5">in {pa.sign} (H{pa.house})</span>
                               </div>
                             </div>
@@ -904,9 +865,9 @@ export default function YogaDoshaView() {
                           {pa.aspects.map(aspect => (
                             <div key={aspect.targetPlanet} className="flex items-start gap-3 p-2 rounded-lg bg-brown-50/50 dark:bg-brown-50/5">
                               <div className="flex items-center gap-1 shrink-0 mt-0.5">
-                                <span className="text-xs font-bold text-brown-600 dark:text-brown-300">{pa.planet.slice(0, 2)}</span>
+                                <span className="text-xs font-bold text-brown-600 dark:text-brown-500">{pa.planet.slice(0, 2)}</span>
                                 <ArrowRightLeft className="size-3 text-gold-dark dark:text-gold" />
-                                <span className="text-xs font-bold text-brown-600 dark:text-brown-300">{aspect.targetPlanet.slice(0, 2)}</span>
+                                <span className="text-xs font-bold text-brown-600 dark:text-brown-500">{aspect.targetPlanet.slice(0, 2)}</span>
                               </div>
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5 mb-1">
@@ -914,7 +875,7 @@ export default function YogaDoshaView() {
                                     {aspect.aspectType}
                                   </Badge>
                                 </div>
-                                <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">
+                                <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">
                                   {aspect.interpretation}
                                 </p>
                               </div>
@@ -929,26 +890,22 @@ export default function YogaDoshaView() {
             </div>
           </motion.div>
         )}
-
         {/* ─── Dignity & Strength Tab ───────────────────────────── */}
         {activeTab === 'dignity' && vedicAnalysis && (
           <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }} className="space-y-4">
             <h2
-              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
             >
               <Gem className="size-5 inline mr-2 text-gold-dark dark:text-gold" />
               Dignity & Strength
             </h2>
-
             {/* Shadbala Summary */}
             <Card className="border-0 shadow-sm bg-gradient-to-br from-gold/5 to-sage-muted/10 dark:from-gold/10 dark:to-sage/5 overflow-hidden">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Gauge className="size-4 text-gold-dark dark:text-gold" />
                   <h3
-                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                   >
                     Shadbala Strength Ranking
                   </h3>
@@ -961,8 +918,8 @@ export default function YogaDoshaView() {
                       <div key={sb.planet} className="space-y-1">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-bold text-brown-800 dark:text-brown-200">{idx + 1}.</span>
-                            <span className="text-sm font-medium text-brown-800 dark:text-brown-200">{sb.planet}</span>
+                            <span className="text-xs font-bold text-brown-800 dark:text-brown-400">{idx + 1}.</span>
+                            <span className="text-sm font-medium text-brown-800 dark:text-brown-400">{sb.planet}</span>
                             <span className="text-[10px] text-brown-400 dark:text-brown-500">{sb.sign}</span>
                             {sb.isRetrograde && <span className="text-[9px] px-1 rounded bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">℞</span>}
                           </div>
@@ -992,20 +949,19 @@ export default function YogaDoshaView() {
                 </div>
               </CardContent>
             </Card>
-
             {/* Detailed Dignity Cards */}
             <div className="space-y-3">
               {vedicAnalysis.dignityDetails.map(dd => {
                 const isOpen = expandedDignity[dd.planet] || false;
                 const dignityBadge = getDignityBadge(dd.dignity);
                 return (
-                  <Card key={dd.planet} className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden">
+                  <Card key={dd.planet} className="border-0 shadow-sm bg-white dark:bg-white/[0.08] overflow-hidden">
                     <Collapsible open={isOpen} onOpenChange={(open) => setExpandedDignity(prev => ({ ...prev, [dd.planet]: open }))}>
                       <CollapsibleTrigger asChild>
                         <button className="w-full text-left p-4 hover:bg-brown-50/30 dark:hover:bg-brown-800/10 transition-colors">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-brown-900 dark:text-brown-100">{dd.planet}</span>
+                              <span className="text-sm font-medium text-brown-900 dark:text-brown-600">{dd.planet}</span>
                               <span className="text-xs text-brown-400 dark:text-brown-500">{dd.sign} {dd.degree}°</span>
                               {dd.isRetrograde && <span className="text-[9px] px-1 rounded bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">℞</span>}
                               {dd.isCombust && <span className="text-[9px] px-1 rounded bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400">C</span>}
@@ -1023,25 +979,25 @@ export default function YogaDoshaView() {
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <div className="px-4 pb-4 space-y-2 border-t border-brown-100/30 dark:border-brown-800/20 pt-3">
-                          <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">
+                          <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">
                             {dd.interpretation}
                           </p>
                           <div className="grid grid-cols-2 gap-2 text-[10px]">
                             <div className="rounded-lg bg-emerald-50 dark:bg-emerald-900/10 p-2">
                               <p className="text-emerald-600 dark:text-emerald-400 mb-0.5">Exalted</p>
-                              <p className="text-brown-700 dark:text-brown-300">{dd.exaltedSign} {dd.exaltedDegree}°</p>
+                              <p className="text-brown-700 dark:text-brown-500">{dd.exaltedSign} {dd.exaltedDegree}°</p>
                             </div>
                             <div className="rounded-lg bg-red-50 dark:bg-red-900/10 p-2">
                               <p className="text-red-600 dark:text-red-400 mb-0.5">Debilitated</p>
-                              <p className="text-brown-700 dark:text-brown-300">{dd.debilitatedSign} {dd.debilitatedDegree}°</p>
+                              <p className="text-brown-700 dark:text-brown-500">{dd.debilitatedSign} {dd.debilitatedDegree}°</p>
                             </div>
                             <div className="rounded-lg bg-teal-50 dark:bg-teal-900/10 p-2">
                               <p className="text-teal-600 dark:text-teal-400 mb-0.5">Moolatrikona</p>
-                              <p className="text-brown-700 dark:text-brown-300">{dd.moolatrikonaSign || 'N/A'}</p>
+                              <p className="text-brown-700 dark:text-brown-500">{dd.moolatrikonaSign || 'N/A'}</p>
                             </div>
                             <div className="rounded-lg bg-blue-50 dark:bg-blue-900/10 p-2">
                               <p className="text-blue-600 dark:text-blue-400 mb-0.5">Own Signs</p>
-                              <p className="text-brown-700 dark:text-brown-300">{dd.ownSigns.join(', ') || 'N/A'}</p>
+                              <p className="text-brown-700 dark:text-brown-500">{dd.ownSigns.join(', ') || 'N/A'}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-wrap">
@@ -1059,7 +1015,7 @@ export default function YogaDoshaView() {
                             )}
                           </div>
                           {dd.retrogradeNote && (
-                            <p className="text-[10px] text-brown-500 dark:text-brown-400 leading-relaxed italic">
+                            <p className="text-[10px] text-brown-500 dark:text-brown-600 leading-relaxed italic">
                               {dd.retrogradeNote}
                             </p>
                           )}
@@ -1070,15 +1026,13 @@ export default function YogaDoshaView() {
                 );
               })}
             </div>
-
             {/* Enhanced House Lord Analysis */}
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] overflow-hidden">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Crown className="size-4 text-gold-dark dark:text-gold" />
                   <h3
-                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                   >
                     House Lord Placements
                   </h3>
@@ -1090,7 +1044,7 @@ export default function YogaDoshaView() {
                       hl.lordHouseType.includes('Trikona') ? 'text-emerald-600 dark:text-emerald-400' :
                       hl.lordHouseType.includes('Dushtana') ? 'text-red-600 dark:text-red-400' :
                       hl.lordHouseType.includes('Upaachaya') ? 'text-amber-600 dark:text-amber-400' :
-                      'text-brown-500 dark:text-brown-400';
+                      'text-brown-500 dark:text-brown-600';
                     return (
                       <Collapsible
                         key={hl.houseNumber}
@@ -1101,8 +1055,8 @@ export default function YogaDoshaView() {
                           <button className="w-full text-left py-2 border-b border-brown-100/50 dark:border-brown-800/30 hover:bg-brown-50/50 dark:hover:bg-brown-800/20 transition-colors rounded px-1">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-brown-600 dark:text-brown-300">H{hl.houseNumber}</span>
-                                <span className="text-xs font-medium text-brown-800 dark:text-brown-200">{hl.houseName}</span>
+                                <span className="text-xs font-bold text-brown-600 dark:text-brown-500">H{hl.houseNumber}</span>
+                                <span className="text-xs font-medium text-brown-800 dark:text-brown-400">{hl.houseName}</span>
                                 <span className={`text-[10px] font-medium ${houseTypeColor}`}>
                                   → {hl.lord} in H{hl.lordHouse}
                                 </span>
@@ -1126,11 +1080,11 @@ export default function YogaDoshaView() {
                               }`}>
                                 {hl.lordSignRelationship}
                               </Badge>
-                              <Badge className="bg-brown-50 text-brown-500 dark:bg-brown-800/30 dark:text-brown-400 border-0 text-[9px] px-1.5 py-0">
+                              <Badge className="bg-brown-50 text-brown-500 dark:bg-brown-800/30 dark:text-brown-600 border-0 text-[9px] px-1.5 py-0">
                                 {hl.lordHouseType}
                               </Badge>
                             </div>
-                            <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">
+                            <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">
                               {hl.interpretation}
                             </p>
                           </div>
@@ -1143,13 +1097,11 @@ export default function YogaDoshaView() {
             </Card>
           </motion.div>
         )}
-
         {/* ─── Transit Influence Tab ────────────────────────────── */}
         {activeTab === 'transit' && vedicAnalysis && (
           <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }} className="space-y-4">
             <h2
-              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
             >
               <Orbit className="size-5 inline mr-2 text-gold-dark dark:text-gold" />
               Current Transit Influence
@@ -1157,7 +1109,6 @@ export default function YogaDoshaView() {
             <p className="text-[10px] text-brown-400 dark:text-brown-500">
               Transit data as of {vedicAnalysis.currentTransitInfluence.transitDate}
             </p>
-
             {/* Sade Sati & Dhaiya Status */}
             <div className="grid grid-cols-2 gap-3">
               <Card className={`border-0 shadow-sm overflow-hidden ${
@@ -1175,7 +1126,7 @@ export default function YogaDoshaView() {
                     {vedicAnalysis.currentTransitInfluence.sadeSatiStatus.isActive ? 'Active' : 'Not Active'}
                   </p>
                   {vedicAnalysis.currentTransitInfluence.sadeSatiStatus.isActive && (
-                    <p className="text-[10px] text-brown-500 dark:text-brown-400 mt-1">
+                    <p className="text-[10px] text-brown-500 dark:text-brown-600 mt-1">
                       {vedicAnalysis.currentTransitInfluence.sadeSatiStatus.phase}
                     </p>
                   )}
@@ -1198,53 +1149,49 @@ export default function YogaDoshaView() {
                 </CardContent>
               </Card>
             </div>
-
             {/* Sade Sati Description */}
             {vedicAnalysis.currentTransitInfluence.sadeSatiStatus.isActive && (
               <Card className="border-0 shadow-sm bg-red-50/50 dark:bg-red-900/5 border-l-4 border-l-red-400">
                 <CardContent className="p-4">
-                  <p className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed">
+                  <p className="text-xs text-brown-700 dark:text-brown-500 leading-relaxed">
                     {vedicAnalysis.currentTransitInfluence.sadeSatiStatus.description}
                   </p>
                 </CardContent>
               </Card>
             )}
-
             {/* Dhaiya Description */}
             {vedicAnalysis.currentTransitInfluence.dhaiyaStatus.isActive && (
               <Card className="border-0 shadow-sm bg-amber-50/50 dark:bg-amber-900/5 border-l-4 border-l-amber-400">
                 <CardContent className="p-4">
-                  <p className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed">
+                  <p className="text-xs text-brown-700 dark:text-brown-500 leading-relaxed">
                     {vedicAnalysis.currentTransitInfluence.dhaiyaStatus.description}
                   </p>
                 </CardContent>
               </Card>
             )}
-
             {/* Jupiter Transit to Moon */}
             <Card className="border-0 shadow-sm bg-gradient-to-r from-gold/5 to-sage-muted/5 dark:from-gold/10 dark:to-sage/5 overflow-hidden">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Compass className="size-4 text-gold-dark dark:text-gold" />
-                  <h3 className="text-sm font-bold text-brown-900 dark:text-brown-100">
+                  <h3 className="text-sm font-bold text-brown-900 dark:text-brown-600">
                     Jupiter Transit to Natal Moon
                   </h3>
                 </div>
                 <Badge className="bg-gold/10 text-gold-dark dark:bg-gold/20 dark:text-gold border-0 text-xs mb-2">
                   {vedicAnalysis.currentTransitInfluence.jupiterTransitToMoon.house}{getOrdinalSuffix(vedicAnalysis.currentTransitInfluence.jupiterTransitToMoon.house)} House
                 </Badge>
-                <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">
+                <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">
                   {vedicAnalysis.currentTransitInfluence.jupiterTransitToMoon.description}
                 </p>
               </CardContent>
             </Card>
-
             {/* All Transit Details */}
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] overflow-hidden">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <TrendingUp className="size-4 text-brown-600 dark:text-brown-300" />
-                  <h3 className="text-sm font-bold text-brown-900 dark:text-brown-100">
+                  <TrendingUp className="size-4 text-brown-600 dark:text-brown-500" />
+                  <h3 className="text-sm font-bold text-brown-900 dark:text-brown-600">
                     All Planetary Transits
                   </h3>
                 </div>
@@ -1266,7 +1213,7 @@ export default function YogaDoshaView() {
                                 ) : (
                                   <span className="size-2 rounded-full bg-brown-300 dark:bg-brown-500 shrink-0" />
                                 )}
-                                <span className="text-xs font-medium text-brown-800 dark:text-brown-200">{transit.planet}</span>
+                                <span className="text-xs font-medium text-brown-800 dark:text-brown-400">{transit.planet}</span>
                                 <span className="text-[10px] text-brown-400 dark:text-brown-500">
                                   in {transit.transitSign} (H{transit.transitHouse})
                                 </span>
@@ -1289,7 +1236,7 @@ export default function YogaDoshaView() {
                             <p className="text-[10px] text-brown-400 dark:text-brown-500">
                               {transit.natalAspect}
                             </p>
-                            <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">
+                            <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">
                               {transit.influence}
                             </p>
                           </div>
@@ -1302,26 +1249,22 @@ export default function YogaDoshaView() {
             </Card>
           </motion.div>
         )}
-
         {/* ─── Nakshatra Details Tab ────────────────────────────── */}
         {activeTab === 'nakshatra' && vedicAnalysis && (
           <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }} className="space-y-4">
             <h2
-              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
             >
               <Moon className="size-5 inline mr-2 text-purple-600 dark:text-purple-400" />
               Nakshatra Details
             </h2>
-
             {/* Nakshatra Personality */}
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden border-l-4 border-l-purple-400 dark:border-l-purple-500">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] overflow-hidden border-l-4 border-l-purple-400 dark:border-l-purple-500">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Moon className="size-4 text-purple-600 dark:text-purple-400" />
                   <h3
-                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                   >
                     Nakshatra Personality
                   </h3>
@@ -1348,29 +1291,27 @@ export default function YogaDoshaView() {
                       </span>
                     ))}
                   </div>
-                  <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
+                  <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed">
                     {vedicAnalysis.nakshatraPersonality.emotionalNature}
                   </p>
                   <div className="rounded-lg bg-purple-50 dark:bg-purple-900/10 p-3">
                     <p className="text-[10px] uppercase tracking-wider text-purple-500 dark:text-purple-400 mb-1 flex items-center gap-1">
                       <Heart className="size-3" /> Life Purpose
                     </p>
-                    <p className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed">
+                    <p className="text-xs text-brown-700 dark:text-brown-500 leading-relaxed">
                       {vedicAnalysis.nakshatraPersonality.lifePurpose}
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-
             {/* Nakshatra Compatibility (Koota) */}
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden border-l-4 border-l-pink-400 dark:border-l-pink-500">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] overflow-hidden border-l-4 border-l-pink-400 dark:border-l-pink-500">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Users className="size-4 text-pink-600 dark:text-pink-400" />
                   <h3
-                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                   >
                     Nakshatra Compatibility (Koota)
                   </h3>
@@ -1378,43 +1319,40 @@ export default function YogaDoshaView() {
                 <p className="text-xs text-brown-400 dark:text-brown-500 mb-3">
                   Based on your Moon nakshatra ({vedicAnalysis.nakshatraCompatibility.nakshatra})
                 </p>
-
                 <div className="grid grid-cols-3 gap-2 mb-3">
                   <div className="rounded-lg bg-pink-50 dark:bg-pink-900/10 p-3 text-center">
                     <p className="text-[10px] uppercase tracking-wider text-pink-500 dark:text-pink-400 mb-1">Yoni</p>
-                    <p className="text-sm font-bold text-brown-800 dark:text-brown-200">{vedicAnalysis.nakshatraCompatibility.yoni}</p>
+                    <p className="text-sm font-bold text-brown-800 dark:text-brown-400">{vedicAnalysis.nakshatraCompatibility.yoni}</p>
                   </div>
                   <div className="rounded-lg bg-purple-50 dark:bg-purple-900/10 p-3 text-center">
                     <p className="text-[10px] uppercase tracking-wider text-purple-500 dark:text-purple-400 mb-1">Gana</p>
-                    <p className="text-sm font-bold text-brown-800 dark:text-brown-200">{vedicAnalysis.nakshatraCompatibility.gana}</p>
+                    <p className="text-sm font-bold text-brown-800 dark:text-brown-400">{vedicAnalysis.nakshatraCompatibility.gana}</p>
                   </div>
                   <div className="rounded-lg bg-teal-50 dark:bg-teal-900/10 p-3 text-center">
                     <p className="text-[10px] uppercase tracking-wider text-teal-500 dark:text-teal-400 mb-1">Nadi</p>
-                    <p className="text-sm font-bold text-brown-800 dark:text-brown-200">{vedicAnalysis.nakshatraCompatibility.nadi.split(' ')[0]}</p>
+                    <p className="text-sm font-bold text-brown-800 dark:text-brown-400">{vedicAnalysis.nakshatraCompatibility.nadi.split(' ')[0]}</p>
                   </div>
                 </div>
-
                 <div className="space-y-3">
                   <div className="rounded-lg bg-pink-50/50 dark:bg-pink-900/5 p-3">
                     <p className="text-[10px] uppercase tracking-wider text-pink-600 dark:text-pink-400 mb-1">Yoni (Animal Nature)</p>
-                    <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">
+                    <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">
                       {vedicAnalysis.nakshatraCompatibility.yoniDescription}
                     </p>
                   </div>
                   <div className="rounded-lg bg-purple-50/50 dark:bg-purple-900/5 p-3">
                     <p className="text-[10px] uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1">Gana (Temperament)</p>
-                    <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">
+                    <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">
                       {vedicAnalysis.nakshatraCompatibility.ganaDescription}
                     </p>
                   </div>
                   <div className="rounded-lg bg-teal-50/50 dark:bg-teal-900/5 p-3">
                     <p className="text-[10px] uppercase tracking-wider text-teal-600 dark:text-teal-400 mb-1">Nadi (Constitution)</p>
-                    <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">
+                    <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">
                       {vedicAnalysis.nakshatraCompatibility.nadiDescription}
                     </p>
                   </div>
                 </div>
-
                 {vedicAnalysis.nakshatraCompatibility.compatibilityNotes.length > 0 && (
                   <div className="mt-3 rounded-lg bg-gold/5 dark:bg-gold/10 border border-gold/10 p-3">
                     <p className="text-[10px] uppercase tracking-wider text-gold-dark dark:text-gold mb-2 flex items-center gap-1">
@@ -1422,7 +1360,7 @@ export default function YogaDoshaView() {
                     </p>
                     <ul className="space-y-1.5">
                       {vedicAnalysis.nakshatraCompatibility.compatibilityNotes.map((note, idx) => (
-                        <li key={idx} className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed pl-3 border-l-2 border-gold/30 dark:border-gold/20">
+                        <li key={idx} className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed pl-3 border-l-2 border-gold/30 dark:border-gold/20">
                           {note}
                         </li>
                       ))}
@@ -1433,7 +1371,6 @@ export default function YogaDoshaView() {
             </Card>
           </motion.div>
         )}
-
         {/* ─── Full Analysis Tab ────────────────────────────────── */}
         {activeTab === 'analysis' && vedicAnalysis && (
           <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }} className="space-y-6">
@@ -1446,8 +1383,7 @@ export default function YogaDoshaView() {
                   </div>
                   <div>
                     <h3
-                      className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                     >
                       Chart Strength
                     </h3>
@@ -1457,19 +1393,19 @@ export default function YogaDoshaView() {
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="rounded-lg bg-white/50 dark:bg-white/5 p-2">
+                  <div className="rounded-lg bg-white/50 dark:bg-white/[0.08] p-2">
                     <p className="text-xs text-brown-400 dark:text-brown-500">Present Yogas</p>
                     <p className="text-lg font-bold text-sage-dark dark:text-sage">{vedicAnalysis.summary.presentYogas}</p>
                     <p className="text-[10px] text-brown-300 dark:text-brown-500">{vedicAnalysis.summary.strongYogas} strong</p>
                   </div>
-                  <div className="rounded-lg bg-white/50 dark:bg-white/5 p-2">
+                  <div className="rounded-lg bg-white/50 dark:bg-white/[0.08] p-2">
                     <p className="text-xs text-brown-400 dark:text-brown-500">Present Doshas</p>
                     <p className="text-lg font-bold text-amber-600 dark:text-amber-400">{vedicAnalysis.summary.presentDoshas}</p>
                     <p className="text-[10px] text-brown-300 dark:text-brown-500">{vedicAnalysis.summary.highSeverityDoshas} high</p>
                   </div>
-                  <div className="rounded-lg bg-white/50 dark:bg-white/5 p-2">
+                  <div className="rounded-lg bg-white/50 dark:bg-white/[0.08] p-2">
                     <p className="text-xs text-brown-400 dark:text-brown-500">Process Time</p>
-                    <p className="text-lg font-bold text-brown-600 dark:text-brown-300">
+                    <p className="text-lg font-bold text-brown-600 dark:text-brown-500">
                       <Zap className="size-4 inline mr-1" />
                       Fast
                     </p>
@@ -1478,15 +1414,13 @@ export default function YogaDoshaView() {
                 </div>
               </CardContent>
             </Card>
-
             {/* Ascendant Lord Analysis */}
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden border-l-4 border-l-gold">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] overflow-hidden border-l-4 border-l-gold">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Sun className="size-4 text-gold-dark dark:text-gold" />
                   <h3
-                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                   >
                     Ascendant Lord Analysis
                   </h3>
@@ -1504,21 +1438,19 @@ export default function YogaDoshaView() {
                       {vedicAnalysis.ascendantLordAnalysis.lordStrength}
                     </Badge>
                   </div>
-                  <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
+                  <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed">
                     {vedicAnalysis.ascendantLordAnalysis.analysis}
                   </p>
                 </div>
               </CardContent>
             </Card>
-
             {/* Current Dasha */}
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden border-l-4 border-l-teal-400 dark:border-l-teal-500">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] overflow-hidden border-l-4 border-l-teal-400 dark:border-l-teal-500">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <CircleDot className="size-4 text-teal-600 dark:text-teal-400" />
                   <h3
-                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                   >
                     Current Dasha Period
                   </h3>
@@ -1535,7 +1467,7 @@ export default function YogaDoshaView() {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
+                    <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed">
                       {vedicAnalysis.dashaInterpretation.interpretation}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -1556,15 +1488,13 @@ export default function YogaDoshaView() {
                 )}
               </CardContent>
             </Card>
-
             {/* Planetary Strengths */}
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] overflow-hidden">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Gem className="size-4 text-brown-600 dark:text-brown-300" />
+                  <Gem className="size-4 text-brown-600 dark:text-brown-500" />
                   <h3
-                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                   >
                     Planetary Strengths
                   </h3>
@@ -1578,7 +1508,7 @@ export default function YogaDoshaView() {
                         className="flex items-center justify-between py-1.5 border-b border-brown-100/50 dark:border-brown-800/30 last:border-0"
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-sm font-medium text-brown-800 dark:text-brown-200">{ps.planet}</span>
+                          <span className="text-sm font-medium text-brown-800 dark:text-brown-400">{ps.planet}</span>
                           <span className="text-xs text-brown-400 dark:text-brown-500">{ps.sign}</span>
                           {ps.isRetrograde && <span className="text-[9px] px-1 py-0 rounded bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">R</span>}
                           {ps.isCombust && <span className="text-[9px] px-1 py-0 rounded bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400">C</span>}
@@ -1592,15 +1522,13 @@ export default function YogaDoshaView() {
                 </div>
               </CardContent>
             </Card>
-
             {/* House Analysis */}
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] overflow-hidden">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <BookOpen className="size-4 text-brown-600 dark:text-brown-300" />
+                  <BookOpen className="size-4 text-brown-600 dark:text-brown-500" />
                   <h3
-                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                   >
                     House-by-House Analysis
                   </h3>
@@ -1618,8 +1546,8 @@ export default function YogaDoshaView() {
                           <button className="w-full text-left py-2 border-b border-brown-100/50 dark:border-brown-800/30 hover:bg-brown-50/50 dark:hover:bg-brown-800/20 transition-colors rounded px-1">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-brown-600 dark:text-brown-300">H{house.houseNumber}</span>
-                                <span className="text-xs font-medium text-brown-800 dark:text-brown-200">{house.houseName}</span>
+                                <span className="text-xs font-bold text-brown-600 dark:text-brown-500">H{house.houseNumber}</span>
+                                <span className="text-xs font-medium text-brown-800 dark:text-brown-400">{house.houseName}</span>
                                 <span className="text-[10px] text-brown-400 dark:text-brown-500">({house.sign})</span>
                                 {house.planets.length > 0 && (
                                   <span className="text-[10px] text-gold-dark dark:text-gold">
@@ -1635,7 +1563,7 @@ export default function YogaDoshaView() {
                         </CollapsibleTrigger>
                         <CollapsibleContent>
                           <div className="py-2 px-1">
-                            <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">
+                            <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">
                               {house.analysis}
                             </p>
                           </div>
@@ -1646,15 +1574,13 @@ export default function YogaDoshaView() {
                 </div>
               </CardContent>
             </Card>
-
             {/* Yoga Interpretations */}
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden border-l-4 border-l-sage">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] overflow-hidden border-l-4 border-l-sage">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="size-4 text-sage-dark dark:text-sage" />
                   <h3
-                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                   >
                     Detailed Yoga Analysis
                   </h3>
@@ -1678,7 +1604,7 @@ export default function YogaDoshaView() {
                                 ) : (
                                   <span className="size-3 shrink-0 rounded-full border border-brown-300 dark:border-brown-600" />
                                 )}
-                                <span className="text-xs font-medium text-brown-800 dark:text-brown-200 truncate">{yi.name}</span>
+                                <span className="text-xs font-medium text-brown-800 dark:text-brown-400 truncate">{yi.name}</span>
                                 {yi.present && (
                                   <Badge className={`${strengthBadge.className} border-0 text-[9px] px-1.5 py-0`}>
                                     {strengthBadge.label}
@@ -1693,9 +1619,9 @@ export default function YogaDoshaView() {
                         </CollapsibleTrigger>
                         <CollapsibleContent>
                           <div className="py-2 px-1 space-y-1">
-                            <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">{yi.description}</p>
+                            <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">{yi.description}</p>
                             {yi.interpretation && (
-                              <p className="text-[11px] text-brown-500 dark:text-brown-400 leading-relaxed italic">
+                              <p className="text-[11px] text-brown-500 dark:text-brown-600 leading-relaxed italic">
                                 {yi.interpretation}
                               </p>
                             )}
@@ -1707,15 +1633,13 @@ export default function YogaDoshaView() {
                 </div>
               </CardContent>
             </Card>
-
             {/* Dosha Interpretations */}
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden border-l-4 border-l-amber-400 dark:border-l-amber-500">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] overflow-hidden border-l-4 border-l-amber-400 dark:border-l-amber-500">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Shield className="size-4 text-amber-600 dark:text-amber-400" />
                   <h3
-                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                   >
                     Detailed Dosha Analysis
                   </h3>
@@ -1739,7 +1663,7 @@ export default function YogaDoshaView() {
                                 ) : (
                                   <CheckCircle2 className="size-3 text-sage-dark dark:text-sage shrink-0" />
                                 )}
-                                <span className="text-xs font-medium text-brown-800 dark:text-brown-200 truncate">{di.name}</span>
+                                <span className="text-xs font-medium text-brown-800 dark:text-brown-400 truncate">{di.name}</span>
                                 {di.present && (
                                   <Badge className={`${severityBadge.className} border-0 text-[9px] px-1.5 py-0`}>
                                     {severityBadge.label}
@@ -1754,19 +1678,19 @@ export default function YogaDoshaView() {
                         </CollapsibleTrigger>
                         <CollapsibleContent>
                           <div className="py-2 px-1 space-y-1">
-                            <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">{di.description}</p>
+                            <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">{di.description}</p>
                             {di.remedies.length > 0 && (
                               <div className="space-y-1 mt-1">
                                 <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-500">Remedies</p>
                                 {di.remedies.slice(0, 3).map((remedy, idx) => (
-                                  <p key={idx} className="text-[11px] text-brown-500 dark:text-brown-400 leading-relaxed pl-2 border-l border-amber-200 dark:border-amber-800">
+                                  <p key={idx} className="text-[11px] text-brown-500 dark:text-brown-600 leading-relaxed pl-2 border-l border-amber-200 dark:border-amber-800">
                                     {remedy}
                                   </p>
                                 ))}
                               </div>
                             )}
                             {di.interpretation && (
-                              <p className="text-[11px] text-brown-500 dark:text-brown-400 leading-relaxed italic mt-1">
+                              <p className="text-[11px] text-brown-500 dark:text-brown-600 leading-relaxed italic mt-1">
                                 {di.interpretation}
                               </p>
                             )}
@@ -1780,7 +1704,6 @@ export default function YogaDoshaView() {
             </Card>
           </motion.div>
         )}
-
         {/* Refresh Analysis Button */}
         {needsAnalysis && userId && !analysisLoading && (
           <Button
@@ -1793,7 +1716,6 @@ export default function YogaDoshaView() {
             {vedicAnalysis ? 'Refresh Analysis' : 'Load Vedic Analysis'}
           </Button>
         )}
-
         {/* Educational Note */}
         <AnimatePresence>
           <motion.div
@@ -1805,7 +1727,7 @@ export default function YogaDoshaView() {
               <CardContent className="p-4">
                 <div className="flex items-start gap-2">
                   <Sparkles className="size-4 text-sage-dark dark:text-sage shrink-0 mt-0.5" />
-                  <p className="text-xs text-brown-500 dark:text-brown-400 leading-relaxed">
+                  <p className="text-xs text-brown-500 dark:text-brown-600 leading-relaxed">
                     Yogas and doshas are not predictions — they are patterns. They describe tendencies in your
                     emotional architecture, not fixed outcomes. Awareness is the first step to transformation.
                   </p>
@@ -1818,17 +1740,13 @@ export default function YogaDoshaView() {
     </div>
   );
 }
-
 // ─── Helper ──────────────────────────────────────────────────────────────────
-
 function getOrdinalSuffix(n: number): string {
   const s = ['th', 'st', 'nd', 'rd'];
   const v = n % 100;
   return s[(v - 20) % 10] || s[v] || s[0];
 }
-
 // ─── Sub-Components ──────────────────────────────────────────────────────────
-
 function YogaCard({
   yoga,
   isOpen,
@@ -1848,7 +1766,7 @@ function YogaCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.05 * index }}
     >
-      <Card className={`border-0 shadow-sm overflow-hidden border-l-4 transition-opacity ${isPresent ? 'bg-white dark:bg-white/5 border-l-sage opacity-100' : 'bg-white/40 dark:bg-white/2 border-l-brown-200 dark:border-l-brown-700 opacity-60'}`}>
+      <Card className={`border-0 shadow-sm overflow-hidden border-l-4 transition-opacity ${isPresent ? 'bg-white dark:bg-white/[0.08] border-l-sage opacity-100' : 'bg-white/40 dark:bg-white/2 border-l-brown-200 dark:border-l-brown-700 opacity-60'}`}>
         <Collapsible open={isOpen} onOpenChange={onToggle}>
           <CollapsibleTrigger asChild>
             <button className={`w-full text-left p-4 transition-colors ${isPresent ? 'hover:bg-sage-muted/10 dark:hover:bg-sage/5' : 'hover:bg-brown-50/30 dark:hover:bg-brown-800/10'}`}>
@@ -1857,8 +1775,7 @@ function YogaCard({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <h3
-                      className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                     >
                       {yoga.name}
                     </h3>
@@ -1875,7 +1792,7 @@ function YogaCard({
                   <p className="text-[11px] text-brown-300 dark:text-brown-500 mb-1">
                     {yoga.sanskrit}
                   </p>
-                  <p className="text-sm text-brown-600 dark:text-brown-300 leading-relaxed">
+                  <p className="text-sm text-brown-600 dark:text-brown-500 leading-relaxed">
                     {yoga.summary}
                   </p>
                 </div>
@@ -1892,18 +1809,18 @@ function YogaCard({
           <CollapsibleContent>
             <div className="px-4 pb-4 space-y-3 border-t border-sage/10 dark:border-sage/5 pt-3">
               <div className="rounded-lg bg-sage-muted/20 dark:bg-sage/10 p-3">
-                <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
+                <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed">
                   {yoga.description}
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg bg-brown-50 dark:bg-brown-50/10 p-3">
                   <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-500 mb-1">Houses</p>
-                  <p className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed">{yoga.houses}</p>
+                  <p className="text-xs text-brown-700 dark:text-brown-500 leading-relaxed">{yoga.houses}</p>
                 </div>
                 <div className="rounded-lg bg-brown-50 dark:bg-brown-50/10 p-3">
                   <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-500 mb-1">Planets</p>
-                  <p className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed">{yoga.planets}</p>
+                  <p className="text-xs text-brown-700 dark:text-brown-500 leading-relaxed">{yoga.planets}</p>
                 </div>
               </div>
               {isPresent && (
@@ -1911,7 +1828,7 @@ function YogaCard({
                   <p className="text-[10px] uppercase tracking-wider text-gold-dark dark:text-gold mb-1 flex items-center gap-1">
                     <Heart className="size-3" /> Emotional Interpretation
                   </p>
-                  <p className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed">
+                  <p className="text-xs text-brown-700 dark:text-brown-500 leading-relaxed">
                     {yoga.emotionalInterpretation}
                   </p>
                 </div>
@@ -1923,7 +1840,6 @@ function YogaCard({
     </motion.div>
   );
 }
-
 function DoshaCard({
   dosha,
   isOpen,
@@ -1943,7 +1859,7 @@ function DoshaCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.05 * index }}
     >
-      <Card className={`border-0 shadow-sm overflow-hidden border-l-4 transition-opacity ${isPresent ? 'bg-white dark:bg-white/5 border-l-amber-400 dark:border-l-amber-500 opacity-100' : 'bg-white/40 dark:bg-white/2 border-l-brown-200 dark:border-l-brown-700 opacity-60'}`}>
+      <Card className={`border-0 shadow-sm overflow-hidden border-l-4 transition-opacity ${isPresent ? 'bg-white dark:bg-white/[0.08] border-l-amber-400 dark:border-l-amber-500 opacity-100' : 'bg-white/40 dark:bg-white/2 border-l-brown-200 dark:border-l-brown-700 opacity-60'}`}>
         <Collapsible open={isOpen} onOpenChange={onToggle}>
           <CollapsibleTrigger asChild>
             <button className={`w-full text-left p-4 transition-colors ${isPresent ? 'hover:bg-amber-50/30 dark:hover:bg-amber-900/5' : 'hover:bg-brown-50/30 dark:hover:bg-brown-800/10'}`}>
@@ -1952,8 +1868,7 @@ function DoshaCard({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <h3
-                      className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                     >
                       {dosha.name}
                     </h3>
@@ -1964,7 +1879,7 @@ function DoshaCard({
                   <p className="text-[11px] text-brown-300 dark:text-brown-500 mb-1">
                     {dosha.sanskrit}
                   </p>
-                  <p className="text-sm text-brown-600 dark:text-brown-300 leading-relaxed">
+                  <p className="text-sm text-brown-600 dark:text-brown-500 leading-relaxed">
                     {dosha.summary}
                   </p>
                 </div>
@@ -1981,7 +1896,7 @@ function DoshaCard({
           <CollapsibleContent>
             <div className="px-4 pb-4 space-y-3 border-t border-amber/10 dark:border-amber/5 pt-3">
               <div className="rounded-lg bg-amber-50/30 dark:bg-amber-900/10 p-3">
-                <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
+                <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed">
                   {dosha.description}
                 </p>
               </div>
@@ -1993,7 +1908,7 @@ function DoshaCard({
                       <p className="text-[10px] uppercase tracking-wider text-sage-dark dark:text-sage mb-1 flex items-center gap-1">
                         <Brain className="size-3" /> Behavioral
                       </p>
-                      <p className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed">
+                      <p className="text-xs text-brown-700 dark:text-brown-500 leading-relaxed">
                         {dosha.remedies.behavioral}
                       </p>
                     </div>
@@ -2001,7 +1916,7 @@ function DoshaCard({
                       <p className="text-[10px] uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1 flex items-center gap-1">
                         <Activity className="size-3" /> Mindfulness
                       </p>
-                      <p className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed">
+                      <p className="text-xs text-brown-700 dark:text-brown-500 leading-relaxed">
                         {dosha.remedies.mindfulness}
                       </p>
                     </div>
@@ -2009,7 +1924,7 @@ function DoshaCard({
                       <p className="text-[10px] uppercase tracking-wider text-gold-dark dark:text-gold mb-1 flex items-center gap-1">
                         <PenLine className="size-3" /> Journaling
                       </p>
-                      <p className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed">
+                      <p className="text-xs text-brown-700 dark:text-brown-500 leading-relaxed">
                         {dosha.remedies.journaling}
                       </p>
                     </div>

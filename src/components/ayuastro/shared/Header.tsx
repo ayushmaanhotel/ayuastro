@@ -1,17 +1,15 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { useTheme } from 'next-themes';
 import { Menu, User, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-
 export default function Header() {
   const { currentView, setView, birthDetails, userId } = useAyuAstroStore();
   const { theme, setTheme } = useTheme();
   const [needsMoodCheckIn, setNeedsMoodCheckIn] = useState(false);
-
   // Check if user has logged a mood today
   useEffect(() => {
     async function checkMoodToday() {
@@ -33,13 +31,10 @@ export default function Header() {
     }
     checkMoodToday();
   }, [userId]);
-
   if (currentView === 'landing' || currentView === 'calculating') return null;
-
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
-
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
@@ -57,9 +52,8 @@ export default function Header() {
             className="flex size-9 items-center justify-center rounded-full transition-colors hover:bg-brown-50 dark:hover:bg-brown-800"
             aria-label="Menu"
           >
-            <Menu className="size-5 text-brown-700 dark:text-brown-300" />
+            <Menu className="size-5 text-brown-700 dark:text-brown-500" />
           </button>
-
           <motion.button
             onClick={() => setView('insights')}
             className="flex items-center gap-2"
@@ -67,22 +61,18 @@ export default function Header() {
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
           >
             <Image src="/logo.svg" alt="AyuAstro" width={24} height={24} className="size-6" priority />
-            <h1
-              className="animate-shimmer-text font-serif text-xl font-semibold tracking-wide"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-            >
+            <h1 className="animate-shimmer-text font-serif text-xl font-semibold tracking-wide">
               AyuAstro
             </h1>
-            {/* "Nothing to Hide" tagline */}
-            <span className="text-[8px] font-medium tracking-[0.15em] text-gold-dark/60 dark:text-gold/50 hidden sm:inline">
-              · Nothing to Hide
-            </span>
+            {/* "Nothing to Hide" tagline — more prominent */}
+            <Badge className="hidden sm:flex text-[8px] font-bold tracking-[0.15em] text-gold-dark/70 dark:text-gold/60 bg-gold/10 dark:bg-gold/15 border-gold/20 px-2 py-0.5 uppercase">
+              Nothing to Hide
+            </Badge>
             {/* v2.0 badge */}
             <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-gold/10 text-gold-dark dark:bg-gold/15 dark:text-gold">
               v2.0
             </span>
           </motion.button>
-
           <div className="flex items-center gap-1">
             {/* Theme Toggle — smooth morphing animation */}
             <button
@@ -117,7 +107,6 @@ export default function Header() {
                 )}
               </AnimatePresence>
             </button>
-
             {/* Profile Button — gold ring when user has unread mood entries */}
             <button
               onClick={() => setView('profile')}
@@ -131,7 +120,7 @@ export default function Header() {
                   {birthDetails.name.charAt(0).toUpperCase()}
                 </div>
               ) : (
-                <User className="size-5 text-brown-700 dark:text-brown-300" />
+                <User className="size-5 text-brown-700 dark:text-brown-500" />
               )}
               {/* Notification dot for mood check-in */}
               <AnimatePresence>

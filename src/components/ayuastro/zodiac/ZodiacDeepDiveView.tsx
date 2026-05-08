@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,14 +15,11 @@ import {
   Wind,
   Droplets,
 } from 'lucide-react';
-
 // ─── Type Definitions ────────────────────────────────────────────────────────
-
 interface EmotionalTrait {
   name: string;
   score: number;
 }
-
 interface ZodiacSignData {
   symbol: string;
   name: string;
@@ -46,9 +42,7 @@ interface ZodiacSignData {
   spiritualPractice: string;
   affirmation: string;
 }
-
 // ─── Complete Data for All 12 Zodiac Signs ───────────────────────────────────
-
 const ZODIAC_DATA: Record<string, ZodiacSignData> = {
   Aries: {
     symbol: '♈',
@@ -591,23 +585,18 @@ const ZODIAC_DATA: Record<string, ZodiacSignData> = {
     affirmation: 'My empathy is a superpower — today I use it on myself first.',
   },
 };
-
 const SIGN_ORDER = [
   'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
   'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
 ];
-
 // ─── Element Config ──────────────────────────────────────────────────────────
-
 const ELEMENT_CONFIG: Record<string, { icon: React.ElementType; bgClass: string; textClass: string; darkBgClass: string; darkTextClass: string; barClass: string }> = {
   Fire: { icon: Flame, bgClass: 'bg-red-50', textClass: 'text-red-600', darkBgClass: 'dark:bg-red-900/30', darkTextClass: 'dark:text-red-300', barClass: 'bg-gradient-to-r from-red-500 to-orange-400' },
   Earth: { icon: Mountain, bgClass: 'bg-green-50', textClass: 'text-green-700', darkBgClass: 'dark:bg-green-900/30', darkTextClass: 'dark:text-green-300', barClass: 'bg-gradient-to-r from-green-600 to-emerald-400' },
   Air: { icon: Wind, bgClass: 'bg-amber-50', textClass: 'text-amber-700', darkBgClass: 'dark:bg-amber-900/30', darkTextClass: 'dark:text-amber-300', barClass: 'bg-gradient-to-r from-yellow-400 to-amber-400' },
   Water: { icon: Droplets, bgClass: 'bg-blue-50', textClass: 'text-blue-600', darkBgClass: 'dark:bg-blue-900/30', darkTextClass: 'dark:text-blue-300', barClass: 'bg-gradient-to-r from-blue-500 to-teal-400' },
 };
-
 // ─── Animation Variants ──────────────────────────────────────────────────────
-
 const staggerContainer = {
   initial: {},
   animate: {
@@ -616,28 +605,21 @@ const staggerContainer = {
     },
   },
 };
-
 const staggerItem = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
 };
-
 // ─── Component ───────────────────────────────────────────────────────────────
-
 export default function ZodiacDeepDiveView() {
   const { astrologyData, setView } = useAyuAstroStore();
   const [selectedSign, setSelectedSign] = useState(astrologyData?.sunSign || 'Aries');
-
   const sunSign = astrologyData?.sunSign || '';
   const moonSign = astrologyData?.moonSign || '';
   const ascendant = astrologyData?.ascendant || '';
-
   const data = ZODIAC_DATA[selectedSign];
   if (!data) return null;
-
   const elementConfig = ELEMENT_CONFIG[data.element];
   const ElementIcon = elementConfig.icon;
-
   const isOwnSign = (sign: string) => sign === sunSign || sign === moonSign || sign === ascendant;
   const getOwnBadge = (sign: string): string | null => {
     if (sign === sunSign) return 'Sun';
@@ -645,7 +627,6 @@ export default function ZodiacDeepDiveView() {
     if (sign === ascendant) return 'Asc';
     return null;
   };
-
   return (
     <div className="bg-cream dark:bg-[#1a1410] min-h-screen pb-24">
       {/* Header */}
@@ -655,21 +636,19 @@ export default function ZodiacDeepDiveView() {
             variant="ghost"
             size="sm"
             onClick={() => setView('insights')}
-            className="text-brown-500 dark:text-brown-300 hover:text-brown-700 dark:hover:text-brown-100 -ml-2"
+            className="text-brown-500 dark:text-brown-500 hover:text-brown-700 dark:hover:text-brown-100 -ml-2"
           >
             <ArrowLeft className="size-4 mr-1" />
             Back
           </Button>
           <h1
-            className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 flex-1"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600 flex-1"
           >
             Zodiac Deep Dive
           </h1>
           <Sparkles className="size-5 text-gold dark:text-gold" />
         </div>
       </div>
-
       {/* Zodiac Sign Selector — Horizontal Scroll */}
       <div className="sticky top-[52px] z-20 bg-cream/95 dark:bg-[#1a1410]/95 backdrop-blur-md border-b border-brown-100/50 dark:border-brown-700/20">
         <div
@@ -687,7 +666,7 @@ export default function ZodiacDeepDiveView() {
                 className={`relative shrink-0 flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-200 ${
                   isActive
                     ? 'bg-gold/15 dark:bg-gold/20 ring-2 ring-gold shadow-md'
-                    : 'bg-white dark:bg-white/5 hover:bg-brown-50 dark:hover:bg-white/10 shadow-sm'
+                    : 'bg-white dark:bg-white/[0.08] hover:bg-brown-50 dark:hover:bg-white/10 shadow-sm'
                 }`}
                 aria-label={sd.name}
                 aria-pressed={isActive}
@@ -698,7 +677,7 @@ export default function ZodiacDeepDiveView() {
                 <span className={`text-[10px] font-semibold tracking-wide ${
                   isActive
                     ? 'text-gold-dark dark:text-gold'
-                    : 'text-brown-400 dark:text-brown-300'
+                    : 'text-brown-400 dark:text-brown-500'
                 }`}>
                   {sd.abbr}
                 </span>
@@ -718,7 +697,6 @@ export default function ZodiacDeepDiveView() {
           })}
         </div>
       </div>
-
       {/* Content */}
       <div className="mx-auto max-w-lg px-4 py-6">
         <AnimatePresence mode="wait">
@@ -731,7 +709,7 @@ export default function ZodiacDeepDiveView() {
           >
             {/* ─── Sign Hero Card ──────────────────────────────────────────── */}
             <motion.div variants={staggerItem}>
-              <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden card-hover">
+              <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden card-hover">
                 <div className="h-1.5 bg-gradient-to-r from-gold via-gold-dark to-sage" />
                 <CardContent className="p-6 text-center">
                   {/* Large zodiac symbol with gold gradient */}
@@ -747,27 +725,23 @@ export default function ZodiacDeepDiveView() {
                       {data.symbol}
                     </span>
                   </div>
-
                   {/* Sign name */}
                   <h2
-                    className="font-serif text-3xl font-bold text-brown-900 dark:text-brown-100 mb-1"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-3xl font-bold text-brown-900 dark:text-brown-600 mb-1"
                   >
                     {data.name}
                   </h2>
-
                   {/* Date range */}
-                  <p className="text-sm text-brown-400 dark:text-brown-400 mb-4">
+                  <p className="text-sm text-brown-400 dark:text-brown-600 mb-4">
                     {data.dateRange}
                   </p>
-
                   {/* Element + Modality + Ruler badges */}
                   <div className="flex items-center justify-center gap-2 flex-wrap mb-4">
                     <Badge className={`${elementConfig.bgClass} ${elementConfig.textClass} ${elementConfig.darkBgClass} ${elementConfig.darkTextClass} border-0 text-xs px-3 py-1 flex items-center gap-1.5`}>
                       <ElementIcon className="size-3.5" />
                       {data.element}
                     </Badge>
-                    <Badge className="bg-brown-50 text-brown-600 dark:bg-brown-800/30 dark:text-brown-300 border-0 text-xs px-3 py-1">
+                    <Badge className="bg-brown-50 text-brown-600 dark:bg-brown-800/30 dark:text-brown-500 border-0 text-xs px-3 py-1">
                       {data.modality}
                     </Badge>
                     <Badge className="bg-gold/10 text-gold-dark dark:bg-gold/20 dark:text-gold border-0 text-xs px-3 py-1 flex items-center gap-1.5">
@@ -775,21 +749,18 @@ export default function ZodiacDeepDiveView() {
                       {data.ruler}
                     </Badge>
                   </div>
-
                   {/* Quality */}
                   <p
-                    className="font-serif text-lg text-brown-700 dark:text-brown-200"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-lg text-brown-700 dark:text-brown-400"
                   >
                     {data.quality}
                   </p>
                 </CardContent>
               </Card>
             </motion.div>
-
             {/* ─── Emotional Profile Card ───────────────────────────────────── */}
             <motion.div variants={staggerItem}>
-              <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden card-hover">
+              <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden card-hover">
                 <div className="h-1 bg-gradient-to-r from-gold/40 to-sage/40" />
                 <CardContent className="p-5">
                   <div className="flex items-center gap-2 mb-4">
@@ -797,21 +768,19 @@ export default function ZodiacDeepDiveView() {
                       <Sparkles className="size-4 text-gold-dark dark:text-gold" />
                     </div>
                     <h3
-                      className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
                     >
                       Emotional Profile
                     </h3>
                   </div>
-
                   <div className="space-y-3">
                     {data.emotionalTraits.map((trait, idx) => (
                       <div key={idx}>
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium text-brown-700 dark:text-brown-200">
+                          <span className="text-sm font-medium text-brown-700 dark:text-brown-400">
                             {trait.name}
                           </span>
-                          <span className="text-xs font-semibold text-brown-400 dark:text-brown-400">
+                          <span className="text-xs font-semibold text-brown-400 dark:text-brown-600">
                             {trait.score}
                           </span>
                         </div>
@@ -835,10 +804,9 @@ export default function ZodiacDeepDiveView() {
                 </CardContent>
               </Card>
             </motion.div>
-
             {/* ─── Love & Relationships Card ────────────────────────────────── */}
             <motion.div variants={staggerItem}>
-              <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden card-hover">
+              <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden card-hover">
                 <div className="h-1 bg-gradient-to-r from-pink-300 via-rose-300 to-gold/40" />
                 <CardContent className="p-5">
                   <div className="flex items-center gap-2 mb-4">
@@ -846,16 +814,14 @@ export default function ZodiacDeepDiveView() {
                       <Heart className="size-4 text-pink-500 dark:text-pink-400" />
                     </div>
                     <h3
-                      className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
                     >
                       Love & Relationships
                     </h3>
                   </div>
-
                   {/* Best love matches */}
                   <div className="mb-4">
-                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-400 uppercase tracking-wider mb-2">
+                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-600 uppercase tracking-wider mb-2">
                       Best Love Matches
                     </p>
                     <div className="flex gap-3">
@@ -866,60 +832,56 @@ export default function ZodiacDeepDiveView() {
                         >
                           <Heart className="size-3 text-pink-400 dark:text-pink-400 fill-pink-400" />
                           <span className="text-lg">{match.symbol}</span>
-                          <span className="text-sm font-medium text-brown-700 dark:text-brown-200">
+                          <span className="text-sm font-medium text-brown-700 dark:text-brown-400">
                             {match.sign}
                           </span>
                         </div>
                       ))}
                     </div>
                   </div>
-
                   {/* Relationship Strengths */}
                   <div className="mb-4">
-                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-400 uppercase tracking-wider mb-2">
+                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-600 uppercase tracking-wider mb-2">
                       Strengths
                     </p>
                     <ul className="space-y-1.5">
                       {data.relationshipStrengths.map((s, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-brown-600 dark:text-brown-300">
+                        <li key={i} className="flex items-start gap-2 text-sm text-brown-600 dark:text-brown-500">
                           <span className="text-sage mt-0.5 shrink-0">✦</span>
                           {s}
                         </li>
                       ))}
                     </ul>
                   </div>
-
                   {/* Growth Areas */}
                   <div className="mb-4">
-                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-400 uppercase tracking-wider mb-2">
+                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-600 uppercase tracking-wider mb-2">
                       Growth Areas
                     </p>
                     <ul className="space-y-1.5">
                       {data.relationshipGrowthAreas.map((g, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-brown-600 dark:text-brown-300">
+                        <li key={i} className="flex items-start gap-2 text-sm text-brown-600 dark:text-brown-500">
                           <span className="text-gold mt-0.5 shrink-0">✦</span>
                           {g}
                         </li>
                       ))}
                     </ul>
                   </div>
-
                   {/* Love Language */}
                   <div className="rounded-lg bg-gradient-to-r from-pink-50 to-gold/5 dark:from-pink-900/10 dark:to-gold/5 p-3">
-                    <p className="text-[10px] font-semibold text-brown-400 dark:text-brown-400 uppercase tracking-wider mb-1">
+                    <p className="text-[10px] font-semibold text-brown-400 dark:text-brown-600 uppercase tracking-wider mb-1">
                       Love Language
                     </p>
-                    <p className="text-sm font-medium text-brown-700 dark:text-brown-200">
+                    <p className="text-sm font-medium text-brown-700 dark:text-brown-400">
                       {data.loveLanguage}
                     </p>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
-
             {/* ─── Career & Ambition Card ───────────────────────────────────── */}
             <motion.div variants={staggerItem}>
-              <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden card-hover">
+              <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden card-hover">
                 <div className="h-1 bg-gradient-to-r from-amber-400 via-gold/40 to-sage/40" />
                 <CardContent className="p-5">
                   <div className="flex items-center gap-2 mb-4">
@@ -927,23 +889,21 @@ export default function ZodiacDeepDiveView() {
                       <Briefcase className="size-4 text-amber-600 dark:text-amber-400" />
                     </div>
                     <h3
-                      className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
                     >
                       Career & Ambition
                     </h3>
                   </div>
-
                   {/* Career fields */}
                   <div className="mb-4">
-                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-400 uppercase tracking-wider mb-2">
+                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-600 uppercase tracking-wider mb-2">
                       Best Career Fields
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {data.careerFields.map((cf, i) => (
                         <span
                           key={i}
-                          className="inline-flex items-center gap-1.5 bg-brown-50 dark:bg-brown-800/20 rounded-lg px-3 py-1.5 text-sm text-brown-700 dark:text-brown-200"
+                          className="inline-flex items-center gap-1.5 bg-brown-50 dark:bg-brown-800/20 rounded-lg px-3 py-1.5 text-sm text-brown-700 dark:text-brown-400"
                         >
                           <span>{cf.emoji}</span>
                           {cf.field}
@@ -951,33 +911,30 @@ export default function ZodiacDeepDiveView() {
                       ))}
                     </div>
                   </div>
-
                   {/* Work style */}
                   <div className="mb-4">
-                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-400 uppercase tracking-wider mb-1">
+                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-600 uppercase tracking-wider mb-1">
                       Work Style
                     </p>
-                    <p className="text-sm text-brown-600 dark:text-brown-300 leading-relaxed">
+                    <p className="text-sm text-brown-600 dark:text-brown-500 leading-relaxed">
                       {data.workStyle}
                     </p>
                   </div>
-
                   {/* Leadership style */}
                   <div className="rounded-lg bg-gradient-to-r from-amber-50 to-gold/5 dark:from-amber-900/10 dark:to-gold/5 p-3">
-                    <p className="text-[10px] font-semibold text-brown-400 dark:text-brown-400 uppercase tracking-wider mb-1">
+                    <p className="text-[10px] font-semibold text-brown-400 dark:text-brown-600 uppercase tracking-wider mb-1">
                       Leadership Style
                     </p>
-                    <p className="text-sm font-medium text-brown-700 dark:text-brown-200">
+                    <p className="text-sm font-medium text-brown-700 dark:text-brown-400">
                       {data.leadershipStyle}
                     </p>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
-
             {/* ─── Spiritual Growth Card ─────────────────────────────────────── */}
             <motion.div variants={staggerItem}>
-              <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden card-hover">
+              <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden card-hover">
                 <div className="h-1 bg-gradient-to-r from-sage via-gold/40 to-brown-300" />
                 <CardContent className="p-5">
                   <div className="flex items-center gap-2 mb-4">
@@ -985,41 +942,36 @@ export default function ZodiacDeepDiveView() {
                       <Sparkles className="size-4 text-sage-dark dark:text-sage" />
                     </div>
                     <h3
-                      className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600"
                     >
                       Spiritual Growth
                     </h3>
                   </div>
-
                   {/* Life lesson */}
                   <div className="mb-4">
-                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-400 uppercase tracking-wider mb-1">
+                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-600 uppercase tracking-wider mb-1">
                       Life Lesson
                     </p>
-                    <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed">
+                    <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed">
                       {data.lifeLesson}
                     </p>
                   </div>
-
                   {/* Spiritual practice */}
                   <div className="mb-4">
-                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-400 uppercase tracking-wider mb-1">
+                    <p className="text-xs font-semibold text-brown-400 dark:text-brown-600 uppercase tracking-wider mb-1">
                       Spiritual Practice
                     </p>
-                    <p className="text-sm text-brown-600 dark:text-brown-300 leading-relaxed">
+                    <p className="text-sm text-brown-600 dark:text-brown-500 leading-relaxed">
                       {data.spiritualPractice}
                     </p>
                   </div>
-
                   {/* Affirmation */}
                   <div className="rounded-lg bg-gradient-to-r from-sage-muted/30 to-gold/5 dark:from-sage/10 dark:to-gold/5 p-4">
-                    <p className="text-[10px] font-semibold text-brown-400 dark:text-brown-400 uppercase tracking-wider mb-2">
+                    <p className="text-[10px] font-semibold text-brown-400 dark:text-brown-600 uppercase tracking-wider mb-2">
                       ✦ Your Affirmation
                     </p>
                     <p
-                      className="italic text-brown-800 dark:text-brown-200 leading-relaxed text-[15px]"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      className="italic text-brown-800 dark:text-brown-400 leading-relaxed text-[15px]"
                     >
                       &ldquo;{data.affirmation}&rdquo;
                     </p>

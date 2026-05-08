@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,23 +8,20 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Sparkles, Brain, Hash, Heart, Star, ArrowRight, Eye, Shield, ChevronDown, CheckCircle2 } from 'lucide-react';
-
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.6 },
 };
-
 const stagger = {
   animate: { transition: { staggerChildren: 0.12 } },
 };
-
 const features = [
   {
     icon: Sparkles,
     title: 'Vedic Astrology + AI',
     description: 'Your kundali, interpreted by emotional intelligence — not generic horoscopes',
-    bg: 'bg-white dark:bg-white/5',
+    bg: 'bg-white dark:bg-white/[0.08]',
     iconBg: 'bg-gradient-to-br from-gold/20 to-gold/5',
     iconColor: 'text-gold-dark',
   },
@@ -41,7 +37,7 @@ const features = [
     icon: Hash,
     title: 'Numerology Fusion',
     description: 'Numbers reveal what words cannot — your name, your date, your code',
-    bg: 'bg-white dark:bg-white/5',
+    bg: 'bg-white dark:bg-white/[0.08]',
     iconBg: 'bg-gradient-to-br from-brown-700/15 to-brown-500/5',
     iconColor: 'text-brown-700',
   },
@@ -54,13 +50,11 @@ const features = [
     iconColor: 'text-brown-500',
   },
 ];
-
 const trustMetrics = [
   { label: 'Reports Generated', value: '50K+' },
   { label: 'Emotional Accuracy', value: '94%' },
   { label: 'Seeker Rating', value: '4.9/5' },
 ];
-
 const testimonials = [
   {
     quote: "The clarity I received completely shifted my understanding of my recurring relationship patterns. It felt less like a reading and more like a profound psychological unblocking.",
@@ -81,7 +75,6 @@ const testimonials = [
     initial: 'P',
   },
 ];
-
 const howItWorksSteps = [
   {
     number: 1,
@@ -102,7 +95,6 @@ const howItWorksSteps = [
     description: 'AI synthesizes Vedic astrology, numerology, and behavioral science into your emotional blueprint',
   },
 ];
-
 const faqItems = [
   {
     question: 'How accurate is the analysis?',
@@ -125,7 +117,6 @@ const faqItems = [
     answer: 'We use Vedic (Jyotish) astrology with Lahiri ayanamsa — the same system used by professional Jyotishis in India. Our calculations are deterministic and astronomically grounded, not random daily horoscopes.',
   },
 ];
-
 // Star-field: fixed positions for ~20 tiny dots
 const starPositions = [
   { x: 5, y: 8, delay: 0 }, { x: 12, y: 22, delay: 0.5 }, { x: 20, y: 5, delay: 1.2 },
@@ -136,27 +127,22 @@ const starPositions = [
   { x: 38, y: 72, delay: 0.8 }, { x: 58, y: 65, delay: 1.9 }, { x: 72, y: 78, delay: 0.1 },
   { x: 85, y: 70, delay: 1.4 }, { x: 48, y: 85, delay: 0.5 },
 ];
-
 // ─── Count-Up Animation Component ─────────────────────────────────────────────
 function CountUpValue({ value }: { value: string }) {
   const [display, setDisplay] = useState(value);
   const hasAnimated = useRef(false);
-
   useEffect(() => {
     if (hasAnimated.current) return;
     hasAnimated.current = true;
-
     // Parse numeric part from value like "50K+", "94%", "4.9/5"
     const numericMatch = value.match(/[\d.]+/);
     if (!numericMatch) return;
-
     const target = parseFloat(numericMatch[0]);
     const suffix = value.replace(numericMatch[0], '');
     const isFloat = numericMatch[0].includes('.');
     const steps = 30;
     const stepDuration = 25;
     let current = 0;
-
     const interval = setInterval(() => {
       current++;
       const progress = current / steps;
@@ -164,31 +150,25 @@ function CountUpValue({ value }: { value: string }) {
       const eased = 1 - Math.pow(1 - progress, 3);
       const currentVal = target * eased;
       setDisplay(isFloat ? `${currentVal.toFixed(1)}${suffix}` : `${Math.round(currentVal)}${suffix}`);
-
       if (current >= steps) {
         clearInterval(interval);
         setDisplay(value);
       }
     }, stepDuration);
-
     return () => clearInterval(interval);
   }, [value]);
-
   return <>{display}</>;
 }
-
 export default function LandingView() {
   const { setView } = useAyuAstroStore();
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [trustCounted, setTrustCounted] = useState(false);
   const [heroOffsetY, setHeroOffsetY] = useState(0);
-
   // Parallax effect
   const { scrollY } = useScroll();
   const bgY = useTransform(scrollY, [0, 1000], [0, 200]);
   const contentY = useTransform(scrollY, [0, 1000], [0, 50]);
   const decorY = useTransform(scrollY, [0, 1000], [0, 300]);
-
   // Subtle parallax on hero text via scroll event
   useEffect(() => {
     const handleScroll = () => {
@@ -197,7 +177,6 @@ export default function LandingView() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
   // Auto-rotate testimonials
   useEffect(() => {
     const interval = setInterval(() => {
@@ -205,11 +184,9 @@ export default function LandingView() {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
-
   const goToTestimonial = useCallback((index: number) => {
     setActiveTestimonial(index);
   }, []);
-
   return (
     <div className="min-h-screen bg-cream dark:bg-brown-900">
       <style>{`
@@ -235,7 +212,6 @@ export default function LandingView() {
           animation: conic-spin 3s linear infinite;
         }
       `}</style>
-
       {/* Hero Section */}
       <motion.section
         initial="initial"
@@ -262,7 +238,6 @@ export default function LandingView() {
               }}
             />
           ))}
-
           {/* Glowing orb behind hero text */}
           <div
             className="glowing-orb absolute top-1/2 left-1/2 w-[500px] h-[500px] rounded-full pointer-events-none"
@@ -270,13 +245,11 @@ export default function LandingView() {
               background: 'radial-gradient(circle, rgba(191,155,48,0.2) 0%, rgba(191,155,48,0.05) 40%, transparent 70%)',
             }}
           />
-
           {/* Existing background decorations (slower due to parallax) */}
           <motion.div style={{ y: decorY }} className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gold/[0.03] blur-3xl" />
           <motion.div style={{ y: decorY }} className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] rounded-full bg-sage/[0.05] blur-2xl" />
           <motion.div style={{ y: decorY }} className="absolute top-1/3 right-1/4 w-[200px] h-[200px] rounded-full bg-brown-200/20 dark:bg-brown-600/10 blur-2xl" />
         </motion.div>
-
         {/* Content (foreground - moves at different parallax speed) */}
         <motion.div className="relative z-10" style={{ y: contentY }}>
           {/* Pill Badge with pulsing "New" badge */}
@@ -288,43 +261,38 @@ export default function LandingView() {
               New
             </Badge>
           </motion.div>
-
           {/* Main Heading with gradient text */}
           <motion.h1
             variants={fadeInUp}
             className="font-serif hero-title mb-6 max-w-xl text-4xl font-bold leading-[1.15] sm:text-5xl md:text-6xl"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif", transform: `translateY(${heroOffsetY}px)` }}
+            style={{ transform: `translateY(${heroOffsetY}px)` }}
           >
             <span className="text-gradient-gold">Discover</span>{' '}
             the hidden{' '}
             <span className="text-gold-gradient">emotional patterns</span>{' '}
             shaping your relationships
           </motion.h1>
-
-          {/* "Nothing to Hide" tagline */}
-          <motion.div variants={fadeInUp} className="mb-3">
-            <span className="inline-block text-[11px] font-semibold tracking-[0.3em] uppercase text-gold-dark dark:text-gold/80">
+          {/* "Nothing to Hide" tagline — bold and prominent */}
+          <motion.div variants={fadeInUp} className="mb-4">
+            <Badge className="border-gold/40 bg-gradient-to-r from-gold/15 via-gold/10 to-gold/15 px-6 py-2 text-[12px] font-bold tracking-[0.3em] text-gold-dark dark:text-gold uppercase shadow-sm shadow-gold/10">
               ✦ Nothing to Hide ✦
-            </span>
+            </Badge>
           </motion.div>
-
           {/* Subtext */}
           <motion.p
             variants={fadeInUp}
-            className="mb-10 max-w-md mx-auto text-base leading-relaxed text-brown-400 dark:text-brown-300 sm:text-lg"
+            className="mb-10 max-w-md mx-auto text-base leading-relaxed text-brown-400 dark:text-brown-500 sm:text-lg"
           >
             AyuAstro combines Vedic astrology, numerology, and behavioral science
-            to reveal the emotional architecture you were born with.
+            to reveal the emotional architecture you were born with. No sugarcoating. Just truth.
           </motion.p>
-
           {/* Social Proof Badge */}
           <motion.div variants={fadeInUp} className="mb-4 flex items-center justify-center gap-1.5">
             <CheckCircle2 className="size-3.5 text-sage-dark" />
-            <span className="text-xs font-medium text-brown-500 dark:text-brown-300">
+            <span className="text-xs font-medium text-brown-500 dark:text-brown-500">
               Trusted by 50,000+ seekers
             </span>
           </motion.div>
-
           {/* CTAs with animated gradient border */}
           <motion.div variants={fadeInUp} className="flex flex-col gap-3 sm:flex-row sm:justify-center">
             <div className="relative group">
@@ -350,13 +318,12 @@ export default function LandingView() {
               onClick={() => setView('onboarding')}
               variant="outline"
               size="lg"
-              className="border-brown-200 dark:border-brown-600 px-8 text-base font-medium text-brown-700 dark:text-brown-200 hover:bg-brown-50 dark:hover:bg-brown-800 transition-all hover:-translate-y-0.5"
+              className="border-brown-200 dark:border-brown-600 px-8 text-base font-medium text-brown-700 dark:text-brown-400 hover:bg-brown-50 dark:hover:bg-brown-800 transition-all hover:-translate-y-0.5"
             >
               <Eye className="mr-2 size-4" />
               View Sample Insight
             </Button>
           </motion.div>
-
           {/* Trust indicators */}
           <motion.div
             variants={fadeInUp}
@@ -364,18 +331,17 @@ export default function LandingView() {
           >
             <div className="flex items-center gap-1.5">
               <Shield className="size-4 text-sage-dark" />
-              <span className="text-xs text-brown-400 dark:text-brown-300">Encrypted & Private</span>
+              <span className="text-xs text-brown-400 dark:text-brown-500">Encrypted & Private</span>
             </div>
             <div className="h-3 w-px bg-brown-200 dark:bg-brown-600" />
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((s) => (
                 <Star key={s} className="size-3 fill-gold text-gold" />
               ))}
-              <span className="ml-1 text-xs font-medium text-brown-500 dark:text-brown-300">4.9/5</span>
+              <span className="ml-1 text-xs font-medium text-brown-500 dark:text-brown-500">4.9/5</span>
             </div>
           </motion.div>
         </motion.div>
-
         {/* Scroll indicator */}
         <motion.div
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
@@ -385,7 +351,6 @@ export default function LandingView() {
           <ChevronDown className="size-5 text-brown-300 dark:text-brown-500" />
         </motion.div>
       </motion.section>
-
       {/* Feature Cards */}
       <section className="px-6 pb-20">
         <motion.div
@@ -398,15 +363,13 @@ export default function LandingView() {
           <motion.div variants={fadeInUp} className="mb-8 text-center">
             <h2
               className="font-serif text-2xl font-bold text-brown-900 dark:text-cream mb-2"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               Not Another Horoscope App
             </h2>
-            <p className="text-sm text-brown-400 dark:text-brown-300">
+            <p className="text-sm text-brown-400 dark:text-brown-500">
               Three systems. One intelligence. Your emotional truth.
             </p>
           </motion.div>
-
           {features.map((feature, i) => {
             const Icon = feature.icon;
             return (
@@ -423,11 +386,10 @@ export default function LandingView() {
                     <div>
                       <h3
                         className="font-serif text-base font-semibold text-brown-900 dark:text-cream"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                       >
                         {feature.title}
                       </h3>
-                      <p className="mt-1 text-sm leading-relaxed text-brown-400 dark:text-brown-300">{feature.description}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-brown-400 dark:text-brown-500">{feature.description}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -436,7 +398,6 @@ export default function LandingView() {
           })}
         </motion.div>
       </section>
-
       {/* How It Works Section */}
       <section className="px-6 pb-20">
         <motion.div
@@ -449,19 +410,16 @@ export default function LandingView() {
           <motion.div variants={fadeInUp} className="mb-8 text-center">
             <h2
               className="font-serif text-2xl font-bold text-brown-900 dark:text-cream mb-2"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               How It Works
             </h2>
-            <p className="text-sm text-brown-400 dark:text-brown-300">
+            <p className="text-sm text-brown-400 dark:text-brown-500">
               Three steps to your emotional blueprint
             </p>
           </motion.div>
-
           <div className="relative">
             {/* Connecting dotted line */}
             <div className="absolute left-6 top-8 bottom-8 w-px border-l-2 border-dashed border-gold/30 dark:border-gold/20 hidden sm:block" />
-
             <div className="space-y-6">
               {howItWorksSteps.map((step, i) => (
                 <motion.div
@@ -471,24 +429,22 @@ export default function LandingView() {
                 >
                   {/* Number badge */}
                   <div className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-gold/20 to-gold/5 dark:from-gold/30 dark:to-gold/10 border-2 border-gold/30">
-                    <span className="font-serif text-lg font-bold text-gold-dark dark:text-gold" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                    <span className="font-serif text-lg font-bold text-gold-dark dark:text-gold">
                       {step.number}
                     </span>
                   </div>
-
                   {/* Content card */}
-                  <Card className="flex-1 border-0 shadow-sm bg-white dark:bg-white/5 dark:border dark:border-brown-700/30">
+                  <Card className="flex-1 border-0 shadow-sm bg-white dark:bg-white/[0.08] dark:border dark:border-brown-700/30">
                     <CardContent className="p-5">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-xl">{step.icon}</span>
                         <h3
                           className="font-serif text-base font-semibold text-brown-900 dark:text-cream"
-                          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                         >
                           {step.title}
                         </h3>
                       </div>
-                      <p className="text-sm leading-relaxed text-brown-400 dark:text-brown-300">
+                      <p className="text-sm leading-relaxed text-brown-400 dark:text-brown-500">
                         {step.description}
                       </p>
                     </CardContent>
@@ -499,7 +455,6 @@ export default function LandingView() {
           </div>
         </motion.div>
       </section>
-
       {/* Trust Metrics */}
       <section className="px-6 pb-16">
         <motion.div
@@ -515,21 +470,19 @@ export default function LandingView() {
               <motion.div
                 key={i}
                 variants={fadeInUp}
-                className="text-center p-4 rounded-2xl bg-white/60 dark:bg-white/5 border border-brown-100/50 dark:border-brown-700/30"
+                className="text-center p-4 rounded-2xl bg-white/60 dark:bg-white/[0.08] border border-brown-100/50 dark:border-brown-700/30"
               >
                 <p
                   className="font-serif text-2xl font-bold text-brown-900 dark:text-cream"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
                   {trustCounted ? <CountUpValue value={metric.value} /> : metric.value}
                 </p>
-                <p className="text-xs text-brown-400 dark:text-brown-300 mt-1">{metric.label}</p>
+                <p className="text-xs text-brown-400 dark:text-brown-500 mt-1">{metric.label}</p>
               </motion.div>
             ))}
           </div>
         </motion.div>
       </section>
-
       {/* Testimonials Carousel */}
       <section className="px-6 pb-16">
         <motion.div
@@ -542,19 +495,17 @@ export default function LandingView() {
           <div className="mb-6 text-center">
             <h2
               className="font-serif text-2xl font-bold text-brown-900 dark:text-cream mb-2"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               What Seekers Say
             </h2>
-            <p className="text-sm text-brown-400 dark:text-brown-300">
+            <p className="text-sm text-brown-400 dark:text-brown-500">
               Real experiences from our community
             </p>
           </div>
-
           <Card className="glass-light border-0 shadow-sm dark:border dark:border-brown-700/30 p-2 min-h-[200px]">
             <CardContent className="p-5 relative overflow-hidden">
               {/* Decorative gold quote mark */}
-              <span className="absolute top-3 left-4 text-5xl text-gold/10 dark:text-gold/5 font-serif leading-none select-none pointer-events-none" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>&ldquo;</span>
+              <span className="absolute top-3 left-4 text-5xl text-gold/10 dark:text-gold/5 font-serif leading-none select-none pointer-events-none">&ldquo;</span>
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTestimonial}
@@ -569,8 +520,7 @@ export default function LandingView() {
                     ))}
                   </div>
                   <p
-                    className="font-serif text-sm italic leading-relaxed text-brown-700 dark:text-brown-200 mb-4"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-sm italic leading-relaxed text-brown-700 dark:text-brown-400 mb-4"
                   >
                     &ldquo;{testimonials[activeTestimonial].quote}&rdquo;
                   </p>
@@ -581,10 +531,10 @@ export default function LandingView() {
                       </span>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-brown-700 dark:text-brown-200">
+                      <p className="text-xs font-semibold text-brown-700 dark:text-brown-400">
                         {testimonials[activeTestimonial].name}
                       </p>
-                      <p className="text-[10px] text-brown-400 dark:text-brown-400">
+                      <p className="text-[10px] text-brown-400 dark:text-brown-600">
                         {testimonials[activeTestimonial].zodiac}
                       </p>
                     </div>
@@ -593,7 +543,6 @@ export default function LandingView() {
               </AnimatePresence>
             </CardContent>
           </Card>
-
           {/* Dot indicators */}
           <div className="flex justify-center gap-2 mt-4">
             {testimonials.map((_, i) => (
@@ -611,7 +560,6 @@ export default function LandingView() {
           </div>
         </motion.div>
       </section>
-
       {/* FAQ Accordion Section */}
       <section className="px-6 pb-16">
         <motion.div
@@ -624,16 +572,14 @@ export default function LandingView() {
           <motion.div variants={fadeInUp} className="mb-6 text-center">
             <h2
               className="font-serif text-2xl font-bold text-brown-900 dark:text-cream mb-2"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               Frequently Asked Questions
             </h2>
-            <p className="text-sm text-brown-400 dark:text-brown-300">
+            <p className="text-sm text-brown-400 dark:text-brown-500">
               Everything you need to know before your analysis
             </p>
           </motion.div>
-
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5 dark:border dark:border-brown-700/30 p-2">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] dark:border dark:border-brown-700/30 p-2">
             <CardContent className="p-4">
               <Accordion type="single" collapsible className="w-full">
                 {faqItems.map((item, i) => (
@@ -653,7 +599,7 @@ export default function LandingView() {
                           {item.question}
                         </span>
                       </AccordionTrigger>
-                      <AccordionContent className="text-sm text-brown-500 dark:text-brown-300 leading-relaxed pl-7">
+                      <AccordionContent className="text-sm text-brown-500 dark:text-brown-500 leading-relaxed pl-7">
                         {item.answer}
                       </AccordionContent>
                     </AccordionItem>
@@ -664,7 +610,6 @@ export default function LandingView() {
           </Card>
         </motion.div>
       </section>
-
       {/* Bottom CTA */}
       <section className="px-6 pb-24 text-center">
         <motion.div
@@ -675,11 +620,10 @@ export default function LandingView() {
         >
           <h2
             className="font-serif text-xl font-bold text-brown-900 dark:text-cream mb-2"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
             Ready to meet yourself?
           </h2>
-          <p className="text-sm text-brown-400 dark:text-brown-300 mb-6">
+          <p className="text-sm text-brown-400 dark:text-brown-500 mb-6">
             Your emotional intelligence report is waiting.
           </p>
           <Button

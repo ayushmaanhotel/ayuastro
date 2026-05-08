@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,14 +10,11 @@ import {
 } from '@/components/ui/collapsible';
 import { motion } from 'framer-motion';
 import { Moon, Star, Clock, Brain, BookOpen, Hash, Shield, Compass, Search, ChevronDown } from 'lucide-react';
-
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
 };
-
 type WisdomCategory = 'All' | 'Vedic Astrology' | 'Numerology' | 'Behavioral Science';
-
 interface WisdomCard {
   icon: React.ElementType;
   title: string;
@@ -30,7 +26,6 @@ interface WisdomCard {
   accentBorder: string;
   readingTime: string;
 }
-
 const wisdomCards: WisdomCard[] = [
   {
     icon: Moon,
@@ -121,15 +116,12 @@ const wisdomCards: WisdomCard[] = [
     readingTime: '4 min',
   },
 ];
-
 const CATEGORIES: WisdomCategory[] = ['All', 'Vedic Astrology', 'Numerology', 'Behavioral Science'];
-
 export default function WisdomView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<WisdomCategory>('All');
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [recentlyViewed, setRecentlyViewed] = useState<string[]>([]);
-
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = { All: wisdomCards.length };
     wisdomCards.forEach((card) => {
@@ -137,7 +129,6 @@ export default function WisdomView() {
     });
     return counts;
   }, []);
-
   const filteredCards = useMemo(() => {
     return wisdomCards.filter((card) => {
       const matchesCategory = activeCategory === 'All' || card.category === activeCategory;
@@ -148,7 +139,6 @@ export default function WisdomView() {
       return matchesCategory && matchesSearch;
     });
   }, [activeCategory, searchQuery]);
-
   const toggleCard = useCallback((title: string) => {
     setExpandedCards((prev) => {
       const next = new Set(prev);
@@ -165,22 +155,19 @@ export default function WisdomView() {
       return next;
     });
   }, []);
-
   // Get recently viewed card data
   const recentlyViewedCards = useMemo(() => {
     return recentlyViewed
       .map((title) => wisdomCards.find((c) => c.title === title))
       .filter(Boolean) as WisdomCard[];
   }, [recentlyViewed]);
-
   return (
     <div className="cosmic-bg bg-cream dark:bg-[#1A1412] px-4 py-6 pb-24">
       <div className="mx-auto max-w-lg space-y-6">
         {/* Header */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
           <h1
-            className="font-serif text-3xl font-bold text-brown-900 dark:text-brown-100 mb-1"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-serif text-3xl font-bold text-brown-900 dark:text-brown-600 mb-1"
           >
             Wisdom Library
           </h1>
@@ -188,11 +175,10 @@ export default function WisdomView() {
             Deepen your understanding of the ancient sciences behind your analysis.
           </p>
         </motion.div>
-
         {/* Search Bar — with magnifying glass icon and gold focus ring */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300 dark:text-brown-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300 dark:text-brown-600" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -201,7 +187,6 @@ export default function WisdomView() {
             />
           </div>
         </motion.div>
-
         {/* Category Filter */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
           <div className="flex flex-wrap gap-2">
@@ -212,12 +197,12 @@ export default function WisdomView() {
                 className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                   activeCategory === cat
                     ? 'bg-brown-700 dark:bg-gold text-white dark:text-brown-900'
-                    : 'bg-white dark:bg-cream-dark text-brown-500 dark:text-brown-300 hover:bg-brown-50 dark:hover:bg-brown-50/20 border border-brown-200 dark:border-brown-100/30'
+                    : 'bg-white dark:bg-cream-dark text-brown-500 dark:text-brown-500 hover:bg-brown-50 dark:hover:bg-brown-50/20 border border-brown-200 dark:border-brown-100/30'
                 }`}
               >
                 {cat}
                 <span className={`text-[10px] ${
-                  activeCategory === cat ? 'text-white/70 dark:text-brown-900/70' : 'text-brown-300 dark:text-brown-400'
+                  activeCategory === cat ? 'text-white/70 dark:text-brown-900/70' : 'text-brown-300 dark:text-brown-600'
                 }`}>
                   {categoryCounts[cat] || 0}
                 </span>
@@ -225,7 +210,6 @@ export default function WisdomView() {
             ))}
           </div>
         </motion.div>
-
         {/* Recently Viewed Section */}
         {recentlyViewedCards.length > 0 && (
           <motion.div
@@ -235,7 +219,7 @@ export default function WisdomView() {
           >
             <div className="flex items-center gap-2 mb-3">
               <Clock className="size-4 text-gold" />
-              <h3 className="text-sm font-semibold text-brown-900 dark:text-brown-100">Recently Viewed</h3>
+              <h3 className="text-sm font-semibold text-brown-900 dark:text-brown-600">Recently Viewed</h3>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
               {recentlyViewedCards.map((card) => {
@@ -244,17 +228,16 @@ export default function WisdomView() {
                   <button
                     key={card.title}
                     onClick={() => toggleCard(card.title)}
-                    className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-white/5 border border-brown-100/50 dark:border-brown-100/20 hover:border-gold/30 transition-colors"
+                    className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-white/[0.08] border border-brown-100/50 dark:border-brown-100/20 hover:border-gold/30 transition-colors"
                   >
                     <Icon className="size-4 text-gold" />
-                    <span className="text-xs font-medium text-brown-700 dark:text-brown-300 whitespace-nowrap">{card.title}</span>
+                    <span className="text-xs font-medium text-brown-700 dark:text-brown-500 whitespace-nowrap">{card.title}</span>
                   </button>
                 );
               })}
             </div>
           </motion.div>
         )}
-
         {/* Wisdom Cards */}
         <div className="space-y-4">
           {filteredCards.length === 0 && (
@@ -275,12 +258,12 @@ export default function WisdomView() {
                 whileTap={{ scale: 0.98 }}
                 className="card-lift"
               >
-                <Card className={`card-hover border-0 shadow-md border-l-4 ${card.accentBorder} ${card.color} dark:bg-white/5`}>
+                <Card className={`card-hover border-0 shadow-md border-l-4 ${card.accentBorder} ${card.color} dark:bg-white/[0.08]`}>
                   <CardContent className="p-6">
                     <Collapsible open={isExpanded} onOpenChange={() => toggleCard(card.title)}>
                       <div className="flex items-start gap-4">
                         <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brown-700/10 dark:bg-brown-700/20">
-                          <Icon className="size-5 text-brown-700 dark:text-brown-300" />
+                          <Icon className="size-5 text-brown-700 dark:text-brown-500" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
@@ -293,22 +276,21 @@ export default function WisdomView() {
                             <Badge className={`${card.badgeColor} border-0 text-[10px] font-medium`}>
                               {card.category}
                             </Badge>
-                            <span className="flex items-center gap-1 text-[10px] text-brown-300 dark:text-brown-400">
+                            <span className="flex items-center gap-1 text-[10px] text-brown-300 dark:text-brown-600">
                               <Clock className="size-2.5" />
                               {card.readingTime}
                             </span>
                           </div>
                           <h3
-                            className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 mb-2"
-                            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                            className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600 mb-2"
                           >
                             {card.title}
                           </h3>
-                          <p className="text-sm text-brown-500 dark:text-brown-300 leading-relaxed">
+                          <p className="text-sm text-brown-500 dark:text-brown-500 leading-relaxed">
                             {card.preview}
                           </p>
                           <CollapsibleContent>
-                            <p className="text-sm text-brown-500 dark:text-brown-300 leading-relaxed mt-3">
+                            <p className="text-sm text-brown-500 dark:text-brown-500 leading-relaxed mt-3">
                               {card.description.substring(card.preview.length)}
                             </p>
                           </CollapsibleContent>

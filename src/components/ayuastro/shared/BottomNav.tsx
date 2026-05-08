@@ -1,10 +1,8 @@
 'use client';
-
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { useAyuAstroStore, type BottomNavTab } from '@/store/ayuastro-store';
 import { Sparkles, Users, BookOpen, User, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
 const tabs: { id: BottomNavTab; label: string; icon: React.ElementType; view: string }[] = [
   { id: 'insights', label: 'Insights', icon: Sparkles, view: 'insights' },
   { id: 'chat', label: 'Chat', icon: MessageCircle, view: 'chat' },
@@ -12,7 +10,6 @@ const tabs: { id: BottomNavTab; label: string; icon: React.ElementType; view: st
   { id: 'wisdom', label: 'Wisdom', icon: BookOpen, view: 'wisdom' },
   { id: 'profile', label: 'Profile', icon: User, view: 'profile' },
 ];
-
 // ─── Ripple Effect Component ─────────────────────────────────────────────────
 function TabRipple({ x, y }: { x: number; y: number }) {
   return (
@@ -31,14 +28,12 @@ function TabRipple({ x, y }: { x: number; y: number }) {
     />
   );
 }
-
 export default function BottomNav() {
   const { currentView, activeTab, setActiveTab, setView } = useAyuAstroStore();
   const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number; tabId: string }>>([]);
   const navRef = useRef<HTMLElement>(null);
   const [magneticOffsets, setMagneticOffsets] = useState<Record<string, number>>({});
   const [chatHintDismissed, setChatHintDismissed] = useState(false);
-
   // Check if user has previously interacted with chat
   useEffect(() => {
     const dismissed = localStorage.getItem('ayuastro-chat-hint-dismissed');
@@ -46,12 +41,10 @@ export default function BottomNav() {
       setChatHintDismissed(true);
     }
   }, []);
-
   // Magnetic effect: move tab slightly toward mouse when nearby
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     if (!navRef.current) return;
     const mouseX = e.clientX;
-
     const newOffsets: Record<string, number> = {};
     tabs.forEach((tab) => {
       const tabEl = navRef.current?.querySelector(`[data-tab="${tab.id}"]`);
@@ -68,18 +61,14 @@ export default function BottomNav() {
     });
     setMagneticOffsets(newOffsets);
   }, []);
-
   const handleMouseLeave = useCallback(() => {
     setMagneticOffsets({});
   }, []);
-
   const visibleViews = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'settings'];
   if (!visibleViews.includes(currentView)) return null;
-
   const handleTabClick = (tab: typeof tabs[number], e?: React.MouseEvent<HTMLButtonElement>) => {
     setActiveTab(tab.id);
     setView(tab.view as 'insights' | 'chat' | 'sync' | 'wisdom' | 'profile');
-
     // Haptic feedback vibration
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
@@ -88,13 +77,11 @@ export default function BottomNav() {
         // Silently fail - vibration not supported
       }
     }
-
     // Dismiss chat hint when chat tab is clicked
     if (tab.id === 'chat' && !chatHintDismissed) {
       setChatHintDismissed(true);
       localStorage.setItem('ayuastro-chat-hint-dismissed', 'true');
     }
-
     // Create ripple from tap point
     if (e) {
       const rect = e.currentTarget.getBoundingClientRect();
@@ -107,7 +94,6 @@ export default function BottomNav() {
       }, 600);
     }
   };
-
   return (
     <motion.nav
       ref={navRef}
@@ -141,7 +127,7 @@ export default function BottomNav() {
               className={`tab-press relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-all overflow-hidden ${
                 isActive
                   ? 'text-brown-700 dark:text-gold'
-                  : 'text-brown-300 hover:text-brown-500 dark:text-brown-300 dark:hover:text-brown-200'
+                  : 'text-brown-300 hover:text-brown-500 dark:text-brown-500 dark:hover:text-brown-200'
               }`}
               aria-label={tab.label}
               aria-current={isActive ? 'page' : undefined}
@@ -152,10 +138,8 @@ export default function BottomNav() {
                 .map((ripple) => (
                   <TabRipple key={ripple.id} x={ripple.x} y={ripple.y} />
                 ))}
-
               {/* Hover glow background */}
               <span className="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity" style={{ background: 'radial-gradient(circle at center, rgba(212,175,55,0.08), transparent 70%)' }} />
-
               <div className="relative">
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -173,7 +157,6 @@ export default function BottomNav() {
                     </motion.div>
                   </motion.div>
                 </AnimatePresence>
-
                 {/* Unread indicator dot on Chat tab for first-time users */}
                 {tab.id === 'chat' && !chatHintDismissed && !isActive && (
                   <motion.span
@@ -183,7 +166,6 @@ export default function BottomNav() {
                     style={{ boxShadow: '0 0 4px 1px rgba(212,175,55,0.5)' }}
                   />
                 )}
-
                 {/* Glowing dot indicator — moves between tabs via layoutId */}
                 {isActive && (
                   <motion.div
@@ -199,7 +181,6 @@ export default function BottomNav() {
                     />
                   </motion.div>
                 )}
-
                 {/* Gold indicator line below icon */}
                 {isActive && (
                   <motion.div

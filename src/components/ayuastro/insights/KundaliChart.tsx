@@ -1,16 +1,12 @@
 'use client';
-
 import { motion } from 'framer-motion';
-
 // ─── Props Interface (unchanged) ─────────────────────────────────────────────
-
 interface BirthDetailsInfo {
   name?: string;
   dateOfBirth?: string;
   timeOfBirth?: string;
   placeOfBirth?: string;
 }
-
 interface KundaliChartProps {
   planetaryPositions: Record<string, { sign: string; degree: number; house: number; retrograde: boolean }>;
   ascendant: string;
@@ -21,24 +17,19 @@ interface KundaliChartProps {
   nakshatra?: string;
   compact?: boolean;
 }
-
 // ─── Constants ───────────────────────────────────────────────────────────────
-
 const ZODIAC_SYMBOLS: Record<string, string> = {
   Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
   Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
 };
-
 const ZODIAC_ABBR: Record<string, string> = {
   Aries: 'Ari', Taurus: 'Tau', Gemini: 'Gem', Cancer: 'Can', Leo: 'Leo', Virgo: 'Vir',
   Libra: 'Lib', Scorpio: 'Sco', Sagittarius: 'Sag', Capricorn: 'Cap', Aquarius: 'Aqu', Pisces: 'Pis',
 };
-
 const ZODIAC_ORDER = [
   'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
   'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
 ];
-
 /** Planet display config — full names, symbols, and distinct colors */
 const PLANET_CONFIG: Record<string, { name: string; symbol: string; color: string }> = {
   Sun:     { name: 'Sun',     symbol: '☉', color: '#EAB308' },
@@ -51,7 +42,6 @@ const PLANET_CONFIG: Record<string, { name: string; symbol: string; color: strin
   Rahu:    { name: 'Rahu',    symbol: '☊', color: '#7C3AED' },
   Ketu:    { name: 'Ketu',    symbol: '☋', color: '#6B7280' },
 };
-
 /**
  * House size categories for adaptive text sizing.
  * North Indian layout:
@@ -60,13 +50,11 @@ const PLANET_CONFIG: Record<string, { name: string; symbol: string; color: strin
  *   - "wide": triangles (1,6) and trapezoids (2,5,7,10) — ~170-229px wide
  */
 type HouseSize = 'narrow' | 'medium' | 'wide';
-
 const HOUSE_SIZE: Record<number, HouseSize> = {
   1: 'wide', 2: 'wide', 3: 'narrow', 4: 'narrow',
   5: 'wide', 6: 'wide', 7: 'wide', 8: 'narrow',
   9: 'narrow', 10: 'wide', 11: 'medium', 12: 'medium',
 };
-
 /** Text layout presets per house size */
 interface LayoutPreset {
   planetFont: number;
@@ -81,7 +69,6 @@ interface LayoutPreset {
   houseNumFont: number;
   badgeR: number;
 }
-
 const PRESETS: Record<HouseSize, LayoutPreset> & { compact: LayoutPreset } = {
   wide: {
     planetFont: 11, degreeFont: 9, dotR: 3.5,
@@ -104,24 +91,19 @@ const PRESETS: Record<HouseSize, LayoutPreset> & { compact: LayoutPreset } = {
     lineGap: 12, zodiacFont: 10, houseNumFont: 7, badgeR: 5.5,
   },
 };
-
 // ─── Layout Constants ────────────────────────────────────────────────────────
-
 // Full-mode diamond grid (scaled from original 280→400, scale≈1.429)
 const F_OX = 25;
 const F_OY = 170;
 const F_SCALE = 400 / 280;
-
 function fGrid(x: number, y: number): [number, number] {
   return [Math.round(x * F_SCALE) + F_OX, Math.round(y * F_SCALE) + F_OY];
 }
-
 const F_TOP    = fGrid(150, 10);
 const F_RIGHT  = fGrid(290, 150);
 const F_BOTTOM = fGrid(150, 290);
 const F_LEFT   = fGrid(10, 150);
 const F_CENTER = fGrid(150, 150);
-
 const F_HOUSE_POLYGONS: Record<number, [number, number][]> = {
   1:  [fGrid(70, 10),  fGrid(230, 10), fGrid(150, 70)],
   2:  [fGrid(230, 10), fGrid(290, 70), fGrid(230, 70), fGrid(150, 70)],
@@ -136,16 +118,13 @@ const F_HOUSE_POLYGONS: Record<number, [number, number][]> = {
   11: [fGrid(70, 70),  fGrid(150, 70), fGrid(150, 150), fGrid(70, 150)],
   12: [fGrid(150, 70), fGrid(230, 70), fGrid(230, 150), fGrid(150, 150)],
 };
-
 // Compact-mode diamond grid (scaled 280→340, scale≈1.214)
 const C_SCALE = 340 / 280;
 const C_OX = 40;
 const C_OY = 30;
-
 function cGrid(x: number, y: number): [number, number] {
   return [Math.round(x * C_SCALE) + C_OX, Math.round(y * C_SCALE) + C_OY];
 }
-
 const C_HOUSE_POLYGONS: Record<number, [number, number][]> = {
   1:  [cGrid(70, 10),  cGrid(230, 10), cGrid(150, 70)],
   2:  [cGrid(230, 10), cGrid(290, 70), cGrid(230, 70), cGrid(150, 70)],
@@ -160,22 +139,18 @@ const C_HOUSE_POLYGONS: Record<number, [number, number][]> = {
   11: [cGrid(70, 70),  cGrid(150, 70), cGrid(150, 150), cGrid(70, 150)],
   12: [cGrid(150, 70), cGrid(230, 70), cGrid(230, 150), cGrid(150, 150)],
 };
-
 // ─── Utility Functions ───────────────────────────────────────────────────────
-
 function getCentroid(points: [number, number][]): [number, number] {
   const n = points.length;
   const cx = points.reduce((sum, p) => sum + p[0], 0) / n;
   const cy = points.reduce((sum, p) => sum + p[1], 0) / n;
   return [Math.round(cx), Math.round(cy)];
 }
-
 function formatDegree(degree: number): string {
   const d = Math.floor(degree);
   const m = Math.floor((degree - d) * 60);
   return `${d}°${m.toString().padStart(2, '0')}'`;
 }
-
 function formatBirthDate(dob?: string): string {
   if (!dob) return '';
   try {
@@ -185,9 +160,7 @@ function formatBirthDate(dob?: string): string {
     return dob;
   }
 }
-
 // ─── Sub-Components ──────────────────────────────────────────────────────────
-
 function HousePlanets({
   planets,
   cx,
@@ -208,7 +181,6 @@ function HousePlanets({
         const config = PLANET_CONFIG[planet.name];
         const dotColor = config?.color || '#8D6E63';
         const displayName = config?.name || planet.name;
-
         return (
           <g key={planet.name} className="chart-planet-group">
             {/* Colored planet dot */}
@@ -229,7 +201,7 @@ function HousePlanets({
               fontWeight="600"
               fill={isAsc ? '#8B6914' : '#4E342E'}
               className="chart-planet"
-              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}
             >
               {displayName}
             </text>
@@ -242,7 +214,7 @@ function HousePlanets({
               fontSize={preset.degreeFont}
               fill={isAsc ? '#B8960C' : '#8D6E63'}
               className="chart-degree"
-              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}
             >
               {formatDegree(planet.degree)}
             </text>
@@ -267,7 +239,6 @@ function HousePlanets({
     </>
   );
 }
-
 function HouseSection({
   houseNum,
   polygon,
@@ -285,19 +256,15 @@ function HouseSection({
   const isAsc = houseNum === 1;
   const zodiacSymbol = ZODIAC_SYMBOLS[sign] || '';
   const zodiacAbbr = ZODIAC_ABBR[sign] || '';
-
   // Choose preset based on house size and mode
   const sizeKey = isFull ? HOUSE_SIZE[houseNum] : 'compact';
   const preset = PRESETS[sizeKey];
-
   // Triangular houses (1, 6) are shorter — reduce top offset
   const isTriangle = polygon.length === 3;
   const yTopOffset = isTriangle ? -6 : -14;
   const badgeYShift = isFull ? 15 : 11;
-
   // Planet text starts below zodiac + house number
   const planetStartY = cy + 2;
-
   return (
     <g key={houseNum}>
       {/* Zodiac symbol + abbreviated name */}
@@ -315,7 +282,6 @@ function HouseSection({
           {zodiacSymbol} {zodiacAbbr}
         </text>
       )}
-
       {/* House number in small circled badge */}
       <circle
         cx={cx + preset.dotOffsetX}
@@ -337,7 +303,6 @@ function HouseSection({
       >
         {houseNum}
       </text>
-
       {/* Planets */}
       {planets.length > 0 && (
         <HousePlanets
@@ -351,9 +316,7 @@ function HouseSection({
     </g>
   );
 }
-
 // ─── Grid Lines Helper ───────────────────────────────────────────────────────
-
 function GridLines({ gridFn, opacity = 0.45 }: { gridFn: (x: number, y: number) => [number, number]; opacity?: number }) {
   return (
     <g stroke="#5D4037" strokeWidth="1.2" opacity={opacity} className="chart-lines">
@@ -379,9 +342,7 @@ function GridLines({ gridFn, opacity = 0.45 }: { gridFn: (x: number, y: number) 
     </g>
   );
 }
-
 // ─── Main Component ──────────────────────────────────────────────────────────
-
 export default function KundaliChart({
   planetaryPositions,
   ascendant,
@@ -403,7 +364,6 @@ export default function KundaliChart({
       retrograde: pos.retrograde,
     });
   }
-
   // Map zodiac signs to houses
   const signByHouse: Record<number, string> = {};
   for (const pos of Object.values(planetaryPositions)) {
@@ -419,9 +379,7 @@ export default function KundaliChart({
       }
     }
   }
-
   const isCompact = compact ?? false;
-
   // ══════════════════════════════════════════════════════════════════════════
   //  COMPACT MODE — diamond only
   // ══════════════════════════════════════════════════════════════════════════
@@ -431,7 +389,6 @@ export default function KundaliChart({
     const C_BOTTOM = cGrid(150, 290);
     const C_LEFT   = cGrid(10, 150);
     const C_CENTER = cGrid(150, 150);
-
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -463,24 +420,20 @@ export default function KundaliChart({
               <feDropShadow dx="0" dy="2" stdDeviation="5" floodColor="#5D4037" floodOpacity="0.12" />
             </filter>
           </defs>
-
           {/* Diamond background */}
           <polygon
             points={`${C_TOP[0]},${C_TOP[1]} ${C_RIGHT[0]},${C_RIGHT[1]} ${C_BOTTOM[0]},${C_BOTTOM[1]} ${C_LEFT[0]},${C_LEFT[1]}`}
             fill="url(#cChartBg)" stroke="#5D4037" strokeWidth="2.5" filter="url(#cShadow)"
             className="chart-diamond-light"
           />
-
           {/* Grid lines */}
           <GridLines gridFn={cGrid} />
-
           {/* 1st house gold highlight */}
           <polygon
             points={C_HOUSE_POLYGONS[1].map(p => p.join(',')).join(' ')}
             fill="url(#cAscGlow)"
             stroke="none"
           />
-
           {/* House content */}
           {Array.from({ length: 12 }, (_, i) => {
             const houseNum = i + 1;
@@ -495,7 +448,6 @@ export default function KundaliChart({
               />
             );
           })}
-
           {/* Ascendant label */}
           <text
             x={C_TOP[0]}
@@ -510,7 +462,6 @@ export default function KundaliChart({
           >
             ASC
           </text>
-
           {/* Corner dots */}
           {[C_TOP, C_RIGHT, C_BOTTOM, C_LEFT].map((pt, i) => (
             <circle key={i} cx={pt[0]} cy={pt[1]} r="3" fill="#5D4037" className="chart-dot" opacity={0.4} />
@@ -520,13 +471,11 @@ export default function KundaliChart({
       </motion.div>
     );
   }
-
   // ══════════════════════════════════════════════════════════════════════════
   //  FULL MODE — header + diamond + legend
   // ══════════════════════════════════════════════════════════════════════════
   const VIEW_W = 460;
   const VIEW_H = 710;
-
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -566,7 +515,6 @@ export default function KundaliChart({
             <feDropShadow dx="0" dy="3" stdDeviation="6" floodColor="#5D4037" floodOpacity="0.12" />
           </filter>
         </defs>
-
         {/* ── BIRTH DETAILS HEADER ─────────────────────────────────────────── */}
         <rect
           x="10" y="8" width="440" height="150" rx="14"
@@ -574,28 +522,25 @@ export default function KundaliChart({
         />
         {/* Gold accent bar */}
         <rect x="10" y="8" width="440" height="3" rx="1.5" fill="#D4AF37" opacity="0.4" />
-
         {/* Title */}
         <text
           x="230" y="34" textAnchor="middle" dominantBaseline="middle"
           fontSize="16" fontWeight="700" fill="#5D4037"
           className="chart-title"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
         >
           Birth Chart (Kundali)
         </text>
-
         {/* Name */}
         {birthDetails?.name && (
-          <text x="30" y="58" textAnchor="start" dominantBaseline="middle" fontSize="11.5" fill="#4E342E" className="chart-detail-text" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+          <text x="30" y="58" textAnchor="start" dominantBaseline="middle" fontSize="11.5" fill="#4E342E" className="chart-detail-text" style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
             <tspan fontWeight="600" fill="#8D6E63">Name </tspan>
             <tspan fill="#4E342E">{birthDetails.name}</tspan>
           </text>
         )}
-
         {/* DOB | TOB */}
         {(birthDetails?.dateOfBirth || birthDetails?.timeOfBirth) && (
-          <text x="30" y="76" textAnchor="start" dominantBaseline="middle" fontSize="10.5" fill="#4E342E" className="chart-detail-text" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+          <text x="30" y="76" textAnchor="start" dominantBaseline="middle" fontSize="10.5" fill="#4E342E" className="chart-detail-text" style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
             {birthDetails.dateOfBirth && (
               <>
                 <tspan fontWeight="600" fill="#8D6E63">DOB </tspan>
@@ -613,17 +558,15 @@ export default function KundaliChart({
             )}
           </text>
         )}
-
         {/* Place */}
         {birthDetails?.placeOfBirth && (
-          <text x="30" y="93" textAnchor="start" dominantBaseline="middle" fontSize="10.5" fill="#4E342E" className="chart-detail-text" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+          <text x="30" y="93" textAnchor="start" dominantBaseline="middle" fontSize="10.5" fill="#4E342E" className="chart-detail-text" style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
             <tspan fontWeight="600" fill="#8D6E63">Place </tspan>
             <tspan fill="#4E342E">{birthDetails.placeOfBirth}</tspan>
           </text>
         )}
-
         {/* Ascendant + Nakshatra */}
-        <text x="30" y="116" textAnchor="start" dominantBaseline="middle" fontSize="11" fill="#4E342E" className="chart-detail-text" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <text x="30" y="116" textAnchor="start" dominantBaseline="middle" fontSize="11" fill="#4E342E" className="chart-detail-text" style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
           <tspan fontWeight="700" fill="#D4AF37">Asc </tspan>
           <tspan fill="#4E342E">{ZODIAC_SYMBOLS[ascendant]} {ascendant}</tspan>
           {ascendantDegree !== undefined && (
@@ -637,38 +580,32 @@ export default function KundaliChart({
             </>
           )}
         </text>
-
         {/* Sun / Moon sign badges */}
         <g transform="translate(30, 132)">
           <rect x="0" y="0" width="90" height="20" rx="10" fill="rgba(234,179,8,0.1)" stroke="#EAB308" strokeWidth="0.6" strokeOpacity="0.5" />
-          <text x="45" y="11" textAnchor="middle" dominantBaseline="middle" fontSize="9.5" fontWeight="600" fill="#B8960C" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+          <text x="45" y="11" textAnchor="middle" dominantBaseline="middle" fontSize="9.5" fontWeight="600" fill="#B8960C" style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
             ☉ {sunSign}
           </text>
           <rect x="100" y="0" width="90" height="20" rx="10" fill="rgba(148,163,184,0.1)" stroke="#94A3B8" strokeWidth="0.6" strokeOpacity="0.5" />
-          <text x="145" y="11" textAnchor="middle" dominantBaseline="middle" fontSize="9.5" fontWeight="600" fill="#64748B" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+          <text x="145" y="11" textAnchor="middle" dominantBaseline="middle" fontSize="9.5" fontWeight="600" fill="#64748B" style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
             ☽ {moonSign}
           </text>
         </g>
-
         {/* ── DIAMOND CHART ────────────────────────────────────────────────── */}
-
         {/* Outer diamond */}
         <polygon
           points={`${F_TOP[0]},${F_TOP[1]} ${F_RIGHT[0]},${F_RIGHT[1]} ${F_BOTTOM[0]},${F_BOTTOM[1]} ${F_LEFT[0]},${F_LEFT[1]}`}
           fill="url(#fChartBg)" stroke="#5D4037" strokeWidth="2.5" filter="url(#fShadow)"
           className="chart-diamond-light"
         />
-
         {/* Grid lines */}
         <GridLines gridFn={fGrid} />
-
         {/* 1st house highlight */}
         <polygon
           points={F_HOUSE_POLYGONS[1].map(p => p.join(',')).join(' ')}
           fill="url(#fAscGlow)"
           stroke="none"
         />
-
         {/* House sections */}
         {Array.from({ length: 12 }, (_, i) => {
           const houseNum = i + 1;
@@ -683,7 +620,6 @@ export default function KundaliChart({
             />
           );
         })}
-
         {/* Ascendant label */}
         <text
           x={F_TOP[0]}
@@ -698,46 +634,38 @@ export default function KundaliChart({
         >
           ASCENDANT
         </text>
-
         {/* Corner & center dots */}
         {[F_TOP, F_RIGHT, F_BOTTOM, F_LEFT].map((pt, i) => (
           <circle key={i} cx={pt[0]} cy={pt[1]} r="3.5" fill="#5D4037" className="chart-dot" opacity={0.4} />
         ))}
         <circle cx={F_CENTER[0]} cy={F_CENTER[1]} r="2" fill="#D4AF37" opacity={0.35} />
-
         {/* ── LEGEND ───────────────────────────────────────────────────────── */}
         <rect
           x="10" y="600" width="440" height="100" rx="12"
           fill="url(#fLegendBg)" stroke="#D4AF37" strokeWidth="0.5" strokeOpacity="0.2"
         />
-
         <text
           x="30" y="618"
           textAnchor="start" dominantBaseline="middle"
           fontSize="9" fontWeight="700" fill="#8D6E63" letterSpacing="1"
-          style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+          style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}
         >
           LEGEND
         </text>
-
         {/* Row 1: House number, zodiac, retrograde, ascendant */}
-        <g style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <g style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
           <circle cx="40" cy="638" r="5" fill="rgba(93,64,55,0.08)" />
           <text x="40" y="638" textAnchor="middle" dominantBaseline="middle" fontSize="7" fontWeight="700" fill="#A1887F">1</text>
           <text x="52" y="638" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63">House number</text>
-
           <text x="148" y="638" textAnchor="start" dominantBaseline="middle" fontSize="11" fill="#8D6E63">♈</text>
           <text x="162" y="638" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63">Zodiac sign</text>
-
           <text x="252" y="638" textAnchor="start" dominantBaseline="middle" fontSize="9.5" fontWeight="700" fill="#DC2626">℞</text>
           <text x="264" y="638" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63">Retrograde</text>
-
           <rect x="350" y="631" width="12" height="12" rx="2" fill="rgba(212,175,55,0.18)" stroke="#D4AF37" strokeWidth="0.5" />
           <text x="368" y="638" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63">1st house (Asc)</text>
         </g>
-
         {/* Row 2: Planet color dots */}
-        <g style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <g style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
           {[
             { name: 'Sun', color: '#EAB308', x: 30 },
             { name: 'Moon', color: '#94A3B8', x: 82 },
@@ -753,9 +681,8 @@ export default function KundaliChart({
             </g>
           ))}
         </g>
-
         {/* Row 3: Shadow planets + degree format */}
-        <g style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <g style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
           {[
             { name: 'Rahu', color: '#7C3AED', x: 30 },
             { name: 'Ketu', color: '#6B7280', x: 90 },

@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,9 +19,7 @@ import {
   Eye,
   Lightbulb,
 } from 'lucide-react';
-
 // ─── Dosha Data ───────────────────────────────────────────────────────────────
-
 interface DoshaInfo {
   id: string;
   name: string;
@@ -32,7 +29,6 @@ interface DoshaInfo {
   remedies: string[];
   silverLining: string;
 }
-
 const DOSHA_DATA: DoshaInfo[] = [
   {
     id: 'mangal',
@@ -137,9 +133,7 @@ const DOSHA_DATA: DoshaInfo[] = [
       'Shrapit Dosha creates extraordinary patience and resilience. You\'ve learned to persist when others quit. This dosha often produces people who achieve success later in life — but when it comes, it\'s unshakeable.',
   },
 ];
-
 // ─── Severity Styles ──────────────────────────────────────────────────────────
-
 const SEVERITY_STYLES: Record<string, { border: string; badge: string; icon: React.ElementType }> = {
   Serious: {
     border: 'border-l-red-500 dark:border-l-red-400',
@@ -157,16 +151,12 @@ const SEVERITY_STYLES: Record<string, { border: string; badge: string; icon: Rea
     icon: Eye,
   },
 };
-
 // ─── Component ────────────────────────────────────────────────────────────────
-
 interface DoshaDetailCardProps {
   doshas: string[]; // List of dosha names present in the chart
 }
-
 export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
   const [expandedDoshas, setExpandedDoshas] = useState<Record<string, boolean>>({});
-
   // Filter to only show doshas that are present
   const activeDoshas = DOSHA_DATA.filter(d =>
     doshas.some(userDosha =>
@@ -174,7 +164,6 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
       d.name.toLowerCase().includes(userDosha.toLowerCase().replace(' dosha', '').replace(' dosh', ''))
     )
   );
-
   // If no doshas match from the list, show all detected doshas with generic info
   const displayDoshas = activeDoshas.length > 0
     ? activeDoshas
@@ -189,7 +178,6 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
           silverLining: 'Every dosha carries a hidden gift. The challenge you face builds strength that others lack.',
         }))
       : [];
-
   // If no doshas at all, show a clean bill message
   if (displayDoshas.length === 0) {
     return (
@@ -202,12 +190,11 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
             </div>
             <div>
               <h3
-                className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
               >
                 Dosha Analysis
               </h3>
-              <p className="text-xs text-brown-500 dark:text-brown-400">No doshas detected</p>
+              <p className="text-xs text-brown-500 dark:text-brown-600">No doshas detected</p>
             </div>
           </div>
           <div className="bg-sage-muted/20 dark:bg-sage/10 rounded-lg p-4">
@@ -219,11 +206,9 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
       </Card>
     );
   }
-
   const toggleDosha = (id: string) => {
     setExpandedDoshas(prev => ({ ...prev, [id]: !prev[id] }));
   };
-
   return (
     <Card className="border-0 shadow-md overflow-hidden">
       <div className="h-1 bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400" />
@@ -236,12 +221,11 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
             </div>
             <div>
               <h3
-                className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
               >
                 Dosha Analysis
               </h3>
-              <p className="text-xs text-brown-500 dark:text-brown-400">
+              <p className="text-xs text-brown-500 dark:text-brown-600">
                 {displayDoshas.length} {displayDoshas.length === 1 ? 'dosha' : 'doshas'} detected
               </p>
             </div>
@@ -251,14 +235,12 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
             Brutally Honest
           </Badge>
         </div>
-
         {/* Dosha Cards */}
         <div className="space-y-3">
           {displayDoshas.map((dosha, index) => {
             const severityStyle = SEVERITY_STYLES[dosha.severity] || SEVERITY_STYLES.Moderate;
             const SeverityIcon = severityStyle.icon;
             const isExpanded = expandedDoshas[dosha.id] || false;
-
             return (
               <motion.div
                 key={dosha.id}
@@ -272,8 +254,7 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h4
-                          className="font-serif text-sm font-bold text-brown-900 dark:text-brown-100"
-                          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                          className="font-serif text-sm font-bold text-brown-900 dark:text-brown-600"
                         >
                           {dosha.name}
                         </h4>
@@ -282,19 +263,18 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
                           {dosha.severity}
                         </Badge>
                       </div>
-                      <p className="text-xs text-brown-600 dark:text-brown-300 leading-relaxed">
+                      <p className="text-xs text-brown-600 dark:text-brown-500 leading-relaxed">
                         {dosha.whatItMeans}
                       </p>
                     </div>
                   </div>
-
                   {/* Collapsible Sections */}
                   <Collapsible open={isExpanded} onOpenChange={() => toggleDosha(dosha.id)}>
                     <CollapsibleTrigger asChild>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="w-full justify-between text-[11px] text-brown-500 dark:text-brown-400 hover:text-brown-700 dark:hover:text-brown-200 px-3 py-1.5 h-auto rounded-none border-t border-brown-100 dark:border-brown-800"
+                        className="w-full justify-between text-[11px] text-brown-500 dark:text-brown-600 hover:text-brown-700 dark:hover:text-brown-200 px-3 py-1.5 h-auto rounded-none border-t border-brown-100 dark:border-brown-800"
                       >
                         {isExpanded ? 'Hide details' : 'Show details'}
                         <ChevronDown className={`size-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
@@ -319,11 +299,10 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
                                     How It Affects You
                                   </span>
                                 </div>
-                                <p className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed pl-4">
+                                <p className="text-xs text-brown-700 dark:text-brown-500 leading-relaxed pl-4">
                                   {dosha.howItAffects}
                                 </p>
                               </div>
-
                               {/* Remedies */}
                               <div>
                                 <div className="flex items-center gap-1.5 mb-1">
@@ -334,14 +313,13 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
                                 </div>
                                 <ul className="space-y-1 pl-4">
                                   {dosha.remedies.map((remedy, i) => (
-                                    <li key={i} className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed flex items-start gap-1.5">
+                                    <li key={i} className="text-xs text-brown-700 dark:text-brown-500 leading-relaxed flex items-start gap-1.5">
                                       <span className="text-gold-dark dark:text-gold mt-0.5 shrink-0 text-[10px]">✦</span>
                                       {remedy}
                                     </li>
                                   ))}
                                 </ul>
                               </div>
-
                               {/* Silver Lining */}
                               <div className="bg-sage-muted/20 dark:bg-sage/10 rounded-lg p-3">
                                 <div className="flex items-center gap-1.5 mb-1">

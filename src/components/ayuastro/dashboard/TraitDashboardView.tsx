@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect, useMemo } from 'react';
 import { useAyuAstroStore, type TraitScore } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,25 +41,20 @@ import {
   Legend,
 } from 'recharts';
 import { useTheme } from 'next-themes';
-
 // ─── Constants ──────────────────────────────────────────────────────────────
-
 const ZODIAC_ELEMENTS: Record<string, { element: string }> = {
   Aries: { element: 'Fire' }, Taurus: { element: 'Earth' }, Gemini: { element: 'Air' },
   Cancer: { element: 'Water' }, Leo: { element: 'Fire' }, Virgo: { element: 'Earth' },
   Libra: { element: 'Air' }, Scorpio: { element: 'Water' }, Sagittarius: { element: 'Fire' },
   Capricorn: { element: 'Earth' }, Aquarius: { element: 'Air' }, Pisces: { element: 'Water' },
 };
-
 const ELEMENT_CHART_COLORS: Record<string, string> = {
   Fire: '#ef4444',
   Earth: '#10b981',
   Air: '#f59e0b',
   Water: '#3b82f6',
 };
-
 const NUMEROLOGY_COLORS = ['#d4af37', '#7c9070', '#8b6f47', '#c4a35a'];
-
 const NUMEROLOGY_MEANINGS: Record<number, string> = {
   1: 'The Pioneer — independence, originality, ambition',
   2: 'The Peacemaker — cooperation, sensitivity, balance',
@@ -75,27 +69,23 @@ const NUMEROLOGY_MEANINGS: Record<number, string> = {
   22: 'The Master Builder — visionary creation, practical idealism',
   33: 'The Master Teacher — compassion mastery, spiritual upliftment',
 };
-
 const PIE_COLORS = {
   High: '#7c9070',      // sage
   Moderate: '#d4af37',  // gold
   Growth: '#a89070',    // brown-300
 };
-
 // ─── Custom Tooltip Component ───────────────────────────────────────────────
-
 function AyuTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color?: string; payload?: Record<string, unknown> }>; label?: string }) {
   if (!active || !payload || payload.length === 0) return null;
-
   return (
     <div className="rounded-lg border border-gold/20 bg-white/95 dark:bg-brown-900/95 px-3 py-2 shadow-lg backdrop-blur-sm">
       {label && (
-        <p className="text-xs font-semibold text-brown-900 dark:text-brown-100 mb-1" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+        <p className="text-xs font-semibold text-brown-900 dark:text-brown-600 mb-1">
           {label}
         </p>
       )}
       {payload.map((entry, i) => (
-        <div key={i} className="flex items-center gap-2 text-xs text-brown-700 dark:text-brown-300">
+        <div key={i} className="flex items-center gap-2 text-xs text-brown-700 dark:text-brown-500">
           <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: entry.color || '#d4af37' }} />
           <span className="font-medium">{entry.name}:</span>
           <span className="font-bold text-brown-900 dark:text-gold">{entry.value}</span>
@@ -104,25 +94,21 @@ function AyuTooltip({ active, payload, label }: { active?: boolean; payload?: Ar
     </div>
   );
 }
-
 function AyuPieTooltip({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; payload: { name: string; value: number; count: number } }> }) {
   if (!active || !payload || payload.length === 0) return null;
   const data = payload[0].payload;
-
   return (
     <div className="rounded-lg border border-gold/20 bg-white/95 dark:bg-brown-900/95 px-3 py-2 shadow-lg backdrop-blur-sm">
-      <p className="text-xs font-semibold text-brown-900 dark:text-brown-100" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+      <p className="text-xs font-semibold text-brown-900 dark:text-brown-600">
         {data.name}
       </p>
-      <p className="text-xs text-brown-600 dark:text-brown-300">
+      <p className="text-xs text-brown-600 dark:text-brown-500">
         {data.count} trait{data.count !== 1 ? 's' : ''} ({data.value}%)
       </p>
     </div>
   );
 }
-
 // ─── Mood Entry Interface ───────────────────────────────────────────────────
-
 interface MoodEntry {
   id: string;
   mood: number;
@@ -131,9 +117,7 @@ interface MoodEntry {
   tags: string[];
   createdAt: string;
 }
-
 // ─── Default Traits (fallback) ──────────────────────────────────────────────
-
 function getDefaultTraits(): TraitScore[] {
   return [
     { name: 'empathy', label: 'Empathy', score: 78, description: '' },
@@ -152,9 +136,7 @@ function getDefaultTraits(): TraitScore[] {
     { name: 'discipline', label: 'Discipline', score: 38, description: '' },
   ];
 }
-
 // ─── Animation Variants ─────────────────────────────────────────────────────
-
 const cardVariants = {
   hidden: { opacity: 0, y: 24 },
   visible: (i: number) => ({
@@ -163,22 +145,17 @@ const cardVariants = {
     transition: { duration: 0.5, delay: i * 0.1, ease: 'easeOut' },
   }),
 };
-
 // ─── Main Component ─────────────────────────────────────────────────────────
-
 export default function TraitDashboardView() {
   const { traitScores, astrologyData, numerologyData, userId, setView } = useAyuAstroStore();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
-
   const [moodData, setMoodData] = useState<MoodEntry[]>([]);
   const [moodLoading, setMoodLoading] = useState(true);
-
   const traits = traitScores.length > 0 ? traitScores : getDefaultTraits();
   const sunSign = astrologyData?.sunSign || 'Capricorn';
   const moonSign = astrologyData?.moonSign || 'Gemini';
   const ascendant = astrologyData?.ascendant || 'Taurus';
-
   // ─── Fetch mood history ────────────────────────────────────────────────────
   useEffect(() => {
     async function fetchMoodHistory() {
@@ -199,7 +176,6 @@ export default function TraitDashboardView() {
     }
     fetchMoodHistory();
   }, [userId]);
-
   // ─── Radar Chart Data ──────────────────────────────────────────────────────
   const radarData = useMemo(() =>
     traits.map((t) => ({
@@ -209,26 +185,22 @@ export default function TraitDashboardView() {
     })),
     [traits]
   );
-
   // ─── Pie Chart Data ────────────────────────────────────────────────────────
   const pieData = useMemo(() => {
     const high = traits.filter((t) => t.score > 75).length;
     const moderate = traits.filter((t) => t.score >= 40 && t.score <= 75).length;
     const growth = traits.filter((t) => t.score < 40).length;
     const total = traits.length || 1;
-
     return [
       { name: 'High', value: Math.round((high / total) * 100), count: high },
       { name: 'Moderate', value: Math.round((moderate / total) * 100), count: moderate },
       { name: 'Growth Area', value: Math.round((growth / total) * 100), count: growth },
     ];
   }, [traits]);
-
   const dominantCategory = useMemo(() => {
     const max = pieData.reduce((a, b) => a.count > b.count ? a : b, pieData[0]);
     return max.name;
   }, [pieData]);
-
   // ─── Element Balance Data ──────────────────────────────────────────────────
   const elementData = useMemo(() => {
     const signElements = [sunSign, moonSign, ascendant]
@@ -236,14 +208,12 @@ export default function TraitDashboardView() {
       .filter(Boolean);
     const counts: Record<string, number> = { Fire: 0, Earth: 0, Air: 0, Water: 0 };
     signElements.forEach((el) => { if (el) counts[el]++; });
-
     return Object.entries(counts).map(([element, count]) => ({
       element,
       count,
       percentage: Math.round((count / 3) * 100),
     }));
   }, [sunSign, moonSign, ascendant]);
-
   // ─── Mood Trend Data ──────────────────────────────────────────────────────
   const moodTrendData = useMemo(() => {
     const days: { day: string; mood: number; date: string }[] = [];
@@ -252,12 +222,10 @@ export default function TraitDashboardView() {
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
       const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
-
       const entry = moodData.find((m) => {
         const entryDate = new Date(m.createdAt).toISOString().split('T')[0];
         return entryDate === dateStr;
       });
-
       days.push({
         day: dayName,
         mood: entry ? entry.mood * 20 : 0, // Convert 1-5 to 0-100 scale
@@ -266,9 +234,7 @@ export default function TraitDashboardView() {
     }
     return days;
   }, [moodData]);
-
   const hasMoodData = moodData.length > 0;
-
   // ─── Numerology Comparison Data ────────────────────────────────────────────
   const numerologyChartData = useMemo(() => {
     if (!numerologyData) return [];
@@ -279,19 +245,17 @@ export default function TraitDashboardView() {
       { name: 'Personality', value: numerologyData.personalityNumber, meaning: NUMEROLOGY_MEANINGS[numerologyData.personalityNumber] || 'Unique personality' },
     ];
   }, [numerologyData]);
-
   // ─── Chart theme colors ───────────────────────────────────────────────────
   const axisColor = isDark ? '#a89070' : '#8b6f47';
   const gridColor = isDark ? 'rgba(168, 144, 112, 0.15)' : 'rgba(139, 111, 71, 0.1)';
   const textColor = isDark ? '#c4a35a' : '#8b6f47';
-
   // ─── Empty state ──────────────────────────────────────────────────────────
   if (traits.length === 0) {
     return (
       <div className="bg-cream min-h-screen px-4 py-6 pb-24">
         <div className="mx-auto max-w-lg text-center py-20">
           <Sparkles className="size-12 text-gold mx-auto mb-4 opacity-50" />
-          <h2 className="font-serif text-xl text-brown-900 dark:text-brown-100 mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+          <h2 className="font-serif text-xl text-brown-900 dark:text-brown-600 mb-2">
             No Data Yet
           </h2>
           <p className="text-sm text-brown-400 mb-6">
@@ -304,11 +268,9 @@ export default function TraitDashboardView() {
       </div>
     );
   }
-
   return (
     <div className="bg-cream px-4 py-6 pb-24">
       <div className="mx-auto max-w-lg space-y-6">
-
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -12 }}
@@ -318,30 +280,28 @@ export default function TraitDashboardView() {
         >
           <button
             onClick={() => setView('insights')}
-            className="flex size-9 items-center justify-center rounded-xl bg-white dark:bg-white/5 border border-brown-100 dark:border-brown-700/30 shadow-sm hover:shadow-md transition-shadow"
+            className="flex size-9 items-center justify-center rounded-xl bg-white dark:bg-white/[0.08] border border-brown-100 dark:border-brown-700/30 shadow-sm hover:shadow-md transition-shadow"
             aria-label="Back to insights"
           >
-            <ArrowLeft className="size-4 text-brown-600 dark:text-brown-300" />
+            <ArrowLeft className="size-4 text-brown-600 dark:text-brown-500" />
           </button>
           <div>
             <h1
-              className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-100"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-600"
             >
               Emotional Dashboard
             </h1>
-            <p className="text-xs text-brown-400 dark:text-brown-300">Your cosmic data, visualized</p>
+            <p className="text-xs text-brown-400 dark:text-brown-500">Your cosmic data, visualized</p>
           </div>
         </motion.div>
-
         {/* 1. Radar Chart — Emotional Architecture */}
         <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
-          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-gold via-sage to-gold-dark" />
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                 <Activity className="size-5 text-gold" />
-                <span style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                <span>
                   Your Emotional Architecture
                 </span>
               </CardTitle>
@@ -374,7 +334,7 @@ export default function TraitDashboardView() {
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
-              <div className="mt-2 flex items-center justify-center gap-4 text-[10px] text-brown-400 dark:text-brown-300">
+              <div className="mt-2 flex items-center justify-center gap-4 text-[10px] text-brown-400 dark:text-brown-500">
                 <div className="flex items-center gap-1.5">
                   <span className="w-8 h-0.5 bg-gold rounded" />
                   <span>Your Score</span>
@@ -387,15 +347,14 @@ export default function TraitDashboardView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* 2. Trait Distribution Pie Chart */}
         <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
-          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-sage via-gold to-brown-300" />
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                 <PieChartIcon className="size-5 text-sage" />
-                <span style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                <span>
                   Trait Distribution
                 </span>
               </CardTitle>
@@ -428,7 +387,7 @@ export default function TraitDashboardView() {
                       iconType="circle"
                       iconSize={8}
                       formatter={(value: string) => (
-                        <span className="text-xs text-brown-600 dark:text-brown-300">{value}</span>
+                        <span className="text-xs text-brown-600 dark:text-brown-500">{value}</span>
                       )}
                     />
                   </PieChart>
@@ -436,10 +395,10 @@ export default function TraitDashboardView() {
                 {/* Center text */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ top: '-8%' }}>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-brown-900 dark:text-gold" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                    <p className="text-2xl font-bold text-brown-900 dark:text-gold">
                       {dominantCategory}
                     </p>
-                    <p className="text-[10px] text-brown-400 dark:text-brown-300 uppercase tracking-wider">
+                    <p className="text-[10px] text-brown-400 dark:text-brown-500 uppercase tracking-wider">
                       Dominant
                     </p>
                   </div>
@@ -448,15 +407,14 @@ export default function TraitDashboardView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* 3. Element Balance Bar Chart */}
         <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
-          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-red-400 via-green-400 via-yellow-400 to-blue-400" />
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                 <BarChart2 className="size-5 text-gold" />
-                <span style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                <span>
                   Element Balance
                 </span>
               </CardTitle>
@@ -487,7 +445,7 @@ export default function TraitDashboardView() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-brown-400 dark:text-brown-300">
+              <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-brown-400 dark:text-brown-500">
                 {elementData.map((e) => (
                   <div key={e.element} className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: ELEMENT_CHART_COLORS[e.element] }} />
@@ -498,20 +456,19 @@ export default function TraitDashboardView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* 4. Mood Trend Line Chart */}
         <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
           {hasMoodData ? (
-            <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+            <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
               <div className="h-1 bg-gradient-to-r from-gold-dark via-gold to-sage" />
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+                <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                   <TrendingUp className="size-5 text-gold" />
-                  <span style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  <span>
                     Mood Trend
                   </span>
                 </CardTitle>
-                <p className="text-xs text-brown-400 dark:text-brown-300">Last 14 days</p>
+                <p className="text-xs text-brown-400 dark:text-brown-500">Last 14 days</p>
               </CardHeader>
               <CardContent>
                 <div className="w-full h-56">
@@ -559,19 +516,18 @@ export default function TraitDashboardView() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+            <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
               <div className="h-1 bg-gradient-to-r from-gold-dark via-gold to-sage" />
               <CardContent className="p-8 text-center">
                 <div className="size-14 mx-auto mb-4 rounded-full bg-gold/10 flex items-center justify-center">
                   <SmilePlus className="size-7 text-gold" />
                 </div>
                 <h3
-                  className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 mb-2"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600 mb-2"
                 >
                   Start Tracking Your Mood
                 </h3>
-                <p className="text-sm text-brown-400 dark:text-brown-300 mb-5 max-w-xs mx-auto">
+                <p className="text-sm text-brown-400 dark:text-brown-500 mb-5 max-w-xs mx-auto">
                   Log your daily mood to see emotional trends and patterns over time.
                 </p>
                 <Button
@@ -585,16 +541,15 @@ export default function TraitDashboardView() {
             </Card>
           )}
         </motion.div>
-
         {/* 5. Numerology Comparison Chart */}
         {numerologyData && (
           <motion.div custom={4} variants={cardVariants} initial="hidden" animate="visible">
-            <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+            <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
               <div className="h-1 bg-gradient-to-r from-gold via-sage to-brown-400" />
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+                <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                   <Sparkles className="size-5 text-gold" />
-                  <span style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  <span>
                     Numerology Blueprint
                   </span>
                 </CardTitle>
@@ -625,10 +580,10 @@ export default function TraitDashboardView() {
                           const data = payload[0].payload as { name: string; value: number; meaning: string };
                           return (
                             <div className="rounded-lg border border-gold/20 bg-white/95 dark:bg-brown-900/95 px-3 py-2 shadow-lg backdrop-blur-sm max-w-[250px]">
-                              <p className="text-xs font-semibold text-brown-900 dark:text-brown-100 mb-1" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                              <p className="text-xs font-semibold text-brown-900 dark:text-brown-600 mb-1">
                                 {data.name}: {data.value}
                               </p>
-                              <p className="text-[10px] text-brown-500 dark:text-brown-300 leading-relaxed">{data.meaning}</p>
+                              <p className="text-[10px] text-brown-500 dark:text-brown-500 leading-relaxed">{data.meaning}</p>
                             </div>
                           );
                         }}
@@ -641,7 +596,7 @@ export default function TraitDashboardView() {
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="mt-3 flex items-center justify-center gap-3 text-[10px] text-brown-400 dark:text-brown-300">
+                <div className="mt-3 flex items-center justify-center gap-3 text-[10px] text-brown-400 dark:text-brown-500">
                   {numerologyChartData.map((item, index) => (
                     <div key={item.name} className="flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: NUMEROLOGY_COLORS[index] }} />
@@ -653,7 +608,6 @@ export default function TraitDashboardView() {
             </Card>
           </motion.div>
         )}
-
       </div>
     </div>
   );

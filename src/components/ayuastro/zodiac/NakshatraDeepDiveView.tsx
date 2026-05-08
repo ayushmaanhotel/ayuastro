@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Card, CardContent } from '@/components/ui/card';
@@ -27,9 +26,7 @@ import {
   BookOpen,
   Eye,
 } from 'lucide-react';
-
 // ─── Type Definitions ────────────────────────────────────────────────────────
-
 interface NakshatraDetail {
   name: string;
   symbol: string;
@@ -64,9 +61,7 @@ interface NakshatraDetail {
     meditationFocus: string;
   };
 }
-
 // ─── All 27 Nakshatras Data ──────────────────────────────────────────────────
-
 const NAKSHATRA_DATA: Record<string, NakshatraDetail> = {
   Ashwini: {
     name: 'Ashwini',
@@ -1122,24 +1117,19 @@ const NAKSHATRA_DATA: Record<string, NakshatraDetail> = {
     },
   },
 };
-
 // ─── Element Config ──────────────────────────────────────────────────────────
-
 const ELEMENT_CONFIG: Record<string, { icon: React.ElementType; bgClass: string; textClass: string; darkBgClass: string; darkTextClass: string; gradientBar: string }> = {
   Fire: { icon: Flame, bgClass: 'bg-red-50', textClass: 'text-red-600', darkBgClass: 'dark:bg-red-900/30', darkTextClass: 'dark:text-red-300', gradientBar: 'from-red-500 via-orange-400 to-amber-500' },
   Earth: { icon: Mountain, bgClass: 'bg-green-50', textClass: 'text-green-700', darkBgClass: 'dark:bg-green-900/30', darkTextClass: 'dark:text-green-300', gradientBar: 'from-green-600 via-emerald-400 to-teal-500' },
   Air: { icon: Wind, bgClass: 'bg-amber-50', textClass: 'text-amber-700', darkBgClass: 'dark:bg-amber-900/30', darkTextClass: 'dark:text-amber-300', gradientBar: 'from-yellow-400 via-amber-400 to-orange-400' },
   Water: { icon: Droplets, bgClass: 'bg-blue-50', textClass: 'text-blue-600', darkBgClass: 'dark:bg-blue-900/30', darkTextClass: 'dark:text-blue-300', gradientBar: 'from-blue-500 via-teal-400 to-cyan-400' },
 };
-
 const GANA_STYLES: Record<string, { bg: string; text: string }> = {
   Deva: { bg: 'bg-sage-muted', text: 'text-sage-dark dark:text-sage' },
   Manushya: { bg: 'bg-gold/15', text: 'text-gold-dark dark:text-gold' },
-  Rakshasa: { bg: 'bg-brown-50 dark:bg-brown-800/30', text: 'text-brown-600 dark:text-brown-300' },
+  Rakshasa: { bg: 'bg-brown-50 dark:bg-brown-800/30', text: 'text-brown-600 dark:text-brown-500' },
 };
-
 // ─── Animation Variants ──────────────────────────────────────────────────────
-
 const staggerContainer = {
   initial: {},
   animate: {
@@ -1148,14 +1138,11 @@ const staggerContainer = {
     },
   },
 };
-
 const staggerItem = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
 };
-
 // ─── Nakshatra Order ─────────────────────────────────────────────────────────
-
 const NAKSHATRA_ORDER = [
   'Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashirsha', 'Ardra',
   'Punarvasu', 'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni', 'Uttara Phalguni',
@@ -1163,9 +1150,7 @@ const NAKSHATRA_ORDER = [
   'Mula', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishtha', 'Shatabhisha',
   'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati',
 ];
-
 // ─── Component ───────────────────────────────────────────────────────────────
-
 export default function NakshatraDeepDiveView() {
   const { astrologyData, setView } = useAyuAstroStore();
   const [selectedNakshatra, setSelectedNakshatra] = useState(astrologyData?.nakshatra || 'Ashwini');
@@ -1178,7 +1163,6 @@ export default function NakshatraDeepDiveView() {
     career: false,
     spiritual: false,
   });
-
   useEffect(() => {
     async function fetchDetails() {
       setLoading(true);
@@ -1211,18 +1195,14 @@ export default function NakshatraDeepDiveView() {
     }
     fetchDetails();
   }, [selectedNakshatra]);
-
   const data = details || NAKSHATRA_DATA[selectedNakshatra];
   if (!data) return null;
-
   const elementConfig = ELEMENT_CONFIG[data.element];
   const ElementIcon = elementConfig.icon;
   const ganaStyle = GANA_STYLES[data.gana] || GANA_STYLES.Manushya;
-
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
-
   return (
     <div className="bg-cream dark:bg-[#1a1410] min-h-screen pb-24">
       {/* Header */}
@@ -1232,21 +1212,19 @@ export default function NakshatraDeepDiveView() {
             variant="ghost"
             size="sm"
             onClick={() => setView('insights')}
-            className="text-brown-500 dark:text-brown-300 hover:text-brown-700 dark:hover:text-brown-100 -ml-2"
+            className="text-brown-500 dark:text-brown-500 hover:text-brown-700 dark:hover:text-brown-100 -ml-2"
           >
             <ArrowLeft className="size-4 mr-1" />
             Back
           </Button>
           <h1
-            className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 flex-1"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600 flex-1"
           >
             Nakshatra Deep Dive
           </h1>
           <Star className="size-5 text-gold dark:text-gold" />
         </div>
       </div>
-
       {/* Nakshatra Selector — Horizontal Scroll */}
       <div className="sticky top-[52px] z-20 bg-cream/95 dark:bg-[#1a1410]/95 backdrop-blur-md border-b border-brown-100/50 dark:border-brown-700/20">
         <div
@@ -1263,7 +1241,7 @@ export default function NakshatraDeepDiveView() {
                 className={`relative shrink-0 px-3 py-2 rounded-xl transition-all duration-200 text-xs font-medium ${
                   isActive
                     ? 'bg-gold/15 dark:bg-gold/20 ring-2 ring-gold shadow-md text-gold-dark dark:text-gold'
-                    : 'bg-white dark:bg-white/5 hover:bg-brown-50 dark:hover:bg-white/10 shadow-sm text-brown-500 dark:text-brown-300'
+                    : 'bg-white dark:bg-white/[0.08] hover:bg-brown-50 dark:hover:bg-white/10 shadow-sm text-brown-500 dark:text-brown-500'
                 }`}
                 aria-label={nak}
                 aria-pressed={isActive}
@@ -1279,7 +1257,6 @@ export default function NakshatraDeepDiveView() {
           })}
         </div>
       </div>
-
       {/* Content */}
       <div className="mx-auto max-w-lg px-4 py-6">
         <AnimatePresence mode="wait">
@@ -1295,16 +1272,14 @@ export default function NakshatraDeepDiveView() {
                 <div className="h-8 w-8 rounded-full border-2 border-gold border-t-transparent animate-spin" />
               </div>
             )}
-
             {error && (
               <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-4 text-center">
                 <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
               </div>
             )}
-
             {/* ─── Section 1: Nakshatra Overview Card ──────────────────────────── */}
             <motion.div variants={staggerItem}>
-              <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden card-hover">
+              <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden card-hover">
                 {/* Gold gradient accent bar */}
                 <div className={`h-1.5 bg-gradient-to-r ${elementConfig.gradientBar}`} />
                 <CardContent className="p-6 text-center">
@@ -1321,20 +1296,16 @@ export default function NakshatraDeepDiveView() {
                       {data.symbol}
                     </span>
                   </div>
-
                   {/* Nakshatra name */}
                   <h2
-                    className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-100 mb-1"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-600 mb-1"
                   >
                     {data.name}
                   </h2>
-
                   {/* Symbol meaning */}
-                  <p className="text-sm text-brown-500 dark:text-brown-400 mb-4 leading-relaxed max-w-sm mx-auto">
+                  <p className="text-sm text-brown-500 dark:text-brown-600 mb-4 leading-relaxed max-w-sm mx-auto">
                     {data.symbolMeaning}
                   </p>
-
                   {/* Element + Gana + Ruling Planet badges */}
                   <div className="flex items-center justify-center gap-2 flex-wrap mb-4">
                     <Badge className={`${elementConfig.bgClass} ${elementConfig.textClass} ${elementConfig.darkBgClass} ${elementConfig.darkTextClass} border-0 text-xs px-3 py-1 flex items-center gap-1.5`}>
@@ -1349,26 +1320,23 @@ export default function NakshatraDeepDiveView() {
                       {data.rulingPlanet}
                     </Badge>
                   </div>
-
                   {/* Ruling Deity */}
                   <div className="rounded-xl bg-gradient-to-br from-gold/5 to-sage-muted/10 dark:from-gold/3 dark:to-sage/5 p-4 mb-4">
                     <p className="text-[10px] uppercase tracking-wider text-gold-dark dark:text-gold mb-1 font-semibold">
                       Ruling Deity
                     </p>
                     <p
-                      className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 mb-2"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                      className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600 mb-2"
                     >
                       {data.rulingDeity}
                     </p>
-                    <p className="text-sm text-brown-600 dark:text-brown-300 leading-relaxed">
+                    <p className="text-sm text-brown-600 dark:text-brown-500 leading-relaxed">
                       {data.deityDescription}
                     </p>
                   </div>
-
                   {/* Pada Descriptions */}
                   <div className="text-left">
-                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-400 mb-2 font-semibold">
+                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-600 mb-2 font-semibold">
                       Pada (Quarters)
                     </p>
                     <div className="space-y-2">
@@ -1377,7 +1345,7 @@ export default function NakshatraDeepDiveView() {
                           key={idx}
                           className="rounded-lg bg-brown-50/50 dark:bg-brown-800/20 p-3"
                         >
-                          <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed">
+                          <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed">
                             {pada}
                           </p>
                         </div>
@@ -1387,10 +1355,9 @@ export default function NakshatraDeepDiveView() {
                 </CardContent>
               </Card>
             </motion.div>
-
             {/* ─── Section 2: Personality & Emotional Profile ─────────────────── */}
             <motion.div variants={staggerItem}>
-              <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden card-hover">
+              <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden card-hover">
                 <div className="h-1 bg-gradient-to-r from-gold/40 to-sage/40" />
                 <CardContent className="p-5">
                   <Collapsible open={expandedSections.personality} onOpenChange={() => toggleSection('personality')}>
@@ -1400,8 +1367,7 @@ export default function NakshatraDeepDiveView() {
                           <Sparkles className="size-4 text-gold-dark dark:text-gold" />
                         </div>
                         <h3
-                          className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 flex-1 text-left"
-                          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                          className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600 flex-1 text-left"
                         >
                           Personality & Emotional Profile
                         </h3>
@@ -1412,14 +1378,13 @@ export default function NakshatraDeepDiveView() {
                       <div className="mt-4 space-y-4">
                         {/* Emotional Tendencies */}
                         <div>
-                          <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-400 mb-1.5 font-semibold">
+                          <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-600 mb-1.5 font-semibold">
                             Emotional Tendencies
                           </p>
-                          <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed">
+                          <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed">
                             {data.personality.emotionalTendencies}
                           </p>
                         </div>
-
                         {/* Strengths */}
                         <div>
                           <p className="text-[10px] uppercase tracking-wider text-sage-dark dark:text-sage mb-2 font-semibold flex items-center gap-1.5">
@@ -1430,12 +1395,11 @@ export default function NakshatraDeepDiveView() {
                             {data.personality.strengths.map((s, idx) => (
                               <div key={idx} className="flex items-start gap-2">
                                 <div className="mt-1.5 size-1.5 rounded-full bg-sage shrink-0" />
-                                <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed">{s}</p>
+                                <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed">{s}</p>
                               </div>
                             ))}
                           </div>
                         </div>
-
                         {/* Growth Areas */}
                         <div>
                           <p className="text-[10px] uppercase tracking-wider text-gold-dark dark:text-gold mb-2 font-semibold flex items-center gap-1.5">
@@ -1446,18 +1410,17 @@ export default function NakshatraDeepDiveView() {
                             {data.personality.growthAreas.map((g, idx) => (
                               <div key={idx} className="flex items-start gap-2">
                                 <div className="mt-1.5 size-1.5 rounded-full bg-gold shrink-0" />
-                                <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed">{g}</p>
+                                <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed">{g}</p>
                               </div>
                             ))}
                           </div>
                         </div>
-
                         {/* Mental Tendencies */}
                         <div className="rounded-lg bg-gradient-to-br from-brown-50 to-gold/5 dark:from-brown-800/20 dark:to-gold/5 p-3">
-                          <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-400 mb-1.5 font-semibold">
+                          <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-600 mb-1.5 font-semibold">
                             Mental Tendencies
                           </p>
-                          <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed">
+                          <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed">
                             {data.personality.mentalTendencies}
                           </p>
                         </div>
@@ -1467,10 +1430,9 @@ export default function NakshatraDeepDiveView() {
                 </CardContent>
               </Card>
             </motion.div>
-
             {/* ─── Section 3: Relationship Patterns ──────────────────────────── */}
             <motion.div variants={staggerItem}>
-              <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden card-hover">
+              <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden card-hover">
                 <div className="h-1 bg-gradient-to-r from-pink-300 via-rose-300 to-gold/40" />
                 <CardContent className="p-5">
                   <Collapsible open={expandedSections.relationships} onOpenChange={() => toggleSection('relationships')}>
@@ -1480,8 +1442,7 @@ export default function NakshatraDeepDiveView() {
                           <Heart className="size-4 text-pink-500 dark:text-pink-400" />
                         </div>
                         <h3
-                          className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 flex-1 text-left"
-                          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                          className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600 flex-1 text-left"
                         >
                           Relationship Patterns
                         </h3>
@@ -1491,28 +1452,26 @@ export default function NakshatraDeepDiveView() {
                     <CollapsibleContent>
                       <div className="mt-4 space-y-4">
                         <div>
-                          <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-400 mb-1.5 font-semibold">
+                          <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-600 mb-1.5 font-semibold">
                             Approach to Love
                           </p>
-                          <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed">
+                          <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed">
                             {data.relationships.approach}
                           </p>
                         </div>
-
                         <div className="rounded-lg bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/10 dark:to-rose-900/10 p-3">
                           <p className="text-[10px] uppercase tracking-wider text-pink-600 dark:text-pink-400 mb-1.5 font-semibold">
                             Compatibility Notes
                           </p>
-                          <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed">
+                          <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed">
                             {data.relationships.compatibility}
                           </p>
                         </div>
-
                         <div>
-                          <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-400 mb-1.5 font-semibold">
+                          <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-600 mb-1.5 font-semibold">
                             Emotional Needs in Relationships
                           </p>
-                          <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed">
+                          <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed">
                             {data.relationships.emotionalNeeds}
                           </p>
                         </div>
@@ -1522,10 +1481,9 @@ export default function NakshatraDeepDiveView() {
                 </CardContent>
               </Card>
             </motion.div>
-
             {/* ─── Section 4: Career & Life Purpose ──────────────────────────── */}
             <motion.div variants={staggerItem}>
-              <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden card-hover">
+              <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden card-hover">
                 <div className="h-1 bg-gradient-to-r from-sage/40 via-gold/40 to-brown-300/40" />
                 <CardContent className="p-5">
                   <Collapsible open={expandedSections.career} onOpenChange={() => toggleSection('career')}>
@@ -1535,8 +1493,7 @@ export default function NakshatraDeepDiveView() {
                           <Briefcase className="size-4 text-sage-dark dark:text-sage" />
                         </div>
                         <h3
-                          className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 flex-1 text-left"
-                          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                          className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600 flex-1 text-left"
                         >
                           Career & Life Purpose
                         </h3>
@@ -1558,41 +1515,37 @@ export default function NakshatraDeepDiveView() {
                             ))}
                           </div>
                         </div>
-
                         {/* Best Careers */}
                         <div>
-                          <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-400 mb-2 font-semibold">
+                          <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-600 mb-2 font-semibold">
                             Best Career Directions
                           </p>
                           <div className="space-y-1.5">
                             {data.career.bestCareers.map((c, idx) => (
                               <div key={idx} className="flex items-start gap-2">
                                 <div className="mt-1.5 size-1.5 rounded-full bg-gold shrink-0" />
-                                <p className="text-sm text-brown-700 dark:text-brown-200">{c}</p>
+                                <p className="text-sm text-brown-700 dark:text-brown-400">{c}</p>
                               </div>
                             ))}
                           </div>
                         </div>
-
                         {/* Life Lessons */}
                         <div className="rounded-lg bg-gradient-to-br from-gold/5 to-sage-muted/10 dark:from-gold/3 dark:to-sage/5 p-3">
                           <p className="text-[10px] uppercase tracking-wider text-gold-dark dark:text-gold mb-1.5 font-semibold">
                             Life Lesson
                           </p>
                           <p
-                            className="text-sm text-brown-800 dark:text-brown-200 leading-relaxed italic"
-                            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                            className="text-sm text-brown-800 dark:text-brown-400 leading-relaxed italic"
                           >
                             {data.career.lifeLessons}
                           </p>
                         </div>
-
                         {/* Karmic Themes */}
                         <div>
-                          <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-400 mb-1.5 font-semibold">
+                          <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-600 mb-1.5 font-semibold">
                             Karmic Themes
                           </p>
-                          <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed">
+                          <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed">
                             {data.career.karmicThemes}
                           </p>
                         </div>
@@ -1602,10 +1555,9 @@ export default function NakshatraDeepDiveView() {
                 </CardContent>
               </Card>
             </motion.div>
-
             {/* ─── Section 5: Spiritual Insights ─────────────────────────────── */}
             <motion.div variants={staggerItem}>
-              <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden card-hover">
+              <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden card-hover">
                 <div className="h-1 bg-gradient-to-r from-purple-300 via-gold/40 to-sage/40" />
                 <CardContent className="p-5">
                   <Collapsible open={expandedSections.spiritual} onOpenChange={() => toggleSection('spiritual')}>
@@ -1615,8 +1567,7 @@ export default function NakshatraDeepDiveView() {
                           <Moon className="size-4 text-purple-600 dark:text-purple-400" />
                         </div>
                         <h3
-                          className="font-serif text-lg font-bold text-brown-900 dark:text-brown-100 flex-1 text-left"
-                          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                          className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600 flex-1 text-left"
                         >
                           Spiritual Insights
                         </h3>
@@ -1631,13 +1582,11 @@ export default function NakshatraDeepDiveView() {
                             Sacred Mantra
                           </p>
                           <p
-                            className="font-serif text-xl font-bold text-brown-900 dark:text-brown-100"
-                            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                            className="font-serif text-xl font-bold text-brown-900 dark:text-brown-600"
                           >
                             {data.spiritual.mantra}
                           </p>
                         </div>
-
                         {/* Spiritual Practices */}
                         <div>
                           <p className="text-[10px] uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-2 font-semibold">
@@ -1647,19 +1596,18 @@ export default function NakshatraDeepDiveView() {
                             {data.spiritual.practices.map((p, idx) => (
                               <div key={idx} className="flex items-start gap-2">
                                 <div className="mt-1.5 size-1.5 rounded-full bg-purple-400 shrink-0" />
-                                <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed">{p}</p>
+                                <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed">{p}</p>
                               </div>
                             ))}
                           </div>
                         </div>
-
                         {/* Meditation Focus */}
                         <div className="rounded-lg bg-gradient-to-br from-purple-50 to-sage-muted/10 dark:from-purple-900/10 dark:to-sage/5 p-3">
                           <p className="text-[10px] uppercase tracking-wider text-sage-dark dark:text-sage mb-1.5 font-semibold flex items-center gap-1.5">
                             <BookOpen className="size-3" />
                             Meditation Focus
                           </p>
-                          <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed italic">
+                          <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed italic">
                             {data.spiritual.meditationFocus}
                           </p>
                         </div>
@@ -1669,7 +1617,6 @@ export default function NakshatraDeepDiveView() {
                 </CardContent>
               </Card>
             </motion.div>
-
           </motion.div>
         </AnimatePresence>
       </div>

@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useAyuAstroStore, type OnboardingStep, type QuestionnaireAnswer } from '@/store/ayuastro-store';
 import { Card, CardContent } from '@/components/ui/card';
@@ -24,7 +23,6 @@ import {
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
 import { getApproximateZodiacPreview } from '@/lib/astrology/client-approx';
-
 const INDIAN_CITIES: Record<string, { lat: number; lon: number }> = {
   'New Delhi': { lat: 28.6139, lon: 77.209 },
   Mumbai: { lat: 19.076, lon: 72.8777 },
@@ -47,7 +45,6 @@ const INDIAN_CITIES: Record<string, { lat: number; lon: number }> = {
   Nagpur: { lat: 21.1458, lon: 79.0882 },
   Surat: { lat: 21.1702, lon: 72.8311 },
 };
-
 const QUESTIONS = [
   // Emotional Category (4 questions)
   {
@@ -134,11 +131,8 @@ const QUESTIONS = [
     category: 'relational' as const,
   },
 ];
-
 const RELATIONSHIP_OPTIONS = ['Single', 'Partnered', "It's Complicated", 'Prefer Not to Say'];
-
 const LIKERT_LABELS = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
-
 const slideVariants = {
   enter: (direction: number) => ({
     x: direction > 0 ? 300 : -300,
@@ -150,9 +144,7 @@ const slideVariants = {
     opacity: 0,
   }),
 };
-
 // ─── Star-field animation component ────────────────────────────────────────
-
 function StarField() {
   const stars = Array.from({ length: 6 }, (_, i) => ({
     id: i,
@@ -161,7 +153,6 @@ function StarField() {
     size: 2 + Math.random() * 3,
     delay: i * 0.2,
   }));
-
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {stars.map((star) => (
@@ -190,15 +181,12 @@ function StarField() {
     </div>
   );
 }
-
 // ─── Completion Celebration Overlay ─────────────────────────────────────────
-
 function CelebrationOverlay({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
     const timer = setTimeout(onComplete, 2000);
     return () => clearTimeout(timer);
   }, [onComplete]);
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -218,8 +206,7 @@ function CelebrationOverlay({ onComplete }: { onComplete: () => void }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-100 text-center px-8"
-        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+        className="font-serif text-2xl font-bold text-brown-900 dark:text-brown-600 text-center px-8"
       >
         Analyzing Your Cosmic Identity...
       </motion.h2>
@@ -243,26 +230,21 @@ function CelebrationOverlay({ onComplete }: { onComplete: () => void }) {
     </motion.div>
   );
 }
-
 // ─── Birth Chart Preview Overlay ─────────────────────────────────────────────
-
 const ZODIAC_SIGNS_LIST = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
 const ZODIAC_SYMBOLS_MAP: Record<string, string> = {
   Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
   Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
 };
-
 function BirthChartPreview({ onComplete, birthDetails }: { onComplete: () => void; birthDetails: { dateOfBirth: string; timeOfBirth: string; latitude: number; longitude: number } | null }) {
   const [phase, setPhase] = useState<'cycling' | 'revealed'>('cycling');
   const [cyclingSymbol, setCyclingSymbol] = useState(0);
-
   // Calculate zodiac signs using lightweight client-side approximation
   // Accurate calculations happen server-side via the API
   const zodiacResults = useMemo(() => {
     if (!birthDetails?.dateOfBirth) {
       return { sunSign: 'Capricorn', moonSign: 'Gemini', risingSign: 'Taurus' };
     }
-
     try {
       return getApproximateZodiacPreview({
         dateOfBirth: birthDetails.dateOfBirth,
@@ -274,10 +256,8 @@ function BirthChartPreview({ onComplete, birthDetails }: { onComplete: () => voi
       // Fallback: simple sun sign calculation from date
       const dateStr = birthDetails.dateOfBirth;
       if (!dateStr) return { sunSign: 'Capricorn', moonSign: 'Gemini', risingSign: 'Taurus' };
-
       const month = parseInt(dateStr.split('-')[1]);
       const day = parseInt(dateStr.split('-')[2]);
-
       // Tropical sun sign (approximate)
       let signIndex: number;
       if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) signIndex = 0;
@@ -292,7 +272,6 @@ function BirthChartPreview({ onComplete, birthDetails }: { onComplete: () => voi
       else if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) signIndex = 9;
       else if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) signIndex = 10;
       else signIndex = 11;
-
       return {
         sunSign: ZODIAC_SIGNS_LIST[signIndex],
         moonSign: ZODIAC_SIGNS_LIST[(signIndex + 4) % 12],
@@ -300,31 +279,26 @@ function BirthChartPreview({ onComplete, birthDetails }: { onComplete: () => voi
       };
     }
   }, [birthDetails]);
-
   // Cycling animation for 2 seconds
   useEffect(() => {
     if (phase !== 'cycling') return;
     const interval = setInterval(() => {
       setCyclingSymbol((prev) => (prev + 1) % 12);
     }, 120);
-
     const timer = setTimeout(() => {
       setPhase('revealed');
     }, 2000);
-
     return () => {
       clearInterval(interval);
       clearTimeout(timer);
     };
   }, [phase]);
-
   // Auto-advance after reveal
   useEffect(() => {
     if (phase !== 'revealed') return;
     const timer = setTimeout(onComplete, 2500);
     return () => clearTimeout(timer);
   }, [phase, onComplete]);
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -353,8 +327,7 @@ function BirthChartPreview({ onComplete, birthDetails }: { onComplete: () => voi
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="font-serif text-xl font-bold text-brown-900 dark:text-brown-100"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-xl font-bold text-brown-900 dark:text-brown-600"
             >
               Generating your cosmic identity...
             </motion.h2>
@@ -381,11 +354,10 @@ function BirthChartPreview({ onComplete, birthDetails }: { onComplete: () => voi
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-            className="bg-white dark:bg-white/5 rounded-2xl shadow-lg border border-gold/10 overflow-hidden"
+            className="bg-white dark:bg-white/[0.08] rounded-2xl shadow-lg border border-gold/10 overflow-hidden"
           >
             {/* Gold top accent */}
             <div className="h-1.5 bg-gradient-to-r from-gold via-gold-light to-gold-dark" />
-
             <div className="p-6 text-center">
               <motion.div
                 initial={{ scale: 0 }}
@@ -397,17 +369,14 @@ function BirthChartPreview({ onComplete, birthDetails }: { onComplete: () => voi
                   <span className="text-3xl">{ZODIAC_SYMBOLS_MAP[zodiacResults.sunSign]}</span>
                 </div>
               </motion.div>
-
               <motion.h2
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="font-serif text-xl font-bold text-brown-900 dark:text-brown-100 mb-4"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                className="font-serif text-xl font-bold text-brown-900 dark:text-brown-600 mb-4"
               >
                 Your Cosmic Identity ✦
               </motion.h2>
-
               <div className="space-y-3">
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
@@ -417,13 +386,12 @@ function BirthChartPreview({ onComplete, birthDetails }: { onComplete: () => voi
                 >
                   <span className="text-2xl">☉</span>
                   <div className="text-left flex-1">
-                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-300">Your Sun Sign</p>
-                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">
+                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-500">Your Sun Sign</p>
+                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-600">
                       {zodiacResults.sunSign} {ZODIAC_SYMBOLS_MAP[zodiacResults.sunSign]}
                     </p>
                   </div>
                 </motion.div>
-
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -432,13 +400,12 @@ function BirthChartPreview({ onComplete, birthDetails }: { onComplete: () => voi
                 >
                   <span className="text-2xl">☽</span>
                   <div className="text-left flex-1">
-                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-300">Moon Sign</p>
-                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">
+                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-500">Moon Sign</p>
+                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-600">
                       {zodiacResults.moonSign} {ZODIAC_SYMBOLS_MAP[zodiacResults.moonSign]}
                     </p>
                   </div>
                 </motion.div>
-
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -447,19 +414,18 @@ function BirthChartPreview({ onComplete, birthDetails }: { onComplete: () => voi
                 >
                   <span className="text-2xl">⬆</span>
                   <div className="text-left flex-1">
-                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-300">Rising Sign</p>
-                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">
+                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-500">Rising Sign</p>
+                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-600">
                       {zodiacResults.risingSign} {ZODIAC_SYMBOLS_MAP[zodiacResults.risingSign]}
                     </p>
                   </div>
                 </motion.div>
               </div>
-
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8 }}
-                className="text-xs text-brown-400 dark:text-brown-300 mt-4"
+                className="text-xs text-brown-400 dark:text-brown-500 mt-4"
               >
                 Preparing your full cosmic analysis...
               </motion.p>
@@ -470,18 +436,14 @@ function BirthChartPreview({ onComplete, birthDetails }: { onComplete: () => voi
     </motion.div>
   );
 }
-
 // ─── Questionnaire Encouragement Messages ──────────────────────────────────
-
 function getEncouragement(count: number): string {
   if (count <= 4) return 'Every answer reveals a layer of your emotional architecture';
   if (count <= 8) return 'You\'re uncovering deep patterns ✦';
   if (count <= 12) return 'Almost there — your cosmic portrait is taking shape ✦';
   return 'Beautiful. Your emotional blueprint is complete ✦';
 }
-
 // ─── Main OnboardingView ──────────────────────────────────────────────────
-
 export default function OnboardingView() {
   const {
     onboardingStep,
@@ -504,7 +466,6 @@ export default function OnboardingView() {
     setUserId,
     setReportLoading,
   } = useAyuAstroStore();
-
   const [direction, setDirection] = useState(0);
   const [localName, setLocalName] = useState(birthDetails?.name || '');
   const [localDob, setLocalDob] = useState(birthDetails?.dateOfBirth || '');
@@ -516,7 +477,6 @@ export default function OnboardingView() {
   const [localRelationship, setLocalRelationship] = useState(
     birthDetails?.relationshipStatus || ''
   );
-
   // When birthDetails is null (after reset), clear all local state to ensure fresh start
   useEffect(() => {
     if (!birthDetails) {
@@ -530,7 +490,6 @@ export default function OnboardingView() {
       setLocalRelationship('');
     }
   }, [birthDetails]);
-
   // Auto-fill lat/lon when city is selected from the datalist
   useEffect(() => {
     const cityData = INDIAN_CITIES[localPlace];
@@ -539,12 +498,10 @@ export default function OnboardingView() {
       setLocalLon(cityData.lon.toString());
     }
   }, [localPlace]);
-
   const [showCelebration, setShowCelebration] = useState(false);
   const [showBirthChartPreview, setShowBirthChartPreview] = useState(false);
   const [celebrationHandled, setCelebrationHandled] = useState(false);
   const hasShownWelcomeToast = useRef(false);
-
   const handleNext = () => {
     if (onboardingStep === 'name') {
       setBirthDetails({ name: localName });
@@ -573,12 +530,10 @@ export default function OnboardingView() {
     setDirection(1);
     nextOnboardingStep();
   };
-
   const handleBack = () => {
     setDirection(-1);
     prevOnboardingStep();
   };
-
   const handleCelebrationComplete = () => {
     setShowCelebration(false);
     if (!celebrationHandled) {
@@ -587,14 +542,12 @@ export default function OnboardingView() {
       setShowBirthChartPreview(true);
     }
   };
-
   const handleBirthChartPreviewComplete = () => {
     setShowBirthChartPreview(false);
     setDirection(1);
     // Skip directly to 'complete' step (not nextOnboardingStep which would go to 'preview')
     setOnboardingStep('complete');
   };
-
   const handleQuestionnaireAnswer = (questionId: string, score: number, category: QuestionnaireAnswer['category']) => {
     addQuestionnaireAnswer({
       questionId,
@@ -603,16 +556,13 @@ export default function OnboardingView() {
       score,
     });
   };
-
   const getQuestionAnswer = (questionId: string): number => {
     const found = questionnaireAnswers.find((a) => a.questionId === questionId);
     return found?.score ?? 0;
   };
-
   const answeredCount = questionnaireAnswers.length;
   const totalQuestions = QUESTIONS.length;
   const progressPercent = (answeredCount / totalQuestions) * 100;
-
   const canProceed = () => {
     switch (onboardingStep) {
       case 'name':
@@ -630,11 +580,9 @@ export default function OnboardingView() {
         return true;
     }
   };
-
   const handleSubmit = async () => {
     setView('calculating');
     setLoading(true, 'Mapping your cosmic blueprint...');
-
     try {
       // Phase 1: Fast kundali calculation (no AI report)
       const response = await fetch('/api/astrology/quick-calculate', {
@@ -653,16 +601,12 @@ export default function OnboardingView() {
           questionnaireAnswers: questionnaireAnswers,
         }),
       });
-
       if (!response.ok) {
         throw new Error('Failed to process your data');
       }
-
       const data = await response.json();
-
       // Map API response to store - API wraps in data.data
       const result = data.data || data;
-
       if (result.userId) setUserId(result.userId);
       if (result.astrology) {
         setAstrologyData({
@@ -698,17 +642,13 @@ export default function OnboardingView() {
         score: t.score,
         description: t.description || '',
       })));
-
       // Show welcome toast and navigate to insights immediately
       cosmicToast.cosmic(`Welcome, ${birthDetails?.name || 'Seeker'}! ✦`, 'Your cosmic journey begins...');
-
       setLoading(false);
       setView('insights');
-
       // Phase 2: Trigger AI report generation in the background
       if (result.userId && result.astrology && result.numerology && result.traits) {
         setReportLoading(true);
-
         // Build trait scores for AI report input
         const traitScoresMap: Record<string, number> = {};
         if (Array.isArray(result.traits)) {
@@ -716,7 +656,6 @@ export default function OnboardingView() {
             traitScoresMap[t.id || t.name] = t.score;
           }
         }
-
         // Fire and forget — update store when complete
         fetch('/api/ai/generate-report-async', {
           method: 'POST',
@@ -767,7 +706,6 @@ export default function OnboardingView() {
       cosmicToast.info('Calculation failed', 'Please check your details and try again');
     }
   };
-
   // Auto-submit on complete step — read from store directly to avoid stale closures
   useEffect(() => {
     if (onboardingStep === 'complete') {
@@ -776,7 +714,6 @@ export default function OnboardingView() {
         // Directly call the submit logic with fresh store data to avoid stale closure
         (async () => {
           const { birthDetails: bd, questionnaireAnswers: qa } = state;
-
           // Validate required data before making API call
           if (!bd?.name || !bd?.dateOfBirth || !bd?.timeOfBirth || !bd?.placeOfBirth) {
             console.warn('[Onboarding] Missing required birth details, redirecting to birth step');
@@ -784,16 +721,13 @@ export default function OnboardingView() {
             cosmicToast.info('Missing details', 'Please fill in all birth information');
             return;
           }
-
           if (!bd?.latitude || !bd?.longitude) {
             console.warn('[Onboarding] Missing coordinates, using defaults');
             bd.latitude = bd.latitude || 28.6139;
             bd.longitude = bd.longitude || 77.209;
           }
-
           state.setView('calculating');
           state.setLoading(true, 'Mapping your cosmic blueprint...');
-
           try {
             const response = await fetch('/api/astrology/quick-calculate', {
               method: 'POST',
@@ -811,14 +745,11 @@ export default function OnboardingView() {
                 questionnaireAnswers: qa,
               }),
             });
-
             if (!response.ok) {
               throw new Error('Failed to process your data');
             }
-
             const data = await response.json();
             const result = data.data || data;
-
             if (result.userId) state.setUserId(result.userId);
             if (result.astrology) {
               state.setAstrologyData({
@@ -854,23 +785,18 @@ export default function OnboardingView() {
               score: t.score,
               description: t.description || '',
             })));
-
             cosmicToast.cosmic(`Welcome, ${bd?.name || 'Seeker'}! ✦`, 'Your cosmic journey begins...');
-
             state.setLoading(false);
             state.setView('insights');
-
             // Phase 2: Trigger AI report generation in the background
             if (result.userId && result.astrology && result.numerology && result.traits) {
               state.setReportLoading(true);
-
               const traitScoresMap: Record<string, number> = {};
               if (Array.isArray(result.traits)) {
                 for (const t of result.traits) {
                   traitScoresMap[t.id || t.name] = t.score;
                 }
               }
-
               fetch('/api/ai/generate-report-async', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -923,14 +849,12 @@ export default function OnboardingView() {
       return () => clearTimeout(timer);
     }
   }, [onboardingStep]);
-
   // Show welcome toast once when name step first appears
   useEffect(() => {
     if (onboardingStep === 'name' && !hasShownWelcomeToast.current && birthDetails?.name) {
       hasShownWelcomeToast.current = true;
     }
   }, [onboardingStep, birthDetails?.name]);
-
   const renderStep = () => {
     switch (onboardingStep) {
       case 'name':
@@ -945,7 +869,7 @@ export default function OnboardingView() {
             transition={{ duration: 0.3 }}
             className="w-full"
           >
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08]">
               <CardContent className="p-6 relative">
                 {/* Star-field effect */}
                 <StarField />
@@ -961,14 +885,12 @@ export default function OnboardingView() {
                 </div>
                 <h2
                   className="font-serif text-2xl font-bold text-brown-900 mb-2 relative z-10"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
                   What should we call you?
                 </h2>
                 <p className="text-sm text-brown-400 mb-6 relative z-10">
                   Your name carries vibrational energy that shapes your numerological blueprint.
                 </p>
-
                 <div className="space-y-3 relative z-10">
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
@@ -994,7 +916,6 @@ export default function OnboardingView() {
             </Card>
           </motion.div>
         );
-
       case 'birth':
         return (
           <motion.div
@@ -1007,7 +928,7 @@ export default function OnboardingView() {
             transition={{ duration: 0.3 }}
             className="w-full"
           >
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08]">
               <CardContent className="p-6">
                 <div className="mb-2">
                   <motion.div
@@ -1022,14 +943,12 @@ export default function OnboardingView() {
                 </div>
                 <h2
                   className="font-serif text-2xl font-bold text-brown-900 mb-2"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
                   Your Cosmic Origin
                 </h2>
                 <p className="text-sm text-brown-400 mb-6">
                   The stars were arranged in a specific pattern at the moment of your birth.
                 </p>
-
                 <div className="space-y-4">
                   {[0,1,2,3,4,5,6].map((fieldIdx) => {
                     if (fieldIdx === 0) return (
@@ -1116,7 +1035,7 @@ export default function OnboardingView() {
                               className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
                                 localGender === g.toLowerCase()
                                   ? 'bg-brown-700 text-white'
-                                  : 'bg-brown-50 dark:bg-brown-50/20 text-brown-600 dark:text-brown-300 hover:bg-brown-100 dark:hover:bg-brown-100'
+                                  : 'bg-brown-50 dark:bg-brown-50/20 text-brown-600 dark:text-brown-500 hover:bg-brown-100 dark:hover:bg-brown-100'
                               }`}
                             >
                               {g}
@@ -1132,7 +1051,7 @@ export default function OnboardingView() {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <Crosshair className="size-4 text-gold-dark" />
-                              <Label className="text-sm font-semibold text-brown-900 dark:text-brown-100">Exact Coordinates</Label>
+                              <Label className="text-sm font-semibold text-brown-900 dark:text-brown-600">Exact Coordinates</Label>
                             </div>
                             <Button
                               type="button"
@@ -1160,18 +1079,16 @@ export default function OnboardingView() {
                               Use My Location
                             </Button>
                           </div>
-
                           {localLat && INDIAN_CITIES[localPlace] && (
                             <div className="flex items-center gap-1.5 text-xs text-sage-dark">
                               <Sparkles className="size-3" />
                               Auto-filled from {localPlace} — edit for more precision
                             </div>
                           )}
-
                           <div className="grid grid-cols-2 gap-3">
                             <div>
                               <div className="flex items-center gap-1.5 mb-1">
-                                <Label className="text-xs font-medium text-brown-700 dark:text-brown-300">Latitude</Label>
+                                <Label className="text-xs font-medium text-brown-700 dark:text-brown-500">Latitude</Label>
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
@@ -1194,7 +1111,7 @@ export default function OnboardingView() {
                             </div>
                             <div>
                               <div className="flex items-center gap-1.5 mb-1">
-                                <Label className="text-xs font-medium text-brown-700 dark:text-brown-300">Longitude</Label>
+                                <Label className="text-xs font-medium text-brown-700 dark:text-brown-500">Longitude</Label>
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
@@ -1227,7 +1144,6 @@ export default function OnboardingView() {
             </Card>
           </motion.div>
         );
-
       case 'relationship':
         return (
           <motion.div
@@ -1240,7 +1156,7 @@ export default function OnboardingView() {
             transition={{ duration: 0.3 }}
             className="w-full"
           >
-            <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+            <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08]">
               <CardContent className="p-6">
                 <div className="mb-2">
                   <motion.div
@@ -1254,14 +1170,12 @@ export default function OnboardingView() {
                 </div>
                 <h2
                   className="font-serif text-2xl font-bold text-brown-900 mb-2"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
                   Relational Dynamics
                 </h2>
                 <p className="text-sm text-brown-400 mb-6">
                   Your relationship status influences how emotional patterns manifest in your life.
                 </p>
-
                 <div className="space-y-3">
                   {RELATIONSHIP_OPTIONS.map((option) => (
                     <button
@@ -1272,7 +1186,7 @@ export default function OnboardingView() {
                           ? option === 'Partnered'
                             ? 'border-gold bg-gold/5 text-brown-900'
                             : 'border-brown-700 bg-brown-50 text-brown-900'
-                          : 'border-brown-100 dark:border-brown-100 bg-white dark:bg-white/5 text-brown-500 hover:border-brown-200 hover:bg-brown-50/50 dark:hover:bg-white/10'
+                          : 'border-brown-100 dark:border-brown-100 bg-white dark:bg-white/[0.08] text-brown-500 hover:border-brown-200 hover:bg-brown-50/50 dark:hover:bg-white/10'
                       }`}
                     >
                       <div
@@ -1296,7 +1210,6 @@ export default function OnboardingView() {
             </Card>
           </motion.div>
         );
-
       case 'questionnaire':
         return (
           <motion.div
@@ -1328,7 +1241,6 @@ export default function OnboardingView() {
                 {getEncouragement(answeredCount)}
               </motion.p>
             </div>
-
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
               {QUESTIONS.map((q, i) => {
                 const currentAnswer = getQuestionAnswer(q.id);
@@ -1339,7 +1251,7 @@ export default function OnboardingView() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
                   >
-                    <Card className="border-0 shadow-sm bg-white dark:bg-white/5">
+                    <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08]">
                       <CardContent className="p-5">
                         <div className="flex items-start gap-2 mb-3">
                           <Badge
@@ -1371,7 +1283,7 @@ export default function OnboardingView() {
                                 className={`flex flex-1 flex-col items-center gap-1 rounded-lg py-2 text-center transition-all ${
                                   isSelected
                                     ? 'bg-brown-700 text-white scale-105'
-                                    : 'bg-brown-50 dark:bg-brown-50/20 text-brown-400 dark:text-brown-300 hover:bg-brown-100 dark:hover:bg-brown-100'
+                                    : 'bg-brown-50 dark:bg-brown-50/20 text-brown-400 dark:text-brown-500 hover:bg-brown-100 dark:hover:bg-brown-100'
                                 }`}
                                 title={label}
                               >
@@ -1393,7 +1305,6 @@ export default function OnboardingView() {
             </div>
           </motion.div>
         );
-
       case 'complete':
         return (
           <motion.div
@@ -1416,7 +1327,6 @@ export default function OnboardingView() {
             </motion.div>
             <h2
               className="font-serif text-2xl font-bold text-brown-900 mb-3"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               Your cosmic blueprint is being mapped...
             </h2>
@@ -1428,16 +1338,13 @@ export default function OnboardingView() {
             </div>
           </motion.div>
         );
-
       default:
         return null;
     }
   };
-
   // Calculate overall progress (0-100) based on step
   const stepProgress: Record<string, number> = { name: 20, birth: 40, relationship: 60, questionnaire: 80, preview: 90, complete: 100 };
   const overallProgress = stepProgress[onboardingStep] || 0;
-
   return (
     <div className="min-h-screen bg-cream px-4 py-6 relative">
       {/* Full-width gold progress bar at top */}
@@ -1450,7 +1357,6 @@ export default function OnboardingView() {
           transition={{ duration: 0.5, ease: 'easeOut' }}
         />
       </div>
-
       {/* Floating gold particles background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         {[0,1,2,3,4,5].map(p => (
@@ -1477,7 +1383,6 @@ export default function OnboardingView() {
           />
         ))}
       </div>
-
       <div className="mx-auto max-w-lg relative z-10">
         {/* Celebration overlay */}
         <AnimatePresence>
@@ -1485,7 +1390,6 @@ export default function OnboardingView() {
             <CelebrationOverlay onComplete={handleCelebrationComplete} />
           )}
         </AnimatePresence>
-
         {/* Birth chart preview overlay */}
         <AnimatePresence>
           {showBirthChartPreview && (
@@ -1495,23 +1399,20 @@ export default function OnboardingView() {
             />
           )}
         </AnimatePresence>
-
         {/* Back button (not on name or complete steps) */}
         {onboardingStep !== 'name' && onboardingStep !== 'complete' && (
           <button
             onClick={handleBack}
-            className="mb-4 flex items-center gap-1 text-sm text-brown-500 dark:text-brown-300 hover:text-brown-700 transition-colors"
+            className="mb-4 flex items-center gap-1 text-sm text-brown-500 dark:text-brown-500 hover:text-brown-700 transition-colors"
           >
             <ArrowLeft className="size-4" />
             Back
           </button>
         )}
-
         {/* Step content with animation */}
         <AnimatePresence mode="wait" custom={direction}>
           {renderStep()}
         </AnimatePresence>
-
         {/* Navigation buttons */}
         {onboardingStep !== 'complete' && onboardingStep !== 'questionnaire' && (
           <div className="mt-6 flex justify-end">
@@ -1526,7 +1427,6 @@ export default function OnboardingView() {
             </Button>
           </div>
         )}
-
         {onboardingStep === 'questionnaire' && (
           <div className="mt-6 flex justify-between">
             <button

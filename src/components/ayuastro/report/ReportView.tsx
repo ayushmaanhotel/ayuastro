@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAyuAstroStore, type ReportSection } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,7 +23,6 @@ import {
   Clock,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
-
 const ICON_MAP: Record<string, React.ElementType> = {
   heart: Heart,
   message: MessageCircle,
@@ -35,7 +33,6 @@ const ICON_MAP: Record<string, React.ElementType> = {
   dollar: DollarSign,
   repeat: Repeat,
 };
-
 const DEFAULT_FREE_SECTIONS: ReportSection[] = [
   {
     id: 'emotional-personality',
@@ -65,7 +62,6 @@ const DEFAULT_FREE_SECTIONS: ReportSection[] = [
     insightLevel: 'free',
   },
 ];
-
 const DEFAULT_PREMIUM_SECTIONS: ReportSection[] = [
   {
     id: 'hidden-strengths',
@@ -104,12 +100,10 @@ const DEFAULT_PREMIUM_SECTIONS: ReportSection[] = [
     insightLevel: 'premium',
   },
 ];
-
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
 };
-
 const staggerContainer = {
   initial: {},
   animate: {
@@ -118,7 +112,6 @@ const staggerContainer = {
     },
   },
 };
-
 export default function ReportView() {
   const { reportSections, hasPaid, setView, userId, astrologyData } = useAyuAstroStore();
   const [downloading, setDownloading] = useState(false);
@@ -127,7 +120,6 @@ export default function ReportView() {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [bookmarkedSections, setBookmarkedSections] = useState<Record<string, boolean>>({});
   const sectionsRef = useRef<Record<string, HTMLDivElement | null>>({});
-
   // Track scroll progress
   useEffect(() => {
     const handleScroll = () => {
@@ -140,36 +132,27 @@ export default function ReportView() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
   const toggleSection = (id: string) => {
     setExpandedSections(prev => ({ ...prev, [id]: !prev[id] }));
   };
-
   const toggleBookmark = (id: string) => {
     setBookmarkedSections(prev => ({ ...prev, [id]: !prev[id] }));
   };
-
   const freeSections = reportSections.filter((s) => s.insightLevel === 'free').length > 0
     ? reportSections.filter((s) => s.insightLevel === 'free')
     : DEFAULT_FREE_SECTIONS;
-
   const premiumSections = reportSections.filter((s) => s.insightLevel === 'premium').length > 0
     ? reportSections.filter((s) => s.insightLevel === 'premium')
     : DEFAULT_PREMIUM_SECTIONS;
-
   const allSections = [...freeSections, ...premiumSections];
   const totalSections = 7; // 3 free + 4 premium
-
   // Calculate reading time based on content length (200 words per min)
   const totalWords = allSections.reduce((sum, s) => sum + s.content.split(/\s+/).length, 0);
   const readingTime = Math.max(1, Math.ceil(totalWords / 200));
-
   // Count expanded sections as "read"
   const sectionsRead = Object.values(expandedSections).filter(Boolean).length;
-
   // Continue reading: find first unexpanded section
   const continueReadingSection = allSections.find(s => !expandedSections[s.id] && (s.insightLevel === 'free' || hasPaid));
-
   const scrollToSection = useCallback((id: string) => {
     const el = sectionsRef.current[id];
     if (el) {
@@ -177,9 +160,7 @@ export default function ReportView() {
       setExpandedSections(prev => ({ ...prev, [id]: true }));
     }
   }, []);
-
   const [downloadError, setDownloadError] = useState<string | null>(null);
-
   const handleDownload = async () => {
     if (!userId) {
       setDownloadError('Please complete onboarding first to download your report.');
@@ -217,7 +198,6 @@ export default function ReportView() {
       setDownloading(false);
     }
   };
-
   const generateClientSideReport = () => {
     const name = useAyuAstroStore.getState().birthDetails?.name || 'Seeker';
     const dob = useAyuAstroStore.getState().birthDetails?.dateOfBirth || 'Unknown';
@@ -226,14 +206,11 @@ export default function ReportView() {
     const sun = astrologyData?.sunSign || 'Unknown';
     const moon = astrologyData?.moonSign || 'Unknown';
     const asc = astrologyData?.ascendant || 'Unknown';
-
     const allSections = [
       ...freeSections.map((s, i) => `<div style="background:white;border-radius:12px;padding:2rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.05);"><h2 style="font-family:Georgia,serif;font-size:1.3rem;color:#3E2723;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #E8F0E9;">${i + 1}. ${s.title}</h2><p style="color:#5D4037;line-height:1.8;">${s.content}</p><div style="margin-top:1rem;display:flex;gap:0.4rem;flex-wrap:wrap;">${s.traits.map(t => `<span style="background:#EFEBE9;color:#5D4037;font-size:0.75rem;padding:0.2rem 0.6rem;border-radius:20px;">${t}</span>`).join('')}</div></div>`),
       ...(hasPaid ? premiumSections.map((s, i) => `<div style="background:white;border-radius:12px;padding:2rem;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.05);"><h2 style="font-family:Georgia,serif;font-size:1.3rem;color:#3E2723;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #E8F0E9;">${freeSections.length + i + 1}. ${s.title} <span style="background:linear-gradient(135deg,#D4AF37,#D4A84B);color:white;font-size:0.6rem;padding:0.15rem 0.5rem;border-radius:4px;letter-spacing:0.1em;vertical-align:middle;margin-left:0.5rem;">PREMIUM</span></h2><p style="color:#5D4037;line-height:1.8;">${s.content}</p><div style="margin-top:1rem;display:flex;gap:0.4rem;flex-wrap:wrap;">${s.traits.map(t => `<span style="background:#D4AF37/10;color:#B8960C;font-size:0.75rem;padding:0.2rem 0.6rem;border-radius:20px;">${t}</span>`).join('')}</div></div>`) : []),
     ];
-
     const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>AyuAstro Report - ${name}</title><style>body{font-family:Inter,-apple-system,sans-serif;background:#FDF6EC;color:#3E2723;line-height:1.7;max-width:800px;margin:0 auto;padding:2rem;}</style></head><body><div style="text-align:center;padding:4rem 2rem;"><h1 style="font-family:Georgia,serif;font-size:3rem;color:#3E2723;">AyuAstro</h1><p style="color:#8D6E63;letter-spacing:0.15em;text-transform:uppercase;">Deep Intelligence Report</p><p style="color:#5D4037;font-size:1.1rem;margin-top:2rem;">Prepared for <strong>${name}</strong><br>Born ${dob} at ${tob}<br>${pob}<br><br>☉ ${sun} &nbsp; ☽ ${moon} &nbsp; ↑ ${asc}</p></div>${allSections.join('\n')}<div style="text-align:center;padding:3rem;color:#8D6E63;font-size:0.8rem;border-top:2px solid #D7CCC8;margin-top:2rem;"><p style="font-family:Georgia,serif;font-size:1rem;color:#5D4037;margin-bottom:0.5rem;">AyuAstro — AI-Powered Emotional Intelligence</p><p>This report was generated for personal reflection only.</p></div></body></html>`;
-
     const blob = new Blob([html], { type: 'text/html' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -244,7 +221,6 @@ export default function ReportView() {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   };
-
   return (
     <div className="bg-cream px-4 py-6 pb-24 relative">
       {/* Scroll progress bar at top */}
@@ -257,7 +233,6 @@ export default function ReportView() {
           transition={{ duration: 0.1 }}
         />
       </div>
-
       {/* Reading progress circular indicator */}
       <div className="fixed top-16 right-4 z-40 flex flex-col items-center gap-1">
         <svg width="36" height="36" viewBox="0 0 36 36" className="-rotate-90">
@@ -275,7 +250,6 @@ export default function ReportView() {
         </svg>
         <span className="text-[9px] font-bold text-gold-dark">{scrollProgress}%</span>
       </div>
-
       {/* Dot pattern background texture */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.02]"
@@ -285,7 +259,6 @@ export default function ReportView() {
         }}
         aria-hidden="true"
       />
-
       <div className="mx-auto max-w-lg space-y-6 relative z-10">
         {/* Header */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4 }}>
@@ -293,7 +266,6 @@ export default function ReportView() {
             <div>
               <h1
                 className="font-serif text-3xl font-bold text-brown-900 mb-1"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
                 Your Deep Intelligence Report
               </h1>
@@ -317,10 +289,9 @@ export default function ReportView() {
               )}
             </div>
           </div>
-
           {/* Reading Time & Progress Badges */}
           <div className="flex items-center gap-2 mt-3 flex-wrap">
-            <Badge className="bg-brown-50 dark:bg-brown-50/20 text-brown-500 dark:text-brown-300 border-0 text-[10px] px-2.5 py-0.5 flex items-center gap-1">
+            <Badge className="bg-brown-50 dark:bg-brown-50/20 text-brown-500 dark:text-brown-500 border-0 text-[10px] px-2.5 py-0.5 flex items-center gap-1">
               <Clock className="size-2.5" />
               Reading Time: {readingTime} min
             </Badge>
@@ -337,7 +308,6 @@ export default function ReportView() {
               </button>
             )}
           </div>
-
           {/* Progress bar */}
           <div className="mt-3 h-1.5 w-full rounded-full bg-brown-100/30 dark:bg-brown-50/20 overflow-hidden">
             <motion.div
@@ -349,7 +319,6 @@ export default function ReportView() {
             />
           </div>
         </motion.div>
-
         {/* Free Sections */}
         <motion.div
           variants={staggerContainer}
@@ -370,7 +339,7 @@ export default function ReportView() {
                 transition={{ duration: 0.4 }}
                 ref={(el) => { sectionsRef.current[section.id] = el; }}
               >
-                <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5 group hover:border-l-2 hover:border-l-gold transition-all">
+                <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/[0.08] group hover:border-l-2 hover:border-l-gold transition-all">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                       <div className="flex size-7 items-center justify-center rounded-full bg-gold/15 text-gold-dark text-xs font-bold">
@@ -397,14 +366,14 @@ export default function ReportView() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm leading-relaxed text-brown-600 dark:text-brown-300 mb-3">
+                    <p className="text-sm leading-relaxed text-brown-600 dark:text-brown-500 mb-3">
                       {section.content}
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {section.traits.map((trait, ti) => (
                         <Badge
                           key={ti}
-                          className="bg-brown-50 dark:bg-brown-50/20 text-brown-600 dark:text-brown-300 border-0 text-xs"
+                          className="bg-brown-50 dark:bg-brown-50/20 text-brown-600 dark:text-brown-500 border-0 text-xs"
                         >
                           {trait}
                         </Badge>
@@ -416,12 +385,10 @@ export default function ReportView() {
             );
           })}
         </motion.div>
-
         {/* Gold Divider between Free and Premium */}
         <div className="section-divider">
           <span className="text-gold text-lg zodiac-glow">✦</span>
         </div>
-
         {/* Premium Sections */}
         <motion.div
           variants={staggerContainer}
@@ -444,7 +411,7 @@ export default function ReportView() {
                 transition={{ duration: 0.4 }}
                 ref={(el) => { sectionsRef.current[section.id] = el; }}
               >
-                <Card className={`card-hover border-0 shadow-md bg-white dark:bg-white/5 group hover:border-l-2 hover:border-l-gold transition-all`}>
+                <Card className={`card-hover border-0 shadow-md bg-white dark:bg-white/[0.08] group hover:border-l-2 hover:border-l-gold transition-all`}>
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                       <div className="flex size-7 items-center justify-center rounded-full bg-gold/15 text-gold-dark text-xs font-bold">
@@ -481,7 +448,7 @@ export default function ReportView() {
                         </div>
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-white/20 via-white/50 to-white/80 dark:from-card/20 dark:via-card/50 dark:to-card/80">
                           <Lock className="size-5 text-gold mb-2" />
-                          <p className="text-xs font-medium text-brown-700 dark:text-brown-200 mb-2">
+                          <p className="text-xs font-medium text-brown-700 dark:text-brown-400 mb-2">
                             Unlock to reveal
                           </p>
                           <Button
@@ -496,7 +463,7 @@ export default function ReportView() {
                       </div>
                     ) : (
                       <>
-                        <p className="text-sm leading-relaxed text-brown-600 dark:text-brown-300 mb-3">
+                        <p className="text-sm leading-relaxed text-brown-600 dark:text-brown-500 mb-3">
                           {section.content}
                         </p>
                         <div className="flex flex-wrap gap-1">
@@ -517,7 +484,6 @@ export default function ReportView() {
             );
           })}
         </motion.div>
-
         {/* Back to Top Button */}
         {showBackToTop && (
           <Button

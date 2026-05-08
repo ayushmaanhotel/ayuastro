@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { useAyuAstroStore, type TraitScore } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,12 +57,10 @@ import DashaTimeline, { generateDashaPeriods, type DashaPeriod } from './DashaTi
 import PersonalityCards from './PersonalityCards';
 import KundaliScoreCard from './KundaliScoreCard';
 import DoshaDetailCard from './DoshaDetailCard';
-
 const ZODIAC_ICONS: Record<string, string> = {
   Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
   Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
 };
-
 const ZODIAC_ELEMENTS: Record<string, { element: string; modality: string; ruler: string; color: string }> = {
   Aries: { element: 'Fire', modality: 'Cardinal', ruler: 'Mars', color: 'text-red-500' },
   Taurus: { element: 'Earth', modality: 'Fixed', ruler: 'Venus', color: 'text-green-600' },
@@ -78,27 +75,23 @@ const ZODIAC_ELEMENTS: Record<string, { element: string; modality: string; ruler
   Aquarius: { element: 'Air', modality: 'Fixed', ruler: 'Uranus', color: 'text-cyan-500' },
   Pisces: { element: 'Water', modality: 'Mutable', ruler: 'Neptune', color: 'text-teal-400' },
 };
-
 const ELEMENT_ICONS: Record<string, React.ElementType> = {
   Fire: Flame,
   Earth: Mountain,
   Air: Wind,
   Water: Droplets,
 };
-
-// Daily cosmic insights based on current day of year
+// Daily cosmic insights — no fluff, just truth
 const COSMIC_INSIGHTS = [
-  { title: 'Emotional Tide', message: 'The Moon\'s current transit amplifies your intuitive faculties. Trust the subtle signals your body sends today — they carry more cosmic weight than logic.', icon: Moon },
-  { title: 'Cosmic Push', message: 'Mars activates your ambition sector. This is a day for bold emotional moves, not retreat. Express what you\'ve been holding back.', icon: Zap },
-  { title: 'Inner Alignment', message: 'Venus harmonizes with your natal chart, creating a rare window for self-compassion. Today, be as gentle with yourself as you are with others.', icon: Heart },
-  { title: 'Mental Clarity', message: 'Mercury\'s influence sharpens your communication pattern. Difficult conversations flow more naturally today — use this cosmic support.', icon: TrendingUp },
-  { title: 'Deep Reflection', message: 'Saturn asks you to examine recurring patterns. The lesson you\'ve been avoiding is ready to be learned. Face it with courage.', icon: BookOpen },
-  { title: 'Karmic Reset', message: 'Rahu-Ketu axis shifts perception today. What seemed like a weakness may reveal itself as your greatest emotional tool.', icon: Sparkles },
-  { title: 'Nurturing Energy', message: 'Jupiter expands your emotional capacity. Today, you can hold space for others without depleting yourself. A rare gift — use it wisely.', icon: Shield },
+  { title: 'Trust Your Gut', message: 'Your gut feeling is screaming at you today. Listen to it — your body knows things your brain hasn\'t caught up with yet. Stop second-guessing that weird feeling in your chest.', icon: Moon },
+  { title: 'You\'re Restless — Use It', message: 'You\'re restless today and that\'s not a bad thing. Channel that energy somewhere useful or it\'ll turn into irritation. Don\'t pick a fight with the wrong person just because you\'re buzzing.', icon: Zap },
+  { title: 'Be Kind to Yourself', message: 'You\'d never talk to your best friend the way you talk to yourself. Today, try being as gentle with your own mistakes as you are with everyone else\'s. You deserve that same patience.', icon: Heart },
+  { title: 'Say the Hard Thing', message: 'That conversation you\'ve been putting off? Today\'s the day. You actually have the words right now — they\'ll leave your mouth easier than usual. Don\'t waste this window.', icon: TrendingUp },
+  { title: 'Face the Pattern', message: 'That thing you keep doing over and over expecting different results? Yeah, it\'s back. The universe isn\'t being cruel — it\'s being persistent. This lesson will keep showing up until you learn it.', icon: BookOpen },
+  { title: 'Flip the Script', message: 'What you thought was your biggest weakness? It might actually be your secret weapon. The thing that makes you "too much" is the same thing that makes you unforgettable. Own it.', icon: Sparkles },
+  { title: 'You Can Handle More Than You Think', message: 'Today you have more emotional bandwidth than usual. You can actually be there for someone without running on empty afterward. That\'s rare for you — don\'t waste it on people who don\'t appreciate it.', icon: Shield },
 ];
-
 // ─── Affirmation & Ritual Data ───────────────────────────────────────────────
-
 const AFFIRMATIONS: Record<string, string[]> = {
   Aries: [
     'I honor my fire by choosing where to direct it, rather than letting it burn indiscriminately.',
@@ -209,7 +202,6 @@ const AFFIRMATIONS: Record<string, string[]> = {
     'I set boundaries not to keep people out, but to keep my energy available for what matters.',
   ],
 };
-
 const RITUAL_SUGGESTIONS = [
   { text: 'Write 3 things you\'re grateful for before getting out of bed', icon: '📝' },
   { text: 'Take 5 minutes of moon-gazing tonight', icon: '🌙' },
@@ -226,7 +218,6 @@ const RITUAL_SUGGESTIONS = [
   { text: 'Spend 2 minutes stretching while focusing on releasing tension', icon: '🧘' },
   { text: 'Look in the mirror and say one kind thing to yourself out loud', icon: '🪞' },
 ];
-
 function deterministicHash(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -236,25 +227,21 @@ function deterministicHash(str: string): number {
   }
   return Math.abs(hash);
 }
-
 function getAffirmation(sunSign: string): string {
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
   const hash = deterministicHash(today + sunSign);
   const pool = AFFIRMATIONS[sunSign] || AFFIRMATIONS['Capricorn'];
   return pool[hash % pool.length];
 }
-
 function getRitual(moonSign: string): typeof RITUAL_SUGGESTIONS[number] {
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
   const hash = deterministicHash(String(dayOfYear) + moonSign);
   return RITUAL_SUGGESTIONS[hash % RITUAL_SUGGESTIONS.length];
 }
-
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
 };
-
 const staggerContainer = {
   initial: {},
   animate: {
@@ -263,28 +250,28 @@ const staggerContainer = {
     },
   },
 };
-
 const staggerItem = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
-
+function getTraitLabel(score: number): string {
+  if (score > 70) return '💪 Your Superpower';
+  if (score >= 40) return '🔄 You\'re Working On It';
+  return '⚡ Honestly, This Needs Work';
+}
 function getTraitColor(score: number): string {
   if (score > 70) return 'bg-sage text-sage-dark';
   if (score >= 40) return 'bg-brown-700 text-white';
   return 'bg-gold text-brown-900';
 }
-
 function getTraitBarColor(score: number): string {
   if (score > 70) return 'bg-sage';
   if (score >= 40) return 'bg-brown-600';
   return 'bg-gold';
 }
-
 function getTopTraits(traits: TraitScore[], count: number = 3): TraitScore[] {
   return [...traits].sort((a, b) => b.score - a.score).slice(0, count);
 }
-
 function getArchetype(traits: TraitScore[]): string {
   if (traits.length === 0) return 'The Seeker';
   const top = getTopTraits(traits, 3);
@@ -297,7 +284,6 @@ function getArchetype(traits: TraitScore[]): string {
   if (names.includes('intuition')) return 'The Intuitive Oracle';
   return 'The Reflective Seeker';
 }
-
 function getArchetypeEmoji(archetype: string): string {
   const map: Record<string, string> = {
     'The Empathic Guardian': '🛡️',
@@ -310,26 +296,34 @@ function getArchetypeEmoji(archetype: string): string {
   };
   return map[archetype] || '✨';
 }
-
+function getArchetypeHonestDescription(archetype: string): string {
+  const map: Record<string, string> = {
+    'The Empathic Guardian': 'You feel everyone\'s pain before they even say a word. This makes you the person people call at 2am — but it also means you carry emotional baggage that isn\'t yours. You probably need better boundaries and you know it.',
+    'The Deep Feeler': 'You feel everything at 10x intensity. This makes you incredible at understanding people, but it also means you get overwhelmed easily. You probably cry at commercials and hate that you do. Your emotional world is rich but exhausting.',
+    'The Resilient Anchor': 'People lean on you because you don\'t crumble — but that doesn\'t mean you\'re not tired. You\'re the strong one until you\'re not, and when you finally break, it surprises everyone (except you). You deserve to ask for help more often.',
+    'The Expressive Bridge': 'You can explain anything to anyone and make it sound simple. You\'re the translator in every group — but sometimes you talk so much that you don\'t actually say what you\'re feeling. The real stuff stays buried under all those words.',
+    'The Driven Architect': 'You get things done. Period. But you measure your worth by what you\'ve achieved, and that\'s a treadmill that never stops. You probably haven\'t celebrated a win in months because you\'re already onto the next thing.',
+    'The Intuitive Oracle': 'You know things before they happen and you can\'t always explain how. People think you\'re mystical, but really you\'re just paying attention when everyone else is distracted. Trust that knowing more — it\'s not just "in your head."',
+    'The Reflective Seeker': 'You spend a lot of time in your own head, which makes you self-aware but also indecisive. You overthink everything, including things that don\'t need thinking about. The answer is usually simpler than you\'re making it.',
+  };
+  return map[archetype] || 'You\'re a complex person who doesn\'t fit neatly into a box — and honestly, that\'s the most honest thing anyone can say about you. You\'re still figuring it out, and that\'s okay.';
+}
 function getStrengths(traits: TraitScore[]): string[] {
   return traits
     .filter((t) => t.score > 70)
     .slice(0, 4)
     .map((t) => t.label || t.name);
 }
-
 function getBlindSpots(traits: TraitScore[]): string[] {
   return traits
     .filter((t) => t.score < 40)
     .slice(0, 3)
     .map((t) => t.label || t.name);
 }
-
 function getDailyInsight() {
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
   return COSMIC_INSIGHTS[dayOfYear % COSMIC_INSIGHTS.length];
 }
-
 interface HoroscopeData {
   sunSign: string;
   moonSign: string;
@@ -339,7 +333,6 @@ interface HoroscopeData {
   guidance: string;
   luckyElement: string;
 }
-
 interface TransitItem {
   planet: string;
   sign: string;
@@ -349,14 +342,12 @@ interface TransitItem {
   effect: string;
   advice: string;
 }
-
 interface TransitsData {
   date: string;
   transits: TransitItem[];
   overallTheme: string;
   focusPeriod: string;
 }
-
 const PLANET_COLORS: Record<string, string> = {
   Saturn: 'bg-amber-900',
   Jupiter: 'bg-amber-500',
@@ -368,42 +359,34 @@ const PLANET_COLORS: Record<string, string> = {
   Sun: 'bg-yellow-500',
   Moon: 'bg-slate-400',
 };
-
 const PLANET_SYMBOLS: Record<string, string> = {
   Sun: '☉', Moon: '☽', Mars: '♂', Mercury: '☿', Jupiter: '♃', Venus: '♀', Saturn: '♄', Rahu: '☊', Ketu: '☋',
 };
-
 const PLANET_DOT_COLORS: Record<string, string> = {
   Sun: 'bg-yellow-500', Moon: 'bg-slate-400', Mars: 'bg-red-500', Mercury: 'bg-emerald-500', Jupiter: 'bg-amber-500', Venus: 'bg-pink-400', Saturn: 'bg-amber-900', Rahu: 'bg-purple-600', Ketu: 'bg-gray-500',
 };
-
 const ELEMENT_COLORS: Record<string, { bar: string; bg: string; text: string; darkBar: string; darkBg: string; darkText: string }> = {
   Fire: { bar: 'bg-gradient-to-r from-red-500 to-orange-500', bg: 'bg-gradient-to-r from-red-50 to-orange-50', text: 'text-red-700', darkBar: 'dark:from-red-600 dark:to-orange-600', darkBg: 'dark:from-red-900/20 dark:to-orange-900/20', darkText: 'dark:text-red-300' },
   Earth: { bar: 'bg-gradient-to-r from-green-600 to-emerald-500', bg: 'bg-gradient-to-r from-green-50 to-emerald-50', text: 'text-green-700', darkBar: 'dark:from-green-600 dark:to-emerald-600', darkBg: 'dark:from-green-900/20 dark:to-emerald-900/20', darkText: 'dark:text-green-300' },
   Air: { bar: 'bg-gradient-to-r from-yellow-400 to-amber-400', bg: 'bg-gradient-to-r from-yellow-50 to-amber-50', text: 'text-yellow-700', darkBar: 'dark:from-yellow-500 dark:to-amber-500', darkBg: 'dark:from-yellow-900/20 dark:to-amber-900/20', darkText: 'dark:text-yellow-300' },
   Water: { bar: 'bg-gradient-to-r from-blue-500 to-teal-400', bg: 'bg-gradient-to-r from-blue-50 to-teal-50', text: 'text-blue-700', darkBar: 'dark:from-blue-500 dark:to-teal-500', darkBg: 'dark:from-blue-900/20 dark:to-teal-900/20', darkText: 'dark:text-blue-300' },
 };
-
 const ELEMENT_QUALITIES: Record<string, string> = {
   Fire: 'Passion, initiative, courage',
   Earth: 'Stability, patience, practicality',
   Air: 'Communication, adaptability, intellect',
   Water: 'Emotion, intuition, depth',
 };
-
 const TRANSIT_TYPE_STYLES: Record<string, string> = {
   major: 'bg-sage-muted text-sage-dark',
   shadow: 'bg-purple-100 text-purple-700',
   minor: 'bg-brown-50 text-brown-500',
 };
-
 // ─── Lucky Colors, Numbers & Days Data ────────────────────────────────────────
-
 interface LuckyColor {
   hex: string;
   name: string;
 }
-
 interface LuckySignData {
   luckyColors: [LuckyColor, LuckyColor, LuckyColor];
   luckyNumbers: [number, number, number];
@@ -411,7 +394,6 @@ interface LuckySignData {
   luckyGemstone: { name: string; description: string };
   powerHour: string;
 }
-
 const LUCKY_DATA: Record<string, LuckySignData> = {
   Aries: {
     luckyColors: [{ hex: '#DC2626', name: 'Crimson' }, { hex: '#F59E0B', name: 'Saffron' }, { hex: '#F5F5F4', name: 'Pearl' }],
@@ -498,9 +480,7 @@ const LUCKY_DATA: Record<string, LuckySignData> = {
     powerHour: '10:00–11:00 PM',
   },
 };
-
 // ─── Cosmic Compatibility Data ────────────────────────────────────────────────
-
 const ELEMENT_COMPAT: Record<string, { compatible: string[]; reason: string }> = {
   Fire: {
     compatible: ['Leo', 'Aries', 'Sagittarius'],
@@ -519,44 +499,36 @@ const ELEMENT_COMPAT: Record<string, { compatible: string[]; reason: string }> =
     reason: 'Emotional depth and intuitive bond',
   },
 };
-
 function getCompatibilityPercent(sign1: string, sign2: string): number {
   const hash = deterministicHash(sign1 + sign2);
   return 70 + (hash % 25); // 70–94% range
 }
-
 export default function InsightsView() {
   const { traitScores, astrologyData, numerologyData, birthDetails, setView, resetKundaliData, setOnboardingStep, setBirthDetails, reportLoading } = useAyuAstroStore();
-
   const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
   const [horoscopeLoading, setHoroscopeLoading] = useState(true);
   const [horoscopeExpanded, setHoroscopeExpanded] = useState(false);
   const [dashaPeriods, setDashaPeriods] = useState<DashaPeriod[]>([]);
-
   const [transits, setTransits] = useState<TransitsData | null>(null);
   const [transitsLoading, setTransitsLoading] = useState(true);
   const [expandedTransits, setExpandedTransits] = useState<Record<string, boolean>>({});
   const [planetaryExpanded, setPlanetaryExpanded] = useState(true);
   const [ritualCompleted, setRitualCompleted] = useState(false);
   const [newKundaliDialogOpen, setNewKundaliDialogOpen] = useState(false);
-
   const topTraits = getTopTraits(traitScores);
   const archetype = getArchetype(traitScores);
   const strengths = getStrengths(traitScores);
   const blindSpots = getBlindSpots(traitScores);
   const dailyInsight = getDailyInsight();
   const DailyIcon = dailyInsight.icon;
-
   const topTags =
     traitScores.length > 0
       ? topTraits.map((t) => t.label || t.name)
       : ['Reflective', 'Intuitive', 'Grounded'];
-
   const sunSign = astrologyData?.sunSign || 'Capricorn';
   const moonSign = astrologyData?.moonSign || 'Gemini';
   const ascendant = astrologyData?.ascendant || 'Taurus';
   const sunElement = ZODIAC_ELEMENTS[sunSign];
-
   // Fetch daily horoscope
   useEffect(() => {
     async function fetchHoroscope() {
@@ -575,7 +547,6 @@ export default function InsightsView() {
     }
     fetchHoroscope();
   }, [sunSign, moonSign]);
-
   // Fetch planetary transits
   useEffect(() => {
     async function fetchTransits() {
@@ -594,13 +565,10 @@ export default function InsightsView() {
     }
     fetchTransits();
   }, [sunSign, moonSign, ascendant]);
-
   const ElementIcon = ELEMENT_ICONS[sunElement?.element || 'Fire'] || Flame;
-
   // Deterministic daily affirmation and ritual
   const affirmation = getAffirmation(sunSign);
   const ritual = getRitual(moonSign);
-
   // Generate Dasha periods from birth date
   useEffect(() => {
     const dob = birthDetails?.dateOfBirth;
@@ -611,13 +579,12 @@ export default function InsightsView() {
       setDashaPeriods(generateDashaPeriods('1995-06-15'));
     }
   }, [birthDetails?.dateOfBirth]);
-
   return (
     <div className="bg-cream px-4 py-6 pb-24 relative">
       {/* Last Updated Badge + Live Indicator + New Kundali Button */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Badge className="bg-brown-50 dark:bg-brown-50/20 text-brown-400 dark:text-brown-300 border-0 text-[10px] px-2.5 py-0.5 flex items-center gap-1.5">
+          <Badge className="bg-brown-50 dark:bg-brown-50/20 text-brown-400 dark:text-brown-500 border-0 text-[10px] px-2.5 py-0.5 flex items-center gap-1.5">
             <Clock className="size-2.5" />
             Last updated: Today
           </Badge>
@@ -647,11 +614,10 @@ export default function InsightsView() {
             <DialogHeader>
               <DialogTitle
                 className="font-serif text-center text-xl"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
                 Create New Kundali?
               </DialogTitle>
-              <DialogDescription className="text-center text-brown-500 dark:text-brown-400 text-sm">
+              <DialogDescription className="text-center text-brown-500 dark:text-brown-600 text-sm">
                 This will clear your current chart data. You can always create a new one.
               </DialogDescription>
             </DialogHeader>
@@ -660,7 +626,7 @@ export default function InsightsView() {
                 variant="outline"
                 size="sm"
                 onClick={() => setNewKundaliDialogOpen(false)}
-                className="flex-1 border-brown-200 dark:border-brown-700 text-brown-600 dark:text-brown-300"
+                className="flex-1 border-brown-200 dark:border-brown-700 text-brown-600 dark:text-brown-500"
               >
                 Cancel
               </Button>
@@ -682,7 +648,6 @@ export default function InsightsView() {
           </DialogContent>
         </Dialog>
       </div>
-
       {/* Decorative constellation dots pattern at top with twinkle */}
       <div className="absolute top-0 left-0 right-0 h-16 select-none pointer-events-none overflow-hidden" aria-hidden="true">
         {/* Zodiac symbols row */}
@@ -719,11 +684,11 @@ export default function InsightsView() {
         transition={{ delay: 0.5, duration: 0.4 }}
         className="floating-action-bar ring-1 ring-gold/15 dark:ring-gold/20 bg-gradient-to-r from-white/80 via-white/90 to-white/80 dark:from-brown-900/80 dark:via-brown-900/90 dark:to-brown-900/80"
       >
-        <span className="text-[9px] uppercase tracking-widest text-brown-500 dark:text-brown-400 font-semibold text-center block mb-1">Quick Actions</span>
+        <span className="text-[9px] uppercase tracking-widest text-brown-500 dark:text-brown-600 font-semibold text-center block mb-1">Quick Actions</span>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setView('insights')}
-            className="flex flex-col items-center gap-0.5 rounded-full p-2 text-brown-500 dark:text-brown-300 hover:text-gold-dark dark:hover:text-gold hover:bg-gold/5 dark:hover:bg-gold/10 transition-all"
+            className="flex flex-col items-center gap-0.5 rounded-full p-2 text-brown-500 dark:text-brown-500 hover:text-gold-dark dark:hover:text-gold hover:bg-gold/5 dark:hover:bg-gold/10 transition-all"
             aria-label="Daily Horoscope"
           >
             <Sun className="size-5" />
@@ -732,7 +697,7 @@ export default function InsightsView() {
           <span className="w-1 h-1 rounded-full bg-gold/40" aria-hidden="true" />
           <button
             onClick={() => setView('chat')}
-            className="flex flex-col items-center gap-0.5 rounded-full p-2 text-brown-500 dark:text-brown-300 hover:text-gold-dark dark:hover:text-gold hover:bg-gold/5 dark:hover:bg-gold/10 transition-all"
+            className="flex flex-col items-center gap-0.5 rounded-full p-2 text-brown-500 dark:text-brown-500 hover:text-gold-dark dark:hover:text-gold hover:bg-gold/5 dark:hover:bg-gold/10 transition-all"
             aria-label="Chat"
           >
             <MessageCircle className="size-5" />
@@ -741,7 +706,7 @@ export default function InsightsView() {
           <span className="w-1 h-1 rounded-full bg-gold/40" aria-hidden="true" />
           <button
             onClick={() => setView('breathing')}
-            className="flex flex-col items-center gap-0.5 rounded-full p-2 text-brown-500 dark:text-brown-300 hover:text-gold-dark dark:hover:text-gold hover:bg-gold/5 dark:hover:bg-gold/10 transition-all"
+            className="flex flex-col items-center gap-0.5 rounded-full p-2 text-brown-500 dark:text-brown-500 hover:text-gold-dark dark:hover:text-gold hover:bg-gold/5 dark:hover:bg-gold/10 transition-all"
             aria-label="Breathing"
           >
             <Wind className="size-5" />
@@ -750,7 +715,7 @@ export default function InsightsView() {
           <span className="w-1 h-1 rounded-full bg-gold/40" aria-hidden="true" />
           <button
             onClick={() => setView('mood')}
-            className="flex flex-col items-center gap-0.5 rounded-full p-2 text-brown-500 dark:text-brown-300 hover:text-gold-dark dark:hover:text-gold hover:bg-gold/5 dark:hover:bg-gold/10 transition-all"
+            className="flex flex-col items-center gap-0.5 rounded-full p-2 text-brown-500 dark:text-brown-500 hover:text-gold-dark dark:hover:text-gold hover:bg-gold/5 dark:hover:bg-gold/10 transition-all"
             aria-label="Mood"
           >
             <Heart className="size-5" />
@@ -758,18 +723,17 @@ export default function InsightsView() {
           </button>
         </div>
       </motion.div>
-
       <motion.div
         variants={staggerContainer}
         initial="initial"
         animate="animate"
         className="mx-auto max-w-lg space-y-6"
       >
-
         {/* Daily Cosmic Insight Card */}
         <motion.div variants={staggerItem}>
           <Card className="glass border-0 shadow-md overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-brown-100/20 dark:from-gold/3 dark:via-transparent dark:to-brown-50/10" />
+            <div className="h-1 bg-gradient-to-r from-gold/40 via-gold to-gold/40" />
             <CardContent className="relative p-5">
               <div className="flex items-start gap-3">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gold/10">
@@ -778,17 +742,16 @@ export default function InsightsView() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Badge className="bg-gold/15 text-gold-dark border-0 text-[11px] px-2 py-0 tracking-wider uppercase">
-                      Today&apos;s Insight
+                      Today&apos;s Honest Truth
                     </Badge>
                     <Clock className="size-3 text-brown-300" />
                   </div>
                   <h3
                     className="font-serif text-base font-bold text-brown-900 mb-1"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                   >
                     {dailyInsight.title}
                   </h3>
-                  <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
+                  <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed">
                     {dailyInsight.message}
                   </p>
                 </div>
@@ -796,17 +759,14 @@ export default function InsightsView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Kundali Score Card */}
         <motion.div variants={staggerItem}>
           <KundaliScoreCard />
         </motion.div>
-
         {/* Dosha Detail Card */}
         <motion.div variants={staggerItem}>
           <DoshaDetailCard doshas={astrologyData?.doshas || []} />
         </motion.div>
-
         {/* Daily Affirmation & Ritual Card — pulsing glow border */}
         <motion.div variants={staggerItem}>
           <Card className="border-0 shadow-md overflow-hidden relative animate-breathe-glow">
@@ -824,23 +784,19 @@ export default function InsightsView() {
                 <div className="relative pl-4">
                   <span
                     className="absolute -left-0.5 -top-1 text-gold/40 dark:text-gold/30 text-2xl font-serif select-none"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                     aria-hidden="true"
                   >
                     ✦
                   </span>
                   <p
-                    className="italic text-brown-900 dark:text-brown-100 leading-relaxed text-[15px]"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="italic text-brown-900 dark:text-brown-600 leading-relaxed text-[15px]"
                   >
                     {affirmation}
                   </p>
                 </div>
               </div>
-
               {/* Divider */}
               <div className="border-t border-gold/10 dark:border-gold/5 my-3" />
-
               {/* Ritual Section */}
               <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -852,12 +808,11 @@ export default function InsightsView() {
                 <div className="flex items-start gap-2.5">
                   <span className="text-lg shrink-0 mt-0.5">{ritual.icon}</span>
                   <div className="flex-1">
-                    <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed">
+                    <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed">
                       {ritual.text}
                     </p>
                   </div>
                 </div>
-
                 {/* Mark as Done Button */}
                 <div className="mt-3">
                   <AnimatePresence mode="wait">
@@ -904,13 +859,12 @@ export default function InsightsView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Lucky Colors, Numbers & Days Card */}
         <motion.div variants={staggerItem}>
           {(() => {
             const lucky = LUCKY_DATA[sunSign] || LUCKY_DATA['Capricorn'];
             return (
-              <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+              <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
                 <div className="h-1 bg-gradient-to-r from-gold via-gold-dark to-gold" />
                 <CardContent className="p-5">
                   <div className="flex items-center gap-2 mb-4">
@@ -919,17 +873,15 @@ export default function InsightsView() {
                     </div>
                     <div>
                       <h3
-                        className="font-serif text-sm font-bold text-brown-900 dark:text-brown-100 border-l-2 border-gold/30 pl-2"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="font-serif text-sm font-bold text-brown-900 dark:text-brown-600 border-l-2 border-gold/30 pl-2"
                       >
                         Lucky Colors, Numbers & Days
                       </h3>
                     </div>
                   </div>
-
                   {/* Lucky Colors */}
                   <div className="mb-4">
-                    <p className="text-[11px] uppercase tracking-wider text-brown-500 dark:text-brown-400 mb-2">Lucky Colors</p>
+                    <p className="text-[11px] uppercase tracking-wider text-brown-500 dark:text-brown-600 mb-2">Lucky Colors</p>
                     <div className="flex items-center gap-3">
                       {lucky.luckyColors.map((c, i) => (
                         <div key={i} className="flex items-center gap-1.5">
@@ -938,15 +890,14 @@ export default function InsightsView() {
                             style={{ backgroundColor: c.hex }}
                             aria-hidden="true"
                           />
-                          <span className="text-xs text-brown-700 dark:text-brown-300">{c.name}</span>
+                          <span className="text-xs text-brown-700 dark:text-brown-500">{c.name}</span>
                         </div>
                       ))}
                     </div>
                   </div>
-
                   {/* Lucky Numbers */}
                   <div className="mb-4">
-                    <p className="text-[11px] uppercase tracking-wider text-brown-500 dark:text-brown-400 mb-2">Lucky Numbers</p>
+                    <p className="text-[11px] uppercase tracking-wider text-brown-500 dark:text-brown-600 mb-2">Lucky Numbers</p>
                     <div className="flex items-center gap-2">
                       {lucky.luckyNumbers.map((n, i) => (
                         <span
@@ -958,36 +909,34 @@ export default function InsightsView() {
                       ))}
                     </div>
                   </div>
-
                   {/* Lucky Days */}
                   <div className="mb-4">
-                    <p className="text-[11px] uppercase tracking-wider text-brown-500 dark:text-brown-400 mb-2">Lucky Days</p>
+                    <p className="text-[11px] uppercase tracking-wider text-brown-500 dark:text-brown-600 mb-2">Lucky Days</p>
                     <div className="flex items-center gap-2 flex-wrap">
                       {lucky.luckyDays.map((d, i) => (
-                        <Badge key={i} className="bg-brown-50 dark:bg-brown-50/20 text-brown-600 dark:text-brown-300 border border-brown-100/50 dark:border-brown-700/30 text-[11px] px-2.5 py-0.5 rounded-full">
+                        <Badge key={i} className="bg-brown-50 dark:bg-brown-50/20 text-brown-600 dark:text-brown-500 border border-brown-100/50 dark:border-brown-700/30 text-[11px] px-2.5 py-0.5 rounded-full">
                           {d}
                         </Badge>
                       ))}
                     </div>
                   </div>
-
                   {/* Gemstone & Power Hour */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-lg bg-gold/5 dark:bg-gold/10 p-3">
                       <div className="flex items-center gap-1.5 mb-1">
                         <Gem className="size-3 text-gold-dark dark:text-gold" />
-                        <span className="text-[11px] uppercase tracking-wider text-brown-400 dark:text-brown-400">Gemstone</span>
+                        <span className="text-[11px] uppercase tracking-wider text-brown-400 dark:text-brown-600">Gemstone</span>
                       </div>
-                      <p className="text-xs font-semibold text-brown-800 dark:text-brown-200">{lucky.luckyGemstone.name}</p>
-                      <p className="text-[11px] text-brown-400 dark:text-brown-400 mt-0.5 leading-relaxed">{lucky.luckyGemstone.description}</p>
+                      <p className="text-xs font-semibold text-brown-800 dark:text-brown-400">{lucky.luckyGemstone.name}</p>
+                      <p className="text-[11px] text-brown-400 dark:text-brown-600 mt-0.5 leading-relaxed">{lucky.luckyGemstone.description}</p>
                     </div>
                     <div className="rounded-lg bg-sage-muted/30 dark:bg-sage/10 p-3">
                       <div className="flex items-center gap-1.5 mb-1">
                         <Clock className="size-3 text-sage-dark dark:text-sage" />
-                        <span className="text-[11px] uppercase tracking-wider text-brown-400 dark:text-brown-400">Power Hour</span>
+                        <span className="text-[11px] uppercase tracking-wider text-brown-400 dark:text-brown-600">Power Hour</span>
                       </div>
-                      <p className="text-xs font-semibold text-brown-800 dark:text-brown-200">{lucky.powerHour}</p>
-                      <p className="text-[11px] text-brown-400 dark:text-brown-400 mt-0.5 leading-relaxed">Peak cosmic energy</p>
+                      <p className="text-xs font-semibold text-brown-800 dark:text-brown-400">{lucky.powerHour}</p>
+                      <p className="text-[11px] text-brown-400 dark:text-brown-600 mt-0.5 leading-relaxed">Peak cosmic energy</p>
                     </div>
                   </div>
                 </CardContent>
@@ -995,7 +944,6 @@ export default function InsightsView() {
             );
           })()}
         </motion.div>
-
         {/* Cosmic Compatibility Quick Glance */}
         <motion.div variants={staggerItem}>
           {(() => {
@@ -1004,7 +952,7 @@ export default function InsightsView() {
             const filteredCompat = compat.compatible.filter((s) => s !== sunSign);
             const topCompat = filteredCompat.slice(0, 3);
             return (
-              <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+              <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
                 <div className="h-1 bg-gradient-to-r from-sage via-sage-dark to-gold" />
                 <CardContent className="p-5">
                   <div className="flex items-center gap-2 mb-4">
@@ -1013,14 +961,12 @@ export default function InsightsView() {
                     </div>
                     <div>
                       <h3
-                        className="font-serif text-sm font-bold text-brown-900 dark:text-brown-100 border-l-2 border-gold/30 pl-2"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="font-serif text-sm font-bold text-brown-900 dark:text-brown-600 border-l-2 border-gold/30 pl-2"
                       >
                         Cosmic Compatibility
                       </h3>
                     </div>
                   </div>
-
                   {/* Compatible Signs */}
                   <div className="flex items-center justify-center gap-4 mb-4">
                     {topCompat.map((sign, i) => {
@@ -1037,17 +983,15 @@ export default function InsightsView() {
                               {pct}%
                             </span>
                           </div>
-                          <span className="text-[11px] font-medium text-brown-600 dark:text-brown-300">{sign}</span>
+                          <span className="text-[11px] font-medium text-brown-600 dark:text-brown-500">{sign}</span>
                         </div>
                       );
                     })}
                   </div>
-
                   {/* Reason */}
-                  <p className="text-xs text-center text-brown-500 dark:text-brown-400 mb-3 italic">
+                  <p className="text-xs text-center text-brown-500 dark:text-brown-600 mb-3 italic">
                     {compat.reason}
                   </p>
-
                   {/* See Full Compatibility Button */}
                   <div className="flex justify-center">
                     <Button
@@ -1066,10 +1010,9 @@ export default function InsightsView() {
             );
           })()}
         </motion.div>
-
         {/* Daily Horoscope Card */}
         <motion.div variants={staggerItem}>
-          <Card className="glass border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+          <Card className="glass border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-sage via-gold to-brown-300" />
             <CardContent className="p-5">
               <div className="flex items-start gap-3">
@@ -1090,11 +1033,9 @@ export default function InsightsView() {
                   </div>
                   <h3
                     className="font-serif text-base font-bold text-brown-900 mb-1"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                   >
                     {sunSign} — Today
                   </h3>
-
                   {horoscopeLoading ? (
                     <div className="space-y-2.5">
                       <div className="h-3 w-full rounded-full bg-gold/10 animate-pulse" />
@@ -1104,7 +1045,7 @@ export default function InsightsView() {
                     </div>
                   ) : horoscope ? (
                     <>
-                      <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
+                      <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed">
                         {horoscope.emotionalEnergy}
                       </p>
                       <Collapsible open={horoscopeExpanded} onOpenChange={setHoroscopeExpanded}>
@@ -1142,10 +1083,9 @@ export default function InsightsView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Planetary Transits Card */}
         <motion.div variants={staggerItem}>
-          <Card className="border-0 shadow-sm bg-white dark:bg-white/5 overflow-hidden">
+          <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-purple-400 via-amber-500 to-sage" />
             <CardContent className="p-5">
               <div className="flex items-start gap-3 mb-3">
@@ -1160,13 +1100,11 @@ export default function InsightsView() {
                   </div>
                   <h3
                     className="font-serif text-base font-bold text-brown-900 mb-1"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                   >
                     Current Cosmic Weather
                   </h3>
                 </div>
               </div>
-
               {transitsLoading ? (
                 <div className="space-y-3">
                   <div className="h-3 w-full rounded-full bg-gold/10 animate-pulse" />
@@ -1179,10 +1117,9 @@ export default function InsightsView() {
                   {/* Overall Theme */}
                   <div className="rounded-lg bg-gradient-to-r from-purple-50 to-amber-50 dark:from-purple-900/10 dark:to-amber-900/10 p-3">
                     <p className="text-xs font-semibold text-purple-700 dark:text-purple-300 mb-1 uppercase tracking-wider">Overall Theme</p>
-                    <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">{transits.overallTheme}</p>
+                    <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed">{transits.overallTheme}</p>
                     <p className="text-[10px] text-brown-400 mt-1">Focus: {transits.focusPeriod}</p>
                   </div>
-
                   {/* Transit List */}
                   <div className="space-y-2">
                     {transits.transits.map((transit) => (
@@ -1198,7 +1135,7 @@ export default function InsightsView() {
                             <button className="w-full text-left p-3 hover:bg-brown-50 dark:hover:bg-brown-800/20 transition-colors">
                               <div className="flex items-center gap-2">
                                 <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${PLANET_COLORS[transit.planet] || 'bg-gray-400'}`} />
-                                <span className="text-sm font-semibold text-brown-900 dark:text-brown-100">{transit.planet}</span>
+                                <span className="text-sm font-semibold text-brown-900 dark:text-brown-600">{transit.planet}</span>
                                 <span className="text-xs text-brown-400">in {transit.sign}</span>
                                 <span className="text-xs text-brown-300">• House {transit.house}</span>
                                 <Badge className={`${TRANSIT_TYPE_STYLES[transit.type] || 'bg-brown-50 text-brown-500'} border-0 text-[10px] px-1.5 py-0 ml-auto`}>
@@ -1206,7 +1143,7 @@ export default function InsightsView() {
                                 </Badge>
                                 <ChevronDown className={`size-3.5 text-brown-300 transition-transform ${expandedTransits[transit.planet] ? 'rotate-180' : ''}`} />
                               </div>
-                              <p className="text-xs text-brown-500 dark:text-brown-400 mt-1 line-clamp-2">
+                              <p className="text-xs text-brown-500 dark:text-brown-600 mt-1 line-clamp-2">
                                 {transit.effect}
                               </p>
                             </button>
@@ -1215,15 +1152,15 @@ export default function InsightsView() {
                             <div className="px-3 pb-3 pt-1 space-y-2 border-t border-brown-100 dark:border-brown-700/30">
                               <div className="rounded-lg bg-brown-50 dark:bg-brown-800/20 p-3">
                                 <p className="text-[11px] uppercase tracking-wider text-brown-400 mb-1">Full Effect</p>
-                                <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">{transit.effect}</p>
+                                <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed">{transit.effect}</p>
                               </div>
                               <div className="rounded-lg bg-gold/5 dark:bg-gold/10 p-3">
                                 <p className="text-[11px] uppercase tracking-wider text-gold-dark dark:text-gold mb-1">Advice</p>
-                                <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">{transit.advice}</p>
+                                <p className="text-sm text-brown-700 dark:text-brown-500 leading-relaxed">{transit.advice}</p>
                               </div>
                               <div className="flex items-center gap-2">
                                 <span className="text-[11px] text-brown-400">Duration:</span>
-                                <span className="text-xs font-medium text-brown-600 dark:text-brown-300">{transit.duration}</span>
+                                <span className="text-xs font-medium text-brown-600 dark:text-brown-500">{transit.duration}</span>
                               </div>
                             </div>
                           </CollapsibleContent>
@@ -1238,11 +1175,10 @@ export default function InsightsView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Cosmic Calendar Card */}
         <motion.div variants={staggerItem} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
           <Card
-            className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden cursor-pointer transition-shadow hover:shadow-[0_8px_30px_rgba(139,111,71,0.12)]"
+            className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden cursor-pointer transition-shadow hover:shadow-[0_8px_30px_rgba(139,111,71,0.12)]"
             onClick={() => setView('calendar')}
           >
             <div className="h-1 bg-gradient-to-r from-gold via-amber-400 to-sage" />
@@ -1258,25 +1194,23 @@ export default function InsightsView() {
                     </Badge>
                   </div>
                   <h3
-                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                   >
                     Cosmic Calendar
                   </h3>
-                  <p className="text-xs text-brown-400 dark:text-brown-400 mt-0.5">
+                  <p className="text-xs text-brown-400 dark:text-brown-600 mt-0.5">
                     Upcoming cosmic events and their emotional impact
                   </p>
                 </div>
-                <ArrowRight className="size-4 text-brown-300 dark:text-brown-400 shrink-0 mt-1" />
+                <ArrowRight className="size-4 text-brown-300 dark:text-brown-600 shrink-0 mt-1" />
               </div>
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Zodiac Deep Dive Card */}
         <motion.div variants={staggerItem} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
           <Card
-            className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden cursor-pointer transition-shadow hover:shadow-[0_8px_30px_rgba(139,111,71,0.12)]"
+            className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden cursor-pointer transition-shadow hover:shadow-[0_8px_30px_rgba(139,111,71,0.12)]"
             onClick={() => setView('zodiacDeepDive')}
           >
             <div className="h-1 bg-gradient-to-r from-gold via-sage to-brown-400" />
@@ -1292,21 +1226,19 @@ export default function InsightsView() {
                     </Badge>
                   </div>
                   <h3
-                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-100"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                    className="font-serif text-base font-bold text-brown-900 dark:text-brown-600"
                   >
                     Zodiac Deep Dive
                   </h3>
-                  <p className="text-xs text-brown-400 dark:text-brown-400 mt-0.5">
+                  <p className="text-xs text-brown-400 dark:text-brown-600 mt-0.5">
                     Explore all 12 zodiac signs
                   </p>
                 </div>
-                <ArrowRight className="size-4 text-brown-300 dark:text-brown-400 shrink-0 mt-1" />
+                <ArrowRight className="size-4 text-brown-300 dark:text-brown-600 shrink-0 mt-1" />
               </div>
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Header Section — with parallax scroll effect */}
         <motion.div variants={staggerItem} style={{ willChange: 'transform' }}>
           <div className="relative flex items-start justify-between">
@@ -1318,12 +1250,14 @@ export default function InsightsView() {
             <div className="relative z-10">
               <h1
                 className="font-serif text-3xl font-bold text-brown-900 mb-1"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
-                Your Emotional Profile
+                This Is Who You Really Are
               </h1>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-gold-dark/70 dark:text-gold/60">✦ Nothing to Hide ✦</span>
+              </div>
               <p className="text-sm text-brown-400 mb-4">
-                How the stars shape your feelings, thoughts, and natural tendencies — explained simply.
+                No sugarcoating. No generic advice. Just the honest truth about how you actually feel, think, and show up in the world.
               </p>
             </div>
             {/* Share Profile Button */}
@@ -1342,7 +1276,6 @@ export default function InsightsView() {
                 <DialogHeader>
                   <DialogTitle
                     className="font-serif text-center text-xl"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                   >
                     Share Your Cosmic Profile
                   </DialogTitle>
@@ -1383,7 +1316,6 @@ export default function InsightsView() {
                     <svg className="size-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     Copy Profile Text
                   </Button>
-
                   {/* Download as Image */}
                   <Button
                     variant="outline"
@@ -1395,7 +1327,6 @@ export default function InsightsView() {
                           cosmicToast.warning('Could not find card', 'Please try again');
                           return;
                         }
-
                         // Use Canvas-based approach
                         const canvas = document.createElement('canvas');
                         const scale = 2;
@@ -1403,80 +1334,65 @@ export default function InsightsView() {
                         const height = cardElement.offsetHeight;
                         canvas.width = width * scale;
                         canvas.height = height * scale;
-
                         const ctx = canvas.getContext('2d');
                         if (!ctx) return;
-
                         ctx.scale(scale, scale);
-
                         // Draw background
                         ctx.fillStyle = '#FFF8F0';
                         ctx.fillRect(0, 0, width, height);
-
                         // Draw decorative zodiac symbols
                         ctx.font = '10px sans-serif';
                         ctx.fillStyle = 'rgba(212, 175, 55, 0.1)';
                         ctx.fillText('♈ ♉ ♊ ♋', 12, 16);
                         ctx.fillText('♌ ♍ ♎ ♏', width - 80, 16);
                         ctx.fillText('♐ ♑ ♒ ♓', 12, height - 20);
-
                         // Draw archetype emoji
                         const archetype = getShareArchetype(traitScores);
                         const archetypeEmoji = getArchetypeEmoji(archetype);
                         ctx.font = '36px sans-serif';
                         ctx.textAlign = 'center';
                         ctx.fillText(archetypeEmoji, width / 2, 55);
-
                         // Draw name
                         ctx.font = 'bold 22px Georgia, serif';
                         ctx.fillStyle = '#3D2B1F';
                         ctx.fillText(birthDetails?.name || 'Cosmic Seeker', width / 2, 85);
-
                         // Draw archetype
                         ctx.font = '600 14px Georgia, serif';
                         ctx.fillStyle = '#8B6914';
                         ctx.fillText(archetype, width / 2, 105);
-
                         // Draw zodiac signs
                         const sunSign = astrologyData?.sunSign || 'Capricorn';
                         const moonSign = astrologyData?.moonSign || 'Gemini';
                         const ascendant = astrologyData?.ascendant || 'Taurus';
-
                         const signY = 145;
                         const signSpacing = width / 4;
                         const zodiacIcons: Record<string, string> = {
                           Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
                           Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
                         };
-
                         ctx.font = '20px sans-serif';
                         ctx.fillText(zodiacIcons[sunSign] || '☉', signSpacing, signY);
                         ctx.fillText(zodiacIcons[moonSign] || '☽', signSpacing * 2, signY);
                         ctx.fillText(zodiacIcons[ascendant] || '☊', signSpacing * 3, signY);
-
                         ctx.font = '9px sans-serif';
                         ctx.fillStyle = '#8B7355';
                         ctx.fillText('SUN', signSpacing, signY + 16);
                         ctx.fillText('MOON', signSpacing * 2, signY + 16);
                         ctx.fillText('ASC', signSpacing * 3, signY + 16);
-
                         ctx.font = 'bold 11px sans-serif';
                         ctx.fillStyle = '#3D2B1F';
                         ctx.fillText(sunSign, signSpacing, signY + 30);
                         ctx.fillText(moonSign, signSpacing * 2, signY + 30);
                         ctx.fillText(ascendant, signSpacing * 3, signY + 30);
-
                         // Draw top traits
                         const topTraits = getShareTopTraits(traitScores);
                         ctx.font = '9px sans-serif';
                         ctx.fillStyle = '#8B7355';
                         ctx.fillText('TOP TRAITS', width / 2, signY + 55);
-
                         ctx.font = '12px sans-serif';
                         ctx.fillStyle = '#3D2B1F';
                         const traitsText = topTraits.map((t) => `${t.label || t.name} ${Math.round(t.score)}%`).join('  •  ');
                         ctx.fillText(traitsText, width / 2, signY + 72);
-
                         // Draw divider
                         ctx.beginPath();
                         ctx.moveTo(width * 0.15, signY + 90);
@@ -1484,7 +1400,6 @@ export default function InsightsView() {
                         ctx.strokeStyle = '#E8D5B7';
                         ctx.lineWidth = 0.5;
                         ctx.stroke();
-
                         // Draw branding
                         ctx.font = '9px sans-serif';
                         ctx.fillStyle = '#8B7355';
@@ -1492,13 +1407,11 @@ export default function InsightsView() {
                         ctx.font = '7px sans-serif';
                         ctx.fillStyle = '#C4A882';
                         ctx.fillText('AI-Powered Emotional Intelligence Platform', width / 2, signY + 120);
-
                         // Download
                         const link = document.createElement('a');
                         link.download = `ayuastro-${(birthDetails?.name || 'profile').toLowerCase().replace(/\s+/g, '-')}.png`;
                         link.href = canvas.toDataURL('image/png');
                         link.click();
-
                         cosmicToast.success('Downloaded ✦', 'Your cosmic profile card has been saved');
                       } catch {
                         cosmicToast.warning('Download failed', 'Please try taking a screenshot instead');
@@ -1508,7 +1421,6 @@ export default function InsightsView() {
                     <svg className="size-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Download as Image
                   </Button>
-
                   {/* Social Share Buttons */}
                   <div className="flex gap-2">
                     {/* WhatsApp */}
@@ -1531,11 +1443,10 @@ export default function InsightsView() {
                       <svg className="size-4 mr-1.5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                       WhatsApp
                     </Button>
-
                     {/* Twitter/X */}
                     <Button
                       variant="outline"
-                      className="flex-1 border-brown-300 text-brown-700 dark:border-brown-600 dark:text-brown-300 hover:bg-brown-50 dark:hover:bg-brown-800/20 text-xs h-9"
+                      className="flex-1 border-brown-300 text-brown-700 dark:border-brown-600 dark:text-brown-500 hover:bg-brown-50 dark:hover:bg-brown-800/20 text-xs h-9"
                       onClick={() => {
                         const shareText = getShareText(
                           birthDetails?.name,
@@ -1580,8 +1491,7 @@ export default function InsightsView() {
             ))}
           </div>
         </motion.div>
-
-        {/* The Anchor Section */}
+        {/* The Anchor Section — "This Is Who You Really Are" */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
           <Card className="glass-premium zodiac-corner relative card-hover border-0 shadow-md overflow-hidden animate-border-shimmer">
             <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-gold/3 dark:from-gold/3 dark:via-transparent dark:to-gold/2 pointer-events-none" />
@@ -1589,53 +1499,106 @@ export default function InsightsView() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900">
                 <Compass className="size-5 text-gold" />
-                The Anchor
+                Your Unfiltered Archetype
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center gap-4 mb-4">
                 <motion.span
-                  className="text-3xl inline-block"
+                  className="text-5xl inline-block"
                   animate={{ opacity: [0.7, 1, 0.7] }}
                   transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
                 >{getArchetypeEmoji(archetype)}</motion.span>
-                <p className="font-serif text-xl font-bold text-brown-900" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                  {archetype}
+                <div>
+                  <p className="font-serif text-2xl font-bold text-brown-900 dark:text-cream">
+                    {archetype}
+                  </p>
+                  <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-dark/70 dark:text-gold/60">✦ Nothing to Hide ✦</span>
+                </div>
+              </div>
+              {/* THE VERDICT — Honest description */}
+              <div className="rounded-xl bg-gradient-to-br from-brown-50/80 to-gold/5 dark:from-brown-50/20 dark:to-gold/5 p-4 mb-4 border border-gold/10 dark:border-gold/10">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-bold tracking-widest uppercase text-gold-dark dark:text-gold">THE VERDICT:</span>
+                </div>
+                <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed">
+                  {getArchetypeHonestDescription(archetype)}
                 </p>
               </div>
-              <p className="text-sm text-brown-500 leading-relaxed">
-                {traitScores.length > 0
-                  ? `Your emotional profile is anchored by ${topTraits[0]?.label || 'deep sensitivity'}. You process the world through a lens of ${topTraits[1]?.label || 'intuitive understanding'}, finding stability in ${topTraits[2]?.label || 'inner reflection'}. This triad forms the core of how you relate to yourself and others.`
-                  : 'Your emotional profile is anchored by deep sensitivity and intuitive understanding. You process the world through a reflective lens, finding meaning in the patterns others miss.'}
-              </p>
+              {/* What You're Genuinely Good At */}
+              <div className="rounded-xl bg-sage-muted/40 dark:bg-sage/10 p-4 mb-3 border border-sage/10 dark:border-sage/10">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <span className="text-xs font-bold tracking-widest uppercase text-sage-dark dark:text-sage">💪 What You're Genuinely Good At</span>
+                </div>
+                <div className="space-y-1.5">
+                  {strengths.length > 0 ? (
+                    strengths.map((s, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-sage-dark shrink-0" />
+                        <span className="text-sm text-brown-700 dark:text-brown-400">{s}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2"><CheckCircle2 className="size-3.5 text-sage-dark shrink-0" /><span className="text-sm text-brown-700">Deep Empathy</span></div>
+                      <div className="flex items-center gap-2"><CheckCircle2 className="size-3.5 text-sage-dark shrink-0" /><span className="text-sm text-brown-700">Intuitive Wisdom</span></div>
+                      <div className="flex items-center gap-2"><CheckCircle2 className="size-3.5 text-sage-dark shrink-0" /><span className="text-sm text-brown-700">Emotional Resilience</span></div>
+                    </>
+                  )}
+                </div>
+              </div>
+              {/* Let's Be Real — Your Blind Spots */}
+              <div className="rounded-xl bg-gold/5 dark:bg-gold/10 p-4 border border-gold/10 dark:border-gold/10">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <span className="text-xs font-bold tracking-widest uppercase text-gold-dark dark:text-gold">👀 Let's Be Real — Your Blind Spots</span>
+                </div>
+                <div className="space-y-1.5">
+                  {blindSpots.length > 0 ? (
+                    blindSpots.map((s, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <Eye className="size-3.5 text-gold-dark dark:text-gold shrink-0" />
+                        <span className="text-sm text-brown-700 dark:text-brown-400">{s}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2"><Eye className="size-3.5 text-gold-dark shrink-0" /><span className="text-sm text-brown-700">Boundary Setting</span></div>
+                      <div className="flex items-center gap-2"><Eye className="size-3.5 text-gold-dark shrink-0" /><span className="text-sm text-brown-700">Self-Advocacy</span></div>
+                      <div className="flex items-center gap-2"><Eye className="size-3.5 text-gold-dark shrink-0" /><span className="text-sm text-brown-700">Delegation</span></div>
+                    </>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
-
+        {/* Visual separator — "Nothing to Hide" section divider */}
+        <div className="section-divider my-2" aria-hidden="true">
+          <span className="text-[10px] tracking-[0.3em] uppercase text-gold-dark/40 dark:text-gold/30 font-semibold">✦ Nothing to Hide ✦</span>
+        </div>
         {/* Duality of Self Section */}
         <motion.div variants={staggerItem}>
-          <Card className="glass-light card-hover border-0 shadow-md">
+          <Card className="glass-light card-hover border-0 shadow-md overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-sage via-gold/50 to-gold-dark" />
             <CardContent className="p-6">
               <h3
                 className="font-serif text-lg font-bold text-brown-900 mb-4 border-l-2 border-gold/30 pl-3"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
-                Duality of Self
+                The Two Sides of You
               </h3>
-
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {/* Strengths */}
-                <div className="rounded-xl bg-sage-muted/50 p-4">
+                <div className="rounded-xl bg-sage-muted/50 dark:bg-sage/10 p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Star className="size-4 text-gold" />
-                    <span className="text-sm font-semibold text-brown-900">Inherent Strengths</span>
+                    <span className="text-sm font-semibold text-brown-900 dark:text-cream">What Comes Naturally to You</span>
                   </div>
                   <div className="space-y-2">
                     {strengths.length > 0 ? (
                       strengths.map((s, i) => (
                         <div key={i} className="flex items-center gap-2">
                           <CheckCircle2 className="size-3.5 text-sage-dark shrink-0" />
-                          <span className="text-sm text-brown-700">{s}</span>
+                          <span className="text-sm text-brown-700 dark:text-brown-400">{s}</span>
                         </div>
                       ))
                     ) : (
@@ -1647,22 +1610,20 @@ export default function InsightsView() {
                     )}
                   </div>
                 </div>
-
                 {/* Decorative gold divider between sections */}
                 <div className="hidden sm:block absolute left-1/2 top-8 bottom-8 w-px bg-gradient-to-b from-transparent via-gold/30 to-transparent" />
-
                 {/* Blind Spots */}
-                <div className="rounded-xl bg-gold/5 p-4">
+                <div className="rounded-xl bg-gold/5 dark:bg-gold/10 p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Eye className="size-4 text-gold-dark" />
-                    <span className="text-sm font-semibold text-brown-900">Subtle Blind Spots</span>
+                    <span className="text-sm font-semibold text-brown-900 dark:text-cream">What You Pretend Isn't a Problem</span>
                   </div>
                   <div className="space-y-2">
                     {blindSpots.length > 0 ? (
                       blindSpots.map((s, i) => (
                         <div key={i} className="flex items-center gap-2">
-                          <Shield className="size-3.5 text-gold-dark shrink-0" />
-                          <span className="text-sm text-brown-700">{s}</span>
+                          <Shield className="size-3.5 text-gold-dark dark:text-gold shrink-0" />
+                          <span className="text-sm text-brown-700 dark:text-brown-400">{s}</span>
                         </div>
                       ))
                     ) : (
@@ -1678,20 +1639,20 @@ export default function InsightsView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Trait Scores Display */}
         <motion.div variants={staggerItem}>
-          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/5">
+          <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-sage via-brown-400 to-gold" />
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 border-l-2 border-gold/30 pl-2">
                 <Sparkles className="size-5 text-gold" />
-                Emotional Trait Map
+                Your Honest Trait Map
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {(traitScores.length > 0 ? traitScores : getDefaultTraits()).map((trait, i) => (
-                  <div key={trait.name} className="space-y-1.5 rounded-lg px-2 py-1 hover:bg-gold/5 transition-colors">
+                  <div key={trait.name} className="space-y-1.5 rounded-lg px-2 py-1.5 hover:bg-gold/5 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-brown-800">{trait.label || trait.name}</span>
@@ -1700,11 +1661,16 @@ export default function InsightsView() {
                           <span className="text-[10px] text-brown-300 hidden sm:inline">— {trait.description}</span>
                         )}
                       </div>
-                      <Badge className={`${getTraitColor(trait.score)} border-0 text-xs px-2 py-0`}>
-                        {Math.round(trait.score)}%
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge className={`${getTraitColor(trait.score)} border-0 text-[10px] px-2 py-0`}>
+                          {getTraitLabel(trait.score)}
+                        </Badge>
+                        <Badge className={`${getTraitColor(trait.score)} border-0 text-xs px-2 py-0`}>
+                          {Math.round(trait.score)}%
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="h-2.5 rounded-full bg-brown-100 overflow-hidden">
+                    <div className="h-2.5 rounded-full bg-brown-100 dark:bg-brown-50/20 overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         whileInView={{ width: `${trait.score}%` }}
@@ -1717,10 +1683,10 @@ export default function InsightsView() {
                 ))}
               </div>
               {/* Legend */}
-              <div className="mt-4 pt-3 border-t border-brown-100 flex items-center gap-4 text-[10px] text-brown-400">
-                <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sage" /> High (70+)</div>
-                <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-brown-600" /> Moderate (40-70)</div>
-                <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gold" /> Growth Area (&lt;40)</div>
+              <div className="mt-4 pt-3 border-t border-brown-100 dark:border-brown-700/30 flex flex-wrap items-center gap-3 text-[10px] text-brown-400">
+                <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sage" /> 💪 Your Superpower (70+)</div>
+                <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-brown-600" /> 🔄 You're Working On It (40-70)</div>
+                <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gold" /> ⚡ Honestly, This Needs Work (&lt;40)</div>
               </div>
               {/* Expand to Dashboard */}
               <div className="mt-4 pt-3 border-t border-brown-100 dark:border-brown-700/30">
@@ -1730,7 +1696,7 @@ export default function InsightsView() {
                 >
                   <div className="flex items-center gap-2">
                     <BarChart2 className="size-4 text-gold-dark dark:text-gold" />
-                    <span className="text-sm font-medium text-brown-800 dark:text-brown-200" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                    <span className="text-sm font-medium text-brown-800 dark:text-brown-400">
                       View Full Dashboard
                     </span>
                   </div>
@@ -1740,7 +1706,6 @@ export default function InsightsView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Numerology Summary Card */}
         {numerologyData && (
           <motion.div variants={staggerItem}>
@@ -1765,7 +1730,6 @@ export default function InsightsView() {
                       <p className="text-[10px] uppercase tracking-widest text-brown-400 mb-1">{item.label}</p>
                       <p
                         className="font-serif text-3xl font-bold text-brown-900 mb-1"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                       >
                         {item.value}
                       </p>
@@ -1779,7 +1743,6 @@ export default function InsightsView() {
             </Card>
           </motion.div>
         )}
-
         {/* Elemental Balance Card */}
         <motion.div variants={staggerItem}>
           <Card className="glass-light card-hover border-0 shadow-md overflow-hidden">
@@ -1798,7 +1761,6 @@ export default function InsightsView() {
                 const counts: Record<string, number> = { Fire: 0, Earth: 0, Air: 0, Water: 0 };
                 signElements.forEach(el => { if (el) counts[el]++; });
                 const dominantElement = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
-
                 return (
                   <div className="space-y-3">
                     {(['Fire', 'Earth', 'Air', 'Water'] as const).map((element) => {
@@ -1823,7 +1785,7 @@ export default function InsightsView() {
                               className={`h-full rounded-full ${colors.bar} ${colors.darkBar}`}
                             />
                           </div>
-                          <p className="text-[10px] text-brown-400 dark:text-brown-300 mt-1">
+                          <p className="text-[10px] text-brown-400 dark:text-brown-500 mt-1">
                             {count} of 3 signs • {ELEMENT_QUALITIES[element]}
                           </p>
                         </div>
@@ -1833,7 +1795,7 @@ export default function InsightsView() {
                       <p className="text-[10px] uppercase tracking-wider text-gold-dark dark:text-gold mb-1">Dominant Element</p>
                       <div className="flex items-center gap-2">
                         {(() => { const DIcon = ELEMENT_ICONS[dominantElement]; return <DIcon className="size-4 text-gold-dark animate-pulse-soft" />; })()}
-                        <span className="text-sm font-semibold text-brown-900 dark:text-brown-100">{dominantElement}</span>
+                        <span className="text-sm font-semibold text-brown-900 dark:text-brown-600">{dominantElement}</span>
                         <span className="text-xs text-brown-400">— {ELEMENT_QUALITIES[dominantElement]}</span>
                       </div>
                     </div>
@@ -1843,7 +1805,6 @@ export default function InsightsView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Astrology Summary Card with Kundali Chart */}
         <motion.div variants={staggerItem}>
           <Card className="glass-premium zodiac-corner relative card-hover border-0 shadow-md">
@@ -1879,14 +1840,13 @@ export default function InsightsView() {
                   );
                 })}
               </div>
-
               {/* Nakshatra & Dasha */}
               <Separator className="my-3 bg-brown-100" />
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <div>
                     <p className="text-xs text-brown-400">Nakshatra</p>
-                    <p className="text-sm font-medium text-brown-900 dark:text-brown-100">
+                    <p className="text-sm font-medium text-brown-900 dark:text-brown-600">
                       {astrologyData?.nakshatra || 'Revati'}
                     </p>
                   </div>
@@ -1902,12 +1862,11 @@ export default function InsightsView() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-brown-400">Current Dasha</p>
-                  <p className="text-sm font-medium text-brown-900 dark:text-brown-100">
+                  <p className="text-sm font-medium text-brown-900 dark:text-brown-600">
                     {astrologyData?.currentDasha || 'Venus/Sun'}
                   </p>
                 </div>
               </div>
-
               {/* Kundali Chart */}
               <Separator className="my-3 bg-brown-100" />
               <div className="mb-3">
@@ -1926,7 +1885,6 @@ export default function InsightsView() {
                   nakshatra={astrologyData?.nakshatra}
                 />
               </div>
-
               {/* ─── Vedic Chart Deep Dive CTA Card ────────────────────── */}
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
@@ -1946,8 +1904,7 @@ export default function InsightsView() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4
-                        className="font-serif text-sm font-bold text-brown-900 dark:text-brown-100 mb-0.5"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="font-serif text-sm font-bold text-brown-900 dark:text-brown-600 mb-0.5"
                       >
                         Explore Your 16 Yogas &amp; 6 Doshas
                       </h4>
@@ -1961,7 +1918,6 @@ export default function InsightsView() {
                   </div>
                 </div>
               </motion.div>
-
               {/* ─── Comprehensive Kundali CTA Card ────────────────────── */}
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
@@ -1981,12 +1937,11 @@ export default function InsightsView() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4
-                        className="font-serif text-sm font-bold text-brown-900 dark:text-brown-100 mb-0.5"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="font-serif text-sm font-bold text-brown-900 dark:text-brown-600 mb-0.5"
                       >
                         ✦ Comprehensive Kundali — 12 Dimensions
                       </h4>
-                      <p className="text-[11px] text-brown-500 dark:text-brown-400 leading-snug">
+                      <p className="text-[11px] text-brown-500 dark:text-brown-600 leading-snug">
                         Full Vedic birth chart analysis: personality, karma, career, marriage, health, spiritual path, nakshatras &amp; more.
                       </p>
                     </div>
@@ -1996,7 +1951,6 @@ export default function InsightsView() {
                   </div>
                 </div>
               </motion.div>
-
               {/* ─── Personality Cards — "Your Life, Card by Card" ──────────────────── */}
               <motion.div variants={staggerItem}>
                 <PersonalityCards
@@ -2005,7 +1959,6 @@ export default function InsightsView() {
                   traitScores={traitScores}
                 />
               </motion.div>
-
               {/* Planetary Positions — Enhanced Table */}
               <Separator className="my-3 bg-brown-100" />
               <Collapsible open={planetaryExpanded} onOpenChange={setPlanetaryExpanded}>
@@ -2047,7 +2000,7 @@ export default function InsightsView() {
                           {/* Planet name */}
                           <div className="flex items-center gap-1.5 min-w-0">
                             <span className="text-base leading-none shrink-0">{PLANET_SYMBOLS[planet] || '●'}</span>
-                            <span className="font-semibold text-sm text-brown-900 dark:text-brown-100 truncate">{planet}</span>
+                            <span className="font-semibold text-sm text-brown-900 dark:text-brown-600 truncate">{planet}</span>
                             {pdata.retrograde && (
                               <span className="text-[10px] font-bold text-red-500 dark:text-red-400">℞</span>
                             )}
@@ -2058,17 +2011,17 @@ export default function InsightsView() {
                           {/* Sign */}
                           <div className="flex items-center gap-1 min-w-0">
                             <span className="text-sm">{ZODIAC_ICONS[pdata.sign] || ''}</span>
-                            <span className="text-brown-700 dark:text-brown-300 text-sm truncate">{pdata.sign}</span>
+                            <span className="text-brown-700 dark:text-brown-500 text-sm truncate">{pdata.sign}</span>
                           </div>
                           {/* Degree */}
-                          <span className="text-xs font-mono text-brown-500 dark:text-brown-400 text-right whitespace-nowrap" data-numeric>
+                          <span className="text-xs font-mono text-brown-500 dark:text-brown-600 text-right whitespace-nowrap" data-numeric>
                             {deg}°{min.toString().padStart(2, '0')}&apos;
                           </span>
                           {/* Nakshatra + Pada */}
                           <div className="text-center min-w-0">
                             {pdata.nakshatra ? (
                               <div className="flex flex-col items-center">
-                                <span className="text-[10px] text-brown-600 dark:text-brown-300 truncate max-w-[80px]">{pdata.nakshatra}</span>
+                                <span className="text-[10px] text-brown-600 dark:text-brown-500 truncate max-w-[80px]">{pdata.nakshatra}</span>
                                 {pdata.nakshatraPada ? (
                                   <span className="text-[8px] text-brown-400 dark:text-brown-500">P{pdata.nakshatraPada}</span>
                                 ) : null}
@@ -2078,7 +2031,7 @@ export default function InsightsView() {
                             )}
                           </div>
                           {/* House */}
-                          <Badge className="bg-brown-100/60 dark:bg-brown-700/30 text-brown-500 dark:text-brown-400 text-[9px] px-1.5 py-0 min-w-[20px] text-center justify-self-center">
+                          <Badge className="bg-brown-100/60 dark:bg-brown-700/30 text-brown-500 dark:text-brown-600 text-[9px] px-1.5 py-0 min-w-[20px] text-center justify-self-center">
                             H{pdata.house}
                           </Badge>
                         </div>
@@ -2087,7 +2040,6 @@ export default function InsightsView() {
                   </div>
                 </CollapsibleContent>
               </Collapsible>
-
               {/* Special Patterns in Your Chart — Clickable Link */}
               <Separator className="my-3 bg-brown-100 dark:bg-brown-100/20" />
               <button
@@ -2099,7 +2051,7 @@ export default function InsightsView() {
                     <Sparkles className="size-4 text-gold-dark dark:text-gold" />
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-100">
+                    <p className="text-sm font-semibold text-brown-900 dark:text-brown-600">
                       Special Patterns in Your Chart ({astrologyData?.yogas?.length || 0} blessings &amp; {astrologyData?.doshas?.length || 0} challenges)
                     </p>
                     <p className="text-[10px] text-brown-400 dark:text-brown-500">
@@ -2112,14 +2064,12 @@ export default function InsightsView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Dasha Timeline */}
         {dashaPeriods.length > 0 && (
           <motion.div variants={staggerItem}>
             <DashaTimeline dashaPeriods={dashaPeriods} />
           </motion.div>
         )}
-
         {/* CTA — cosmic gradient background with floating dots */}
         <motion.div variants={staggerItem} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
           <Card className="border-0 shadow-md overflow-hidden relative transition-shadow hover:shadow-[0_8px_30px_rgba(139,111,71,0.12)]">
@@ -2154,7 +2104,6 @@ export default function InsightsView() {
             <CardContent className="relative p-5 text-center">
               <p
                 className="font-serif text-lg font-bold text-brown-900 mb-2"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
                 Ready to go deeper?
               </p>
@@ -2176,7 +2125,6 @@ export default function InsightsView() {
     </div>
   );
 }
-
 function getDefaultTraits(): TraitScore[] {
   return [
     { name: 'empathy', label: 'Empathy', score: 78, description: '' },

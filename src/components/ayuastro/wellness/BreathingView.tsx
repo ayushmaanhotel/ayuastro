@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAyuAstroStore } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,11 +22,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
-
 // ─── Types ──────────────────────────────────────────────────────────────────
-
 type BreathingPhase = 'inhale' | 'hold' | 'exhale' | 'holdAfterExhale';
-
 interface BreathingTechnique {
   id: string;
   name: string;
@@ -37,7 +33,6 @@ interface BreathingTechnique {
   description: string;
   color: string;
 }
-
 interface MeditationCard {
   id: string;
   name: string;
@@ -48,9 +43,7 @@ interface MeditationCard {
   icon: React.ElementType;
   gradient: string;
 }
-
 // ─── Breathing Techniques ───────────────────────────────────────────────────
-
 const BREATHING_TECHNIQUES: BreathingTechnique[] = [
   {
     id: 'cosmic-calm',
@@ -93,9 +86,7 @@ const BREATHING_TECHNIQUES: BreathingTechnique[] = [
     color: 'from-gold/15 to-gold-light/10',
   },
 ];
-
 // ─── Meditation Cards ───────────────────────────────────────────────────────
-
 const MEDITATION_CARDS: MeditationCard[] = [
   {
     id: 'morning-intention',
@@ -138,14 +129,11 @@ const MEDITATION_CARDS: MeditationCard[] = [
     gradient: 'from-brown-100/30 to-sage-muted/10',
   },
 ];
-
 // ─── Daily Mindfulness Prompts (144 total: 12 per zodiac sign) ─────────────
-
 const ZODIAC_SIGNS = [
   'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
   'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
 ];
-
 const MINDFULNESS_PROMPTS: Record<string, string[]> = {
   Aries: [
     'Pause before reacting today — your fire is powerful, but a steady flame warms more than a wildfire.',
@@ -316,9 +304,7 @@ const MINDFULNESS_PROMPTS: Record<string, string[]> = {
     'Honor both your dreamer and your doer. They need each other to create magic.',
   ],
 };
-
 // ─── Helper Functions ───────────────────────────────────────────────────────
-
 function getDailyMindfulnessPrompt(sunSign: string): string {
   const today = new Date();
   const dayOfYear = Math.floor(
@@ -329,14 +315,11 @@ function getDailyMindfulnessPrompt(sunSign: string): string {
   const prompts = MINDFULNESS_PROMPTS[sunSign] || MINDFULNESS_PROMPTS['Aries'];
   return prompts[promptIndex];
 }
-
 const fadeInUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
 };
-
 // ─── Meditation Overlay Component ───────────────────────────────────────────
-
 function MeditationOverlay({
   meditation,
   onClose,
@@ -347,13 +330,11 @@ function MeditationOverlay({
   const [timeLeft, setTimeLeft] = useState(meditation.duration * 60);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
   useEffect(() => {
     if (isPaused) {
       if (intervalRef.current) clearInterval(intervalRef.current);
       return;
     }
-
     intervalRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -363,19 +344,15 @@ function MeditationOverlay({
         return prev - 1;
       });
     }, 1000);
-
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [isPaused]);
-
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
   const progress = 1 - timeLeft / (meditation.duration * 60);
-
   // Breathing animation for overlay
   const breatheCycleDuration = 8; // 8 seconds for one full breath
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -391,7 +368,6 @@ function MeditationOverlay({
         >
           ✕
         </button>
-
         {/* Animated breathing orb */}
         <motion.div
           animate={{
@@ -408,7 +384,6 @@ function MeditationOverlay({
             background: 'radial-gradient(circle, rgba(212,175,55,0.3) 0%, rgba(165,214,167,0.15) 60%, transparent 100%)',
           }}
         />
-
         {/* Inner glow */}
         <motion.div
           animate={{
@@ -424,16 +399,14 @@ function MeditationOverlay({
             background: 'radial-gradient(circle, rgba(212,175,55,0.5) 0%, rgba(240,193,75,0.2) 60%, transparent 100%)',
           }}
         />
-
         {/* Title */}
         <h2 className="font-serif text-xl font-semibold text-cream mb-1"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+         >
           {meditation.name}
         </h2>
         <p className="text-sm text-brown-200 mb-6">
           {meditation.emoji} Close your eyes and breathe gently
         </p>
-
         {/* Timer */}
         <div className="relative size-32 mb-6">
           <svg className="size-32 -rotate-90" viewBox="0 0 120 120">
@@ -456,13 +429,12 @@ function MeditationOverlay({
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="font-serif text-3xl font-bold text-cream"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+             >
               {minutes}:{seconds.toString().padStart(2, '0')}
             </span>
             <span className="text-xs text-brown-300">remaining</span>
           </div>
         </div>
-
         {/* Pause/Resume */}
         <button
           onClick={() => setIsPaused(!isPaused)}
@@ -480,7 +452,6 @@ function MeditationOverlay({
             </>
           )}
         </button>
-
         {/* Completion state */}
         {timeLeft === 0 && (
           <motion.div
@@ -489,7 +460,7 @@ function MeditationOverlay({
             className="mt-4"
           >
             <p className="text-gold font-serif text-lg"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+             >
               Namaste ✦
             </p>
             <p className="text-sm text-brown-200 mt-1">Your meditation is complete</p>
@@ -505,33 +476,25 @@ function MeditationOverlay({
     </motion.div>
   );
 }
-
 // ─── Main BreathingView Component ───────────────────────────────────────────
-
 export default function BreathingView() {
   const { astrologyData, setView } = useAyuAstroStore();
   const sunSign = astrologyData?.sunSign || 'Aries';
-
   const [selectedTechnique, setSelectedTechnique] = useState<BreathingTechnique>(BREATHING_TECHNIQUES[0]);
   const [isBreathing, setIsBreathing] = useState(false);
   const [activeMeditation, setActiveMeditation] = useState<MeditationCard | null>(null);
   const [practicedToday, setPracticedToday] = useState(false);
-
   const dailyPrompt = getDailyMindfulnessPrompt(sunSign);
-
   const handleCycleComplete = useCallback(() => {
     // Called when one breathing cycle completes
   }, []);
-
   const toggleBreathing = () => {
     setIsBreathing(!isBreathing);
   };
-
   const handlePracticedToday = () => {
     setPracticedToday(true);
     cosmicToast.success('Mindful moment captured ✦', 'Your cosmic awareness grows stronger');
   };
-
   return (
     <div className="bg-cream dark:bg-[#1a1410] px-4 py-6 pb-24 min-h-screen">
       <div className="mx-auto max-w-lg space-y-6">
@@ -543,24 +506,22 @@ export default function BreathingView() {
             onClick={() => setView('profile')}
             className="size-10 rounded-full hover:bg-brown-50 dark:hover:bg-brown-800"
           >
-            <ArrowLeft className="size-5 text-brown-700 dark:text-brown-300" />
+            <ArrowLeft className="size-5 text-brown-700 dark:text-brown-500" />
           </Button>
           <div>
             <h1
-              className="font-serif text-xl font-bold text-brown-900 dark:text-brown-100"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-serif text-xl font-bold text-brown-900 dark:text-brown-600"
             >
               Breathing & Meditation
             </h1>
             <p className="text-xs text-brown-400 dark:text-brown-500">Find your cosmic calm</p>
           </div>
         </motion.div>
-
         {/* ─── Section 1: Breathing Exercise ─────────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
-          <Card className="border-0 shadow-md bg-white dark:bg-white/5 overflow-hidden">
+          <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                 <Wind className="size-5 text-gold" />
                 Breathing Exercise
               </CardTitle>
@@ -586,7 +547,7 @@ export default function BreathingView() {
                       <p className={`text-xs font-semibold ${
                         selectedTechnique.id === tech.id
                           ? 'text-gold-dark dark:text-gold'
-                          : 'text-brown-700 dark:text-brown-300'
+                          : 'text-brown-700 dark:text-brown-500'
                       }`}>
                         {tech.name}
                       </p>
@@ -595,14 +556,12 @@ export default function BreathingView() {
                   </button>
                 ))}
               </div>
-
               {/* Selected technique info */}
               <div className="text-center mb-2">
-                <p className="text-sm text-brown-500 dark:text-brown-400">
+                <p className="text-sm text-brown-500 dark:text-brown-600">
                   {selectedTechnique.description}
                 </p>
               </div>
-
               {/* Breathing Circle - passing play/pause control from parent */}
               <div className="flex flex-col items-center">
                 <BreathingCircleWithControls
@@ -616,12 +575,11 @@ export default function BreathingView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* ─── Section 2: Quick Meditation Cards ──────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.1 }}>
-          <Card className="border-0 shadow-md bg-white dark:bg-white/5">
+          <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08]">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                 <Moon className="size-5 text-gold" />
                 Quick Meditations
               </CardTitle>
@@ -645,8 +603,7 @@ export default function BreathingView() {
                         </Badge>
                       </div>
                       <h3
-                        className="font-serif text-sm font-semibold text-brown-900 dark:text-brown-100 mb-1"
-                        style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                        className="font-serif text-sm font-semibold text-brown-900 dark:text-brown-600 mb-1"
                       >
                         {med.name}
                       </h3>
@@ -664,7 +621,6 @@ export default function BreathingView() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* ─── Cosmic Sounds Entry Card ──────────────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.12 }}>
           <motion.div
@@ -680,7 +636,6 @@ export default function BreathingView() {
               <div className="flex-1">
                 <h3
                   className="font-serif text-base font-semibold text-cream mb-0.5"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
                   Cosmic Sounds
                 </h3>
@@ -699,13 +654,12 @@ export default function BreathingView() {
             </div>
           </motion.div>
         </motion.div>
-
         {/* ─── Section 3: Daily Mindfulness Prompt ───────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.15 }}>
           <Card className="card-hover border-0 shadow-md overflow-hidden bg-gradient-to-br from-gold/5 to-sage-muted/10 dark:from-gold/5 dark:to-sage-muted/5">
             <div className="h-1 bg-gradient-to-r from-gold via-sage to-gold-dark" />
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-100">
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                 <Sparkles className="size-5 text-gold" />
                 Daily Mindfulness
               </CardTitle>
@@ -721,13 +675,11 @@ export default function BreathingView() {
                     Today&apos;s cosmic guidance
                   </span>
                 </div>
-
                 {/* Prompt text */}
-                <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed font-serif"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                <p className="text-sm text-brown-700 dark:text-brown-400 leading-relaxed font-serif"
+                 >
                   &ldquo;{dailyPrompt}&rdquo;
                 </p>
-
                 {/* Practiced button */}
                 <AnimatePresence mode="wait">
                   {practicedToday ? (
@@ -765,7 +717,6 @@ export default function BreathingView() {
           </Card>
         </motion.div>
       </div>
-
       {/* Meditation Overlay */}
       <AnimatePresence>
         {activeMeditation && (
@@ -779,9 +730,7 @@ export default function BreathingView() {
     </div>
   );
 }
-
 // ─── Breathing Circle With Parent Controls ──────────────────────────────────
-
 function BreathingCircleWithControls({
   technique,
   isPlaying,
@@ -798,10 +747,8 @@ function BreathingCircleWithControls({
   const [cyclesCompleted, setCyclesCompleted] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const phaseStartRef = useRef<number>(0);
-
   const currentPhase = technique.phases[currentPhaseIndex];
   const phaseDuration = currentPhase?.duration || 4000;
-
   const getScale = useCallback(() => {
     if (!currentPhase) return 1;
     if (currentPhase.phase === 'inhale') return 1 + phaseProgress * 0.35;
@@ -810,21 +757,17 @@ function BreathingCircleWithControls({
     if (currentPhase.phase === 'holdAfterExhale') return 1;
     return 1;
   }, [currentPhase, phaseProgress]);
-
   useEffect(() => {
     if (!isPlaying) {
       if (intervalRef.current) clearInterval(intervalRef.current);
       return;
     }
-
     phaseStartRef.current = Date.now();
-
     const tickInterval = 50;
     intervalRef.current = setInterval(() => {
       const elapsed = Date.now() - phaseStartRef.current;
       const progress = Math.min(elapsed / phaseDuration, 1);
       setPhaseProgress(progress);
-
       if (progress >= 1) {
         const nextPhaseIndex = currentPhaseIndex + 1;
         if (nextPhaseIndex >= technique.phases.length) {
@@ -838,17 +781,14 @@ function BreathingCircleWithControls({
         setPhaseProgress(0);
       }
     }, tickInterval);
-
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [isPlaying, currentPhaseIndex, phaseDuration, technique.phases.length, onCycleComplete]);
-
   const scale = getScale();
   const phaseLabel = currentPhase?.label || 'Ready';
   const particleCount = 6;
   const orbitRadius = 120;
-
   return (
     <div className="flex flex-col items-center">
       {/* Breathing Circle */}
@@ -884,7 +824,6 @@ function BreathingCircleWithControls({
             />
           );
         })}
-
         {/* Outer glow ring */}
         <motion.div
           className="absolute rounded-full"
@@ -902,7 +841,6 @@ function BreathingCircleWithControls({
             background: 'radial-gradient(circle, rgba(212,175,55,0.2) 0%, rgba(165,214,167,0.1) 70%, transparent 100%)',
           }}
         />
-
         {/* Main circle */}
         <motion.div
           className="relative flex items-center justify-center rounded-full animate-breathe-glow"
@@ -927,8 +865,7 @@ function BreathingCircleWithControls({
                 key={`${technique.id}-${currentPhaseIndex}`}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="font-serif text-3xl font-bold text-brown-900 dark:text-brown-100"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                className="font-serif text-3xl font-bold text-brown-900 dark:text-brown-600"
               >
                 {Math.ceil((1 - phaseProgress) * (phaseDuration / 1000))}
               </motion.span>
@@ -939,7 +876,6 @@ function BreathingCircleWithControls({
           </div>
         </motion.div>
       </div>
-
       {/* Cycle counter */}
       <div className="mt-4 flex items-center gap-2">
         <Badge className="bg-gold/10 text-gold-dark dark:text-gold border-0 text-xs">
@@ -947,7 +883,6 @@ function BreathingCircleWithControls({
           Round {cyclesCompleted + (isPlaying ? 1 : 0)}
         </Badge>
       </div>
-
       {/* Controls */}
       <div className="mt-4 flex items-center gap-3">
         <Button
@@ -960,7 +895,7 @@ function BreathingCircleWithControls({
           }}
           className="size-10 rounded-full border-brown-200 dark:border-brown-100/20 hover:bg-brown-50 dark:hover:bg-brown-50/10"
         >
-          <RotateCcw className="size-4 text-brown-500 dark:text-brown-400" />
+          <RotateCcw className="size-4 text-brown-500 dark:text-brown-600" />
         </Button>
         <Button
           size="lg"
