@@ -301,6 +301,13 @@ export default function LandingView() {
             shaping your relationships
           </motion.h1>
 
+          {/* "Nothing to Hide" tagline */}
+          <motion.div variants={fadeInUp} className="mb-3">
+            <span className="inline-block text-[11px] font-semibold tracking-[0.3em] uppercase text-gold-dark dark:text-gold/80">
+              ✦ Nothing to Hide ✦
+            </span>
+          </motion.div>
+
           {/* Subtext */}
           <motion.p
             variants={fadeInUp}

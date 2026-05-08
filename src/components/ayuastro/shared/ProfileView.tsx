@@ -33,6 +33,7 @@ import {
   Share2,
   HelpCircle,
   Download,
+  Settings,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
 
@@ -824,6 +825,32 @@ export default function ProfileView() {
         <div className="section-divider">
           <span className="text-gold text-lg zodiac-glow">✦</span>
         </div>
+
+        {/* Settings Card */}
+        <motion.div variants={staggerItem} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
+          <Card
+            className="card-hover border-0 shadow-md bg-gradient-to-br from-brown-50/80 to-gold/5 dark:from-brown-50/10 dark:to-gold/5 cursor-pointer transition-shadow hover:shadow-[0_8px_30px_rgba(139,111,71,0.12)]"
+            onClick={() => setView('settings')}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/80 dark:bg-brown-50/20 border border-brown-200/50 dark:border-brown-100/30">
+                  <Settings className="size-6 text-brown-600 dark:text-brown-300" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-serif text-base font-semibold text-brown-900 dark:text-brown-100"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                    Settings
+                  </h3>
+                  <p className="text-xs text-brown-400 dark:text-brown-500 mt-0.5">
+                    Theme, preferences, privacy & more
+                  </p>
+                </div>
+                <span className="text-2xl">⚙️</span>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Create New Kundali Button — prominent */}
         <motion.div variants={staggerItem}>

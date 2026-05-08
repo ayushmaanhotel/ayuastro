@@ -28,6 +28,7 @@ import NakshatraDeepDiveView from '@/components/ayuastro/zodiac/NakshatraDeepDiv
 import GratitudeJournalView from '@/components/ayuastro/wellness/GratitudeJournalView';
 import ZodiacGameView from '@/components/ayuastro/sync/ZodiacGameView';
 import ComprehensiveKundaliView from '@/components/ayuastro/kundali/ComprehensiveKundaliView';
+import SettingsView from '@/components/ayuastro/settings/SettingsView';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -127,6 +128,8 @@ export default function Home() {
           />
         );
       }
+      case 'settings':
+        return <SettingsView />;
       case 'wisdom':
         return <WisdomView />;
       default:
@@ -135,7 +138,7 @@ export default function Home() {
   };
 
   const showHeader = currentView !== 'landing' && currentView !== 'calculating';
-  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'zodiacDeepDive', 'nakshatraDeepDive', 'gratitudeJournal', 'zodiacGame', 'comprehensiveKundali'].includes(currentView);
+  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'zodiacDeepDive', 'nakshatraDeepDive', 'gratitudeJournal', 'zodiacGame', 'comprehensiveKundali', 'settings'].includes(currentView);
 
   return (
     <div className="min-h-screen flex flex-col bg-cream">

@@ -73,6 +73,10 @@ export default function Header() {
             >
               AyuAstro
             </h1>
+            {/* "Nothing to Hide" tagline */}
+            <span className="text-[8px] font-medium tracking-[0.15em] text-gold-dark/60 dark:text-gold/50 hidden sm:inline">
+              · Nothing to Hide
+            </span>
             {/* v2.0 badge */}
             <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-gold/10 text-gold-dark dark:bg-gold/15 dark:text-gold">
               v2.0

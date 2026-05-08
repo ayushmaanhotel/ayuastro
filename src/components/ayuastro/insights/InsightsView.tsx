@@ -55,6 +55,9 @@ import {
 import KundaliChart from './KundaliChart';
 import ShareableCard, { getShareText, getTopTraits as getShareTopTraits, getArchetype as getShareArchetype } from './ShareableCard';
 import DashaTimeline, { generateDashaPeriods, type DashaPeriod } from './DashaTimeline';
+import PersonalityCards from './PersonalityCards';
+import KundaliScoreCard from './KundaliScoreCard';
+import DoshaDetailCard from './DoshaDetailCard';
 
 const ZODIAC_ICONS: Record<string, string> = {
   Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
@@ -792,6 +795,16 @@ export default function InsightsView() {
               </div>
             </CardContent>
           </Card>
+        </motion.div>
+
+        {/* Kundali Score Card */}
+        <motion.div variants={staggerItem}>
+          <KundaliScoreCard />
+        </motion.div>
+
+        {/* Dosha Detail Card */}
+        <motion.div variants={staggerItem}>
+          <DoshaDetailCard doshas={astrologyData?.doshas || []} />
         </motion.div>
 
         {/* Daily Affirmation & Ritual Card — pulsing glow border */}
@@ -1982,6 +1995,15 @@ export default function InsightsView() {
                     </div>
                   </div>
                 </div>
+              </motion.div>
+
+              {/* ─── Personality Cards — "Your Life, Card by Card" ──────────────────── */}
+              <motion.div variants={staggerItem}>
+                <PersonalityCards
+                  astrologyData={astrologyData}
+                  numerologyData={numerologyData}
+                  traitScores={traitScores}
+                />
               </motion.div>
 
               {/* Planetary Positions — Enhanced Table */}

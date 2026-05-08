@@ -1013,6 +1013,14 @@ export default function PremiumView() {
                   <span>Secure Payments</span>
                 </div>
               </div>
+
+              {/* "Nothing to Hide" trust badge */}
+              <div className="mt-4 flex items-center justify-center">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/5 dark:bg-gold/10 border border-gold/15 dark:border-gold/20">
+                  <Eye className="size-3 text-gold-dark dark:text-gold" />
+                  <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold-dark dark:text-gold">Nothing to Hide</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
           </div>

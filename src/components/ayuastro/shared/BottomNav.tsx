@@ -73,7 +73,7 @@ export default function BottomNav() {
     setMagneticOffsets({});
   }, []);
 
-  const visibleViews = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds'];
+  const visibleViews = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'settings'];
   if (!visibleViews.includes(currentView)) return null;
 
   const handleTabClick = (tab: typeof tabs[number], e?: React.MouseEvent<HTMLButtonElement>) => {
