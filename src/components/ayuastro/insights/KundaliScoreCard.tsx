@@ -142,7 +142,7 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
         >
           <span className={getScoreColor(score)}>{score}</span>
         </motion.span>
-        <span className="text-[9px] uppercase tracking-widest text-brown-400 dark:text-brown-500 font-semibold">
+        <span className="text-[11px] tracking-wider text-brown-500 dark:text-brown-400 font-semibold">
           out of 100
         </span>
       </div>
@@ -160,9 +160,9 @@ function BreakdownBar({ item, delay = 0 }: { item: BreakdownItem; delay?: number
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <Icon className="size-3 text-brown-400 dark:text-brown-500" />
-          <span className="text-xs font-medium text-brown-700 dark:text-brown-300">{item.label}</span>
+          <span className="text-xs font-medium text-brown-700 dark:text-brown-200">{item.label}</span>
         </div>
-        <span className={`text-xs font-bold ${getScoreColor(item.score)}`}>{item.score}</span>
+        <span className={`text-sm font-bold ${getScoreColor(item.score)}`}>{item.score}</span>
       </div>
       <div className={`h-2 rounded-full overflow-hidden ${getBarBg(item.score)}`}>
         <motion.div
@@ -172,7 +172,7 @@ function BreakdownBar({ item, delay = 0 }: { item: BreakdownItem; delay?: number
           transition={{ duration: 0.8, ease: 'easeOut', delay: delay + 0.5 }}
         />
       </div>
-      <p className="text-[10px] text-brown-500 dark:text-brown-400 leading-relaxed">{item.description}</p>
+      <p className="text-[11px] text-brown-500 dark:text-brown-400 leading-relaxed">{item.description}</p>
     </div>
   );
 }
@@ -326,11 +326,11 @@ export default function KundaliScoreCard() {
         <div className="bg-gold/5 dark:bg-gold/5 rounded-lg p-3 mb-4 border border-gold/10 dark:border-gold/10">
           <div className="flex items-center gap-1.5 mb-1.5">
             <Eye className="size-3 text-gold-dark dark:text-gold" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-gold-dark dark:text-gold">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-gold-dark dark:text-gold">
               Honest Assessment
             </span>
           </div>
-          <p className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed">
+          <p className="text-sm text-brown-800 dark:text-brown-200 leading-relaxed">
             {scoreData.honestAssessment}
           </p>
         </div>
@@ -340,22 +340,22 @@ export default function KundaliScoreCard() {
           <div className="bg-sage-muted/20 dark:bg-sage/10 rounded-lg p-2.5">
             <div className="flex items-center gap-1 mb-1">
               <TrendingUp className="size-3 text-sage-dark dark:text-sage" />
-              <span className="text-[9px] font-semibold uppercase tracking-wider text-sage-dark dark:text-sage">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-sage-dark dark:text-sage">
                 Top Strength
               </span>
             </div>
-            <p className="text-[10px] text-brown-700 dark:text-brown-300 leading-relaxed">
+            <p className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed">
               {scoreData.topStrength}
             </p>
           </div>
           <div className="bg-red-50 dark:bg-red-900/10 rounded-lg p-2.5">
             <div className="flex items-center gap-1 mb-1">
               <TrendingDown className="size-3 text-red-500 dark:text-red-400" />
-              <span className="text-[9px] font-semibold uppercase tracking-wider text-red-500 dark:text-red-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-red-500 dark:text-red-400">
                 Top Challenge
               </span>
             </div>
-            <p className="text-[10px] text-brown-700 dark:text-brown-300 leading-relaxed">
+            <p className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed">
               {scoreData.topChallenge}
             </p>
           </div>
@@ -367,7 +367,7 @@ export default function KundaliScoreCard() {
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-between text-[11px] text-brown-500 dark:text-brown-400 hover:text-brown-700 dark:hover:text-brown-200 px-0 py-1 h-auto mb-2"
+              className="w-full justify-between text-xs font-semibold text-brown-500 dark:text-brown-400 hover:text-brown-700 dark:hover:text-brown-200 px-0 py-1 h-auto mb-2"
             >
               <span className="flex items-center gap-1.5">
                 <Target className="size-3" />
@@ -401,7 +401,7 @@ export default function KundaliScoreCard() {
         {!detailsExpanded && (
           <div className="flex items-center gap-1 flex-wrap mb-2">
             {breakdownItems.map(item => (
-              <div key={item.label} className="flex items-center gap-1 text-[9px]">
+              <div key={item.label} className="flex items-center gap-1 text-[10px]">
                 <span className="text-brown-400 dark:text-brown-500">{item.label}:</span>
                 <span className={`font-bold ${getScoreColor(item.score)}`}>{item.score}</span>
               </div>
@@ -416,7 +416,7 @@ export default function KundaliScoreCard() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-between text-[11px] text-gold-dark dark:text-gold hover:text-gold-dark dark:hover:text-gold px-0 py-1 h-auto"
+                className="w-full justify-between text-xs font-semibold text-gold-dark dark:text-gold hover:text-gold-dark dark:hover:text-gold px-0 py-1 h-auto"
               >
                 <span className="flex items-center gap-1.5">
                   <Lightbulb className="size-3" />
@@ -438,7 +438,7 @@ export default function KundaliScoreCard() {
                     <ul className="space-y-1.5 pb-1">
                       {scoreData.remedies.map((remedy, i) => (
                         <li key={i} className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed flex items-start gap-1.5">
-                          <span className="text-gold-dark dark:text-gold mt-0.5 shrink-0 text-[8px]">✦</span>
+                          <span className="text-gold-dark dark:text-gold mt-0.5 shrink-0 text-[10px]">✦</span>
                           {remedy}
                         </li>
                       ))}

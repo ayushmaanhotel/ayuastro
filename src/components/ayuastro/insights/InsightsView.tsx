@@ -719,7 +719,7 @@ export default function InsightsView() {
         transition={{ delay: 0.5, duration: 0.4 }}
         className="floating-action-bar ring-1 ring-gold/15 dark:ring-gold/20 bg-gradient-to-r from-white/80 via-white/90 to-white/80 dark:from-brown-900/80 dark:via-brown-900/90 dark:to-brown-900/80"
       >
-        <span className="text-[7px] uppercase tracking-widest text-brown-300 dark:text-brown-400 font-semibold text-center block mb-1">Quick Actions</span>
+        <span className="text-[9px] uppercase tracking-widest text-brown-500 dark:text-brown-400 font-semibold text-center block mb-1">Quick Actions</span>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setView('insights')}
@@ -727,7 +727,7 @@ export default function InsightsView() {
             aria-label="Daily Horoscope"
           >
             <Sun className="size-5" />
-            <span className="text-[8px] font-medium">Horoscope</span>
+            <span className="text-[10px] font-medium">Horoscope</span>
           </button>
           <span className="w-1 h-1 rounded-full bg-gold/40" aria-hidden="true" />
           <button
@@ -736,7 +736,7 @@ export default function InsightsView() {
             aria-label="Chat"
           >
             <MessageCircle className="size-5" />
-            <span className="text-[8px] font-medium">Chat</span>
+            <span className="text-[10px] font-medium">Chat</span>
           </button>
           <span className="w-1 h-1 rounded-full bg-gold/40" aria-hidden="true" />
           <button
@@ -745,7 +745,7 @@ export default function InsightsView() {
             aria-label="Breathing"
           >
             <Wind className="size-5" />
-            <span className="text-[8px] font-medium">Breathe</span>
+            <span className="text-[10px] font-medium">Breathe</span>
           </button>
           <span className="w-1 h-1 rounded-full bg-gold/40" aria-hidden="true" />
           <button
@@ -754,7 +754,7 @@ export default function InsightsView() {
             aria-label="Mood"
           >
             <Heart className="size-5" />
-            <span className="text-[8px] font-medium">Mood</span>
+            <span className="text-[10px] font-medium">Mood</span>
           </button>
         </div>
       </motion.div>
@@ -777,7 +777,7 @@ export default function InsightsView() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <Badge className="bg-gold/10 text-gold-dark border-0 text-[10px] px-2 py-0 tracking-wider uppercase">
+                    <Badge className="bg-gold/15 text-gold-dark border-0 text-[11px] px-2 py-0 tracking-wider uppercase">
                       Today&apos;s Insight
                     </Badge>
                     <Clock className="size-3 text-brown-300" />
@@ -788,7 +788,7 @@ export default function InsightsView() {
                   >
                     {dailyInsight.title}
                   </h3>
-                  <p className="text-sm text-brown-500 leading-relaxed">
+                  <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
                     {dailyInsight.message}
                   </p>
                 </div>
@@ -817,7 +817,7 @@ export default function InsightsView() {
               {/* Affirmation Section */}
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge className="bg-gold/10 text-gold-dark dark:bg-gold/15 dark:text-gold border-0 text-[10px] px-2 py-0 tracking-wider uppercase">
+                  <Badge className="bg-gold/10 text-gold-dark dark:bg-gold/15 dark:text-gold border-0 text-[11px] px-2 py-0 tracking-wider uppercase">
                     ✦ Today&apos;s Affirmation
                   </Badge>
                 </div>
@@ -830,7 +830,7 @@ export default function InsightsView() {
                     ✦
                   </span>
                   <p
-                    className="italic text-brown-800 dark:text-brown-200 leading-relaxed text-[15px]"
+                    className="italic text-brown-900 dark:text-brown-100 leading-relaxed text-[15px]"
                     style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                   >
                     {affirmation}
@@ -845,14 +845,14 @@ export default function InsightsView() {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Clock className="size-3.5 text-sage-dark dark:text-sage" />
-                  <Badge className="bg-sage-muted text-sage-dark dark:bg-sage/20 dark:text-sage border-0 text-[10px] px-2 py-0 tracking-wider uppercase">
+                  <Badge className="bg-sage-muted text-sage-dark dark:bg-sage/20 dark:text-sage border-0 text-[11px] px-2 py-0 tracking-wider uppercase">
                     Today&apos;s Ritual
                   </Badge>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="text-lg shrink-0 mt-0.5">{ritual.icon}</span>
                   <div className="flex-1">
-                    <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
+                    <p className="text-sm text-brown-700 dark:text-brown-200 leading-relaxed">
                       {ritual.text}
                     </p>
                   </div>
@@ -929,7 +929,7 @@ export default function InsightsView() {
 
                   {/* Lucky Colors */}
                   <div className="mb-4">
-                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-400 mb-2">Lucky Colors</p>
+                    <p className="text-[11px] uppercase tracking-wider text-brown-500 dark:text-brown-400 mb-2">Lucky Colors</p>
                     <div className="flex items-center gap-3">
                       {lucky.luckyColors.map((c, i) => (
                         <div key={i} className="flex items-center gap-1.5">
@@ -946,7 +946,7 @@ export default function InsightsView() {
 
                   {/* Lucky Numbers */}
                   <div className="mb-4">
-                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-400 mb-2">Lucky Numbers</p>
+                    <p className="text-[11px] uppercase tracking-wider text-brown-500 dark:text-brown-400 mb-2">Lucky Numbers</p>
                     <div className="flex items-center gap-2">
                       {lucky.luckyNumbers.map((n, i) => (
                         <span
@@ -961,10 +961,10 @@ export default function InsightsView() {
 
                   {/* Lucky Days */}
                   <div className="mb-4">
-                    <p className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-400 mb-2">Lucky Days</p>
+                    <p className="text-[11px] uppercase tracking-wider text-brown-500 dark:text-brown-400 mb-2">Lucky Days</p>
                     <div className="flex items-center gap-2 flex-wrap">
                       {lucky.luckyDays.map((d, i) => (
-                        <Badge key={i} className="bg-brown-50 dark:bg-brown-50/20 text-brown-600 dark:text-brown-300 border border-brown-100/50 dark:border-brown-700/30 text-[10px] px-2.5 py-0.5 rounded-full">
+                        <Badge key={i} className="bg-brown-50 dark:bg-brown-50/20 text-brown-600 dark:text-brown-300 border border-brown-100/50 dark:border-brown-700/30 text-[11px] px-2.5 py-0.5 rounded-full">
                           {d}
                         </Badge>
                       ))}
@@ -976,18 +976,18 @@ export default function InsightsView() {
                     <div className="rounded-lg bg-gold/5 dark:bg-gold/10 p-3">
                       <div className="flex items-center gap-1.5 mb-1">
                         <Gem className="size-3 text-gold-dark dark:text-gold" />
-                        <span className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-400">Gemstone</span>
+                        <span className="text-[11px] uppercase tracking-wider text-brown-400 dark:text-brown-400">Gemstone</span>
                       </div>
                       <p className="text-xs font-semibold text-brown-800 dark:text-brown-200">{lucky.luckyGemstone.name}</p>
-                      <p className="text-[10px] text-brown-400 dark:text-brown-400 mt-0.5 leading-relaxed">{lucky.luckyGemstone.description}</p>
+                      <p className="text-[11px] text-brown-400 dark:text-brown-400 mt-0.5 leading-relaxed">{lucky.luckyGemstone.description}</p>
                     </div>
                     <div className="rounded-lg bg-sage-muted/30 dark:bg-sage/10 p-3">
                       <div className="flex items-center gap-1.5 mb-1">
                         <Clock className="size-3 text-sage-dark dark:text-sage" />
-                        <span className="text-[10px] uppercase tracking-wider text-brown-400 dark:text-brown-400">Power Hour</span>
+                        <span className="text-[11px] uppercase tracking-wider text-brown-400 dark:text-brown-400">Power Hour</span>
                       </div>
                       <p className="text-xs font-semibold text-brown-800 dark:text-brown-200">{lucky.powerHour}</p>
-                      <p className="text-[10px] text-brown-400 dark:text-brown-400 mt-0.5 leading-relaxed">Peak cosmic energy</p>
+                      <p className="text-[11px] text-brown-400 dark:text-brown-400 mt-0.5 leading-relaxed">Peak cosmic energy</p>
                     </div>
                   </div>
                 </CardContent>
@@ -1037,7 +1037,7 @@ export default function InsightsView() {
                               {pct}%
                             </span>
                           </div>
-                          <span className="text-[10px] font-medium text-brown-600 dark:text-brown-300">{sign}</span>
+                          <span className="text-[11px] font-medium text-brown-600 dark:text-brown-300">{sign}</span>
                         </div>
                       );
                     })}
@@ -1078,11 +1078,11 @@ export default function InsightsView() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <Badge className="bg-sage-muted text-sage-dark border-0 text-[10px] px-2 py-0 tracking-wider uppercase">
+                    <Badge className="bg-sage-muted text-sage-dark border-0 text-[11px] px-2 py-0 tracking-wider uppercase">
                       Daily Horoscope
                     </Badge>
                     {sunElement && (
-                      <Badge className="bg-brown-50 text-brown-500 border-0 text-[10px] px-2 py-0 flex items-center gap-1">
+                      <Badge className="bg-brown-50 text-brown-500 border-0 text-[11px] px-2 py-0 flex items-center gap-1">
                         <ElementIcon className="size-2.5" />
                         {sunElement.element}
                       </Badge>
@@ -1104,12 +1104,12 @@ export default function InsightsView() {
                     </div>
                   ) : horoscope ? (
                     <>
-                      <p className="text-sm text-brown-500 leading-relaxed">
+                      <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">
                         {horoscope.emotionalEnergy}
                       </p>
                       <Collapsible open={horoscopeExpanded} onOpenChange={setHoroscopeExpanded}>
                         <CollapsibleTrigger asChild>
-                          <button className="mt-2 text-xs font-medium text-gold-dark hover:text-gold flex items-center gap-1 transition-colors">
+                          <button className="mt-2 text-sm font-semibold text-gold-dark hover:text-gold flex items-center gap-1 transition-colors">
                             {horoscopeExpanded ? 'Show Less' : 'Read More'}
                             <ChevronDown className={`size-3 transition-transform ${horoscopeExpanded ? 'rotate-180' : ''}`} />
                           </button>
@@ -1154,7 +1154,7 @@ export default function InsightsView() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border-0 text-[10px] px-2 py-0 tracking-wider uppercase">
+                    <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border-0 text-[11px] px-2 py-0 tracking-wider uppercase">
                       Planetary Transits
                     </Badge>
                   </div>
@@ -1201,7 +1201,7 @@ export default function InsightsView() {
                                 <span className="text-sm font-semibold text-brown-900 dark:text-brown-100">{transit.planet}</span>
                                 <span className="text-xs text-brown-400">in {transit.sign}</span>
                                 <span className="text-xs text-brown-300">• House {transit.house}</span>
-                                <Badge className={`${TRANSIT_TYPE_STYLES[transit.type] || 'bg-brown-50 text-brown-500'} border-0 text-[9px] px-1.5 py-0 ml-auto`}>
+                                <Badge className={`${TRANSIT_TYPE_STYLES[transit.type] || 'bg-brown-50 text-brown-500'} border-0 text-[10px] px-1.5 py-0 ml-auto`}>
                                   {transit.type === 'major' ? 'Major' : transit.type === 'shadow' ? 'Shadow' : 'Minor'}
                                 </Badge>
                                 <ChevronDown className={`size-3.5 text-brown-300 transition-transform ${expandedTransits[transit.planet] ? 'rotate-180' : ''}`} />
@@ -1214,15 +1214,15 @@ export default function InsightsView() {
                           <CollapsibleContent>
                             <div className="px-3 pb-3 pt-1 space-y-2 border-t border-brown-100 dark:border-brown-700/30">
                               <div className="rounded-lg bg-brown-50 dark:bg-brown-800/20 p-3">
-                                <p className="text-[10px] uppercase tracking-wider text-brown-400 mb-1">Full Effect</p>
+                                <p className="text-[11px] uppercase tracking-wider text-brown-400 mb-1">Full Effect</p>
                                 <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">{transit.effect}</p>
                               </div>
                               <div className="rounded-lg bg-gold/5 dark:bg-gold/10 p-3">
-                                <p className="text-[10px] uppercase tracking-wider text-gold-dark dark:text-gold mb-1">Advice</p>
+                                <p className="text-[11px] uppercase tracking-wider text-gold-dark dark:text-gold mb-1">Advice</p>
                                 <p className="text-sm text-brown-700 dark:text-brown-300 leading-relaxed">{transit.advice}</p>
                               </div>
                               <div className="flex items-center gap-2">
-                                <span className="text-[10px] text-brown-400">Duration:</span>
+                                <span className="text-[11px] text-brown-400">Duration:</span>
                                 <span className="text-xs font-medium text-brown-600 dark:text-brown-300">{transit.duration}</span>
                               </div>
                             </div>

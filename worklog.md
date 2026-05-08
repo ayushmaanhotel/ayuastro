@@ -3261,3 +3261,87 @@ Stage Summary:
 - Kundali Score API returns honest scores (68/B for chart with Mangal Dosha)
 - "Nothing to Hide" tagline in 4 locations
 - All features integrated and working
+
+---
+Task ID: 1-4
+Agent: Text/Font Fix Agent
+Task: Fix text, font, and language issues across insights page components
+
+Work Log:
+- InsightsView.tsx: Fixed 30+ text size/contrast/weight issues
+  - Quick Actions label: text-[7px] → text-[9px], text-brown-300 → text-brown-500 dark:text-brown-400
+  - Quick Action buttons (Horoscope, Chat, Breathe, Mood): text-[8px] → text-[10px]
+  - Daily Cosmic Insight badge: text-[10px] → text-[11px], bg-gold/10 → bg-gold/15
+  - Daily Cosmic Insight message: text-brown-500 → text-brown-700 dark:text-brown-300
+  - Affirmation badge: text-[10px] → text-[11px]
+  - Affirmation text: text-brown-800 dark:text-brown-200 → text-brown-900 dark:text-brown-100
+  - Ritual badge: text-[10px] → text-[11px]
+  - Ritual text: dark:text-brown-300 → dark:text-brown-200
+  - Lucky Colors/Numbers/Days labels: text-[10px] → text-[11px], text-brown-400 → text-brown-500 dark:text-brown-400
+  - Lucky Days badges: text-[10px] → text-[11px]
+  - Gemstone/Power Hour labels: text-[10px] → text-[11px]
+  - Gemstone/Power Hour descriptions: text-[10px] → text-[11px]
+  - Cosmic Compatibility sign names: text-[10px] → text-[11px]
+  - Daily Horoscope badge: text-[10px] → text-[11px]
+  - Daily Horoscope element badge: text-[10px] → text-[11px]
+  - Daily Horoscope text: text-brown-500 → text-brown-700 dark:text-brown-300
+  - Read More link: text-xs font-medium → text-sm font-semibold
+  - Planetary Transits badge: text-[10px] → text-[11px]
+  - Transit type badge: text-[9px] → text-[10px]
+  - Transit detail labels (Full Effect, Advice, Duration): text-[10px] → text-[11px]
+- KundaliScoreCard.tsx: Fixed 14 text size/contrast/weight issues
+  - "out of 100" text: text-[9px] tracking-widest → text-[11px] tracking-wider, text-brown-400 → text-brown-500
+  - Honest Assessment header: text-[10px] font-semibold → text-[11px] font-bold
+  - Honest Assessment text: text-xs text-brown-700 → text-sm text-brown-800 dark:text-brown-200 leading-relaxed
+  - Top Strength label: text-[9px] font-semibold → text-[10px] font-bold
+  - Top Strength text: text-[10px] → text-xs
+  - Top Challenge label: text-[9px] font-semibold → text-[10px] font-bold
+  - Top Challenge text: text-[10px] → text-xs
+  - Score Breakdown trigger: text-[11px] → text-xs font-semibold
+  - Breakdown bar score: text-xs font-bold → text-sm font-bold
+  - Breakdown bar label: added dark:text-brown-200
+  - Breakdown description: text-[10px] → text-[11px]
+  - Mini breakdown items: text-[9px] → text-[10px]
+  - Remedies trigger: text-[11px] → text-xs font-semibold
+  - Remedies bullet: text-[8px] → text-[10px]
+- kundali-score/route.ts: Fixed 3 vague language strings
+  - "Overall decent planetary strength." → "Overall, your planetary positions give you a solid foundation."
+  - "This brings a specific gift to your life." → "This activates special abilities in your chart — an area where you naturally excel."
+  - "will create turbulence in specific life areas. This is not a curse, it's a pattern to understand." → "affects your relationships and emotional reactions. It shows up when you feel most provoked. This is a recognizable pattern — not a life sentence. Awareness is your first tool."
+- DoshaDetailCard.tsx: Fixed 6 text size/weight issues
+  - "Brutally Honest" badge: text-[9px] → text-[10px]
+  - Dosha severity badge: text-[9px] → text-[10px]
+  - "How It Affects You" label: text-[10px] font-semibold → text-[11px] font-bold
+  - "Practical Remedies" label: text-[10px] font-semibold → text-[11px] font-bold
+  - "The Good News" label: text-[10px] font-semibold → text-[11px] font-bold
+  - Remedies bullet: text-[8px] → text-[10px]
+
+Stage Summary:
+- 4 files modified with 53+ individual text/font/contrast fixes
+- Text sizes increased from tiny (7-9px) to readable (9-11px) across all components
+- Font weights added (font-bold, font-semibold) for labels and section headers
+- Color contrast improved (brown-300→brown-500, brown-400→brown-500, brown-800→brown-900) in both light and dark modes
+- Dark mode variants improved for better readability (dark:text-brown-200, dark:text-brown-100)
+- Vague API language replaced with specific, actionable descriptions
+- Zero lint errors after all changes
+---
+Task ID: 1-4
+Agent: Main Coordinator
+Task: Fix text, font, and language issues across insights page components
+
+Work Log:
+- Used VLM (Vision Language Model) to analyze 4 screenshots of the insights page at different scroll positions
+- Identified 53+ individual text/font/contrast issues across 4 files
+- Fixed InsightsView.tsx: 30+ changes including Quick Actions label size (7px→9px), button labels (8px→10px), all badge sizes (10px→11px), message text contrast improvements, affirmation text contrast, Read More link visibility (xs→sm), transit label sizes
+- Fixed KundaliScoreCard.tsx: 14 changes including "out of 100" text (9px→11px), Honest Assessment header weight (semibold→bold), Top Strength/Challenge text sizes (10px→xs), score numbers (xs→sm), breakdown descriptions (10px→11px)
+- Fixed kundali-score API: 3 vague language replacements - "specific gift"→"special abilities in your chart", "turbulence in specific life areas"→"affects your relationships and emotional reactions", "overall decent"→"solid foundation"
+- Fixed DoshaDetailCard.tsx: 6 changes including severity badge sizes (9px→10px), section label weights (semibold→bold) and sizes (10px→11px), bullet sizes (8px→10px)
+- Verified fixes with VLM analysis: Readability rated 8-9/10 across all sections
+- Lint passes with zero errors, no runtime errors
+
+Stage Summary:
+- 53+ text/font/contrast fixes across 4 files
+- All text now more readable with better contrast and appropriate sizing
+- Vague language replaced with specific, valuable descriptions
+- Dark mode variants maintained throughout
+- Zero lint errors, all APIs responding normally

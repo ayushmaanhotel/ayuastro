@@ -246,7 +246,7 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
               </p>
             </div>
           </div>
-          <Badge className="bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-300 border-0 text-[9px] px-2 py-0.5 tracking-wider uppercase flex items-center gap-1">
+          <Badge className="bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-300 border-0 text-[10px] px-2 py-0.5 tracking-wider uppercase flex items-center gap-1">
             <Eye className="size-2.5" />
             Brutally Honest
           </Badge>
@@ -277,7 +277,7 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
                         >
                           {dosha.name}
                         </h4>
-                        <Badge className={`${severityStyle.badge} border-0 text-[9px] px-1.5 py-0 tracking-wider uppercase flex items-center gap-0.5`}>
+                        <Badge className={`${severityStyle.badge} border-0 text-[10px] px-1.5 py-0 tracking-wider uppercase flex items-center gap-0.5`}>
                           <SeverityIcon className="size-2.5" />
                           {dosha.severity}
                         </Badge>
@@ -315,7 +315,7 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
                               <div>
                                 <div className="flex items-center gap-1.5 mb-1">
                                   <AlertTriangle className="size-3 text-red-400" />
-                                  <span className="text-[10px] font-semibold uppercase tracking-wider text-red-500 dark:text-red-400">
+                                  <span className="text-[11px] font-bold uppercase tracking-wider text-red-500 dark:text-red-400">
                                     How It Affects You
                                   </span>
                                 </div>
@@ -328,14 +328,14 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
                               <div>
                                 <div className="flex items-center gap-1.5 mb-1">
                                   <Sparkles className="size-3 text-gold-dark dark:text-gold" />
-                                  <span className="text-[10px] font-semibold uppercase tracking-wider text-gold-dark dark:text-gold">
+                                  <span className="text-[11px] font-bold uppercase tracking-wider text-gold-dark dark:text-gold">
                                     Practical Remedies
                                   </span>
                                 </div>
                                 <ul className="space-y-1 pl-4">
                                   {dosha.remedies.map((remedy, i) => (
                                     <li key={i} className="text-xs text-brown-700 dark:text-brown-300 leading-relaxed flex items-start gap-1.5">
-                                      <span className="text-gold-dark dark:text-gold mt-0.5 shrink-0 text-[8px]">✦</span>
+                                      <span className="text-gold-dark dark:text-gold mt-0.5 shrink-0 text-[10px]">✦</span>
                                       {remedy}
                                     </li>
                                   ))}
@@ -346,7 +346,7 @@ export default function DoshaDetailCard({ doshas }: DoshaDetailCardProps) {
                               <div className="bg-sage-muted/20 dark:bg-sage/10 rounded-lg p-3">
                                 <div className="flex items-center gap-1.5 mb-1">
                                   <Lightbulb className="size-3 text-sage-dark dark:text-sage" />
-                                  <span className="text-[10px] font-semibold uppercase tracking-wider text-sage-dark dark:text-sage">
+                                  <span className="text-[11px] font-bold uppercase tracking-wider text-sage-dark dark:text-sage">
                                     The Good News
                                   </span>
                                 </div>

@@ -129,7 +129,7 @@ function calculatePlanetStrength(
   } else if (worstPlanet) {
     description = worstPlanet.replace(' — ', ' which brings some hardship. ');
   } else if (bestPlanet) {
-    description = `${bestPlanet.split(' — ')[0]}. Overall decent planetary strength.`;
+    description = `${bestPlanet.split(' — ')[0]}. Overall, your planetary positions give you a solid foundation.`;
   }
 
   return { score, label: 'Planet Strength', description };
@@ -157,7 +157,7 @@ function calculateYogaScore(yogas: string[]): BreakdownItem {
   if (yogaCount === 0) {
     description = 'No significant yogas detected in your chart. This is common — most charts have 1-2 yogas at most.';
   } else if (yogaCount === 1) {
-    description = `You have 1 auspicious yoga forming. This brings a specific gift to your life.`;
+    description = `You have 1 auspicious yoga forming. This activates special abilities in your chart — an area where you naturally excel.`;
   } else if (yogaCount <= 3) {
     description = `You have ${yogaCount} auspicious yogas forming. This brings special gifts and areas of natural advantage.`;
   } else {
@@ -387,7 +387,7 @@ function generateHonestAssessment(
   // Add specific observations
   const observations: string[] = [];
   if (doshas.length > 0) {
-    observations.push(`The ${doshas[0]} will create turbulence in specific life areas. This is not a curse, it\'s a pattern to understand.`);
+    observations.push(`The ${doshas[0]} affects your relationships and emotional reactions. It shows up when you feel most provoked. This is a recognizable pattern — not a life sentence. Awareness is your first tool.`);
   }
   if (breakdown.ascendantLord.score >= 75) {
     observations.push('Your strong ascendant lord gives you resilience and self-direction.');
