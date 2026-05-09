@@ -1,13 +1,13 @@
 'use client';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { useAyuAstroStore, type BottomNavTab } from '@/store/ayuastro-store';
-import { Sparkles, Users, BookOpen, User, MessageCircle } from 'lucide-react';
+import { Sparkles, Users, ShoppingBag, User, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 const tabs: { id: BottomNavTab; label: string; icon: React.ElementType; view: string }[] = [
   { id: 'insights', label: 'Insights', icon: Sparkles, view: 'insights' },
   { id: 'chat', label: 'Chat', icon: MessageCircle, view: 'chat' },
   { id: 'sync', label: 'Sync', icon: Users, view: 'sync' },
-  { id: 'wisdom', label: 'Wisdom', icon: BookOpen, view: 'wisdom' },
+  { id: 'store', label: 'Store', icon: ShoppingBag, view: 'store' },
   { id: 'profile', label: 'Profile', icon: User, view: 'profile' },
 ];
 // ─── Ripple Effect Component ─────────────────────────────────────────────────
@@ -64,11 +64,11 @@ export default function BottomNav() {
   const handleMouseLeave = useCallback(() => {
     setMagneticOffsets({});
   }, []);
-  const visibleViews = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'settings'];
+  const visibleViews = ['insights', 'report', 'premium', 'wisdom', 'store', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'settings'];
   if (!visibleViews.includes(currentView)) return null;
   const handleTabClick = (tab: typeof tabs[number], e?: React.MouseEvent<HTMLButtonElement>) => {
     setActiveTab(tab.id);
-    setView(tab.view as 'insights' | 'chat' | 'sync' | 'wisdom' | 'profile');
+    setView(tab.view as 'insights' | 'chat' | 'sync' | 'store' | 'profile');
     // Haptic feedback vibration
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {

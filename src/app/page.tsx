@@ -15,7 +15,8 @@ import InsightsView from '@/components/ayuastro/insights/InsightsView';
 import SyncView from '@/components/ayuastro/sync/SyncView';
 import ReportView from '@/components/ayuastro/report/ReportView';
 import PremiumView from '@/components/ayuastro/premium/PremiumView';
-import ChatView from '@/components/ayuastro/chat/ChatView';
+import AstrologerChatView from '@/components/ayuastro/chat/AstrologerChatView';
+import StoreView from '@/components/ayuastro/store/StoreView';
 import MoodTrackerView from '@/components/ayuastro/mood/MoodTrackerView';
 import BreathingView from '@/components/ayuastro/wellness/BreathingView';
 import YogaDoshaView from '@/components/ayuastro/insights/YogaDoshaView';
@@ -92,7 +93,9 @@ export default function Home() {
       case 'sync':
         return <SyncView />;
       case 'chat':
-        return <ChatView />;
+        return <AstrologerChatView />;
+      case 'store':
+        return <StoreView />;
       case 'mood':
         return <MoodTrackerView />;
       case 'breathing':
@@ -138,7 +141,7 @@ export default function Home() {
   };
 
   const showHeader = currentView !== 'landing' && currentView !== 'calculating';
-  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'zodiacDeepDive', 'nakshatraDeepDive', 'gratitudeJournal', 'zodiacGame', 'comprehensiveKundali', 'settings'].includes(currentView);
+  const showBottomNav = ['insights', 'report', 'premium', 'wisdom', 'store', 'profile', 'sync', 'chat', 'mood', 'breathing', 'yogaDosha', 'compatibilityDetail', 'dashboard', 'calendar', 'cosmicSounds', 'zodiacDeepDive', 'nakshatraDeepDive', 'gratitudeJournal', 'zodiacGame', 'comprehensiveKundali', 'settings'].includes(currentView);
 
   return (
     <div className="min-h-screen flex flex-col bg-cream">

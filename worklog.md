@@ -3496,3 +3496,35 @@ Stage Summary:
 - Backend computes house and includes it in API response
 - Frontend also computes house as fallback when API data doesn't include it
 - Verified with 4 different birth data sets - all show correct house distribution
+
+---
+Task ID: chat-store-1
+Agent: Main Coordinator
+Task: Add astrologer chat with Instagram-like UI and replace Wisdom with Vedic Store
+
+Work Log:
+- Created AstrologerChatView.tsx with 6 astrologers: Rishi Parasher, Jyoti Nanda, Santanu Mishra, Dr. Om Thakur, Anjali Tripathi, Markandaya
+- Instagram-like chat list with stories row, online status indicators, gradient avatar rings
+- Individual chat view per astrologer with welcome card, suggested questions, typing indicator with "writing" animation
+- Each astrologer has unique system prompt/personality, specialization, rating, experience
+- Created /api/chat/astrologer endpoint supporting astrologer-specific system prompts, rate limiting (30/hr)
+- Created StoreView.tsx replacing Wisdom tab with Vedic Store (20 products across 5 categories)
+- Categories: Pujas (5), Gemstones (5), Rudraksha (3), Remedies (3), Rituals (3)
+- Products: Mangal Dosha Puja, Blue Sapphire, 5 Mukhi Rudraksha, Navagraha Yantra, Vivah Muhurta, etc.
+- "Recommended for You" section based on user's doshas and planetary positions
+- Product detail dialog with benefits, dosha/planet tags, Add to Cart button
+- Trust section with certification badges
+- Updated store types: Added 'store' to AppView and BottomNavTab, replaced 'wisdom' with 'store'
+- Updated BottomNav: Store tab with ShoppingBag icon replaces Wisdom tab
+- Updated page.tsx: Added AstrologerChatView and StoreView routing
+- Added CSS: story-ring-rotate, chat-bubble-in, online-pulse, card-shine, writing-expand animations
+- All lint checks pass with zero errors
+- QA tested via agent-browser: Chat shows all 6 astrologers, Store shows all products, both functional
+
+Stage Summary:
+- 5 new files created: AstrologerChatView.tsx, StoreView.tsx, /api/chat/astrologer/route.ts
+- 5 files modified: ayuastro-store.ts, BottomNav.tsx, page.tsx, globals.css
+- Instagram-like chat UI with astrologer selection, stories row, individual chat views
+- Vedic Store with 20 products, 5 categories, search, filter, product detail dialogs
+- Full dark mode support across all new components
+- Zero lint errors
