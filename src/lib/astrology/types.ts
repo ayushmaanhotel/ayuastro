@@ -43,6 +43,7 @@ export interface PlanetPosition {
   sign: ZodiacSign;
   signIndex: number;       // 0-11
   degreeInSign: number;    // 0-30
+  house?: number;          // 1-12 house number (whole sign system, computed after ascendant)
   nakshatra: string;
   nakshatraIndex: number;  // 0-26
   nakshatraPada: number;   // 1-4

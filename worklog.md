@@ -3476,3 +3476,23 @@ Stage Summary:
 4. Add real Razorpay payment integration
 5. Add real PDF generation with Puppeteer/jsPDF
 6. Add real authentication (Firebase Auth)
+
+---
+Task ID: fix-planet-houses
+Agent: Main Coordinator
+Task: Fix all planets showing in same house in birth chart
+
+Work Log:
+- Diagnosed root cause: `PlanetPosition` type had no `house` field, frontend mapping used `p.house || 1` which defaulted ALL planets to house 1
+- Added `house?: number` field to `PlanetPosition` type in `types.ts`
+- Added house computation in `calculateKundali()` (index.ts) using whole sign system formula: `house = ((signIndex - ascSignIndex) % 12 + 12) % 12 + 1`
+- Fixed frontend mapping in `OnboardingView.tsx` (2 places): replaced `p.house || 1` with proper computation using `signIndex` and ascendant
+- Used existing `ZODIAC_SIGNS_LIST` constant for ascendant sign index lookup
+- Lint passes with zero errors
+- Verified fix via agent-browser testing: planets now correctly distributed across 5-7 unique houses depending on birth data
+
+Stage Summary:
+- Critical bug fixed: planets now show in correct houses in the birth chart
+- Backend computes house and includes it in API response
+- Frontend also computes house as fallback when API data doesn't include it
+- Verified with 4 different birth data sets - all show correct house distribution

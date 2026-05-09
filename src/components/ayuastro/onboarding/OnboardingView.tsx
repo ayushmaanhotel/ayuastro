@@ -621,8 +621,10 @@ export default function OnboardingView() {
           doshas: (result.astrology.doshas || []).filter((d: { present: boolean }) => d.present).map((d: { name: string }) => d.name),
           planetaryPositions: Object.fromEntries(
             Object.entries(result.astrology.planetaryPositions || {}).map(([key, pos]: [string, unknown]) => {
-              const p = pos as { sign: string; degreeInSign: number; house?: number; isRetrograde?: boolean; nakshatra?: string; nakshatraPada?: number; isCombust?: boolean };
-              return [key, { sign: p.sign, degree: p.degreeInSign, house: p.house || 1, retrograde: p.isRetrograde || false, nakshatra: p.nakshatra || '', nakshatraPada: p.nakshatraPada || 0, isCombust: p.isCombust || false }];
+              const p = pos as { sign: string; signIndex?: number; degreeInSign: number; house?: number; isRetrograde?: boolean; nakshatra?: string; nakshatraPada?: number; isCombust?: boolean };
+              const ascSignIdx = ZODIAC_SIGNS_LIST.indexOf(result.astrology.ascendant || '');
+              const computedHouse = p.house ?? (p.signIndex !== undefined && ascSignIdx >= 0 ? ((p.signIndex - ascSignIdx) % 12 + 12) % 12 + 1 : 1);
+              return [key, { sign: p.sign, degree: p.degreeInSign, house: computedHouse, retrograde: p.isRetrograde || false, nakshatra: p.nakshatra || '', nakshatraPada: p.nakshatraPada || 0, isCombust: p.isCombust || false }];
             })
           ),
         });
@@ -764,8 +766,10 @@ export default function OnboardingView() {
                 doshas: (result.astrology.doshas || []).filter((d: { present: boolean }) => d.present).map((d: { name: string }) => d.name),
                 planetaryPositions: Object.fromEntries(
                   Object.entries(result.astrology.planetaryPositions || {}).map(([key, pos]: [string, unknown]) => {
-                    const p = pos as { sign: string; degreeInSign: number; house?: number; isRetrograde?: boolean; nakshatra?: string; nakshatraPada?: number; isCombust?: boolean };
-                    return [key, { sign: p.sign, degree: p.degreeInSign, house: p.house || 1, retrograde: p.isRetrograde || false, nakshatra: p.nakshatra || '', nakshatraPada: p.nakshatraPada || 0, isCombust: p.isCombust || false }];
+                    const p = pos as { sign: string; signIndex?: number; degreeInSign: number; house?: number; isRetrograde?: boolean; nakshatra?: string; nakshatraPada?: number; isCombust?: boolean };
+                    const ascSignIdx = ZODIAC_SIGNS_LIST.indexOf(result.astrology.ascendant || '');
+                    const computedHouse = p.house ?? (p.signIndex !== undefined && ascSignIdx >= 0 ? ((p.signIndex - ascSignIdx) % 12 + 12) % 12 + 1 : 1);
+                    return [key, { sign: p.sign, degree: p.degreeInSign, house: computedHouse, retrograde: p.isRetrograde || false, nakshatra: p.nakshatra || '', nakshatraPada: p.nakshatraPada || 0, isCombust: p.isCombust || false }];
                   })
                 ),
               });

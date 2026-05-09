@@ -147,6 +147,16 @@ export function calculateKundali(
     timezoneOffset
   );
   
+  // Step 1b: Assign house numbers to each planet using whole sign system
+  // House = ((planetSignIndex - ascendantSignIndex) % 12 + 12) % 12 + 1
+  const ascSignIndex = ascendant.signIndex;
+  for (const planetName of Object.keys(positions)) {
+    const pos = positions[planetName];
+    if (pos) {
+      pos.house = ((pos.signIndex - ascSignIndex) % 12 + 12) % 12 + 1;
+    }
+  }
+  
   // Step 2: Generate chart and houses
   const chart = generateNorthIndianChart(ascendant, positions);
   const houses = calculateHouses(ascendant, positions);
