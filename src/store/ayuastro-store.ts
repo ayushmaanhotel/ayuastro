@@ -96,6 +96,15 @@ interface AyuAstroState {
   error: string | null;
   reportLoading: boolean;
 
+  // Auth state
+  isLoggedIn: boolean;
+  authEmail: string | null;
+  authPhone: string | null;
+  language: 'en' | 'hi' | 'hinglish';
+  vedicLevel: 'standard' | 'detailed' | 'hinglish';
+  dailyHoroscopeNotif: boolean;
+  moodRemindersNotif: boolean;
+
   // Actions
   setView: (view: AppView) => void;
   setActiveTab: (tab: BottomNavTab) => void;
@@ -115,6 +124,13 @@ interface AyuAstroState {
   setReportLoading: (loading: boolean) => void;
   resetKundaliData: () => void;
   setCompatDetail: (data: { partnerSign: string; partnerName?: string; overall: number; emotional: number; communication: number; trust: number }) => void;
+  setAuthState: (data: { isLoggedIn: boolean; authEmail?: string | null; authPhone?: string | null }) => void;
+  setLanguage: (lang: 'en' | 'hi' | 'hinglish') => void;
+  setVedicLevel: (level: 'standard' | 'detailed' | 'hinglish') => void;
+  setDailyHoroscopeNotif: (enabled: boolean) => void;
+  setMoodRemindersNotif: (enabled: boolean) => void;
+  loginUser: (userId: string, email?: string, phone?: string) => void;
+  logoutUser: () => void;
   reset: () => void;
   nextOnboardingStep: () => void;
   prevOnboardingStep: () => void;
@@ -146,6 +162,13 @@ const initialState = {
   hasPaid: false,
   error: null as string | null,
   reportLoading: false,
+  isLoggedIn: false,
+  authEmail: null as string | null,
+  authPhone: null as string | null,
+  language: 'en' as 'en' | 'hi' | 'hinglish',
+  vedicLevel: 'standard' as 'standard' | 'detailed' | 'hinglish',
+  dailyHoroscopeNotif: true,
+  moodRemindersNotif: true,
 };
 
 export const useAyuAstroStore = create<AyuAstroState>()(
@@ -193,6 +216,13 @@ export const useAyuAstroStore = create<AyuAstroState>()(
         isLoading: false,
         loadingMessage: '',
         error: null,
+        isLoggedIn: false,
+        authEmail: null,
+        authPhone: null,
+        language: 'en',
+        vedicLevel: 'standard',
+        dailyHoroscopeNotif: true,
+        moodRemindersNotif: true,
       }),
       setCompatDetail: (data) => set({
         compatPartnerSign: data.partnerSign,
@@ -201,6 +231,28 @@ export const useAyuAstroStore = create<AyuAstroState>()(
         compatEmotionalScore: data.emotional,
         compatCommunicationScore: data.communication,
         compatTrustScore: data.trust,
+      }),
+      setAuthState: (data) => set({
+        isLoggedIn: data.isLoggedIn,
+        authEmail: data.authEmail !== undefined ? data.authEmail : get().authEmail,
+        authPhone: data.authPhone !== undefined ? data.authPhone : get().authPhone,
+      }),
+      setLanguage: (lang) => set({ language: lang }),
+      setVedicLevel: (level) => set({ vedicLevel: level }),
+      setDailyHoroscopeNotif: (enabled) => set({ dailyHoroscopeNotif: enabled }),
+      setMoodRemindersNotif: (enabled) => set({ moodRemindersNotif: enabled }),
+      loginUser: (userId, email, phone) => set({
+        userId,
+        isLoggedIn: true,
+        authEmail: email ?? null,
+        authPhone: phone ?? null,
+      }),
+      logoutUser: () => set({
+        isLoggedIn: false,
+        authEmail: null,
+        authPhone: null,
+        userId: null,
+        // Keep onboarding data intact
       }),
       reset: () => {
         // Clear persisted storage first to ensure clean slate
@@ -245,6 +297,13 @@ export const useAyuAstroStore = create<AyuAstroState>()(
         activeTab: state.activeTab,
         onboardingStep: state.onboardingStep,
         reportLoading: state.reportLoading,
+        isLoggedIn: state.isLoggedIn,
+        authEmail: state.authEmail,
+        authPhone: state.authPhone,
+        language: state.language,
+        vedicLevel: state.vedicLevel,
+        dailyHoroscopeNotif: state.dailyHoroscopeNotif,
+        moodRemindersNotif: state.moodRemindersNotif,
       }),
     }
   )

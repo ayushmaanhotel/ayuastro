@@ -3528,3 +3528,165 @@ Stage Summary:
 - Vedic Store with 20 products, 5 categories, search, filter, product detail dialogs
 - Full dark mode support across all new components
 - Zero lint errors
+
+---
+Task ID: 6
+Agent: Store Update Agent
+Task: Update Zustand store with auth state and language preference
+
+Work Log:
+- Read current store at /home/z/my-project/src/store/ayuastro-store.ts
+- Added 7 new state fields to AyuAstroState interface: isLoggedIn, authEmail, authPhone, language, vedicLevel, dailyHoroscopeNotif, moodRemindersNotif
+- Added 7 new action types to AyuAstroState interface: setAuthState, setLanguage, setVedicLevel, setDailyHoroscopeNotif, setMoodRemindersNotif, loginUser, logoutUser
+- Added initial state values for all new fields (isLoggedIn: false, authEmail/Phone: null, language: 'en', vedicLevel: 'standard', both notifs: true)
+- Implemented all 7 new actions with proper TypeScript typing
+- Updated partialize config to persist all 7 new fields across page refresh
+- Updated resetKundaliData to reset auth state fields
+- reset() action already uses set(initialState) so automatically includes new fields
+- Ran lint check — zero errors
+
+Stage Summary:
+- Store updated with auth state (isLoggedIn, authEmail, authPhone) and language preference (language, vedicLevel)
+- Notification toggles added (dailyHoroscopeNotif, moodRemindersNotif)
+- All new state persisted via partialize config
+- loginUser sets userId + auth state; logoutUser clears auth but keeps onboarding data
+- Zero lint errors, no other files modified
+
+---
+Task ID: 3
+Agent: Auth API Agent
+Task: Create auth API routes for signup, signin, profile, and preferences
+
+Work Log:
+- Created POST /api/auth/signup/route.ts — User registration with Zod validation (name min 2 chars, email or phone required, password min 6 chars), duplicate email/phone check (409), SHA-256 password hashing with random salt, creates User + default UserPreferences (language: 'en', vedicLevel: 'standard')
+- Created POST /api/auth/signin/route.ts — User login with Zod validation (email or phone required, password required), user lookup by email or phone, SHA-256 password verification against stored salt:hash, returns userId, name, email, phone, isOnboarded
+- Created GET /api/auth/profile/route.ts — Get user profile with preferences and astrology summary, accepts userId query param, fetches User + Profile + UserPreferences + AstrologyData via Prisma include, returns full profile data with preferences (language, darkMode, dailyHoroscope, moodReminders, vedicLevel, notificationsEnabled) and astrology summary (sunSign, moonSign, ascendant)
+- Created PUT /api/auth/preferences/route.ts — Update user preferences with Zod validation, language must be 'en'/'hi'/'hinglish', vedicLevel must be 'standard'/'detailed'/'hinglish', upserts UserPreferences record, returns updated preferences
+- Created PUT /api/auth/profile-update/route.ts — Update user profile with Zod validation (name min 2, email valid, phone required, avatar URL), checks for duplicate email/phone on update (409), only updates provided fields, returns updated user data
+- All routes use `import { db } from '@/lib/db'` for database access
+- All routes use Zod for validation with proper error responses (400)
+- Password hashing uses Node.js crypto: createHash('sha256') with randomBytes(16) salt, stored as `salt:hash`
+- Proper HTTP status codes: 200 (success), 201 (created), 400 (validation), 401 (unauthorized), 404 (not found), 409 (conflict), 500 (server error)
+- Had to regenerate Prisma client (bun run db:push) to ensure passwordHash field was recognized
+- All 5 routes tested successfully via curl: signup creates user, signin verifies password, profile returns full data, preferences updates correctly, profile-update works
+- ESLint passes with zero errors
+
+Stage Summary:
+- 5 API route files created under /src/app/api/auth/
+- Complete auth system: signup, signin, profile retrieval, preferences update, profile update
+- SHA-256 password hashing with salt (no bcrypt dependency needed)
+- Zod validation on all routes with proper error responses
+- All routes tested and working correctly
+
+---
+Task ID: 4
+Agent: Profile Enhancement Agent
+Task: Enhance ProfileView with account creation, login, and profile editing
+
+Work Log:
+- Read and analyzed current ProfileView.tsx (873 lines), ayuastro-store.ts, and all 5 auth API routes (signup, signin, profile, profile-update, preferences)
+- Created AuthCard sub-component with Sign Up / Sign In toggle, email/phone toggle, password show/hide, loading states, error handling, AnimatePresence transitions
+- Created AccountStatusCard sub-component with green "Signed in as" badge, email/phone display, member since date, Edit Profile button, Sign Out button
+- Created ProfileEditForm sub-component with inline editing for name/email/phone, Save/Cancel buttons, PUT /api/auth/profile-update integration, error states
+- Added isLoggedIn, authEmail, authPhone, loginUser, logoutUser from store to ProfileView
+- Added useEffect to fetch member since date from GET /api/auth/profile when logged in
+- AuthCard appears at TOP of profile view when not logged in; AccountStatusCard appears when logged in
+- ProfileEditForm renders inline when Edit Profile is clicked, with AnimatePresence enter/exit animations
+- After signup/signin success, calls loginUser(userId, email, phone) from store
+- After signout, calls logoutUser() from store and clears editing state
+- After profile save, updates store via loginUser and setBirthDetails
+- Added new imports: Input, AnimatePresence, Mail, Phone, Eye, EyeOff, LogIn, LogOut, Edit, Save, X
+- All new components follow AyuAstro design system: cream background, brown/gold/sage colors, serif headings, gold accent borders
+- Full dark mode support on all new elements
+- Responsive design with max-w-lg container
+- Smooth framer-motion animations with AnimatePresence for form transitions
+- Error states with red text, success toasts with cosmicToast
+- All existing profile content preserved (Cosmic Identity, Cosmic Score, Trait Highlights, Birth Details, Astrology, Numerology, Payment Status, Account Stats, Mood Journal, Breathing, Cosmic Age, Settings, Create New Kundali, Export, Start Over)
+- Lint check passes with zero errors
+- Dev server running with no errors
+
+Stage Summary:
+- ProfileView enhanced with complete account creation, login, and profile editing features
+- 3 new sub-components: AuthCard, AccountStatusCard, ProfileEditForm
+- Auth flow: Sign Up (name + email/phone + password) → Sign In (email/phone + password) → Logged In status → Edit Profile → Sign Out
+- All auth API routes integrated: POST /api/auth/signup, POST /api/auth/signin, GET /api/auth/profile, PUT /api/auth/profile-update
+- Store auth state properly managed: loginUser/logoutUser/setBirthDetails
+- Full AyuAstro design system compliance with dark mode support
+- Zero lint errors, zero runtime errors
+
+---
+Task ID: 5
+Agent: Settings & i18n Agent
+Task: Update SettingsView with Hinglish option and create Vedic i18n system
+
+Work Log:
+- Read existing SettingsView.tsx, ayuastro-store.ts, and API routes to understand current implementation
+- Verified PUT /api/auth/preferences API route already exists with Zod validation supporting language (en/hi/hinglish), vedicLevel (standard/detailed/hinglish), dailyHoroscope, moodReminders fields
+- Verified Prisma schema has UserPreferences model with all required fields (language, vedicLevel, dailyHoroscope, moodReminders)
+- Created /src/lib/vedic-i18n.ts — comprehensive Vedic content translation utility:
+  - VedicLanguage type: 'en' | 'hi' | 'hinglish'
+  - ZODIAC_NAMES: All 12 zodiac signs in English, Hindi (मेष, वृषभ, etc.), and Hinglish (Mesh, Vrishabh, etc.)
+  - PLANET_NAMES: All 9 Navagraha planets — Sun/सूर्य/Surya, Moon/चंद्र/Chandra, Mars/मंगल/Mangal, Mercury/बुध/Budh, Jupiter/बृहस्पति/Brihaspati, Venus/शुक्र/Shukra, Saturn/शनि/Shani, Rahu/राहु/Rahu, Ketu/केतु/Ketu
+  - NAKSHATRA_NAMES: All 27 Nakshatras in all 3 languages
+  - ELEMENT_NAMES: Fire/अग्नि/Agni, Earth/पृथ्वी/Prithvi, Air/वायु/Vayu, Water/जल/Jal
+  - DOSHA_NAMES: 6 doshas including Mangal Dosha/मांगलिक दोष/Mangal Dosh, Kaal Sarp Dosha, Pitra Dosha, Nadi Dosha, Shani Sade Sati, Grahan Dosha
+  - YOGA_NAMES: 18 yogas including Gajakesari, Raja, Dhana, Budhaditya, Chandra Mangal, Pancha Mahapurusha yogas, and more
+  - HOUSE_NAMES: All 12 houses with descriptions in all 3 languages (e.g., 1st Bhav/Self, 2nd Bhav/Dhan)
+  - MODALITY_NAMES: Cardinal/चर/Char, Fixed/स्थिर/Sthir, Mutable/द्वैध/Dwidh
+  - DASHA_PERIOD_NAMES: All 9 Mahadasha periods in all 3 languages
+  - ZODIAC_SYMBOLS and PLANET_SYMBOLS: Unicode symbol maps
+  - Helper functions: getZodiacName, getPlanetName, getNakshatraName, getElementName, getDoshaName, getYogaName, getHouseName, getModalityName, getDashaName, getZodiacSymbol, getPlanetSymbol
+  - Phrase helpers: getPlanetInSignPhrase (e.g., "Your Surya is in Mesh rashi"), getPlanetInHousePhrase, getElementQuality
+  - All functions have fallback to English if key not found
+- Updated SettingsView.tsx with major improvements:
+  - Replaced local state (useState + localStorage) with Zustand store values (language, vedicLevel, dailyHoroscopeNotif, moodRemindersNotif)
+  - Removed localStorage-based preference persistence — now fully driven by Zustand store with persist middleware
+  - Language selector: 3 pill buttons (🇬🇧 EN, 🇮🇳 हिं, 🔀 Hing) with gold highlight on active, flex-1 equal width
+  - Hinglish language shows animated preview: "Your Surya is in Mesh rashi, which gives you strong Agni tatva..."
+  - Vedic Content Level selector: 3 pill buttons (Standard, Detailed, Hinglish) with BookOpen icon
+  - Active vedic level shows animated description card with level explanation
+  - syncToBackend callback: calls PUT /api/auth/preferences on every preference change with userId
+  - "Saved ✓" indicator: appears in header with framer-motion AnimatePresence when preferences saved to backend, auto-hides after 2s
+  - All toggles (language, vedic level, dark mode, notifications) update both store AND backend
+  - Full dark mode support with dark: variants on all new elements
+  - Smooth framer-motion animations on language preview and vedic level description
+- Lint passes with zero errors
+
+Stage Summary:
+- 2 files created/modified: vedic-i18n.ts (new), SettingsView.tsx (updated)
+- Complete Vedic i18n translation system with 9 translation maps and 13 helper functions
+- SettingsView now reads from Zustand store and syncs to backend API
+- 3-option language selector (EN/Hindi/Hinglish) replaces old 2-option toggle
+- New Vedic Content Level selector with 3 options
+- "Saved ✓" indicator on backend sync success
+- All existing functionality preserved with no breaking changes
+- Zero lint errors
+---
+Task ID: profile-auth-1
+Agent: Main Coordinator
+Task: Enhance profile section with account creation, Hinglish language support, and preference saving
+
+Work Log:
+- Updated Prisma schema: Added passwordHash to User model, created UserPreferences model (language, vedicLevel, darkMode, dailyHoroscope, moodReminders, notificationsEnabled)
+- Ran db:push to sync schema changes
+- Created 5 auth API routes:
+  - POST /api/auth/signup - User registration with SHA-256 password hashing
+  - POST /api/auth/signin - User login with credential verification
+  - GET /api/auth/profile - Fetch user profile with preferences
+  - PUT /api/auth/preferences - Update user preferences (language, vedicLevel, etc.)
+  - PUT /api/auth/profile-update - Update user profile (name, email, phone)
+- Updated Zustand store: Added isLoggedIn, authEmail, authPhone, language, vedicLevel, dailyHoroscopeNotif, moodRemindersNotif + all action setters
+- Enhanced ProfileView: Added AuthCard (sign up/sign in forms), AccountStatusCard (logged-in state), ProfileEditForm (inline editing)
+- Updated SettingsView: 3-option language selector (EN/हिं/Hing), Vedic Content Level selector (Standard/Detailed/Hinglish), backend sync for all preferences, "Saved ✓" indicator
+- Created /src/lib/vedic-i18n.ts: Comprehensive translation system with 9 maps (Zodiac 12 signs, Planets 9, Nakshatras 27, Elements 4, Doshas 6, Yogas 18, Houses 12, Modalities 3, Dasha 9) and 13 helper functions for EN/HI/Hinglish
+- All API endpoints tested and working: signup returns 201, signin returns 200, preferences returns updated data
+- Lint passes with zero errors
+
+Stage Summary:
+- Full account creation and authentication system implemented
+- Users can sign up with email/phone + password, sign in, edit profile, and sign out
+- Language preference supports English, Hindi, and Hinglish (Hindi-English mix)
+- Vedic content level selector allows Standard, Detailed, or Hinglish mode
+- All preferences sync to backend via /api/auth/preferences
+- Comprehensive Vedic i18n translation system created for future use across the app
+- 7 new files created, 4 existing files modified

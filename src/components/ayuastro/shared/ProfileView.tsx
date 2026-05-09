@@ -1,13 +1,14 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAyuAstroStore, type TraitScore } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   User,
   Sun,
@@ -33,6 +34,15 @@ import {
   HelpCircle,
   Download,
   Settings,
+  Mail,
+  Phone,
+  Eye,
+  EyeOff,
+  LogIn,
+  LogOut,
+  Edit,
+  Save,
+  X,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
 const ZODIAC_ICONS: Record<string, string> = {
@@ -112,9 +122,631 @@ const staggerItem = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
+
+// ─── Auth Form Component ─────────────────────────────────────────────────────
+
+type AuthMode = 'signup' | 'signin';
+type ContactMethod = 'email' | 'phone';
+
+function AuthCard({ onAuthSuccess }: { onAuthSuccess: (userId: string, email?: string, phone?: string) => void }) {
+  const [mode, setMode] = useState<AuthMode>('signup');
+  const [contactMethod, setContactMethod] = useState<ContactMethod>('email');
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Signup fields
+  const [signupName, setSignupName] = useState('');
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPhone, setSignupPhone] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+
+  // Signin fields
+  const [signinEmail, setSigninEmail] = useState('');
+  const [signinPhone, setSigninPhone] = useState('');
+  const [signinPassword, setSigninPassword] = useState('');
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSignup = async () => {
+    setError(null);
+    if (!signupName.trim() || signupName.trim().length < 2) {
+      setError('Name must be at least 2 characters');
+      return;
+    }
+    if (contactMethod === 'email' && !signupEmail.trim()) {
+      setError('Email is required');
+      return;
+    }
+    if (contactMethod === 'phone' && !signupPhone.trim()) {
+      setError('Phone number is required');
+      return;
+    }
+    if (signupPassword.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const body: Record<string, string> = {
+        name: signupName.trim(),
+        password: signupPassword,
+      };
+      if (contactMethod === 'email') body.email = signupEmail.trim();
+      if (contactMethod === 'phone') body.phone = signupPhone.trim();
+
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        setError(data.error || 'Signup failed. Please try again.');
+        return;
+      }
+
+      cosmicToast.success('Welcome to AyuAstro! ✦', 'Your cosmic account has been created');
+      onAuthSuccess(data.userId, data.email, data.phone);
+    } catch {
+      setError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignin = async () => {
+    setError(null);
+    if (contactMethod === 'email' && !signinEmail.trim()) {
+      setError('Email is required');
+      return;
+    }
+    if (contactMethod === 'phone' && !signinPhone.trim()) {
+      setError('Phone number is required');
+      return;
+    }
+    if (!signinPassword) {
+      setError('Password is required');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const body: Record<string, string> = { password: signinPassword };
+      if (contactMethod === 'email') body.email = signinEmail.trim();
+      if (contactMethod === 'phone') body.phone = signinPhone.trim();
+
+      const res = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        setError(data.error || 'Invalid credentials');
+        return;
+      }
+
+      cosmicToast.cosmic('Welcome back! ✦', `Signed in as ${data.name || 'Seeker'}`);
+      onAuthSuccess(data.userId, data.email, data.phone);
+    } catch {
+      setError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const switchMode = () => {
+    setError(null);
+    setMode(mode === 'signup' ? 'signin' : 'signup');
+  };
+
+  const switchContactMethod = () => {
+    setError(null);
+    setContactMethod(contactMethod === 'email' ? 'phone' : 'email');
+  };
+
+  return (
+    <Card className="border-0 shadow-md overflow-hidden relative">
+      {/* Gold accent border at top */}
+      <div className="h-1 bg-gradient-to-r from-gold via-gold-light to-gold-dark" />
+      <CardContent className="p-6">
+        {/* Header */}
+        <div className="text-center mb-5">
+          <div className="flex justify-center mb-3">
+            <div className="flex size-14 items-center justify-center rounded-full bg-gold/10 dark:bg-gold/15 border border-gold/20">
+              {mode === 'signup' ? (
+                <User className="size-6 text-gold" />
+              ) : (
+                <LogIn className="size-6 text-gold" />
+              )}
+            </div>
+          </div>
+          <h3 className="font-serif text-lg font-bold text-brown-900 dark:text-brown-600">
+            {mode === 'signup' ? 'Create Your Account' : 'Welcome Back'}
+          </h3>
+          <p className="text-xs text-brown-400 dark:text-brown-500 mt-1">
+            {mode === 'signup'
+              ? 'Save your cosmic journey & access it anywhere'
+              : 'Sign in to continue your cosmic exploration'}
+          </p>
+        </div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={mode}
+            initial={{ opacity: 0, x: mode === 'signup' ? -20 : 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: mode === 'signup' ? 20 : -20 }}
+            transition={{ duration: 0.25 }}
+            className="space-y-3"
+          >
+            {/* Name field (signup only) */}
+            {mode === 'signup' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <label className="text-xs font-medium text-brown-700 dark:text-brown-400 mb-1.5 block">
+                  Full Name
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300 dark:text-brown-500" />
+                  <Input
+                    type="text"
+                    placeholder="Enter your name"
+                    value={signupName}
+                    onChange={(e) => setSignupName(e.target.value)}
+                    className="pl-10 bg-cream dark:bg-cream-dark border-brown-200 dark:border-brown-100/30 focus:border-gold dark:focus:border-gold text-brown-900 dark:text-brown-100 placeholder:text-brown-300 dark:placeholder:text-brown-500"
+                  />
+                </div>
+              </motion.div>
+            )}
+
+            {/* Contact method toggle */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-medium text-brown-700 dark:text-brown-400">
+                  {contactMethod === 'email' ? 'Email Address' : 'Phone Number'}
+                </label>
+                <button
+                  type="button"
+                  onClick={switchContactMethod}
+                  className="text-[11px] text-gold-dark dark:text-gold hover:underline font-medium"
+                >
+                  Use {contactMethod === 'email' ? 'phone' : 'email'} instead
+                </button>
+              </div>
+              <div className="relative">
+                {contactMethod === 'email' ? (
+                  <>
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300 dark:text-brown-500" />
+                    <Input
+                      type="email"
+                      placeholder="you@example.com"
+                      value={mode === 'signup' ? signupEmail : signinEmail}
+                      onChange={(e) => mode === 'signup' ? setSignupEmail(e.target.value) : setSigninEmail(e.target.value)}
+                      className="pl-10 bg-cream dark:bg-cream-dark border-brown-200 dark:border-brown-100/30 focus:border-gold dark:focus:border-gold text-brown-900 dark:text-brown-100 placeholder:text-brown-300 dark:placeholder:text-brown-500"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300 dark:text-brown-500" />
+                    <Input
+                      type="tel"
+                      placeholder="+91 98765 43210"
+                      value={mode === 'signup' ? signupPhone : signinPhone}
+                      onChange={(e) => mode === 'signup' ? setSignupPhone(e.target.value) : setSigninPhone(e.target.value)}
+                      className="pl-10 bg-cream dark:bg-cream-dark border-brown-200 dark:border-brown-100/30 focus:border-gold dark:focus:border-gold text-brown-900 dark:text-brown-100 placeholder:text-brown-300 dark:placeholder:text-brown-500"
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Password field */}
+            <div>
+              <label className="text-xs font-medium text-brown-700 dark:text-brown-400 mb-1.5 block">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300 dark:text-brown-500" />
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder={mode === 'signup' ? 'Min 6 characters' : 'Enter your password'}
+                  value={mode === 'signup' ? signupPassword : signinPassword}
+                  onChange={(e) => mode === 'signup' ? setSignupPassword(e.target.value) : setSigninPassword(e.target.value)}
+                  className="pl-10 pr-10 bg-cream dark:bg-cream-dark border-brown-200 dark:border-brown-100/30 focus:border-gold dark:focus:border-gold text-brown-900 dark:text-brown-100 placeholder:text-brown-300 dark:placeholder:text-brown-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-300 dark:text-brown-500 hover:text-gold dark:hover:text-gold transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Error message */}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 p-2.5"
+                >
+                  <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Submit button */}
+            <Button
+              onClick={mode === 'signup' ? handleSignup : handleSignin}
+              disabled={isLoading}
+              className="w-full bg-brown-700 dark:bg-gold dark:text-brown-900 text-white hover:bg-brown-800 dark:hover:bg-gold-light font-semibold"
+            >
+              {isLoading ? (
+                <motion.span
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  className="inline-block mr-2"
+                >
+                  <Sparkles className="size-4" />
+                </motion.span>
+              ) : mode === 'signup' ? (
+                <User className="mr-2 size-4" />
+              ) : (
+                <LogIn className="mr-2 size-4" />
+              )}
+              {isLoading
+                ? (mode === 'signup' ? 'Creating Account...' : 'Signing In...')
+                : (mode === 'signup' ? 'Create Account' : 'Sign In')}
+            </Button>
+
+            {/* Switch mode link */}
+            <p className="text-center text-xs text-brown-400 dark:text-brown-500 mt-2">
+              {mode === 'signup' ? (
+                <>
+                  Already have an account?{' '}
+                  <button type="button" onClick={switchMode} className="text-gold-dark dark:text-gold font-semibold hover:underline">
+                    Sign In
+                  </button>
+                </>
+              ) : (
+                <>
+                  Don&apos;t have an account?{' '}
+                  <button type="button" onClick={switchMode} className="text-gold-dark dark:text-gold font-semibold hover:underline">
+                    Sign Up
+                  </button>
+                </>
+              )}
+            </p>
+          </motion.div>
+        </AnimatePresence>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Account Status Card (Logged In) ─────────────────────────────────────────
+
+function AccountStatusCard({
+  isLoggedIn,
+  authEmail,
+  authPhone,
+  userId,
+  memberSince,
+  onSignOut,
+  onEditProfile,
+}: {
+  isLoggedIn: boolean;
+  authEmail: string | null;
+  authPhone: string | null;
+  userId: string | null;
+  memberSince: string;
+  onSignOut: () => void;
+  onEditProfile: () => void;
+}) {
+  const contactDisplay = authEmail || authPhone || '—';
+
+  return (
+    <Card className="card-hover border-0 shadow-md bg-white dark:bg-white/[0.08] transition-all hover:-translate-y-[3px] hover:shadow-lg overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-gold via-gold-light to-gold-dark" />
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
+          <Sparkles className="size-5 text-gold" />
+          Account
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {/* Logged in badge */}
+        {isLoggedIn && (
+          <div className="flex items-center gap-2 mb-3">
+            <span className="relative flex size-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span className="relative inline-flex rounded-full size-2.5 bg-green-500" />
+            </span>
+            <span className="text-xs font-medium text-green-700 dark:text-green-400">
+              Signed in as {contactDisplay}
+            </span>
+          </div>
+        )}
+
+        {/* Account details grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3">
+            <div className="flex items-center gap-1.5 mb-1">
+              {authEmail ? <Mail className="size-3 text-brown-400" /> : <Phone className="size-3 text-brown-400" />}
+              <p className="text-[10px] uppercase tracking-wider text-brown-400">
+                {authEmail ? 'Email' : 'Phone'}
+              </p>
+            </div>
+            <p className="text-xs font-semibold text-brown-900 dark:text-brown-600 truncate">
+              {contactDisplay}
+            </p>
+          </div>
+          <div className="rounded-xl bg-brown-50 dark:bg-brown-50/20 p-3">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Calendar className="size-3 text-brown-400" />
+              <p className="text-[10px] uppercase tracking-wider text-brown-400">Member Since</p>
+            </div>
+            <p className="text-xs font-semibold text-brown-900 dark:text-brown-600">{memberSince}</p>
+          </div>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex items-center gap-2 mt-3">
+          <Button
+            onClick={onEditProfile}
+            variant="outline"
+            size="sm"
+            className="flex-1 border-gold/30 text-gold-dark dark:text-gold hover:bg-gold/5 text-xs"
+          >
+            <Edit className="mr-1.5 size-3.5" />
+            Edit Profile
+          </Button>
+          <Button
+            onClick={onSignOut}
+            variant="ghost"
+            size="sm"
+            className="text-brown-400 dark:text-brown-500 hover:text-red-600 dark:hover:text-red-400 text-xs"
+          >
+            <LogOut className="mr-1.5 size-3.5" />
+            Sign Out
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Profile Edit Form ────────────────────────────────────────────────────────
+
+function ProfileEditForm({
+  currentName,
+  currentEmail,
+  currentPhone,
+  userId,
+  onCancel,
+  onSave,
+}: {
+  currentName: string;
+  currentEmail: string | null;
+  currentPhone: string | null;
+  userId: string | null;
+  onCancel: () => void;
+  onSave: (name: string, email: string, phone: string) => void;
+}) {
+  const [name, setName] = useState(currentName);
+  const [email, setEmail] = useState(currentEmail || '');
+  const [phone, setPhone] = useState(currentPhone || '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    setError(null);
+    if (!name.trim() || name.trim().length < 2) {
+      setError('Name must be at least 2 characters');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const body: Record<string, string> = { userId: userId!, name: name.trim() };
+      if (email.trim()) body.email = email.trim();
+      if (phone.trim()) body.phone = phone.trim();
+
+      const res = await fetch('/api/auth/profile-update', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        setError(data.error || 'Failed to update profile');
+        return;
+      }
+
+      cosmicToast.success('Profile Updated! ✦', 'Your changes have been saved');
+      onSave(data.user.name, data.user.email, data.user.phone);
+    } catch {
+      setError('Network error. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="border-0 shadow-md bg-white dark:bg-white/[0.08] overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-gold via-gold-light to-gold-dark" />
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
+            <Edit className="size-5 text-gold" />
+            Edit Profile
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {/* Name */}
+          <div>
+            <label className="text-xs font-medium text-brown-700 dark:text-brown-400 mb-1.5 block">Name</label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300 dark:text-brown-500" />
+              <Input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="pl-10 bg-cream dark:bg-cream-dark border-brown-200 dark:border-brown-100/30 focus:border-gold dark:focus:border-gold text-brown-900 dark:text-brown-100"
+              />
+            </div>
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="text-xs font-medium text-brown-700 dark:text-brown-400 mb-1.5 block">Email</label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300 dark:text-brown-500" />
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="pl-10 bg-cream dark:bg-cream-dark border-brown-200 dark:border-brown-100/30 focus:border-gold dark:focus:border-gold text-brown-900 dark:text-brown-100 placeholder:text-brown-300 dark:placeholder:text-brown-500"
+              />
+            </div>
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="text-xs font-medium text-brown-700 dark:text-brown-400 mb-1.5 block">Phone</label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brown-300 dark:text-brown-500" />
+              <Input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+91 98765 43210"
+                className="pl-10 bg-cream dark:bg-cream-dark border-brown-200 dark:border-brown-100/30 focus:border-gold dark:focus:border-gold text-brown-900 dark:text-brown-100 placeholder:text-brown-300 dark:placeholder:text-brown-500"
+              />
+            </div>
+          </div>
+
+          {/* Error */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 p-2.5"
+              >
+                <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Buttons */}
+          <div className="flex items-center gap-2 pt-1">
+            <Button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex-1 bg-brown-700 dark:bg-gold dark:text-brown-900 text-white hover:bg-brown-800 dark:hover:bg-gold-light text-xs"
+            >
+              {isSaving ? (
+                <motion.span
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  className="inline-block mr-1.5"
+                >
+                  <Sparkles className="size-3.5" />
+                </motion.span>
+              ) : (
+                <Save className="mr-1.5 size-3.5" />
+              )}
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
+            <Button
+              onClick={onCancel}
+              variant="outline"
+              size="sm"
+              className="border-brown-200 dark:border-brown-100/30 text-brown-500 dark:text-brown-400 hover:bg-brown-50 dark:hover:bg-brown-50/20 text-xs"
+            >
+              <X className="mr-1 size-3.5" />
+              Cancel
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
+// ─── Main ProfileView ─────────────────────────────────────────────────────────
+
 export default function ProfileView() {
-  const { birthDetails, astrologyData, numerologyData, traitScores, hasPaid, reportSections, reset, setView, userId, resetKundaliData, setOnboardingStep, setBirthDetails, reportLoading } = useAyuAstroStore();
+  const {
+    birthDetails, astrologyData, numerologyData, traitScores, hasPaid,
+    reportSections, reset, setView, userId, resetKundaliData, setOnboardingStep,
+    setBirthDetails, reportLoading, isLoggedIn, authEmail, authPhone,
+    loginUser, logoutUser,
+  } = useAyuAstroStore();
+
   const [isExporting, setIsExporting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [memberSince, setMemberSince] = useState<string>('—');
+
+  // Fetch member since date from profile API
+  useEffect(() => {
+    if (isLoggedIn && userId) {
+      fetch(`/api/auth/profile?userId=${encodeURIComponent(userId)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.user?.createdAt) {
+            const date = new Date(data.user.createdAt);
+            setMemberSince(date.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }));
+          }
+        })
+        .catch(() => {
+          // Silently fail — member since is non-critical
+        });
+    }
+  }, [isLoggedIn, userId]);
+
+  const handleAuthSuccess = (newUserId: string, email?: string, phone?: string) => {
+    loginUser(newUserId, email, phone);
+  };
+
+  const handleSignOut = () => {
+    logoutUser();
+    setIsEditing(false);
+    cosmicToast.info('Signed Out ✦', 'You have been signed out successfully');
+  };
+
+  const handleProfileSave = (name: string, email: string, phone: string) => {
+    // Update store with new profile data
+    loginUser(userId!, email || undefined, phone || undefined);
+    if (birthDetails) {
+      setBirthDetails({ name });
+    }
+    setIsEditing(false);
+  };
+
   const handleExportData = async () => {
     if (!userId) {
       cosmicToast.warning('No user data found', 'Please complete onboarding first');
@@ -128,7 +760,6 @@ export default function ProfileView() {
         throw new Error(data.error || data.message || 'Export failed');
       }
       const data = await response.json();
-      // Create downloadable JSON file
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -175,8 +806,9 @@ export default function ProfileView() {
     : 0;
   // Account stats
   const analysisDate = birthDetails?.dateOfBirth || '—';
-  const questionsAnswered = 8; // based on fixed questionnaire
+  const questionsAnswered = 8;
   const sectionsUnlocked = hasPaid ? reportSections.length : reportSections.filter(s => s.insightLevel === 'free').length;
+
   return (
     <div className="bg-cream px-4 py-6 pb-24">
       <motion.div
@@ -185,6 +817,44 @@ export default function ProfileView() {
         animate="animate"
         className="mx-auto max-w-lg space-y-6"
       >
+        {/* ── Account Creation Card (shown when NOT logged in) ── */}
+        {!isLoggedIn && (
+          <motion.div variants={staggerItem}>
+            <AuthCard onAuthSuccess={handleAuthSuccess} />
+          </motion.div>
+        )}
+
+        {/* ── Account Status Card (shown when LOGGED IN) ── */}
+        {isLoggedIn && (
+          <motion.div variants={staggerItem}>
+            <AccountStatusCard
+              isLoggedIn={isLoggedIn}
+              authEmail={authEmail}
+              authPhone={authPhone}
+              userId={userId}
+              memberSince={memberSince}
+              onSignOut={handleSignOut}
+              onEditProfile={() => setIsEditing(true)}
+            />
+          </motion.div>
+        )}
+
+        {/* ── Profile Edit Mode ── */}
+        <AnimatePresence>
+          {isEditing && (
+            <motion.div variants={staggerItem}>
+              <ProfileEditForm
+                currentName={birthDetails?.name || ''}
+                currentEmail={authEmail}
+                currentPhone={authPhone}
+                userId={userId}
+                onCancel={() => setIsEditing(false)}
+                onSave={handleProfileSave}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Cosmic Identity Card */}
         <motion.div variants={staggerItem}>
           <Card className="border-0 shadow-md overflow-hidden relative">
