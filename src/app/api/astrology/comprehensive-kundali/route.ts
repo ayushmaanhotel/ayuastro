@@ -637,6 +637,33 @@ export async function POST(request: NextRequest) {
         calculationDate: new Date().toISOString(),
       },
 
+      // Raw astrology data for store consistency sync
+      rawAstrologyData: {
+        sunSign: kundali.sunSign,
+        moonSign: kundali.moonSign,
+        ascendant: kundali.ascendant,
+        nakshatra: kundali.nakshatra.name,
+        currentDasha: kundali.dashaPeriods.currentMahadasha
+          ? `${kundali.dashaPeriods.currentMahadasha.planet}${kundali.dashaPeriods.currentAntardasha ? '/' + kundali.dashaPeriods.currentAntardasha.planet : ''}`
+          : '',
+        yogas: kundali.yogas.filter(y => y.present).map(y => y.name),
+        doshas: kundali.doshas.filter(d => d.present).map(d => d.name),
+        planetaryPositions: Object.fromEntries(
+          Object.entries(positions).map(([key, pos]) => [
+            key,
+            {
+              sign: pos.sign,
+              degree: pos.degreeInSign,
+              house: pos.house ?? getHouseFromAscendant(pos.signIndex, ascSignIndex),
+              retrograde: pos.isRetrograde,
+              nakshatra: pos.nakshatra,
+              nakshatraPada: pos.nakshatraPada,
+              isCombust: pos.isCombust,
+            },
+          ])
+        ),
+      },
+
       personalityBlueprint: generatePersonalityBlueprint(positions, ascSignIndex, karakas),
 
       karmaPatterns: generateKarmaPatterns(positions, ascSignIndex, karakas),

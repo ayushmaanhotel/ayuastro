@@ -69,11 +69,11 @@ const ZODIAC_ELEMENTS: Record<string, { element: string; modality: string; ruler
   Leo: { element: 'Fire', modality: 'Fixed', ruler: 'Sun', color: 'text-orange-500' },
   Virgo: { element: 'Earth', modality: 'Mutable', ruler: 'Mercury', color: 'text-green-500' },
   Libra: { element: 'Air', modality: 'Cardinal', ruler: 'Venus', color: 'text-pink-400' },
-  Scorpio: { element: 'Water', modality: 'Fixed', ruler: 'Pluto', color: 'text-purple-600' },
+  Scorpio: { element: 'Water', modality: 'Fixed', ruler: 'Mars', color: 'text-purple-600' },
   Sagittarius: { element: 'Fire', modality: 'Mutable', ruler: 'Jupiter', color: 'text-purple-500' },
   Capricorn: { element: 'Earth', modality: 'Cardinal', ruler: 'Saturn', color: 'text-gray-600' },
-  Aquarius: { element: 'Air', modality: 'Fixed', ruler: 'Uranus', color: 'text-cyan-500' },
-  Pisces: { element: 'Water', modality: 'Mutable', ruler: 'Neptune', color: 'text-teal-400' },
+  Aquarius: { element: 'Air', modality: 'Fixed', ruler: 'Saturn', color: 'text-cyan-500' },
+  Pisces: { element: 'Water', modality: 'Mutable', ruler: 'Jupiter', color: 'text-teal-400' },
 };
 const ELEMENT_ICONS: Record<string, React.ElementType> = {
   Fire: Flame,

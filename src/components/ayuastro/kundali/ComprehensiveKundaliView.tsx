@@ -16,6 +16,16 @@ import KundaliChart from '@/components/ayuastro/insights/KundaliChart';
 // ─── Types ──────────────────────────────────────────────────────────────────
 interface ComprehensiveData {
   calculationInfo: { engine: string; ayanamsa: number; calculationDate: string };
+  rawAstrologyData?: {
+    sunSign: string;
+    moonSign: string;
+    ascendant: string;
+    nakshatra: string;
+    currentDasha: string;
+    yogas: string[];
+    doshas: string[];
+    planetaryPositions: Record<string, { sign: string; degree: number; house: number; retrograde: boolean; nakshatra?: string; nakshatraPada?: number; isCombust?: boolean }>;
+  };
   personalityBlueprint: Record<string, any>;
   karmaPatterns: Record<string, any>;
   careerDharma: Record<string, any>;
@@ -149,7 +159,7 @@ function VargaCard({ name, ascSign, analysis }: { name: string; ascSign: string;
 }
 // ─── Main Component ────────────────────────────────────────────────────────
 export default function ComprehensiveKundaliView() {
-  const { userId, setView, birthDetails, astrologyData, numerologyData } = useAyuAstroStore();
+  const { userId, setView, birthDetails, astrologyData, numerologyData, setAstrologyData } = useAyuAstroStore();
   const [data, setData] = useState<ComprehensiveData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -170,6 +180,21 @@ export default function ComprehensiveKundaliView() {
         const json = await res.json();
         setData(json);
         setViewedSections(new Set([0]));
+
+        // Sync store with fresh API data for consistency across pages
+        if (json.rawAstrologyData) {
+          const raw = json.rawAstrologyData;
+          setAstrologyData({
+            sunSign: raw.sunSign || astrologyData?.sunSign || '',
+            moonSign: raw.moonSign || astrologyData?.moonSign || '',
+            ascendant: raw.ascendant || astrologyData?.ascendant || '',
+            nakshatra: raw.nakshatra || astrologyData?.nakshatra || '',
+            currentDasha: raw.currentDasha || astrologyData?.currentDasha || '',
+            yogas: raw.yogas || astrologyData?.yogas || [],
+            doshas: raw.doshas || astrologyData?.doshas || [],
+            planetaryPositions: raw.planetaryPositions || astrologyData?.planetaryPositions || {},
+          });
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load analysis');
       } finally {

@@ -21,12 +21,15 @@ import {
   TrendingDown,
   Crown,
   Eye,
+  Flame,
+  Moon,
 } from 'lucide-react';
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface BreakdownItem {
   score: number;
   label: string;
   description: string;
+  details?: string[];
 }
 interface KundaliScoreData {
   overallScore: number;
@@ -38,6 +41,8 @@ interface KundaliScoreData {
     doshaPenalty: BreakdownItem;
     housePlacement: BreakdownItem;
     ascendantLord: BreakdownItem;
+    nakshatraStrength?: BreakdownItem;
+    elementalBalance?: BreakdownItem;
   };
   honestAssessment: string;
   topStrength: string;
@@ -76,6 +81,8 @@ const BREAKDOWN_ICONS: Record<string, React.ElementType> = {
   doshaPenalty: Shield,
   housePlacement: Target,
   ascendantLord: Crown,
+  nakshatraStrength: Moon,
+  elementalBalance: Flame,
 };
 // ─── SVG Ring Component ───────────────────────────────────────────────────────
 function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
@@ -197,6 +204,7 @@ export default function KundaliScoreCard() {
   const planetaryPositions = astrologyData?.planetaryPositions || {};
   const yogas = astrologyData?.yogas || [];
   const doshas = astrologyData?.doshas || [];
+  const nakshatra = astrologyData?.nakshatra || '';
   useEffect(() => {
     async function fetchKundaliScore() {
       setLoading(true);
@@ -212,6 +220,7 @@ export default function KundaliScoreCard() {
             planetaryPositions,
             yogas,
             doshas,
+            nakshatra,
           }),
         });
         if (res.ok) {
@@ -232,7 +241,7 @@ export default function KundaliScoreCard() {
     } else {
       setLoading(false);
     }
-  }, [userId, sunSign, moonSign, ascendant, planetaryPositions, yogas, doshas]);
+  }, [userId, sunSign, moonSign, ascendant, planetaryPositions, yogas, doshas, nakshatra]);
   if (loading) return <KundaliScoreSkeleton />;
   if (!scoreData) {
     // Fallback: show a simplified card if no data
@@ -261,7 +270,9 @@ export default function KundaliScoreCard() {
     scoreData.breakdown.doshaPenalty,
     scoreData.breakdown.housePlacement,
     scoreData.breakdown.ascendantLord,
-  ];
+    scoreData.breakdown.nakshatraStrength,
+    scoreData.breakdown.elementalBalance,
+  ].filter(Boolean);
   return (
     <Card className="border-0 shadow-md overflow-hidden">
       {/* Gold accent bar */}

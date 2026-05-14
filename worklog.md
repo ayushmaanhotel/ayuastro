@@ -3903,3 +3903,47 @@ Stage Summary:
 - SVG visibility fixed for dark mode in KundaliChart
 - UI enhanced with cosmic identity banner and decorative elements
 - No more generic "one size fits all" default content
+
+---
+Task ID: kundali-score-fix
+Agent: Main Coordinator
+Task: Update point calculation algorithm for accurate 100-point kundali scoring and fix data inconsistency across pages
+
+Work Log:
+- Rewrote `/src/app/api/astrology/kundali-score/route.ts` — complete algorithm overhaul:
+  - **Fixed critical bug**: Weights previously summed to 1.20 (0.30+0.25+0.20+0.25+0.20), now correctly sum to 1.0 (0.25+0.15+0.15+0.15+0.15+0.10+0.05)
+  - **Added planet dignity scoring**: Planets now scored based on relationship with sign lord (Great Friend=7.5, Friend=7, Neutral=5, Enemy=3.5, Great Enemy=2.5) instead of generic "6" for anything not exalted/debilitated
+  - **Added combustion penalty**: -2 points per combust planet
+  - **Added retrograde bonus**: +0.5 for retrograde planets (Vedic cheshta bala)
+  - **New section: Nakshatra Strength (10% weight)**: Evaluates Moon nakshatra nature (Deva/Manushya/Rakshasa), nakshatra lord dignity, Moon's house placement
+  - **New section: Elemental Balance (5% weight)**: Checks if all 4 elements are represented, penalizes concentration/absence
+  - **Improved house placement calculation**: Fixed the 50-point base that could exceed 100; added kendra-trikona distribution bonus, house concentration penalty, empty house penalties
+  - **Improved ascendant lord calculation**: Now uses sign lord relationship for more nuanced scoring
+  - **Improved yoga scoring**: Differentiated powerful yogas (Raj Yoga, Panch Mahapurusha: 20 pts) vs good yogas (12 pts) vs minor (8 pts)
+  - **Improved dosha penalties**: More accurate severity weights (Kaal Sarp=22, Mangal=18, Sade Sati=16, etc.)
+  - **Added personalized remedies**: Based on weak chart areas (planet strength, nakshatra, doshas)
+  - **Added nakshatra parameter to API schema**: For proper nakshatra-based scoring
+  - **Fixed semantic inversion**: When yoga score is the top challenge, rephrases as "your chart lacks major boosters" instead of showing blessing description
+- Updated `/src/components/ayuastro/insights/KundaliScoreCard.tsx`:
+  - Added nakshatra and elementalBalance to breakdown types
+  - Added Nakshatra Strength and Elemental Balance to breakdown display
+  - Added Moon and Flame icons for new sections
+  - Added nakshatra parameter to API request
+  - Updated useEffect dependency array
+- Fixed Vedic astrology consistency in InsightsView:
+  - Changed ZODIAC_ELEMENTS ruler for Scorpio from "Pluto" to "Mars" (Vedic)
+  - Changed ZODIAC_ELEMENTS ruler for Aquarius from "Uranus" to "Saturn" (Vedic)
+  - Changed ZODIAC_ELEMENTS ruler for Pisces from "Neptune" to "Jupiter" (Vedic)
+- Fixed data inconsistency across pages:
+  - Added `rawAstrologyData` to comprehensive-kundali API response
+  - Updated ComprehensiveKundaliView to sync store with API data on fetch
+  - This ensures planetary positions, yogas, doshas, and signs are consistent between Insights, Kundali Score, and Comprehensive views
+
+Stage Summary:
+- Kundali score algorithm now uses 7 categories with proper weights summing to 1.0
+- Planet dignity scoring based on actual Vedic planetary relationships
+- Two new scoring categories: Nakshatra Strength and Elemental Balance
+- Data consistency ensured across all views through store sync mechanism
+- Vedic rulers corrected in InsightsView (no more Western astrology rulers)
+- Tested via agent-browser: Score card renders properly with all 7 breakdown items
+- Zero lint errors, zero runtime errors
