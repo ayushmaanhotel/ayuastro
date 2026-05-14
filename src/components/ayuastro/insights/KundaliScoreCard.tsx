@@ -23,6 +23,11 @@ import {
   Eye,
   Flame,
   Moon,
+  Gem,
+  HandHeart,
+  Sun,
+  Utensils,
+  Compass,
 } from 'lucide-react';
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface BreakdownItem {
@@ -30,6 +35,20 @@ interface BreakdownItem {
   label: string;
   description: string;
   details?: string[];
+  subScores?: Record<string, number>;
+}
+interface ShadbalaDetails {
+  sthanaBala: number;
+  digBala: number;
+  chestaBala: number;
+  navamshaBonus: number;
+}
+interface VedicRemedies {
+  gemstones: string[];
+  mantras: string[];
+  dayPractices: string[];
+  fasting: string[];
+  disclaimer: string;
 }
 interface KundaliScoreData {
   overallScore: number;
@@ -48,6 +67,8 @@ interface KundaliScoreData {
   topStrength: string;
   topChallenge: string;
   remedies: string[];
+  shadbalaDetails?: ShadbalaDetails;
+  vedicRemedies?: VedicRemedies;
 }
 // ─── Helper Functions ─────────────────────────────────────────────────────────
 function getScoreColor(score: number): string {
@@ -66,8 +87,8 @@ function getBarBg(score: number): string {
   return 'bg-red-100 dark:bg-red-900/20';
 }
 function getGradeColor(grade: string): string {
-  if (grade.startsWith('A')) return 'text-sage-dark dark:text-sage bg-sage-muted/30 dark:bg-sage/10';
-  if (grade.startsWith('B')) return 'text-gold-dark dark:text-gold bg-gold/10';
+  if (grade === 'Exceptional' || grade === 'Strong') return 'text-sage-dark dark:text-sage bg-sage-muted/30 dark:bg-sage/10';
+  if (grade === 'Good' || grade === 'Average') return 'text-gold-dark dark:text-gold bg-gold/10';
   return 'text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20';
 }
 function getRingStroke(score: number): string {
@@ -76,13 +97,16 @@ function getRingStroke(score: number): string {
   return '#EF4444'; // red-500
 }
 const BREAKDOWN_ICONS: Record<string, React.ElementType> = {
-  planetStrength: Star,
-  yogaScore: Sparkles,
-  doshaPenalty: Shield,
-  housePlacement: Target,
-  ascendantLord: Crown,
-  nakshatraStrength: Moon,
-  elementalBalance: Flame,
+  'Graha Strength (Shadbala)': Star,
+  'Planet Strength': Star,
+  'Yogas & Blessings': Sparkles,
+  'Doshas & Challenges': Shield,
+  'Bhava Strength': Target,
+  'House Layout': Target,
+  'Lagna Lord': Crown,
+  'Ascendant Lord': Crown,
+  'Nakshatra Strength': Moon,
+  'Elemental Balance': Flame,
 };
 // ─── SVG Ring Component ───────────────────────────────────────────────────────
 function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
@@ -162,6 +186,16 @@ function BreakdownBar({ item, delay = 0 }: { item: BreakdownItem; delay?: number
         />
       </div>
       <p className="text-[11px] text-brown-500 dark:text-brown-600 leading-relaxed">{item.description}</p>
+      {/* Shabdala sub-scores for Planet Strength */}
+      {item.subScores && (
+        <div className="flex gap-2 mt-1">
+          {Object.entries(item.subScores).map(([key, val]) => (
+            <span key={key} className="text-[9px] px-1.5 py-0.5 rounded bg-brown-50 dark:bg-brown-800/50 text-brown-500 dark:text-brown-400 font-medium">
+              {key}: {val}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -198,6 +232,7 @@ export default function KundaliScoreCard() {
   const [loading, setLoading] = useState(true);
   const [detailsExpanded, setDetailsExpanded] = useState(false);
   const [remediesExpanded, setRemediesExpanded] = useState(false);
+  const [vedicRemediesExpanded, setVedicRemediesExpanded] = useState(false);
   const sunSign = astrologyData?.sunSign || '';
   const moonSign = astrologyData?.moonSign || '';
   const ascendant = astrologyData?.ascendant || '';
@@ -273,6 +308,14 @@ export default function KundaliScoreCard() {
     scoreData.breakdown.nakshatraStrength,
     scoreData.breakdown.elementalBalance,
   ].filter(Boolean);
+
+  const hasVedicRemedies = scoreData.vedicRemedies && (
+    scoreData.vedicRemedies.gemstones.length > 0 ||
+    scoreData.vedicRemedies.mantras.length > 0 ||
+    scoreData.vedicRemedies.dayPractices.length > 0 ||
+    scoreData.vedicRemedies.fasting.length > 0
+  );
+
   return (
     <Card className="border-0 shadow-md overflow-hidden">
       {/* Gold accent bar */}
@@ -291,13 +334,46 @@ export default function KundaliScoreCard() {
             <span
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${getGradeColor(scoreData.grade)}`}
             >
-              Grade {scoreData.grade}
+              {scoreData.grade}
             </span>
           </motion.div>
-          <p className="text-[11px] text-brown-500 dark:text-brown-600 mt-1 text-center">
+          <p className="text-[11px] text-brown-500 dark:text-brown-600 mt-1 text-center leading-relaxed">
             {scoreData.gradeDescription}
           </p>
         </div>
+
+        {/* Shadbala Summary (if available) */}
+        {scoreData.shadbalaDetails && (
+          <div className="bg-brown-50/50 dark:bg-brown-800/30 rounded-lg p-2.5 mb-4 border border-brown-100/50 dark:border-brown-700/30">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Compass className="size-3 text-brown-500 dark:text-brown-400" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-brown-600 dark:text-brown-400">
+                Shadbala Components
+              </span>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              <div className="text-center">
+                <div className="text-xs font-bold text-brown-800 dark:text-brown-300">{scoreData.shadbalaDetails.sthanaBala}</div>
+                <div className="text-[9px] text-brown-500 dark:text-brown-500">Sthana</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs font-bold text-brown-800 dark:text-brown-300">{scoreData.shadbalaDetails.digBala}</div>
+                <div className="text-[9px] text-brown-500 dark:text-brown-500">Dig Bala</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs font-bold text-brown-800 dark:text-brown-300">{scoreData.shadbalaDetails.chestaBala}</div>
+                <div className="text-[9px] text-brown-500 dark:text-brown-500">Cheshta</div>
+              </div>
+              <div className="text-center">
+                <div className={`text-xs font-bold ${scoreData.shadbalaDetails.navamshaBonus >= 0 ? 'text-sage-dark dark:text-sage' : 'text-red-500'}`}>
+                  {scoreData.shadbalaDetails.navamshaBonus >= 0 ? '+' : ''}{scoreData.shadbalaDetails.navamshaBonus}
+                </div>
+                <div className="text-[9px] text-brown-500 dark:text-brown-500">Navamsha</div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Honest Assessment */}
         <div className="bg-gold/5 dark:bg-gold/5 rounded-lg p-3 mb-4 border border-gold/10 dark:border-gold/10">
           <div className="flex items-center gap-1.5 mb-1.5">
@@ -381,7 +457,7 @@ export default function KundaliScoreCard() {
             ))}
           </div>
         )}
-        {/* Remedies */}
+        {/* Basic Remedies */}
         {scoreData.remedies.length > 0 && (
           <Collapsible open={remediesExpanded} onOpenChange={setRemediesExpanded}>
             <CollapsibleTrigger asChild>
@@ -392,7 +468,7 @@ export default function KundaliScoreCard() {
               >
                 <span className="flex items-center gap-1.5">
                   <Lightbulb className="size-3" />
-                  Recommended Remedies
+                  Recommended Upaya (Remedies)
                 </span>
                 <ChevronDown className={`size-3 transition-transform ${remediesExpanded ? 'rotate-180' : ''}`} />
               </Button>
@@ -415,6 +491,119 @@ export default function KundaliScoreCard() {
                         </li>
                       ))}
                     </ul>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+
+        {/* Vedic-Specific Remedies */}
+        {hasVedicRemedies && (
+          <Collapsible open={vedicRemediesExpanded} onOpenChange={setVedicRemediesExpanded}>
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-between text-xs font-semibold text-brown-600 dark:text-brown-300 hover:text-brown-800 dark:hover:text-brown-100 px-0 py-1 h-auto mt-1"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Gem className="size-3" />
+                  Vedic Remedies (Ratna, Mantra, Vrata)
+                </span>
+                <ChevronDown className={`size-3 transition-transform ${vedicRemediesExpanded ? 'rotate-180' : ''}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <AnimatePresence>
+                {vedicRemediesExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="space-y-3 pb-2 pt-1">
+                      {/* Gemstones */}
+                      {scoreData.vedicRemedies!.gemstones.length > 0 && (
+                        <div>
+                          <div className="flex items-center gap-1 mb-1">
+                            <Gem className="size-3 text-gold-dark dark:text-gold" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-gold-dark dark:text-gold">Ratna (Gemstones)</span>
+                          </div>
+                          <ul className="space-y-1 ml-4">
+                            {scoreData.vedicRemedies!.gemstones.map((g, i) => (
+                              <li key={i} className="text-[11px] text-brown-700 dark:text-brown-500 leading-relaxed flex items-start gap-1.5">
+                                <span className="text-gold-dark dark:text-gold mt-0.5 shrink-0 text-[9px]">◆</span>
+                                {g}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Mantras */}
+                      {scoreData.vedicRemedies!.mantras.length > 0 && (
+                        <div>
+                          <div className="flex items-center gap-1 mb-1">
+                            <HandHeart className="size-3 text-sage-dark dark:text-sage" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-sage-dark dark:text-sage">Mantra (Chants)</span>
+                          </div>
+                          <ul className="space-y-1 ml-4">
+                            {scoreData.vedicRemedies!.mantras.map((m, i) => (
+                              <li key={i} className="text-[11px] text-brown-700 dark:text-brown-500 leading-relaxed flex items-start gap-1.5">
+                                <span className="text-sage-dark dark:text-sage mt-0.5 shrink-0 text-[9px]">ॐ</span>
+                                {m}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Day Practices */}
+                      {scoreData.vedicRemedies!.dayPractices.length > 0 && (
+                        <div>
+                          <div className="flex items-center gap-1 mb-1">
+                            <Sun className="size-3 text-brown-600 dark:text-brown-400" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-brown-600 dark:text-brown-400">Day-Specific Practices</span>
+                          </div>
+                          <ul className="space-y-1 ml-4">
+                            {scoreData.vedicRemedies!.dayPractices.map((d, i) => (
+                              <li key={i} className="text-[11px] text-brown-700 dark:text-brown-500 leading-relaxed flex items-start gap-1.5">
+                                <span className="text-brown-500 dark:text-brown-400 mt-0.5 shrink-0 text-[9px]">☀</span>
+                                {d}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Fasting */}
+                      {scoreData.vedicRemedies!.fasting.length > 0 && (
+                        <div>
+                          <div className="flex items-center gap-1 mb-1">
+                            <Utensils className="size-3 text-brown-500 dark:text-brown-400" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-brown-500 dark:text-brown-400">Vrata (Fasting)</span>
+                          </div>
+                          <ul className="space-y-1 ml-4">
+                            {scoreData.vedicRemedies!.fasting.map((f, i) => (
+                              <li key={i} className="text-[11px] text-brown-700 dark:text-brown-500 leading-relaxed flex items-start gap-1.5">
+                                <span className="text-brown-500 dark:text-brown-400 mt-0.5 shrink-0 text-[9px]">•</span>
+                                {f}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Disclaimer */}
+                      <div className="bg-gold/5 dark:bg-gold/5 rounded-md p-2 border border-gold/10 dark:border-gold/10 mt-2">
+                        <p className="text-[10px] text-brown-500 dark:text-brown-600 leading-relaxed italic">
+                          {scoreData.vedicRemedies!.disclaimer}
+                        </p>
+                      </div>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>

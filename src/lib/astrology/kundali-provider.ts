@@ -16,7 +16,7 @@
  */
 
 import { db } from '@/lib/db';
-import { calculateKundali } from './index';
+import { calculateKundali, getCalculationMethod, initializeSwissEphemeris } from './index';
 import {
   type KundaliData,
   type PlanetPosition,
@@ -39,6 +39,8 @@ export interface KundaliProviderResult {
   fromStorage: boolean;
   /** Whether a recalculation was performed and the result should be saved back */
   shouldSave: boolean;
+  /** Which calculation method produced this data */
+  calculationMethod: 'swiss-ephemeris' | 'meeus-fallback';
 }
 
 // ─── JSON Parsing Helpers ─────────────────────────────────────────────────────
@@ -126,6 +128,9 @@ function normalizeHouseData(houses: HouseData[]): HouseData[] {
  * @returns KundaliProviderResult with the kundali data and metadata
  */
 export async function getKundaliData(userId: string): Promise<KundaliProviderResult> {
+  // Ensure Swiss Ephemeris is initialized before any calculation
+  await initializeSwissEphemeris();
+
   // Step 1: Fetch user with profile and astrology data
   const user = await db.user.findUnique({
     where: { id: userId },
@@ -202,6 +207,7 @@ export async function getKundaliData(userId: string): Promise<KundaliProviderRes
         kundali,
         fromStorage: true,
         shouldSave: false, // Data is already stored
+        calculationMethod: getCalculationMethod(),
       };
     }
   }
@@ -227,6 +233,7 @@ export async function getKundaliData(userId: string): Promise<KundaliProviderRes
     kundali,
     fromStorage: false,
     shouldSave: true, // Should save the recalculated data to DB
+    calculationMethod: getCalculationMethod(),
   };
 }
 

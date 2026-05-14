@@ -1,6 +1,37 @@
 /**
  * AyuAstro - Core Planetary Calculation Engine
  *
+ * ═════════════════════════════════════════════════════════════════════════
+ * VEDIC ASTROLOGY METHOD ENFORCEMENT
+ * ═════════════════════════════════════════════════════════════════════════
+ * This engine STRICTLY follows Vedic (sidereal) astrology per Parashari:
+ *
+ * 1. LAHIRI AYANAMSA (Chitrapaksha)
+ *    - The official ayanamsa adopted by the Government of India
+ *    - Used to convert tropical longitudes to sidereal longitudes
+ *    - Expected range: ~23°-25° for modern dates (1900-2100)
+ *    - Any value outside this range indicates a calculation error
+ *
+ * 2. WHOLE SIGN HOUSE SYSTEM
+ *    - The standard house system in Vedic/Jyotish astrology
+ *    - Each house = one complete zodiac sign (30°)
+ *    - House 1 = the sign containing the ascendant (Lagna)
+ *    - House N = sign N-1 positions away from ascendant sign
+ *    - NOT Equal house, NOT Placidus, NOT Koch
+ *
+ * 3. VIMSHOTTARI DASHA SYSTEM
+ *    - 120-year cycle based on Moon's nakshatra at birth
+ *    - 9 Mahadasha periods: Ketu(7), Venus(20), Sun(6), Moon(10),
+ *      Mars(7), Rahu(18), Jupiter(16), Saturn(19), Mercury(17)
+ *    - Each Mahadasha contains Antardashas in the same sequence
+ *
+ * 4. PARASHARI PRINCIPLES
+ *    - Traditional Vedic astrology as codified by Sage Parashara
+ *    - Planet-centric analysis (graha-phala)
+ *    - Emphasis on Moon sign (Rashi) and nakshatra for predictions
+ *    - Yoga and dosha detection per classical texts
+ * ═════════════════════════════════════════════════════════════════════════
+ *
  * PRIMARY: Uses Swiss Ephemeris (sweph) for professional-grade accuracy
  * (arc-minute level). The Swiss Ephemeris uses Moshier built-in ephemeris
  * so no external data files are required.
@@ -47,6 +78,7 @@ import {
   swephCalcHouses,
   swephGetAyanamsa,
   swephDateToJD,
+  getSwephHealthStatus,
 } from './swiss-ephemeris';
 
 // ─── Module State ────────────────────────────────────────────────────────────
@@ -70,12 +102,15 @@ export async function initializeSwissEphemeris(): Promise<boolean> {
     const result = await initSweph();
     swephReady = result.ready;
     if (swephReady) {
-      console.log('[Calculator] Swiss Ephemeris initialized successfully');
+      console.log('[Calculator] ✓ Swiss Ephemeris initialized successfully — using arc-minute accuracy');
     } else {
-      console.warn(`[Calculator] Swiss Ephemeris unavailable: ${result.error}. Falling back to Meeus calculations.`);
+      console.error('[Calculator] ✗ Swiss Ephemeris UNAVAILABLE: %s', result.error);
+      console.error('[Calculator] ✗ Falling back to Meeus calculations with ~1-3° error');
+      console.error('[Calculator] ✗ THIS IS A CRITICAL ISSUE — planetary sign placements may be WRONG at sign boundaries');
     }
   } catch (err) {
-    console.warn('[Calculator] Swiss Ephemeris init error:', err);
+    console.error('[Calculator] ✗ Swiss Ephemeris init error:', err);
+    console.error('[Calculator] ✗ Falling back to Meeus calculations with ~1-3° error');
     swephReady = false;
   }
 
@@ -87,6 +122,29 @@ export async function initializeSwissEphemeris(): Promise<boolean> {
  */
 export function isSwissEphemerisReady(): boolean {
   return swephReady;
+}
+
+/**
+ * Get the current calculation method being used.
+ * Returns 'swiss-ephemeris' if the native module is loaded and active,
+ * or 'meeus-fallback' if Swiss Ephemeris is unavailable.
+ *
+ * This can be called from API routes to inform the frontend which
+ * calculation engine produced the results.
+ */
+export function getCalculationMethod(): 'swiss-ephemeris' | 'meeus-fallback' {
+  return swephReady ? 'swiss-ephemeris' : 'meeus-fallback';
+}
+
+/**
+ * Get detailed health status of the calculation engine.
+ * Includes method, version, error info, and init state.
+ */
+export function getCalculatorHealthStatus() {
+  return {
+    ...getSwephHealthStatus(),
+    calculatorInitialized: swephInitAttempted,
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -626,17 +684,39 @@ export function calculateAllPlanetaryPositions(
   ayanamsa: number;
   ascendant: AscendantData;
 } {
+  let result: { positions: Record<string, PlanetPosition>; ayanamsa: number; ascendant: AscendantData };
+
   if (swephReady) {
     try {
       // Adjust date to UTC for Swiss Ephemeris
       const utcDate = new Date(date.getTime() - timezoneOffset * 3600000);
-      return calculateAllPlanetaryPositionsSweph(utcDate, latitude, longitude);
+      result = calculateAllPlanetaryPositionsSweph(utcDate, latitude, longitude);
     } catch (err) {
-      console.warn('[Calculator] Swiss Ephemeris calculation failed, falling back to Meeus:', err);
-      // Fall through to Meeus
+      console.error('[Calculator] Swiss Ephemeris calculation FAILED, falling back to Meeus:', err);
+      result = calculateAllPlanetaryPositionsMeeus(date, latitude, longitude, timezoneOffset);
     }
+  } else {
+    result = calculateAllPlanetaryPositionsMeeus(date, latitude, longitude, timezoneOffset);
   }
-  return calculateAllPlanetaryPositionsMeeus(date, latitude, longitude, timezoneOffset);
+
+  // ── Validate Ayanamsa Value ──────────────────────────────────────────────
+  // Lahiri Ayanamsa for modern dates (1900-2100) should be approximately
+  // 23°-25°. Values outside this range indicate a calculation error.
+  const ayanamsa = result.ayanamsa;
+  if (ayanamsa < 22 || ayanamsa > 26) {
+    console.error(
+      `[Calculator] ⚠️ AYANAMSA VALUE SEEMS WRONG: ${ayanamsa.toFixed(4)}° — ` +
+      `expected ~23°-25° for modern dates (Lahiri/Chitrapaksha). ` +
+      `This may cause INCORRECT sidereal positions! Calculation method: ${getCalculationMethod()}`
+    );
+  } else if (ayanamsa < 23 || ayanamsa > 25) {
+    console.warn(
+      `[Calculator] Ayanamsa value ${ayanamsa.toFixed(4)}° is within acceptable range ` +
+      `but outside the ideal 23°-25° range for modern dates.`
+    );
+  }
+
+  return result;
 }
 
 // ─── Convenience: Sidereal longitude for a specific planet ───────────────────

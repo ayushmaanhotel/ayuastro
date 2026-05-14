@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { calculateKundali } from '@/lib/astrology';
+import { calculateKundali, getCalculationMethod, initializeSwissEphemeris } from '@/lib/astrology';
 import { calculateNumerology } from '@/lib/numerology';
 import {
   computeAllTraits,
@@ -81,6 +81,9 @@ function safeStringify(obj: unknown): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure Swiss Ephemeris is initialized before calculations
+    await initializeSwissEphemeris();
+
     const body = await request.json();
     const parsed = processAllSchema.safeParse(body);
 
@@ -395,6 +398,7 @@ export async function POST(request: NextRequest) {
         success: hasPartialSuccess ? true : false,
         data: {
           userId: user.id,
+          calculationMethod: getCalculationMethod(),
           astrology: kundali
             ? {
                 sunSign: kundali.sunSign,

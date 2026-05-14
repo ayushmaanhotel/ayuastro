@@ -117,6 +117,7 @@ function validateInput(input: AIReportInput): void {
 
 /**
  * Parse the raw AI response into a structured GeneratedReport.
+ * Includes fallback extraction if the AI returns malformed JSON.
  */
 function parseAIResponse(
   rawContent: string,
@@ -189,12 +190,107 @@ function parseAIResponse(
     };
   } catch (error) {
     if (error instanceof AIEngineError) throw error;
+
+    // ── Fallback: Try to extract sections from raw text if JSON parsing failed ──
+    console.warn('[Report Generator] JSON parsing failed, attempting raw text extraction...');
+    const fallbackResult = tryExtractFromRawText(rawContent, templates);
+    if (fallbackResult) {
+      console.info(`[Report Generator] Raw text extraction succeeded — recovered ${fallbackResult.sections.length} sections`);
+      return fallbackResult;
+    }
+
     throw new AIEngineError(
       AIErrorType.PARSING_FAILED,
       `Failed to parse AI response: ${error instanceof Error ? error.message : String(error)}`,
       false,
       error
     );
+  }
+}
+
+/**
+ * Attempt to extract report sections from raw text when JSON parsing fails.
+ * Looks for section patterns like ## Section ID, ### Section Title, etc.
+ */
+function tryExtractFromRawText(
+  rawContent: string,
+  templates: ReportSectionTemplate[]
+): GeneratedReport | null {
+  try {
+    const templateMap = new Map<string, ReportSectionTemplate>();
+    for (const t of templates) {
+      templateMap.set(t.id, t);
+    }
+
+    const sections: ReportSection[] = [];
+
+    // Try to find JSON-like structures embedded in the text
+    const jsonMatch = rawContent.match(/\{[\s\S]*"sections"[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.sections && Array.isArray(parsed.sections)) {
+          for (const s of parsed.sections) {
+            if (s.id && s.content && templateMap.has(s.id)) {
+              const template = templateMap.get(s.id)!;
+              sections.push({
+                id: template.id,
+                title: template.title,
+                icon: template.icon,
+                content: s.content,
+                traits: template.traits,
+                insightLevel: template.insightLevel,
+              });
+            }
+          }
+        }
+      } catch {
+        // Embedded JSON also failed, continue to text extraction
+      }
+    }
+
+    // If we found sections from embedded JSON, return them
+    if (sections.length > 0) {
+      return {
+        title: 'Your Deep Intelligence Report',
+        summary: 'A comprehensive analysis of your personality, patterns, and life trajectory.',
+        sections,
+      };
+    }
+
+    // Try to extract content by section IDs from markdown text
+    for (const template of templates) {
+      // Look for patterns like "## section-id" or "### Section Title"
+      const sectionPatterns = [
+        new RegExp(`(?:##|###)\\s+${template.id}[\\s\\S]*?(?=(?:##|###)\\s+\\w|$)`, 'i'),
+        new RegExp(`"${template.id}"[\\s\\S]*?"content"\\s*:\\s*"([\\s\\S]*?)"`, 'i'),
+      ];
+
+      for (const pattern of sectionPatterns) {
+        const match = rawContent.match(pattern);
+        if (match) {
+          sections.push({
+            id: template.id,
+            title: template.title,
+            icon: template.icon,
+            content: match[1] || match[0],
+            traits: template.traits,
+            insightLevel: template.insightLevel,
+          });
+          break;
+        }
+      }
+    }
+
+    if (sections.length === 0) return null;
+
+    return {
+      title: 'Your Deep Intelligence Report',
+      summary: 'A comprehensive analysis of your personality, patterns, and life trajectory.',
+      sections,
+    };
+  } catch {
+    return null;
   }
 }
 
@@ -248,17 +344,26 @@ function parseSectionResponse(
 
 /**
  * Execute an AI call with retry logic for transient failures.
+ * Includes configurable timeout per attempt.
  */
 async function withRetry<T>(
   fn: () => Promise<T>,
   maxRetries: number = 2,
-  delayMs: number = 1000
+  delayMs: number = 1000,
+  timeoutMs: number = 120000 // 2 minute timeout per attempt
 ): Promise<T> {
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      return await fn();
+      // Wrap the function call in a timeout
+      const result = await Promise.race([
+        fn(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`AI call timed out after ${timeoutMs / 1000}s`)), timeoutMs)
+        ),
+      ]);
+      return result;
     } catch (error) {
       lastError = error;
 
@@ -280,6 +385,8 @@ async function withRetry<T>(
           error
         );
       }
+
+      console.warn(`[Report Generator] Attempt ${attempt + 1} failed: ${error instanceof Error ? error.message : String(error)}`);
 
       // Wait before retrying
       if (attempt < maxRetries) {
@@ -487,12 +594,21 @@ export async function generateDeepIntelligenceReport(
   const premiumTemplates = getPremiumTemplates();
   const temperature = options?.temperature ?? 0.75;
   const onProgress = options?.onProgress;
+  const BATCH_SIZE = 3; // Reduced from 4 to 3 for more reliable generation
+
+  console.info(`[Deep Intelligence] Starting report generation — ${freeTemplates.length} free + ${premiumTemplates.length} premium sections`);
+  console.info(`[Deep Intelligence] Input: Sun=${input.sunSign}, Moon=${input.moonSign}, Asc=${input.ascendant}, Nakshatra=${input.nakshatra}`);
+  if (input.planetaryPositions && Object.keys(input.planetaryPositions).length > 0) {
+    console.info(`[Deep Intelligence] Planetary positions provided: ${Object.keys(input.planetaryPositions).join(', ')}`);
+  }
 
   let reportTitle = '';
   let reportSummary = '';
   const allSections: ReportSection[] = [];
+  const startTime = Date.now();
 
   // ── Batch 1: Free sections (3) ──────────────────────────────
+  console.info('[Deep Intelligence] Generating free sections...');
   try {
     const freeReport = await withRetry(async () => {
       const client = await getAIClient();
@@ -523,17 +639,19 @@ export async function generateDeepIntelligenceReport(
     freeReport.sections.forEach((s) => {
       onProgress?.(allSections.length, allTemplates.length, s.title);
     });
+    console.info(`[Deep Intelligence] Free sections complete — ${freeReport.sections.length} sections in ${Date.now() - startTime}ms`);
   } catch (error) {
     console.error('[Deep Intelligence] Free sections failed:', error);
     // Continue with premium even if free fails
   }
 
-  // ── Batch 2+: Premium sections in groups of 4 ──────────────
-  const BATCH_SIZE = 4;
+  // ── Batch 2+: Premium sections in groups of 3 ──────────────
   const deepSystemPrompt = getDeepIntelligenceSystemPrompt(options?.language ?? 'en');
 
   for (let i = 0; i < premiumTemplates.length; i += BATCH_SIZE) {
     const batch = premiumTemplates.slice(i, i + BATCH_SIZE);
+    const batchStart = Date.now();
+    console.info(`[Deep Intelligence] Generating premium batch ${Math.floor(i / BATCH_SIZE) + 1} (${batch.map(t => t.id).join(', ')})...`);
 
     try {
       const batchReport = await withRetry(async () => {
@@ -570,9 +688,11 @@ export async function generateDeepIntelligenceReport(
       batchReport.sections.forEach((s) => {
         onProgress?.(allSections.length, allTemplates.length, s.title);
       });
+      console.info(`[Deep Intelligence] Premium batch complete — ${batchReport.sections.length} sections in ${Date.now() - batchStart}ms (total: ${allSections.length}/${allTemplates.length})`);
     } catch (error) {
       console.error(`[Deep Intelligence] Premium batch ${i}-${i + BATCH_SIZE} failed:`, error);
       // Try generating sections individually as fallback
+      console.info(`[Deep Intelligence] Falling back to individual section generation...`);
       for (const template of batch) {
         try {
           const section = await generateSection(input, template.id, { temperature });
@@ -598,6 +718,9 @@ export async function generateDeepIntelligenceReport(
   // ── Sort sections in template order ──────────────────────────
   const sectionOrder = allTemplates.map((t) => t.id);
   allSections.sort((a, b) => sectionOrder.indexOf(a.id) - sectionOrder.indexOf(b.id));
+
+  const totalTime = Date.now() - startTime;
+  console.info(`[Deep Intelligence] Report generation complete — ${allSections.length}/${allTemplates.length} sections in ${totalTime}ms (${(totalTime / 1000).toFixed(1)}s)`);
 
   return {
     title: reportTitle || 'Your Deep Intelligence Report',

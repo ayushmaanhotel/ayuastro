@@ -15,7 +15,7 @@ export * from './types';
 
 // ─── Re-export all modules ───────────────────────────────────────────────────
 
-export { calculateLahiriAyanamsa, calculateAllPlanetaryPositions, getPlanetSiderealLongitude, dateToJulianDay } from './calculator';
+export { calculateLahiriAyanamsa, calculateAllPlanetaryPositions, getPlanetSiderealLongitude, dateToJulianDay, initializeSwissEphemeris, isSwissEphemerisReady, getCalculationMethod, getCalculatorHealthStatus } from './calculator';
 
 export { calculateHouses, generateNorthIndianChart, getHouseLords, getSignToHouseMap, HOUSE_SIGNIFICANCES } from './charts';
 
@@ -76,7 +76,13 @@ export {
   PLANETS,
 } from './utils';
 
-// ─── Main Calculation Function ───────────────────────────────────────────────
+export {
+  type SwephInitResult,
+  type SwephHealthStatus,
+  initSweph,
+  isSwephReady,
+  getSwephHealthStatus,
+} from './swiss-ephemeris';
 
 import {
   type KundaliData,

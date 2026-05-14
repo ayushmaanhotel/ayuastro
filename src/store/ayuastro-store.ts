@@ -41,6 +41,18 @@ export interface ReportSection {
   insightLevel: 'free' | 'premium';
 }
 
+export type CalculationMethod = 'swiss-ephemeris' | 'meeus-fallback';
+
+export interface PlanetaryPositionInfo {
+  sign: string;
+  degree: number;
+  house: number;
+  retrograde: boolean;
+  nakshatra?: string;
+  nakshatraPada?: number;
+  isCombust?: boolean;
+}
+
 export interface AstrologyInfo {
   sunSign: string;
   moonSign: string;
@@ -49,7 +61,9 @@ export interface AstrologyInfo {
   currentDasha: string;
   yogas: string[];
   doshas: string[];
-  planetaryPositions: Record<string, { sign: string; degree: number; house: number; retrograde: boolean; nakshatra?: string; nakshatraPada?: number; isCombust?: boolean }>;
+  /** Which calculation engine produced this data */
+  calculationMethod: CalculationMethod;
+  planetaryPositions: Record<string, PlanetaryPositionInfo>;
 }
 
 export interface NumerologyInfo {
@@ -138,6 +152,79 @@ interface AyuAstroState {
 
 const ONBOARDING_STEPS: OnboardingStep[] = ['name', 'birth', 'relationship', 'questionnaire', 'preview', 'complete'];
 
+// ─── Data Normalization ──────────────────────────────────────────────────────
+
+const ZODIAC_SIGNS_LIST = [
+  'Aries', 'Taurus', 'Gemini', 'Cancer',
+  'Leo', 'Virgo', 'Libra', 'Scorpio',
+  'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
+] as const;
+
+/**
+ * Normalize astrology data to ensure all planetary positions have consistent fields.
+ *
+ * This function ensures that every planet entry in `planetaryPositions` has:
+ * - `sign` (string zodiac sign name)
+ * - `degree` (number 0-30)
+ * - `house` (number 1-12) — recalculated from signIndex if missing
+ * - `retrograde` (boolean)
+ * - `nakshatra` (string)
+ * - `nakshatraPada` (number 1-4)
+ * - `isCombust` (boolean)
+ *
+ * It also ensures `calculationMethod` defaults to 'meeus-fallback' if not set.
+ *
+ * @param data - Raw AstrologyInfo from the backend
+ * @returns Normalized AstrologyInfo with all fields guaranteed present
+ */
+function normalizeAstrologyData(data: AstrologyInfo): AstrologyInfo {
+  if (!data) return data;
+
+  const ascSignIndex = ZODIAC_SIGNS_LIST.indexOf(data.ascendant as typeof ZODIAC_SIGNS_LIST[number]);
+
+  const normalizedPositions: Record<string, PlanetaryPositionInfo> = {};
+
+  for (const [planetKey, pos] of Object.entries(data.planetaryPositions || {})) {
+    if (!pos) continue;
+
+    // Calculate house from sign relative to ascendant if missing
+    let house = pos.house;
+    if (house === undefined || house === null || isNaN(house)) {
+      const planetSignIndex = ZODIAC_SIGNS_LIST.indexOf(pos.sign as typeof ZODIAC_SIGNS_LIST[number]);
+      if (planetSignIndex >= 0 && ascSignIndex >= 0) {
+        house = ((planetSignIndex - ascSignIndex) % 12 + 12) % 12 + 1;
+      } else {
+        house = 1; // Fallback — should not happen with valid data
+      }
+    }
+
+    // Ensure house is in valid range 1-12
+    house = Math.max(1, Math.min(12, Math.round(house)));
+
+    normalizedPositions[planetKey] = {
+      sign: pos.sign || 'Aries',
+      degree: typeof pos.degree === 'number' && !isNaN(pos.degree) ? pos.degree : 0,
+      house,
+      retrograde: pos.retrograde ?? false,
+      nakshatra: pos.nakshatra ?? 'Ashwini',
+      nakshatraPada: pos.nakshatraPada ?? 1,
+      isCombust: pos.isCombust ?? false,
+    };
+  }
+
+  return {
+    sunSign: data.sunSign || 'Aries',
+    moonSign: data.moonSign || 'Aries',
+    ascendant: data.ascendant || 'Aries',
+    nakshatra: data.nakshatra || 'Ashwini',
+    currentDasha: data.currentDasha || 'Unknown',
+    yogas: data.yogas || [],
+    doshas: data.doshas || [],
+    calculationMethod: data.calculationMethod || 'meeus-fallback',
+    planetaryPositions: normalizedPositions,
+  };
+}
+
 const initialState = {
   currentView: 'landing' as AppView,
   previousView: null as AppView | null,
@@ -176,6 +263,8 @@ export const useAyuAstroStore = create<AyuAstroState>()(
     (set, get) => ({
       ...initialState,
 
+      // ─── Data Normalization ────────────────────────────────────────────────
+
       setView: (view) => set((state) => ({ previousView: state.currentView, currentView: view })),
       setActiveTab: (tab) => set({ activeTab: tab }),
       setOnboardingStep: (step) => set({ onboardingStep: step }),
@@ -191,7 +280,7 @@ export const useAyuAstroStore = create<AyuAstroState>()(
           ],
         })),
       setQuestionnaireAnswers: (answers) => set({ questionnaireAnswers: answers }),
-      setAstrologyData: (data) => set({ astrologyData: data }),
+      setAstrologyData: (data) => set({ astrologyData: normalizeAstrologyData(data) }),
       setNumerologyData: (data) => set({ numerologyData: data }),
       setTraitScores: (scores) => set({ traitScores: scores }),
       setReportSections: (sections) => set({ reportSections: sections }),

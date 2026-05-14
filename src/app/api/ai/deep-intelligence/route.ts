@@ -14,7 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { generateDeepIntelligenceReport } from '@/lib/ai';
-import type { AIReportInput, TraitScores } from '@/lib/ai';
+import type { AIReportInput, TraitScores, PlanetaryPosition } from '@/lib/ai';
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
@@ -35,6 +35,16 @@ const traitScoresSchema = z.object({
   adaptability: z.number().min(0).max(100),
 });
 
+const planetaryPositionSchema = z.object({
+  sign: z.string(),
+  degree: z.number(),
+  house: z.number(),
+  retrograde: z.boolean(),
+  nakshatra: z.string().optional(),
+  nakshatraPada: z.number().optional(),
+  isCombust: z.boolean().optional(),
+});
+
 const deepIntelligenceSchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
   astrologyData: z.object({
@@ -45,6 +55,7 @@ const deepIntelligenceSchema = z.object({
     currentDasha: z.string().optional(),
     yogas: z.array(z.string()).optional(),
     doshas: z.array(z.string()).optional(),
+    planetaryPositions: z.record(z.string(), planetaryPositionSchema).optional(),
   }),
   numerologyData: z.object({
     lifePathNumber: z.number().int(),
@@ -94,6 +105,7 @@ export async function POST(request: NextRequest) {
       currentDasha: astrologyData.currentDasha ?? '',
       yogas: astrologyData.yogas ?? [],
       doshas: astrologyData.doshas ?? [],
+      planetaryPositions: astrologyData.planetaryPositions as Record<string, PlanetaryPosition> | undefined,
       lifePathNumber: numerologyData.lifePathNumber,
       destinyNumber: numerologyData.destinyNumber,
       soulUrgeNumber: numerologyData.soulUrgeNumber,

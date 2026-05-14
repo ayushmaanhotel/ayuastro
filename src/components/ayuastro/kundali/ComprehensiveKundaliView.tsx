@@ -192,6 +192,7 @@ export default function ComprehensiveKundaliView() {
             currentDasha: raw.currentDasha || astrologyData?.currentDasha || '',
             yogas: raw.yogas || astrologyData?.yogas || [],
             doshas: raw.doshas || astrologyData?.doshas || [],
+            calculationMethod: raw.calculationMethod || astrologyData?.calculationMethod || 'meeus-fallback',
             planetaryPositions: raw.planetaryPositions || astrologyData?.planetaryPositions || {},
           });
         }

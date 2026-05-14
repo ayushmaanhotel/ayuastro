@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { calculateKundali } from '@/lib/astrology';
+import { calculateKundali, getCalculationMethod, initializeSwissEphemeris } from '@/lib/astrology';
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
@@ -29,6 +29,9 @@ function serializeDashaPeriods(dashaPeriods: Record<string, unknown>): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure Swiss Ephemeris is initialized before calculations
+    await initializeSwissEphemeris();
+
     const body = await request.json();
     const parsed = astrologySchema.safeParse(body);
 
@@ -104,6 +107,7 @@ export async function POST(request: NextRequest) {
         moonSign: kundali.moonSign,
         ascendant: kundali.ascendant,
         ayanamsa: kundali.ayanamsa,
+        calculationMethod: getCalculationMethod(),
         planetaryPositions: kundali.planetaryPositions,
         houses: kundali.houses,
         chart: kundali.chart,

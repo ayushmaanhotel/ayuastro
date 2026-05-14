@@ -24,6 +24,20 @@ export interface TraitScores {
 }
 
 /**
+ * Planetary position detail used in the deep intelligence report.
+ * Calculated using Swiss Ephemeris for arc-level accuracy.
+ */
+export interface PlanetaryPosition {
+  sign: string;
+  degree: number;
+  house: number;
+  retrograde: boolean;
+  nakshatra?: string;
+  nakshatraPada?: number;
+  isCombust?: boolean;
+}
+
+/**
  * Complete input for the AI report generator.
  * Combines astrology data, numerology data, and trait scores.
  */
@@ -36,6 +50,9 @@ export interface AIReportInput {
   currentDasha: string;
   yogas: string[];
   doshas: string[];
+
+  // Full planetary positions (Swiss Ephemeris calculated)
+  planetaryPositions?: Record<string, PlanetaryPosition>;
 
   // Numerology
   lifePathNumber: number;

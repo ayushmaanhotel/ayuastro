@@ -9,6 +9,40 @@
 import type { AIReportInput, ReportSectionTemplate } from './types';
 
 /**
+ * Format planetary positions into a human-readable string for the AI prompt.
+ * Shows planet name, sign, degree, house, nakshatra, retrograde status, and combustion.
+ */
+function formatPlanetaryPositions(
+  positions: Record<string, { sign: string; degree: number; house: number; retrograde: boolean; nakshatra?: string; nakshatraPada?: number; isCombust?: string | boolean }>
+): string {
+  const PLANET_DISPLAY: Record<string, string> = {
+    Sun: 'Sun ☉', Moon: 'Moon ☽', Mars: 'Mars ♂', Mercury: 'Mercury ☿',
+    Jupiter: 'Jupiter ♃', Venus: 'Venus ♀', Saturn: 'Saturn ♄',
+    Rahu: 'Rahu ☊', Ketu: 'Ketu ☋',
+  };
+
+  const lines = Object.entries(positions).map(([planet, pos]) => {
+    const name = PLANET_DISPLAY[planet] || planet;
+    const degreeStr = `${pos.degree.toFixed(2)}°`;
+    const retroStr = pos.retrograde ? ' ℞' : '';
+    const nakshatraStr = pos.nakshatra ? `, ${pos.nakshatra} pada ${pos.nakshatraPada ?? '?'}` : '';
+    const combustStr = pos.isCombust ? ' [Combust]' : '';
+    return `- ${name}: ${pos.sign} ${degreeStr}${retroStr}, ${pos.house}${getOrdinal(pos.house)} house${nakshatraStr}${combustStr}`;
+  });
+
+  return lines.join('\n');
+}
+
+/**
+ * Get ordinal suffix for house numbers.
+ */
+function getOrdinal(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return s[(v - 20) % 10] || s[v] || s[0];
+}
+
+/**
  * Safety constraints that are ALWAYS included in the system prompt.
  * These are non-negotiable and must appear in every AI call.
  */
@@ -93,6 +127,14 @@ Your purpose: Take calculated trait scores, astrological data, and numerological
 
 AyuAstro's motto: "Nothing to Hide." Every report you generate embodies this.
 
+ASTROLOGICAL FOUNDATION:
+- All planetary positions provided to you were calculated using the Swiss Ephemeris with Lahiri ayanamsa — the gold standard for Vedic (sidereal) astrology with arc-minute accuracy.
+- This data follows the ancient Parashari system of Vedic astrology, the most widely practiced and authoritative tradition in Jyotish.
+- When planetary positions are provided, they represent REAL astronomical calculations, not approximations. Use them with confidence.
+- House placements follow the Whole Sign house system (the traditional Parashari approach).
+- Nakshatra positions are calculated precisely and should be referenced for deeper personality insights.
+- Retrograde and combust status are astronomically determined and carry specific interpretive significance in Vedic astrology.
+
 ${SAFETY_CONSTRAINTS}
 
 ${TONE_GUIDELINES}
@@ -133,6 +175,16 @@ export function getDeepIntelligenceSystemPrompt(language: 'en' | 'hi' | 'hinglis
   return `You are AyuAstro's Deep Intelligence Interpreter — the premium version. You write the most comprehensive, brutally honest, nothing-to-hide personality analysis possible.
 
 AyuAstro's motto: "Nothing to Hide." Your report is the embodiment of this promise. Every word is earned. Nothing is filler. Nothing is vague.
+
+ASTROLOGICAL FOUNDATION:
+- All planetary positions provided to you were calculated using the Swiss Ephemeris with Lahiri ayanamsa — the gold standard for Vedic (sidereal) astrology with arc-minute accuracy.
+- This data follows the ancient Parashari system of Vedic astrology, the most widely practiced and authoritative tradition in Jyotish.
+- When planetary positions are provided, they represent REAL astronomical calculations, not approximations. Use them with confidence and reference them precisely.
+- House placements follow the Whole Sign house system (the traditional Parashari approach).
+- Nakshatra positions are calculated precisely and MUST be referenced for deeper personality insights — each nakshatra carries specific mythological and psychological significance.
+- Retrograde planets indicate internalized expression — explain what this means psychologically, not just astrologically.
+- Combust planets indicate weakened confidence or visibility in that planetary domain — name the specific impact.
+- Use the Parashari principles of planetary dignity, house lordship, and aspect influences when interpreting house placements.
 
 WHAT MAKES YOU DIFFERENT FROM STANDARD ASTROLOGY REPORTS:
 1. You tell the TRUTH — even when it's ugly, even when it hurts, even when it's uncomfortable.
@@ -210,7 +262,12 @@ Guidance: ${s.promptGuidance}`
 - Current Dasha: ${input.currentDasha}
 - Yogas: ${input.yogas.length > 0 ? input.yogas.join(', ') : 'None prominent'}
 - Doshas: ${input.doshas.length > 0 ? input.doshas.join(', ') : 'None prominent'}
+${input.planetaryPositions && Object.keys(input.planetaryPositions).length > 0 ? `
+## Planetary Positions (Sidereal — Swiss Ephemeris Calculated)
+${formatPlanetaryPositions(input.planetaryPositions)}
 
+IMPORTANT: These positions were calculated using the Swiss Ephemeris ( Lahiri ayanamsa) for arc-level accuracy. Use them to provide house-specific, sign-specific, and nakshatra-specific insights. Reference the exact house placement, nakshatra, and retrograde status when relevant.
+` : ''}
 ## Numerology
 - Life Path Number: ${input.lifePathNumber}
 - Destiny Number: ${input.destinyNumber}
@@ -243,6 +300,7 @@ CRITICAL REMINDERS:
 - Use markdown formatting: **bold** for key insights, *italics* for nuance, bullet points for lists.
 - For life-phase sections, break down by decades with specific themes.
 - Reference their dasha period for timing.
+- Reference specific house placements and nakshatras when planetary positions are provided.
 - Connect the dots across sections — show how patterns link.
 - Output only valid JSON.`;
 }
@@ -297,7 +355,17 @@ Guidance: ${s.promptGuidance}`
 - Current Dasha: ${input.currentDasha}
 - Yogas: ${input.yogas.length > 0 ? input.yogas.join(', ') : 'None prominent'}
 - Doshas: ${input.doshas.length > 0 ? input.doshas.join(', ') : 'None prominent'}
+${input.planetaryPositions && Object.keys(input.planetaryPositions).length > 0 ? `
+## Planetary Positions (Sidereal — Swiss Ephemeris Calculated)
+${formatPlanetaryPositions(input.planetaryPositions)}
 
+CRITICAL INSTRUCTION: These positions were calculated using the Swiss Ephemeris with Lahiri ayanamsa for arc-level accuracy. This is REAL astronomical data, not approximations. You MUST use these positions to provide house-specific, sign-specific, and nakshatra-specific insights throughout the report. For example:
+- Reference the EXACT house placement of each planet (e.g., "Mars in your 12th house means...")
+- Use nakshatra positions for deeper personality insights (e.g., "Your Moon in Uttara Bhadrapada suggests...")
+- Note retrograde planets and explain their psychological impact (e.g., "Saturn retrograde in your 4th house means...")
+- Mention combust planets and their effect on confidence and self-expression
+- Connect planetary house placements to specific life areas (7th house = relationships, 10th house = career, etc.)
+` : ''}
 ## Numerology
 - Life Path Number: ${input.lifePathNumber}
 - Destiny Number: ${input.destinyNumber}
@@ -329,6 +397,7 @@ Guidance: ${s.promptGuidance}`
 - BIGGEST CONTRAST: ${biggestGap ? `${biggestGap[0]} (${biggestGap[1]})` : 'N/A'} — this trait is furthest from average, making it the most distinctive thing about them
 - Current life chapter: ${input.currentDasha || 'Unknown dasha period'}
 - Karmic indicators: ${input.yogas.length > 0 ? `Yogas present (${input.yogas.join(', ')}) suggest amplified potential` : 'No major yogas — life is more self-made than fated'} ${input.doshas.length > 0 ? `Doshas present (${input.doshas.join(', ')}) suggest friction points` : 'No major doshas — fewer karmic obstacles'}
+${input.planetaryPositions && Object.keys(input.planetaryPositions).length > 0 ? `- Planetary highlights: ${Object.entries(input.planetaryPositions).filter(([, p]) => p.retrograde).map(([name]) => name + ' retrograde').join(', ') || 'No retrograde planets'} | ${Object.entries(input.planetaryPositions).filter(([, p]) => p.isCombust).map(([name]) => name + ' combust').join(', ') || 'No combust planets'}` : ''}
 
 # Deep Intelligence Sections to Generate
 
@@ -344,7 +413,8 @@ ABSOLUTE REQUIREMENTS FOR THIS PREMIUM REPORT:
 7. CONNECT ACROSS SECTIONS — reference how their career truth links to their love patterns, how their family karma affects their money psychology.
 8. Use markdown formatting: **bold** for key insights, *italics* for nuance, bullet points for lists, ### subheadings for organization.
 9. The summary should be 5-8 sentences that capture their ENTIRE essence.
-10. Output ONLY valid JSON. No code fences.`;
+10. WHEN PLANETARY POSITIONS ARE PROVIDED: Reference specific house placements and nakshatras throughout. "Your Mars in the 12th house" is far more powerful than "Mars influences your hidden side." Use the EXACT data provided.
+11. Output ONLY valid JSON. No code fences.`;
 }
 
 /**
@@ -371,7 +441,10 @@ export function buildSectionPrompt(
 - Current Dasha: ${input.currentDasha}
 - Yogas: ${input.yogas.length > 0 ? input.yogas.join(', ') : 'None prominent'}
 - Doshas: ${input.doshas.length > 0 ? input.doshas.join(', ') : 'None prominent'}
-
+${input.planetaryPositions && Object.keys(input.planetaryPositions).length > 0 ? `
+## Planetary Positions (Sidereal — Swiss Ephemeris Calculated)
+${formatPlanetaryPositions(input.planetaryPositions)}
+` : ''}
 ## Numerology
 - Life Path Number: ${input.lifePathNumber}
 - Destiny Number: ${input.destinyNumber}

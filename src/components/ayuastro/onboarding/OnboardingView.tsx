@@ -619,6 +619,7 @@ export default function OnboardingView() {
             : '',
           yogas: (result.astrology.yogas || []).filter((y: { present: boolean }) => y.present).map((y: { name: string }) => y.name),
           doshas: (result.astrology.doshas || []).filter((d: { present: boolean }) => d.present).map((d: { name: string }) => d.name),
+          calculationMethod: result.calculationMethod || result.astrology.calculationMethod || 'meeus-fallback',
           planetaryPositions: Object.fromEntries(
             Object.entries(result.astrology.planetaryPositions || {}).map(([key, pos]: [string, unknown]) => {
               const p = pos as { sign: string; signIndex?: number; degreeInSign: number; house?: number; isRetrograde?: boolean; nakshatra?: string; nakshatraPada?: number; isCombust?: boolean };
@@ -764,6 +765,7 @@ export default function OnboardingView() {
                   : '',
                 yogas: (result.astrology.yogas || []).filter((y: { present: boolean }) => y.present).map((y: { name: string }) => y.name),
                 doshas: (result.astrology.doshas || []).filter((d: { present: boolean }) => d.present).map((d: { name: string }) => d.name),
+                calculationMethod: result.calculationMethod || result.astrology.calculationMethod || 'meeus-fallback',
                 planetaryPositions: Object.fromEntries(
                   Object.entries(result.astrology.planetaryPositions || {}).map(([key, pos]: [string, unknown]) => {
                     const p = pos as { sign: string; signIndex?: number; degreeInSign: number; house?: number; isRetrograde?: boolean; nakshatra?: string; nakshatraPada?: number; isCombust?: boolean };

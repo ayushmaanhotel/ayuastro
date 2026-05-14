@@ -562,6 +562,25 @@ export default function ReportView() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // ─── Auto-trigger Deep Intelligence Report for premium users ────────────
+  const autoTriggerRef = useRef(false);
+  useEffect(() => {
+    // Only auto-trigger once per session
+    if (autoTriggerRef.current) return;
+    // Must be paid, not have a deep report yet, and have required data
+    if (!hasPaid) return;
+    if (reportSections.length >= 12) return;
+    if (!userId || !astrologyData || !numerologyData) return;
+    if (deepReportGenerating) return;
+
+    autoTriggerRef.current = true;
+    // Small delay so the view renders first
+    const timer = setTimeout(() => {
+      handleGenerateDeepReport();
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [hasPaid, userId, astrologyData, numerologyData, reportSections.length, deepReportGenerating, handleGenerateDeepReport]);
+
   const toggleBookmark = (id: string) => {
     setBookmarkedSections(prev => ({ ...prev, [id]: !prev[id] }));
   };
@@ -617,6 +636,7 @@ export default function ReportView() {
             currentDasha: astrologyData.currentDasha,
             yogas: astrologyData.yogas,
             doshas: astrologyData.doshas,
+            planetaryPositions: astrologyData.planetaryPositions,
           },
           numerologyData: {
             lifePathNumber: numerologyData.lifePathNumber,

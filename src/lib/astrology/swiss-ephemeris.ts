@@ -86,8 +86,25 @@ export async function initSweph(): Promise<SwephInitResult> {
     return initResult;
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
-    console.warn(`[SwissEph] Failed to load sweph module: ${errorMsg}`);
-    console.warn('[SwissEph] Falling back to Meeus calculations (~1-3° accuracy)');
+    // ═══════════════════════════════════════════════════════════════════════
+    // ⚠️  CRITICAL WARNING: Swiss Ephemeris FAILED to load!
+    // ═══════════════════════════════════════════════════════════════════════
+    // This means the app is using Meeus fallback calculations which have
+    // ~1-3° error. This is UNACCEPTABLE for a Vedic astrology app that
+    // claims "arc-level accuracy". Planet sign placements may be WRONG.
+    // ═══════════════════════════════════════════════════════════════════════
+    console.error('╔══════════════════════════════════════════════════════════════════╗');
+    console.error('║  ⚠️  Swiss Ephemeris FAILED to load!                            ║');
+    console.error('║  Calculations will use Meeus fallback (~1-3° error).            ║');
+    console.error('║  Planet sign placements may be INCORRECT at sign boundaries.    ║');
+    console.error('║  This is a CRITICAL issue for a Vedic astrology application.     ║');
+    console.error('╚══════════════════════════════════════════════════════════════════╝');
+    console.error(`[SwissEph] Error: ${errorMsg}`);
+    console.error('[SwissEph] The sweph native module could not be loaded. Possible causes:');
+    console.error('[SwissEph]   1. N-API binary not compiled for this platform');
+    console.error('[SwissEph]   2. Turbopack dev mode incompatible with native modules');
+    console.error('[SwissEph]   3. Missing sweph package or corrupted installation');
+    console.error('[SwissEph] Action: Run `npm rebuild sweph` or switch to webpack dev mode');
     swephModule = null;
     initResult = {
       ready: false,
@@ -284,5 +301,35 @@ export function swephDateToJD(
   return {
     jd_et: result.data[0], // Ephemeris Time (for planet calculations)
     jd_ut: result.data[1], // Universal Time (for house calculations)
+  };
+}
+
+// ─── Health Check ────────────────────────────────────────────────────────────
+
+export interface SwephHealthStatus {
+  /** Whether Swiss Ephemeris is active and being used for calculations */
+  ready: boolean;
+  /** Which calculation method is being used */
+  method: 'swiss-ephemeris' | 'meeus-fallback';
+  /** Version of Swiss Ephemeris if loaded */
+  version?: string;
+  /** Error message if Swiss Ephemeris failed to load */
+  error?: string;
+  /** Whether initialization has been attempted */
+  initAttempted: boolean;
+}
+
+/**
+ * Get the health status of the Swiss Ephemeris module.
+ * Can be called from API routes to report calculation method to the frontend.
+ */
+export function getSwephHealthStatus(): SwephHealthStatus {
+  const ready = initResult?.ready === true && swephModule !== null;
+  return {
+    ready,
+    method: ready ? 'swiss-ephemeris' : 'meeus-fallback',
+    version: initResult?.version,
+    error: initResult?.error,
+    initAttempted: initResult !== null,
   };
 }

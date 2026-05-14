@@ -3947,3 +3947,195 @@ Stage Summary:
 - Vedic rulers corrected in InsightsView (no more Western astrology rulers)
 - Tested via agent-browser: Score card renders properly with all 7 breakdown items
 - Zero lint errors, zero runtime errors
+
+---
+Task ID: 2
+Agent: Swiss Ephemeris & Data Consistency Agent
+Task: Fix Swiss Ephemeris Usage & Cross-Page Data Consistency
+
+Work Log:
+
+### Problem 1: Swiss Ephemeris Loading Improvements
+- Enhanced `swiss-ephemeris.ts` error logging: When sweph fails to load, now outputs a prominent boxed error message with clear explanation that Meeus fallback (~1-3° error) is being used, possible causes (N-API binary, Turbopack incompatibility, missing package), and remediation steps
+- Changed from `console.warn` to `console.error` for Swiss Eph failures — these are CRITICAL issues
+- Added `SwephHealthStatus` interface and `getSwephHealthStatus()` function to swiss-ephemeris.ts for programmatic health checking
+- Added `getCalculationMethod()` function to calculator.ts — returns 'swiss-ephemeris' or 'meeus-fallback'
+- Added `getCalculatorHealthStatus()` function to calculator.ts — returns detailed health info including method, version, error, init state
+- Enhanced calculator.ts init logging: Uses ✓/✗ symbols and explicit "CRITICAL ISSUE" wording when Swiss Eph is unavailable
+- Changed Meeus fallback logging from `console.warn` to `console.error` for visibility
+
+### Problem 2: Cross-Page Data Consistency
+- Added `calculationMethod` field to `AstrologyInfo` type in ayuastro-store.ts (type: 'swiss-ephemeris' | 'meeus-fallback')
+- Extracted `PlanetaryPositionInfo` interface from inline type for reusability
+- Added `normalizeAstrologyData()` function in ayuastro-store.ts that:
+  - Ensures every planetary position has `sign`, `degree`, `house`, `retrograde`, `nakshatra`, `nakshatraPada`, `isCombust`
+  - Recalculates missing `house` fields from planet sign index relative to ascendant sign index (Whole Sign system)
+  - Validates house is in range 1-12
+  - Defaults `calculationMethod` to 'meeus-fallback' if not specified
+- Modified `setAstrologyData` store action to call `normalizeAstrologyData()` automatically
+- Updated `KundaliProviderResult` interface to include `calculationMethod` field
+- Updated both `setAstrologyData` calls in OnboardingView.tsx to include `calculationMethod` from API response
+- Updated `setAstrologyData` call in ComprehensiveKundaliView.tsx to include `calculationMethod`
+- Updated process-all route (`/api/process-all/route.ts`) to return `calculationMethod: getCalculationMethod()` in response
+- Updated astrology calculate route (`/api/astrology/calculate/route.ts`) to return `calculationMethod` in response
+- Both API routes now call `await initializeSwissEphemeris()` at the top of the handler
+
+### Problem 3: Vedic Astrology Method Enforcement
+- Added comprehensive Vedic method comment block at the top of calculator.ts documenting:
+  1. Lahiri Ayanamsa (Chitrapaksha) — official ayanamsa, expected range ~23°-25° for modern dates
+  2. Whole Sign House System — standard Vedic, NOT Equal/Placidus/Koch
+  3. Vimshottari Dasha System — 120-year cycle, 9 Mahadasha periods
+  4. Parashari Principles — traditional Vedic astrology
+- Added ayanamsa validation in `calculateAllPlanetaryPositions()`:
+  - Logs `console.error` with ⚠️ if ayanamsa is outside 22°-26° (indicates calculation error)
+  - Logs `console.warn` if ayanamsa is outside 23°-25° but within 22°-26°
+  - Includes the calculation method in the warning for debugging
+
+### Health Check API
+- Created `/api/health` GET endpoint that returns:
+  - `method`: 'swiss-ephemeris' or 'meeus-fallback'
+  - `swissEphemerisReady`: boolean
+  - `version`: Swiss Eph version if loaded
+  - `initAttempted`: boolean
+  - `error`: error message if Swiss Eph failed
+  - `timestamp`: ISO timestamp
+
+### Export Updates (astrology/index.ts)
+- Re-exported: `initializeSwissEphemeris`, `isSwissEphemerisReady`, `getCalculationMethod`, `getCalculatorHealthStatus`
+- Re-exported from swiss-ephemeris: `SwephInitResult`, `SwephHealthStatus`, `initSweph`, `isSwephReady`, `getSwephHealthStatus`
+
+### Files Modified:
+- `/src/lib/astrology/swiss-ephemeris.ts` — Enhanced error logging, added health check functions
+- `/src/lib/astrology/calculator.ts` — Vedic method comments, getCalculationMethod(), getCalculatorHealthStatus(), ayanamsa validation, enhanced init logging
+- `/src/lib/astrology/kundali-provider.ts` — Added calculationMethod to result, explicit init call, imported new functions
+- `/src/lib/astrology/index.ts` — Re-exported new functions and types
+- `/src/store/ayuastro-store.ts` — Added calculationMethod field, PlanetaryPositionInfo type, normalizeAstrologyData(), integrated normalization into setAstrologyData
+- `/src/app/api/process-all/route.ts` — Explicit init call, returns calculationMethod
+- `/src/app/api/astrology/calculate/route.ts` — Explicit init call, returns calculationMethod
+- `/src/app/api/health/route.ts` — New health check endpoint
+- `/src/components/ayuastro/onboarding/OnboardingView.tsx` — Passes calculationMethod from API response to store
+- `/src/components/ayuastro/kundali/ComprehensiveKundaliView.tsx` — Passes calculationMethod from API data to store
+
+Stage Summary:
+- Swiss Ephemeris failures are now VERY visible in server logs with prominent error boxes
+- API endpoints and health check allow frontend to know which calculation method was used
+- All planetary positions are normalized with consistent fields (sign, degree, house, retrograde, nakshatra, nakshatraPada, isCombust) before being stored in Zustand
+- Ayanamsa values are validated and warnings emitted for out-of-range values
+- Vedic method enforcement documented clearly in calculator.ts header comments
+- All modified files pass ESLint with zero errors
+
+---
+Task ID: 1
+Agent: Deep Intelligence Fix Agent
+Task: Fix Deep Intelligence Report — add planetary positions, auto-trigger for premium, robustness
+
+Work Log:
+- Updated AIReportInput type with PlanetaryPosition interface and optional planetaryPositions field
+- Updated deep-intelligence API route: added planetaryPositionSchema Zod validation, passes planetaryPositions through to AIReportInput
+- Updated prompts.ts: added formatPlanetaryPositions() helper, getOrdinal() helper, updated buildReportPrompt(), buildDeepIntelligencePrompt(), buildSectionPrompt() to include planetary positions when available
+- Updated system prompts (getSystemPrompt, getDeepIntelligenceSystemPrompt) to reference Swiss Ephemeris + Lahiri ayanamsa, Parashari system, Whole Sign houses, nakshatra/retrograde/combust interpretive guidance
+- Updated ReportView.tsx: added planetaryPositions to API call body, added auto-trigger useEffect for premium users (hasPaid + no deep report + required data available)
+- Made report-generator.ts more robust: added tryExtractFromRawText() fallback for invalid JSON, 2-minute timeout per batch via Promise.race, reduced batch size from 4 to 3, detailed logging throughout generateDeepIntelligenceReport()
+- Exported PlanetaryPosition type from index.ts
+- Lint passes with zero errors
+
+Stage Summary:
+- Deep Intelligence Report now receives full planetary positions (sign, degree, house, retrograde, nakshatra, pada, combust)
+- AI prompts instruct model to use Swiss Ephemeris calculated data with Parashari Vedic astrology methods
+- Premium users get auto-triggered deep report generation on viewing the report page
+- Report generator more robust with fallback text extraction, timeout, smaller batches, and detailed logging
+- 6 files modified: types.ts, route.ts, prompts.ts, ReportView.tsx, report-generator.ts, index.ts
+
+
+---
+Task ID: 4
+Agent: Kundali Scoring Algorithm Agent
+Task: Update Kundali Scoring Algorithm for Vedic Accuracy
+
+Work Log:
+- Rewrote /src/app/api/astrology/kundali-score/route.ts with comprehensive Vedic scoring algorithm
+- Added Shadbala-inspired scoring components:
+  - Sthana Bala (Positional Strength): Exalted 10, Own Sign 9, Moolatrikona 8.5, Great Friend 7.5, Friend 7, Neutral 5, Enemy 3.5, Great Enemy 2.5, Debilitated 1.5
+  - Kendra (Angular) bonus: +1.5 for planets in 1st, 4th, 7th, 10th houses
+  - Trikona (Trine) bonus: +1.0 for planets in 1st, 5th, 9th houses
+  - Degree-based strength: up to +1.0 for planets near exact exaltation degree
+  - Dig Bala (Directional Strength): +2 for planets in their Dig Bala house (Jupiter/Mercury→1st, Sun/Mars→10th, Venus/Moon→4th, Saturn→7th), +1 for adjacent houses
+  - Chesta Bala (Motional Strength): Retrograde +1.5 (increased from +0.5), Combust -2.5
+- Replaced House Placement with Bhava Lord Analysis:
+  - Analyzes lords of 6 key houses: Lagna (1st), Putra (5th), Dharma (9th), Sukha (4th), Kalatra (7th), Karma (10th)
+  - Weighted scoring based on house importance (Lagna 2.0, Dharma 1.5, Karma 1.3, Kalatra 1.3, Sukha/Putra 1.2)
+  - Checks dignity of each house lord (exalted, own sign, moolatrikona, debilitated, friendly/enemy sign)
+  - Applies Kendra/Trikona/Dusthana modifiers for lord placement
+- Updated weighting formula from simple average to Vedic-accurate weights:
+  - Graha Strength (Shadbala): 25% (core foundation)
+  - Lagna Lord: 20% (most important in Vedic astrology)
+  - Yoga Score: 15%
+  - Dosha Penalty: 15%
+  - Bhava Strength: 10%
+  - Nakshatra Strength: 10%
+  - Elemental Balance: 5%
+- Replaced letter grades (A+/A/B+/B/C+/C/D/D-) with Vedic-appropriate grading:
+  - 85+: "Exceptional" (rare, genuinely powerful chart)
+  - 75-84: "Strong" (real advantages, some challenges)
+  - 65-74: "Good" (mostly solid, specific weak spots)
+  - 55-64: "Average" (balanced strengths and weaknesses)
+  - 45-54: "Below Average" (more challenges than average)
+  - 35-44: "Challenged" (significant difficulties)
+  - <35: "Heavily Challenged" (hard path, but not hopeless)
+- Added Navamsha/Vargottama bonus (±5 points):
+  - Checks if planets are Vargottama (same sign in D1 and D9)
+  - +1.0 per Vargottama planet, +2 extra for 3+ Vargottama planets
+  - Accepts navamshaSign field in planet positions
+- Added Vedic-specific remedies (generateVedicRemedies function):
+  - Gemstone (Ratna) recommendations based on weak planets: Ruby, Pearl, Red Coral, Emerald, Yellow Sapphire, Diamond/White Sapphire, Blue Sapphire with Vedic names
+  - Mantra recommendations per planet deity: Om Suryaya Namaha, Om Chandraya Namaha, Om Mangalaya Namaha, etc.
+  - Day-specific practices: Surya Namaskar on Sundays, study on Wednesdays, Seva on Saturdays, etc.
+  - Fasting (Vrata) recommendations: Sunday/Monday/Tuesday/Wednesday/Thursday/Friday/Saturday specific fasts
+  - Always includes comprehensive disclaimer about consulting qualified Jyotishi
+- Updated Vedic terminology throughout:
+  - Ascendant Lord → Lagna Lord, Exalted → Uccha, Debilitated → Neecha, Own Sign → Swakshetra
+  - Friend/Enemy → Mitra/Shatru/Adhimitra/Adhishatru, Retrograde → Vakri, Combust → Asta
+  - Remedies → Upaya, Effort → Purushartha, Destiny → Daiva, Tendencies → Samskara
+  - Elements use Sanskrit: Agni (Fire), Prithvi (Earth), Vayu (Air), Jala (Water)
+- Updated KundaliScoreCard.tsx frontend:
+  - Added Shabdala Components summary display (Sthana/Dig Bala/Cheshta/Navamsha)
+  - Updated grade display from "Grade A+" to Vedic grade names (Exceptional, Strong, etc.)
+  - Added Vedic Remedies section with 4 sub-categories (Ratna, Mantra, Day Practices, Vrata)
+  - Each category has its own icon (Gem, HandHeart, Sun, Utensils) and colored markers
+  - Disclaimer always displayed at bottom of Vedic remedies
+  - Sub-scores displayed on planet strength breakdown bar
+- All API response fields remain backward-compatible (housePlacement key kept, label changed to "Bhava Strength")
+- Lint passes with zero errors
+- API tested with strong chart (79, "Strong"), weak chart (40, "Challenged"), and Vargottama chart (+5 bonus)
+- Vargottama detection correctly identifies planets in same Rashi across D1 and D9
+
+Stage Summary:
+- 2 files modified: route.ts (complete algorithm rewrite), KundaliScoreCard.tsx (UI updates)
+- Full Shadbala-inspired scoring with Sthana Bala, Dig Bala, Chesta Bala components
+- Bhava Lord Analysis replaces simple House Placement
+- Vedic-accurate weighted scoring (Graha 25%, Lagna 20%, Yoga 15%, Dosha 15%, Bhava 10%, Nakshatra 10%, Element 5%)
+- Vedic grade names replace letter grades
+- Navamsha/Vargottama bonus system implemented
+- Vedic remedies with Ratna, Mantra, Day Practices, Vrata categories
+- All Vedic terminology used consistently (Uccha, Neecha, Swakshetra, Mitra, Shatru, Vakri, Asta, etc.)
+- Zero breaking changes to API response structure
+
+---
+Task ID: 1/2/4 (parallel)
+Agent: Main Coordinator + 3 Subagents
+Task: Fix Deep Intelligence Report, Swiss Ephemeris enforcement, cross-page data consistency, Vedic scoring algorithm
+
+Work Log:
+- Agent 1 (Deep Intelligence Report): Added PlanetaryPosition type to AIReportInput, updated deep-intelligence route to accept & pass planetary positions, updated AI prompts to include full planetary positions with house/nakshatra/retrograde, added auto-trigger for premium users, reduced batch size from 4→3, added 2-min timeout per batch, added tryExtractFromRawText fallback for malformed AI JSON
+- Agent 2 (Swiss Ephemeris + Data Consistency): Added getCalculationMethod() and getCalculatorHealthStatus() to calculator, added /api/health endpoint showing calculation engine status, added calculationMethod to AstrologyInfo store type, added normalizeAstrologyData() to ensure all planets have house field, added explicit initializeSwissEphemeris() calls in API routes, added ayanamsa validation (error if outside 22-26°), added comprehensive Vedic method documentation
+- Agent 3 (Vedic Scoring Algorithm): Complete rewrite of kundali-score route with Shadbala-inspired scoring (Sthana Bala, Dig Bala, Chesta Bala), Bhava Lord analysis replacing simple House Placement, Vedic-accurate weighting (Graha 25%, Lagna Lord 20%, Yoga 15%, Dosha 15%, Bhava 10%, Nakshatra 10%, Elements 5%), Navamsha/Vargottama bonus ±5, Vedic grade scale (Exceptional to Heavily Challenged), Vedic remedies with Ratna/Mantra/Vrata recommendations
+
+Stage Summary:
+- Swiss Ephemeris confirmed active: /api/health returns method:"swiss-ephemeris", version:"2.10.3"
+- Deep Intelligence Report now auto-generates for premium users with full planetary positions
+- AI prompts now include Swiss Ephemeris foundation and Parashari Vedic astrology emphasis
+- Cross-page data consistency fixed via normalizeAstrologyData() and calculationMethod tracking
+- Kundali scoring now uses authentic Vedic terminology: Shadbala, Sthana Bala, Dig Bala, Chesta Bala, Graha, Lagna Lord, Bhava, Upaya, Ratna, Mantra, Vrata, Shubha, Ashubha, Shaapa, Bodha, Purushartha, Daiva
+- Grade scale updated from A+/A/B+/B/C+/C/D/D- to Exceptional/Strong/Good/Average/Below Average/Challenged/Heavily Challenged
+- Lint passes with zero errors
+- Server running correctly on port 3000

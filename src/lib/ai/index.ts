@@ -13,6 +13,7 @@
 export type {
   AIReportInput,
   GeneratedReport,
+  PlanetaryPosition,
   RawAIResponse,
   ReportSection,
   ReportSectionTemplate,
