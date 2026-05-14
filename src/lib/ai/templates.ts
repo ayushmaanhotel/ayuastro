@@ -6,7 +6,7 @@
 //
 // Structure:
 //   3 Free sections  — teaser value, enough to resonate but leave them wanting more
-//   19 Premium sections — deep, honest, life-altering guidance
+//   20 Premium sections — deep, honest, life-altering guidance
 //
 // Writing philosophy for all guidance:
 //   - HUMAN tone, like a wise friend who tells you the truth even when it hurts
@@ -478,6 +478,80 @@ Focus on:
 Be honest but compassionate. The goal is awareness, not guilt. Reference specific scores and placements.`,
   },
   {
+    id: 'your-personalized-remedies',
+    title: 'Your Personalized Remedies & Solutions',
+    icon: 'ShieldCheck',
+    traits: ['discipline', 'patience', 'trust', 'resilience'],
+    insightLevel: 'premium',
+    promptGuidance: `THIS IS THE MOST IMPORTANT SECTION FOR THE USER. After telling them all the hard truths about their patterns, fears, and blind spots — this section gives them the SPECIFIC, ACTIONABLE steps to transform. Every remedy must be PERSONALIZED to their chart, not generic astrology advice.
+
+IMPORTANT RULES FOR REMEDIES:
+- NEVER suggest expensive gemstones, paid rituals, or purchases. All remedies must be FREE and accessible.
+- NEVER claim these remedies will magically solve problems. Frame them as "practices that help shift patterns over time."
+- Every remedy must reference THEIR SPECIFIC data — their signs, trait scores, doshas, nakshatra, dasha period.
+- If you suggest a mantra, give the EXACT mantra in both Sanskrit and transliteration, with meaning.
+- Structure remedies by AREA: Emotional, Relational, Financial, Career, Health, Spiritual.
+
+STRUCTURE THE SECTION AS FOLLOWS:
+
+### 🧠 Emotional Remedies (Based on their specific emotional patterns)
+For each remedy:
+- Name the specific problem (e.g., "Your emotionalIntensity of 78 means you absorb others' emotions until you can't tell which are yours")
+- Give the specific practice (e.g., "Before responding to any emotionally charged message, wait 10 minutes and ask yourself: 'Is this my feeling or theirs?'")
+- Explain WHY this works for THEIR specific chart (e.g., "With your Moon in Cancer, you have a natural tendency to merge emotionally. This practice creates the boundary your Cancer Moon needs but doesn't naturally build.")
+
+### 💔 Relationship Remedies (Based on their attachment pattern and trust scores)
+For each remedy:
+- Name the specific relationship pattern (reference their attachmentStyle and trust scores)
+- Give the specific practice (e.g., "When you feel the urge to withdraw from your partner, say this EXACT phrase: 'I need 30 minutes to process, but I'm coming back.' Then keep your word.")
+- Explain why this works for THEIR specific combination
+
+### 💰 Financial Remedies (Based on their money psychology)
+For each remedy:
+- Name the specific financial blind spot (reference ambition, discipline, impulsiveness scores)
+- Give the specific practice (e.g., "Set up an automatic transfer of 10% on payday BEFORE you can touch it. Your impulsiveness score of 72 means you'll spend what's available — so make it unavailable.")
+- Reference their destiny number and what it says about their wealth approach
+
+### 💼 Career Remedies (Based on their career truth)
+For each remedy:
+- Name the specific career pattern that's limiting them
+- Give the specific practice (e.g., "Block 2 hours every Friday for creative/strategic thinking. Your creativity (82) is your highest trait but your discipline (38) means you never protect time for it.")
+- Reference their life path number's career calling
+
+### 🏥 Health Remedies (Based on their constitutional tendencies)
+For each remedy:
+- Name the specific health vulnerability (reference their ascendant sign's body rulership)
+- Give the specific practice (e.g., "Your Aries ascendant means your head and sinuses take the hit when you're stressed. Start every morning with 5 minutes of alternate nostril breathing — it directly calms the nervous system pattern that your chart shows is overactive.")
+- Include a lifestyle practice that addresses their specific stress-body connection
+
+### 🙏 Spiritual Remedies (Based on their soul purpose and nakshatra)
+For each remedy:
+- Give a mantra SPECIFIC to their nakshatra ruling deity (name the deity and the mantra)
+- Give a meditation practice tailored to their spiritual purpose (reference their life path number)
+- Suggest a timing practice based on their current dasha (e.g., "During your Saturn dasha, Sunday mornings are your most powerful meditation window because...")
+
+### 🪐 Planetary Remedies (Vedic, based on their chart)
+For EACH weak/afflicted planet in their chart:
+- Identify the planet and why it's weak (based on their doshas, sign placements, and trait scores)
+- Give the SPECIFIC FREE Vedic remedy:
+  - Day of the week to practice
+  - Color to wear on that day
+  - Simple action (e.g., "Feed birds on Wednesdays to strengthen Mercury" or "Light a sesame oil lamp on Saturday evenings for Saturn")
+  - Short mantra (Sanskrit + transliteration + meaning)
+- Frame it practically: "This isn't superstition — it's a daily mindfulness practice that keeps your attention on the area of life this planet governs for you."
+
+### 🔄 Pattern-Interruption Techniques
+Give 3 specific "pattern interrupt" techniques for their most destructive recurring patterns:
+1. The trigger (what starts the pattern — be SPECIFIC to their life)
+2. The old response (what they usually do)
+3. The new response (what they should do instead — give the EXACT words or action)
+4. How to remember in the moment (a physical anchor, a phrase, a phone alarm)
+
+END WITH: A 30-day action plan — 5 specific things they should start doing in the next 30 days, listed in priority order, with each one referencing specific data from their chart. Not "meditate more" but "Every morning for 30 days, do 5 minutes of [specific practice] because your [specific chart factor] needs it."
+
+REMEMBER: Every single remedy must be PERSONALIZED. If a remedy could appear in anyone's report, it's too generic. Reference specific scores, signs, nakshatras, doshas, dasha periods, and numerology numbers throughout. This section should be 800-1200 words — the most comprehensive section in the entire report.`,
+  },
+  {
     id: 'honest-disclaimer',
     title: 'An Honest Note Before You Go',
     icon: 'Scale',
@@ -532,7 +606,7 @@ export function getSectionOrder(): string[] {
 
 /**
  * Get ALL premium templates for the Deep Intelligence Report.
- * This is the full premium report — all 19 premium sections in order.
+ * This is the full premium report — all 20 premium sections in order.
  */
 export function getDeepIntelligenceTemplates(): ReportSectionTemplate[] {
   return REPORT_SECTION_TEMPLATES.filter((t) => t.insightLevel === 'premium');

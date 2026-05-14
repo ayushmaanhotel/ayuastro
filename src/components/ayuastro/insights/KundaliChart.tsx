@@ -38,7 +38,7 @@ const PLANET_CONFIG: Record<string, { name: string; symbol: string; color: strin
   Mercury: { name: 'Mercury', symbol: '☿', color: '#22C55E' },
   Jupiter: { name: 'Jupiter', symbol: '♃', color: '#F59E0B' },
   Venus:   { name: 'Venus',   symbol: '♀', color: '#EC4899' },
-  Saturn:  { name: 'Saturn',  symbol: '♄', color: '#1E3A5F' },
+  Saturn:  { name: 'Saturn',  symbol: '♄', color: '#5C6BC0' },
   Rahu:    { name: 'Rahu',    symbol: '☊', color: '#7C3AED' },
   Ketu:    { name: 'Ketu',    symbol: '☋', color: '#6B7280' },
 };
@@ -583,11 +583,11 @@ export default function KundaliChart({
         {/* Sun / Moon sign badges */}
         <g transform="translate(30, 132)">
           <rect x="0" y="0" width="90" height="20" rx="10" fill="rgba(234,179,8,0.1)" stroke="#EAB308" strokeWidth="0.6" strokeOpacity="0.5" />
-          <text x="45" y="11" textAnchor="middle" dominantBaseline="middle" fontSize="9.5" fontWeight="600" fill="#B8960C" style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
+          <text x="45" y="11" textAnchor="middle" dominantBaseline="middle" fontSize="9.5" fontWeight="600" fill="#B8960C" className="chart-sun-badge" style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
             ☉ {sunSign}
           </text>
           <rect x="100" y="0" width="90" height="20" rx="10" fill="rgba(148,163,184,0.1)" stroke="#94A3B8" strokeWidth="0.6" strokeOpacity="0.5" />
-          <text x="145" y="11" textAnchor="middle" dominantBaseline="middle" fontSize="9.5" fontWeight="600" fill="#64748B" style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
+          <text x="145" y="11" textAnchor="middle" dominantBaseline="middle" fontSize="9.5" fontWeight="600" fill="#64748B" className="chart-moon-badge" style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
             ☽ {moonSign}
           </text>
         </g>
@@ -647,25 +647,25 @@ export default function KundaliChart({
         <text
           x="30" y="618"
           textAnchor="start" dominantBaseline="middle"
-          fontSize="9" fontWeight="700" fill="#8D6E63" letterSpacing="1"
+          fontSize="9" fontWeight="700" fill="#8D6E63" letterSpacing="1" className="chart-legend-text"
           style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}
         >
           LEGEND
         </text>
         {/* Row 1: House number, zodiac, retrograde, ascendant */}
-        <g style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
-          <circle cx="40" cy="638" r="5" fill="rgba(93,64,55,0.08)" />
-          <text x="40" y="638" textAnchor="middle" dominantBaseline="middle" fontSize="7" fontWeight="700" fill="#A1887F">1</text>
-          <text x="52" y="638" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63">House number</text>
-          <text x="148" y="638" textAnchor="start" dominantBaseline="middle" fontSize="11" fill="#8D6E63">♈</text>
-          <text x="162" y="638" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63">Zodiac sign</text>
+        <g className="chart-legend-row" style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
+          <circle cx="40" cy="638" r="5" fill="rgba(93,64,55,0.08)" className="chart-legend-badge-bg" />
+          <text x="40" y="638" textAnchor="middle" dominantBaseline="middle" fontSize="7" fontWeight="700" fill="#A1887F" className="chart-legend-num">1</text>
+          <text x="52" y="638" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63" className="chart-legend-text">House number</text>
+          <text x="148" y="638" textAnchor="start" dominantBaseline="middle" fontSize="11" fill="#8D6E63" className="chart-legend-text">♈</text>
+          <text x="162" y="638" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63" className="chart-legend-text">Zodiac sign</text>
           <text x="252" y="638" textAnchor="start" dominantBaseline="middle" fontSize="9.5" fontWeight="700" fill="#DC2626">℞</text>
-          <text x="264" y="638" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63">Retrograde</text>
-          <rect x="350" y="631" width="12" height="12" rx="2" fill="rgba(212,175,55,0.18)" stroke="#D4AF37" strokeWidth="0.5" />
-          <text x="368" y="638" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63">1st house (Asc)</text>
+          <text x="264" y="638" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63" className="chart-legend-text">Retrograde</text>
+          <rect x="350" y="631" width="12" height="12" rx="2" fill="rgba(212,175,55,0.18)" stroke="#D4AF37" strokeWidth="0.5" className="chart-legend-asc-box" />
+          <text x="368" y="638" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63" className="chart-legend-text">1st house (Asc)</text>
         </g>
         {/* Row 2: Planet color dots */}
-        <g style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
+        <g className="chart-legend-row" style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
           {[
             { name: 'Sun', color: '#EAB308', x: 30 },
             { name: 'Moon', color: '#94A3B8', x: 82 },
@@ -673,26 +673,26 @@ export default function KundaliChart({
             { name: 'Mercury', color: '#22C55E', x: 186 },
             { name: 'Jupiter', color: '#F59E0B', x: 252 },
             { name: 'Venus', color: '#EC4899', x: 314 },
-            { name: 'Saturn', color: '#1E3A5F', x: 370 },
+            { name: 'Saturn', color: '#5C6BC0', x: 370 },
           ].map((p) => (
             <g key={p.name}>
-              <circle cx={p.x} cy="660" r="4" fill={p.color} />
-              <text x={p.x + 8} y="660" textAnchor="start" dominantBaseline="middle" fontSize="8" fill="#8D6E63">{p.name}</text>
+              <circle cx={p.x} cy="660" r="4" fill={p.color} className="chart-planet-dot-legend" />
+              <text x={p.x + 8} y="660" textAnchor="start" dominantBaseline="middle" fontSize="8" fill="#8D6E63" className="chart-legend-text">{p.name}</text>
             </g>
           ))}
         </g>
         {/* Row 3: Shadow planets + degree format */}
-        <g style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
+        <g className="chart-legend-row" style={{ fontFamily: "var(--font-inter), 'Inter', system-ui, sans-serif" }}>
           {[
             { name: 'Rahu', color: '#7C3AED', x: 30 },
             { name: 'Ketu', color: '#6B7280', x: 90 },
           ].map((p) => (
             <g key={p.name}>
-              <circle cx={p.x} cy="680" r="4" fill={p.color} />
-              <text x={p.x + 8} y="680" textAnchor="start" dominantBaseline="middle" fontSize="8" fill="#8D6E63">{p.name}</text>
+              <circle cx={p.x} cy="680" r="4" fill={p.color} className="chart-planet-dot-legend" />
+              <text x={p.x + 8} y="680" textAnchor="start" dominantBaseline="middle" fontSize="8" fill="#8D6E63" className="chart-legend-text">{p.name}</text>
             </g>
           ))}
-          <text x="160" y="680" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63">
+          <text x="160" y="680" textAnchor="start" dominantBaseline="middle" fontSize="8.5" fill="#8D6E63" className="chart-legend-text">
             Degree format: <tspan fontWeight="600">15°23'</tspan> = 15° 23 min
           </text>
         </g>

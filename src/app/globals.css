@@ -420,6 +420,38 @@
   fill: #D4AF37;
 }
 
+/* Planet dots — ensure visibility on dark backgrounds */
+.dark .kundali-chart .chart-planet-dot {
+  opacity: 1;
+}
+
+/* Legend text in dark mode */
+.dark .kundali-chart .chart-legend-text {
+  fill: #BCAAA4 !important;
+}
+
+.dark .kundali-chart .chart-legend-num {
+  fill: #8D6E63 !important;
+}
+
+.dark .kundali-chart .chart-legend-badge-bg {
+  fill: rgba(212,175,55,0.12) !important;
+}
+
+.dark .kundali-chart .chart-legend-asc-box {
+  fill: rgba(212,175,55,0.12) !important;
+  stroke: rgba(212,175,55,0.3) !important;
+}
+
+/* Sun/Moon sign badges in dark mode */
+.dark .kundali-chart .chart-sun-badge {
+  fill: #F0C14B !important;
+}
+
+.dark .kundali-chart .chart-moon-badge {
+  fill: #94A3B8 !important;
+}
+
 /* Kundali header/legend dark mode */
 .dark .kundali-chart rect[fill="url(#fHeaderBg)"] {
   fill: rgba(212,175,55,0.04);
@@ -429,6 +461,11 @@
 .dark .kundali-chart rect[fill="url(#fLegendBg)"] {
   fill: rgba(212,175,55,0.03);
   stroke: rgba(212,175,55,0.1);
+}
+
+/* Header birth detail text in dark mode — override parent <text> fill */
+.dark .kundali-chart .chart-detail-text {
+  fill: #D7CCC8 !important;
 }
 
 /* Tab press animation */

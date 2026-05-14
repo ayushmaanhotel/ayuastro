@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useAyuAstroStore, type ReportSection } from '@/store/ayuastro-store';
+import { useAyuAstroStore, type ReportSection, type AstrologyInfo, type NumerologyInfo, type TraitScore } from '@/store/ayuastro-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,8 +37,31 @@ import {
   GitBranch,
   Baby,
   Scale,
+  ShieldCheck,
+  Users,
 } from 'lucide-react';
 import { cosmicToast } from '@/lib/toast';
+
+// ─── Zodiac Symbols Map ─────────────────────────────────────────────────────
+const ZODIAC_SYMBOLS: Record<string, string> = {
+  Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
+  Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
+};
+
+const ZODIAC_ELEMENTS: Record<string, { element: string; color: string; bgClass: string }> = {
+  Aries: { element: 'Fire', color: 'text-red-500', bgClass: 'from-red-500/10 to-orange-500/5' },
+  Leo: { element: 'Fire', color: 'text-red-500', bgClass: 'from-red-500/10 to-orange-500/5' },
+  Sagittarius: { element: 'Fire', color: 'text-red-500', bgClass: 'from-red-500/10 to-orange-500/5' },
+  Taurus: { element: 'Earth', color: 'text-emerald-600', bgClass: 'from-emerald-500/10 to-green-500/5' },
+  Virgo: { element: 'Earth', color: 'text-emerald-600', bgClass: 'from-emerald-500/10 to-green-500/5' },
+  Capricorn: { element: 'Earth', color: 'text-emerald-600', bgClass: 'from-emerald-500/10 to-green-500/5' },
+  Gemini: { element: 'Air', color: 'text-amber-500', bgClass: 'from-amber-500/10 to-yellow-500/5' },
+  Libra: { element: 'Air', color: 'text-amber-500', bgClass: 'from-amber-500/10 to-yellow-500/5' },
+  Aquarius: { element: 'Air', color: 'text-amber-500', bgClass: 'from-amber-500/10 to-yellow-500/5' },
+  Cancer: { element: 'Water', color: 'text-sky-500', bgClass: 'from-sky-500/10 to-blue-500/5' },
+  Scorpio: { element: 'Water', color: 'text-sky-500', bgClass: 'from-sky-500/10 to-blue-500/5' },
+  Pisces: { element: 'Water', color: 'text-sky-500', bgClass: 'from-sky-500/10 to-blue-500/5' },
+};
 
 // ─── Icon Map (15+ sections) ────────────────────────────────────────────────
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -63,6 +86,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
   gitbranch: GitBranch,
   baby: Baby,
   scale: Scale,
+  shieldcheck: ShieldCheck,
+  users: Users,
 };
 
 // ─── Section Color Themes ───────────────────────────────────────────────────
@@ -88,191 +113,377 @@ const SECTION_COLORS: Record<string, { gradient: string; iconBg: string; iconCol
   'your-power-years': { gradient: 'from-yellow-500/10 to-amber-500/5', iconBg: 'bg-yellow-500/15', iconColor: 'text-yellow-600', badgeBg: 'bg-yellow-500/10', badgeColor: 'text-yellow-700' },
   'your-decision-pattern': { gradient: 'from-lime-500/10 to-green-500/5', iconBg: 'bg-lime-500/15', iconColor: 'text-lime-600', badgeBg: 'bg-lime-500/10', badgeColor: 'text-lime-700' },
   'your-parenting-style': { gradient: 'from-pink-500/10 to-fuchsia-500/5', iconBg: 'bg-pink-500/15', iconColor: 'text-pink-600', badgeBg: 'bg-pink-500/10', badgeColor: 'text-pink-700' },
+  'your-personalized-remedies': { gradient: 'from-emerald-500/10 to-teal-500/5', iconBg: 'bg-emerald-500/15', iconColor: 'text-emerald-600', badgeBg: 'bg-emerald-500/10', badgeColor: 'text-emerald-700' },
   'honest-disclaimer': { gradient: 'from-slate-500/10 to-gray-500/5', iconBg: 'bg-slate-500/15', iconColor: 'text-slate-600', badgeBg: 'bg-slate-500/10', badgeColor: 'text-slate-700' },
 };
 
-// ─── Default Sections (expanded) ────────────────────────────────────────────
-const DEFAULT_FREE_SECTIONS: ReportSection[] = [
-  {
-    id: 'emotional-personality',
-    title: 'Your Emotional Truth',
-    icon: 'heart',
-    content: 'Let\'s be real — your emotional world isn\'t simple. Your Moon sign shapes how you actually FEEL, not how you present yourself to the world. And those two things? They\'re often very different.\n\nYou feel things at a depth that most people around you don\'t even suspect. You\'ve learned to mask it, to appear calm when you\'re actually drowning inside. This isn\'t weakness — it\'s a superpower that you haven\'t learned to fully wield yet.\n\nThe key insight: your emotional intensity isn\'t something to manage or suppress. It\'s the raw material for your greatest strengths. The question isn\'t "how do I feel less?" — it\'s "how do I channel what I feel into something that serves me?"\n\nWatch for the pattern where you absorb other people\'s emotions and mistake them for your own. This is especially dangerous in relationships — you might think you\'re angry when you\'re actually picking up your partner\'s frustration.',
-    traits: ['Emotional Depth', 'Empathy', 'Intuition', 'Inner Conflict'],
-    insightLevel: 'free',
-  },
-  {
-    id: 'relationship-style',
-    title: 'Your Relationship Reality',
-    icon: 'user',
-    content: 'Here\'s the truth about how you love: you don\'t do surface-level. You never have. When you connect with someone, you go deep fast — and that scares people who aren\'t ready for it.\n\nYour attachment pattern tells the real story. You crave closeness but you\'ve been burned enough times that you\'ve built walls. The problem? Those walls don\'t just keep out the wrong people — they keep out the right ones too.\n\nWhat you actually need in a partner isn\'t what you think you want. You think you want someone who understands you. What you really need is someone who is WILLING to understand you — because understanding you takes time, patience, and the willingness to sit with your complexity without running away.\n\nThe pattern to break: you tend to choose partners who need saving because it gives you a role to play. But the role of "savior" keeps you from being truly vulnerable, which is what actually creates intimacy.',
-    traits: ['Attachment Pattern', 'Trust Issues', 'Deep Connection', 'Vulnerability'],
-    insightLevel: 'free',
-  },
-  {
-    id: 'communication-patterns',
-    title: 'How You Really Communicate',
-    icon: 'message',
-    content: 'You say less than you feel. That\'s not a flaw — it\'s a strategy you developed early. The question is: does this strategy still serve you?\n\nWhen you\'re upset, you don\'t explode. You implode. You withdraw, you go quiet, and the other person has no idea what happened. You think you\'re protecting the relationship by not starting a fight. What you\'re actually doing is building resentment that will eventually leak out as passive aggression.\n\nYour communication superpower: when you DO speak, your words carry unusual weight. People remember what you say because you don\'t waste words. Use this. Don\'t save your truth for never — share it at the right moment, with the right person, in the right way.\n\nThe hard truth: your communication style works better in writing than in person. In conversations, you get overwhelmed and shut down. In writing, you can express your full depth. This isn\'t a limitation — it\'s a preference. Own it.',
-    traits: ['Selective Expression', 'Written Strength', 'Passive Patterns', 'Deep Listening'],
-    insightLevel: 'free',
-  },
-];
+// ─── Personalized Default Section Generator ─────────────────────────────────
+function generatePersonalizedDefaults(
+  astrology: AstrologyInfo | null,
+  numerology: NumerologyInfo | null,
+  traits: TraitScore[]
+): { freeSections: ReportSection[]; premiumSections: ReportSection[] } {
+  // Extract data with defaults
+  const sun = astrology?.sunSign || 'your Sun sign';
+  const moon = astrology?.moonSign || 'your Moon sign';
+  const asc = astrology?.ascendant || 'your Ascendant';
+  const nakshatra = astrology?.nakshatra || 'your Nakshatra';
+  const dasha = astrology?.currentDasha || 'your current Dasha';
+  const yogas = astrology?.yogas || [];
+  const doshas = astrology?.doshas || [];
+  const lifePath = numerology?.lifePathNumber || 1;
+  const destiny = numerology?.destinyNumber || 1;
+  const soulUrge = numerology?.soulUrgeNumber || 1;
 
-const DEFAULT_PREMIUM_SECTIONS: ReportSection[] = [
-  {
-    id: 'hidden-strengths',
-    title: 'Powers You Don\'t Know You Have',
-    icon: 'sparkles',
-    content: 'You have strengths you don\'t even recognize because they come so naturally to you that you think everyone has them. They don\'t.\n\nYour hidden power: you can see the root cause of a problem while everyone else is still arguing about the symptoms. This makes you invaluable in crisis — but it also makes you frustrated when others can\'t see what seems obvious to you.\n\nYour creativity isn\'t just artistic — it\'s strategic. You find solutions that other people miss because you approach problems from an angle they didn\'t consider. This is especially powerful in your career.\n\nYour resilience is quiet. You don\'t bounce back with a motivational speech — you process, you adapt, and you emerge different. Stronger, but changed. That\'s a different kind of resilience than the world celebrates, and it\'s actually more durable.',
-    traits: ['Root-Cause Thinking', 'Strategic Creativity', 'Quiet Resilience', 'Adaptive Strength'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'emotional-blind-spots',
-    title: 'What You Refuse to See',
-    icon: 'eye',
-    content: 'You have a blind spot around self-worth. You can see everyone else\'s value clearly, but when it comes to your own, you minimize, deflect, or outright deny it. This isn\'t humility — it\'s a pattern that costs you.\n\nThe pattern: you over-give until you\'re empty, then withdraw and wonder why people don\'t appreciate you. But you never actually asked for what you needed in the first place. You expected them to notice. They didn\'t.\n\nYour biggest blind spot: you think being needed is the same as being loved. It\'s not. Being needed keeps you in the role of caregiver. Being loved means someone sees YOU — not what you do for them.\n\nThe hard truth you need to hear: your emotional intelligence, which is your greatest strength, becomes a weapon against yourself when you use it to anticipate everyone\'s needs except your own.',
-    traits: ['Self-Worth Gap', 'Over-Giving', 'Need vs Love', 'Emotional Intelligence Trap'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'money-psychology',
-    title: 'Your Money Story — The Whole Truth',
-    icon: 'wallet',
-    content: 'Your relationship with money isn\'t about money. It\'s about security, control, and the story you inherited from your family.\n\nThe truth: you treat money as emotional insurance. When you feel financially secure, you feel emotionally secure. When money is tight, everything feels like it\'s falling apart — even the parts of your life that have nothing to do with money.\n\nYour money pattern: you either save obsessively or spend to self-soothe, and you swing between these extremes based on your emotional state, not your financial reality. This means your bank account is actually a mirror of your mental health.\n\nWhat you don\'t see: you undervalue your own work. You charge less than you\'re worth, accept less than you deserve, and feel guilty asking for more. This isn\'t a money problem — it\'s a self-worth problem wearing a financial disguise.',
-    traits: ['Emotional Spending', 'Security Seeking', 'Undervaluing Self', 'Financial Anxiety'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'recurring-life-patterns',
-    title: 'Patterns That Keep Repeating',
-    icon: 'repeat',
-    content: 'The same story keeps playing out in different areas of your life, and you might not even see it. That\'s the nature of karmic patterns — they\'re invisible to the person living them.\n\nYour recurring theme: entering situations where you are undervalued, over time proving your worth, then leaving transformed. This plays out in jobs, relationships, and friendships.\n\nThe deeper pattern: you are drawn to situations that require you to fight for recognition because deep down, you don\'t believe your value is inherent. You think it must be earned, proven, demonstrated — again and again and again.\n\nThe karmic lesson: your soul is trying to teach you that your worth is not negotiable. Every time you accept less than you deserve, you reinforce the pattern. Every time you walk away from something that doesn\'t value you, you break it.',
-    traits: ['Recognition Seeking', 'Self-Worth Lessons', 'Karmic Loops', 'Transformation Cycles'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'your-dark-side',
-    title: 'Your Shadow Self',
-    icon: 'ghost',
-    content: 'Everyone has a shadow — the part they don\'t want to admit exists. Yours shows up in specific ways that you probably justify to yourself.\n\nYour shadow: emotional manipulation. Not the cartoon-villain kind — the subtle kind. The kind where you withdraw affection to make someone feel your absence, or where you use your emotional intelligence to steer conversations in the direction you want.\n\nYou don\'t do this maliciously. You do it because you learned early that direct requests got you nothing, so you developed indirect strategies to get your needs met. But these strategies keep you from genuine connection.\n\nYour darker tendency: you can hold a grudge with surgical precision. You remember exactly what someone did, when they did it, and how it made you feel. You may forgive, but you rarely forget — and this memory becomes ammunition in future conflicts.',
-    traits: ['Subtle Manipulation', 'Grudge Holding', 'Indirect Strategies', 'Emotional Control'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'love-heartbreak-timeline',
-    title: 'Your Love & Heartbreak Timeline',
-    icon: 'heartcrack',
-    content: 'Love doesn\'t follow a schedule, but your chart does suggest phases where romantic energy is more active and phases where it\'s more about healing.\n\nYour 20s: intense crushes, idealized love, and the painful discovery that feelings alone don\'t sustain a relationship. Heartbreak here teaches you what you actually need vs. what you thought you wanted.\n\nYour 30s: the decade of reckoning. You either commit to the pattern of choosing unavailable partners, or you break it. This is when your dasha periods most likely activate major relationship events.\n\nYour 40s+: if you\'ve done the work, this is where love becomes what you always wanted — deep, real, and sustainable. If you haven\'t done the work, the pattern repeats with higher stakes.\n\nKey timing: your current dasha period is directly influencing your love life right now. Pay attention to who enters and exits during this time.',
-    traits: ['Love Phases', 'Heartbreak Lessons', 'Timing Patterns', 'Dasha Influence'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'career-truth',
-    title: 'What You\'re Actually Meant to Do',
-    icon: 'briefcase',
-    content: 'Forget what sounds impressive. Forget what your family expects. Here\'s what your chart says you\'re actually built for.\n\nYou are not meant for one career — you are meant for a mission. That mission involves helping people see what they can\'t see on their own. Whether you do this through counseling, teaching, writing, or strategy, the core function is the same: you are a mirror for others.\n\nThe career trap: you\'ll be tempted by stable, respectable jobs that look good on paper but slowly drain your soul. Your chart warns against choosing security over meaning. The security will never feel like enough, and the meaning will always pull you.\n\nThe honest truth: your career will not be a straight line. It will be a series of pivots, each one bringing you closer to your actual purpose. Don\'t fight the pivots — they\'re the path.',
-    traits: ['Mission-Driven', 'Mirror for Others', 'Anti-Corporate', 'Pivoting Path'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'family-karma',
-    title: 'What You Inherited From Your Family',
-    icon: 'home',
-    content: 'You didn\'t just inherit your parents\' genes — you inherited their patterns, their unresolved traumas, and their coping mechanisms.\n\nFather karma: your relationship with authority and self-worth is directly shaped by your father\'s presence (or absence). If he was emotionally unavailable, you may find yourself constantly seeking validation from authority figures who mirror that same distance.\n\nMother karma: your emotional patterns — how you nurture, how you self-soothe, how you handle stress — are mother\'s milk. Even the patterns you\'ve sworn you\'d never repeat show up when you\'re stressed.\n\nFamily wealth pattern: your relationship with money was set before you ever earned your first rupee. If your family struggled, you may carry scarcity mindset even when you\'re doing well. If your family had wealth, you may carry guilt about outearning them.\n\nThe liberation: you are not doomed to repeat these patterns. But you cannot break what you cannot name.',
-    traits: ['Father Wound', 'Mother Pattern', 'Wealth Inheritance', 'Generational Cycles'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'health-warnings',
-    title: 'What Your Body Is Prone To',
-    icon: 'heartpulse',
-    content: 'Your chart doesn\'t diagnose — but it does highlight vulnerabilities that are worth paying attention to.\n\nYour constitutional weakness: your digestive system and nervous system are connected. When you\'re stressed, your gut reacts first. This isn\'t psychosomatic — it\'s your body processing what your mind is trying to suppress.\n\nStress pattern: you carry tension in your shoulders and jaw. You may not realize how tightly you\'re holding yourself until someone points it out or until you get a migraine.\n\nThe warning: your tendency to push through discomfort rather than rest will catch up with you. Your body will force you to slow down if you don\'t choose to. Listen to the small signals before they become big ones.\n\nMental health: you are prone to periods of existential anxiety — not the everyday kind, but the deep, "what is the point of all this" kind. This is actually your spiritual nature expressing itself through your nervous system.',
-    traits: ['Gut-Brain Connection', 'Stress Tension', 'Forced Rest', 'Existential Anxiety'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'life-phase-roadmap',
-    title: 'Your Life Phase Roadmap',
-    icon: 'map',
-    content: 'Life isn\'t one long story — it\'s chapters. And your chart shows what each chapter is really about.\n\n**Your 20s** — The Experimentation Phase: You try on different identities, careers, and relationships. The mistake isn\'t trying — it\'s thinking you should have it figured out by 25. You won\'t. That\'s the point.\n\n**Your 30s** — The Building Phase: This is where your real work begins. The dasha periods in your 30s are the most defining of your life. Career direction solidifies, relationship patterns crystallize, and you either commit to growth or commit to comfort.\n\n**Your 40s** — The Power Phase: If you\'ve done the inner work, this decade brings the external rewards. Authority, recognition, and the confidence that comes from actually knowing who you are. If you haven\'t done the work, this is when the midlife crisis hits.\n\n**Your 50s+** — The Wisdom Phase: The pressure to prove yourself lifts. What replaces it is either deep peace or deep regret — and that depends entirely on whether you lived authentically or performed for others.',
-    traits: ['Decade Themes', 'Dasha Alignment', 'Growth Windows', 'Wisdom Timeline'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'financial-timeline',
-    title: 'When Money Flows & When It Doesn\'t',
-    icon: 'barchart3',
-    content: 'Money follows cycles, and your chart reveals those cycles clearly.\n\n**Early career (20s-early 30s):** Money is tight not because you lack talent, but because you lack direction. You\'re earning, but you\'re also spending on things that don\'t align with your eventual path. This isn\'t waste — it\'s tuition.\n\n**Mid-career (mid 30s-40s):** This is your wealth-building window. The dasha periods here favor financial growth, especially through intellectual property, consulting, or specialized expertise. Don\'t dilute your focus.\n\n**Peak earning (40s-50s):** If you\'ve specialized and built authority, this is when the real money comes. Not from working harder, but from being known for something specific.\n\n**Wealth preservation (60s+):** The danger here isn\'t earning — it\'s overspending on the next generation or on status symbols you don\'t actually care about. Your wealth is best preserved through simplicity and strategic giving.',
-    traits: ['Wealth Cycles', 'Career Phases', 'Specialization Value', 'Preservation Strategy'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'spiritual-purpose',
-    title: 'Why Your Soul Chose This Life',
-    icon: 'flame',
-    content: 'This isn\'t about religion. This is about the deepest "why" behind your existence.\n\nYour soul chose this life to master one core lesson: **authenticity under pressure**. You are here to learn who you are when everything external — status, relationships, security — is stripped away. And you will be tested on this. Multiple times.\n\nThe spiritual lesson: you keep attracting situations that force you to choose between what others expect and what your soul knows. Every time you choose the expectations, you feel a deep emptiness that no amount of external success can fill. Every time you choose your truth, you feel alive even if the circumstances are difficult.\n\nYour dharma: to be a guide for others who are going through what you\'ve already survived. Not a guru on a mountain — a real person who has walked through the fire and can say "I know this path. Here\'s where it turns."\n\nThe deepest truth: your suffering is not random. It is curriculum. And the degree to which you understand this directly determines your peace.',
-    traits: ['Soul Mission', 'Authenticity Test', 'Guide Dharma', 'Suffering as Curriculum'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'your-deepest-fear',
-    title: 'The Fear That Runs Your Life',
-    icon: 'shieldalert',
-    content: 'You have one fear that drives more of your decisions than you\'d ever admit. It\'s not the obvious stuff — it\'s the deep, structural fear that\'s been running in the background since you were a kid.\n\nYour fear shows up in the patterns you can\'t break. Every time you get close to something real — a relationship, a career opportunity, a moment of genuine happiness — this fear whispers "don\'t trust it" or "it won\'t last" or "you don\'t deserve this." And you listen, because the fear feels like protection when it\'s actually a prison.\n\nThe truth: your fear is protecting you from something that probably won\'t happen. But by protecting you, it\'s also keeping you from the things that WOULD happen if you stopped running.\n\nThis is what "nothing to hide" means. We\'re naming the fear so it stops running the show from the shadows.',
-    traits: ['Core Fear', 'Self-Protection', 'Avoidance Strategy', 'Hidden Cost'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'your-friendship-pattern',
-    title: 'How You Really Do Friendships',
-    icon: 'users',
-    content: 'Most astrology skips friendships. But who you are when the romantic stakes are removed? That\'s your real social self.\n\nYour friendship pattern tells a story. You have a type of friend you always attract and a role you always play. Maybe you\'re the therapist friend — everyone comes to you with their problems, but nobody asks how YOU\'RE doing. Maybe you\'re the fun friend — always invited to parties, rarely called when things get real.\n\nThe pattern to notice: your friendships mirror your relationship with yourself. If you don\'t ask for what you need from friends, you probably don\'t ask for it anywhere. If you keep attracting friends in crisis, there\'s something in you that needs to be needed.\n\nYour premium deep intelligence report will analyze your specific friendship archetype and tell you what you really need from your friendships but never ask for.',
-    traits: ['Friendship Archetype', 'Trust Circles', 'Conflict Style', 'Unmet Needs'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'your-anger-blueprint',
-    title: 'What Happens When You Get Angry',
-    icon: 'flame',
-    content: 'Anger is the emotion people lie about most. "I\'m not angry, I\'m just disappointed." No — you\'re angry. And that\'s okay.\n\nYour anger has a pattern. It builds in a specific way, explodes (or doesn\'t) in a specific way, and leaves a specific kind of damage. Most people think their anger style is normal because it\'s all they\'ve ever known. It\'s not normal — it\'s YOURS.\n\nThe key insight: your anger is never about what you think it\'s about. The person who cut you off in traffic? You\'re not angry about the traffic. You\'re angry about something deeper — feeling disrespected, feeling powerless, feeling like nobody sees you. Your anger is a messenger, and you\'ve been shooting the messenger your whole life.\n\nYour premium report will decode your specific anger blueprint — what triggers it, what it\'s really about, and how to use it instead of being used by it.',
-    traits: ['Anger Style', 'Hidden Triggers', 'Damage Pattern', 'Constructive Channel'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'your-power-years',
-    title: 'Your Power Years — When Everything Changes',
-    icon: 'zap',
-    content: 'Some years change everything. Not gradually — dramatically. Career breakthroughs, major relationships, identity shifts, financial turning points. These are the years where life before and life after look completely different.\n\nYour chart and dasha timeline reveal these power years with remarkable specificity. Saturn returns, Jupiter returns, Rahu-Ketu transits, and dasha changes — each one opens a door that only stays open for a limited time.\n\nThe mistake most people make: they treat power years like regular years. They play safe when they should be bold. They hesitate when they should be decisive. They maintain when they should be transforming.\n\nYour premium report will identify your specific power years with year ranges, what each one is about, and what you should do (and avoid) during these critical windows.',
-    traits: ['Power Windows', 'Dasha Transitions', 'Life Milestones', 'Strategic Timing'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'your-decision-pattern',
-    title: 'How You Make Decisions (And Why You Regret Half of Them)',
-    icon: 'gitbranch',
-    content: 'Every decision you\'ve ever made follows a pattern. Not the content — the PROCESS. How you gather info, how long you take, what you prioritize, and what you inevitably regret.\n\nYou have a decision-making operating system. It runs on autopilot for 90% of your choices. And it\'s the source of most of your regret — not because you make bad decisions, but because you make decisions the same WAY every time, even when the situation calls for a different approach.\n\nThe pattern: you probably make relationship decisions with your gut, financial decisions with your fear, and career decisions with other people\'s expectations. None of these are wrong — but they\'re not consistent, and that inconsistency is why you second-guess yourself.\n\nYour premium report will map your specific decision-making pattern, name your regret loop, and give you a calibrated process for making better decisions.',
-    traits: ['Decision Style', 'Regret Pattern', 'Analysis Method', 'Optimal Process'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'your-parenting-style',
-    title: 'The Parent You Are (Or Will Be)',
-    icon: 'baby',
-    content: 'Whether you have kids, want kids, or never want them — you parent something. You parent yourself. You parent your friends. You parent your projects. And your parenting pattern follows a specific blueprint.\n\nYour chart reveals your nurturing style — not just how you care for others, but what you BELIEVE care looks like. And that belief comes from how you were cared for, which is encoded in your 4th house and moon sign.\n\nThe honest truth: you will repeat your parents\' patterns unless you consciously choose differently. Not because you want to, but because those patterns are your default settings. Under stress, you revert to what you learned.\n\nYour premium report will name your parenting archetype, your blind spot, and the emotional inheritance you\'re passing on (or about to).',
-    traits: ['Nurturing Style', 'Inherited Patterns', 'Parenting Strength', 'Blind Spot'],
-    insightLevel: 'premium',
-  },
-  {
-    id: 'honest-disclaimer',
-    title: 'An Honest Note Before You Go',
-    icon: 'scale',
-    content: 'Before you carry all of this with you, there\'s something important to say.\n\nThis report is based on interpretation, not absolute truth. The calculations are mathematical — planetary positions, degrees, houses — but the MEANING is interpretive. Two astrologers could look at the same chart and emphasize completely different things. So take what resonates and leave what doesn\'t.\n\nThis is not 100% accurate. It was never meant to be. Astrology shows tendencies and patterns, not certainties. A trait score of 65 doesn\'t mean you\'re exactly 65% of anything — it means this factor is significant in your personality. The degree is approximate.\n\nYou are NOT defined by your chart. The chart shows the hand you were dealt — not how you play it. Free will is real. Awareness changes everything. Knowing a pattern exists gives you the power to choose differently, and that\'s the whole point.\n\nThe "nothing to hide" philosophy means we told you the hard truths. But hard truths are still interpretations of data, not objective facts about who you are.\n\nYou are more than your chart. You are more than your scores. You are a human being with the capacity to grow, change, and surprise even yourself.',
-    traits: ['Disclaimer', 'Free Will', 'Interpretation', 'Self-Determination'],
-    insightLevel: 'premium',
-  },
-];
+  // Build trait map
+  const traitMap: Record<string, number> = {};
+  traits.forEach(t => { traitMap[t.name] = t.score; });
+
+  const emotionalIntensity = traitMap['emotionalIntensity'] ?? 50;
+  const attachmentStyle = traitMap['attachmentStyle'] ?? 50;
+  const trust = traitMap['trust'] ?? 50;
+  const empathy = traitMap['empathy'] ?? 50;
+  const ambition = traitMap['ambition'] ?? 50;
+  const discipline = traitMap['discipline'] ?? 50;
+  const impulsiveness = traitMap['impulsiveness'] ?? 50;
+  const creativity = traitMap['creativity'] ?? 50;
+  const patience = traitMap['patience'] ?? 50;
+  const resilience = traitMap['resilience'] ?? 50;
+  const communicationOpenness = traitMap['communicationOpenness'] ?? 50;
+  const socialEnergy = traitMap['socialEnergy'] ?? 50;
+  const intuition = traitMap['intuition'] ?? 50;
+  const adaptability = traitMap['adaptability'] ?? 50;
+
+  // Find strongest and weakest
+  const strongest = traits.length > 0 ? traits.reduce((a, b) => a.score > b.score ? a : b) : { name: 'emotionalIntensity', label: 'Emotional Intensity', score: 50, description: '' };
+  const weakest = traits.length > 0 ? traits.reduce((a, b) => a.score < b.score ? a : b) : { name: 'patience', label: 'Patience', score: 50, description: '' };
+
+  // Yoga/dosha text
+  const yogaText = yogas.length > 0 ? `Your chart carries ${yogas.join(' and ')} — these amplify specific strengths in your personality.` : 'Your chart is free of major yogas, which means your life path is more self-made than fated.';
+  const doshaText = doshas.length > 0 ? `Your chart has ${doshas.join(' and ')} — these create friction points that you'll need to navigate consciously.` : 'Your chart has no major doshas, which means fewer karmic obstacles in your path.';
+
+  // Emotional description based on scores
+  const emotionalDesc = emotionalIntensity > 70
+    ? 'you feel everything at full volume — your emotions are like an exposed nerve, vivid and sometimes overwhelming'
+    : emotionalIntensity > 40
+      ? 'you have a rich emotional life but you\'ve developed a filter — you feel deeply but you choose when to show it'
+      : 'you process emotions quietly and internally — others may not realize how much is happening beneath your calm surface';
+
+  // Trust description
+  const trustDesc = trust > 65
+    ? 'you tend to trust freely, which means you sometimes project your own sincerity onto people who haven\'t earned it'
+    : trust < 35
+      ? 'you guard your trust fiercely, which protects you but also keeps out the people who deserve to be close to you'
+      : 'you\'re selective about trust — you give it in measured doses, which is healthy but can feel slow to people who want in';
+
+  // Build personalized free sections
+  const freeSections: ReportSection[] = [
+    {
+      id: 'emotional-personality',
+      title: 'Your Emotional Truth',
+      icon: 'heart',
+      content: `Let's be real about your emotional world. With your Moon in ${moon}, ${emotionalDesc}. Your Sun in ${sun} drives your outer identity, but it's your Moon that runs your inner life — and those two don't always agree.
+
+Your emotional intensity score is ${emotionalIntensity}/100. ${emotionalIntensity > 70 ? 'That means you don\'t just feel things — you get consumed by them. A bad day isn\'t just a bad day; it\'s a full-body experience. This intensity is your superpower when you channel it, and your kryptonite when it channels you.' : emotionalIntensity > 40 ? 'That means you have significant emotional capacity — you feel deeply but you\'ve learned to regulate. The danger is regulating so well that you numb yourself to your own signals.' : 'That means you process emotions internally and quietly. People may underestimate how much is happening beneath your surface because you don\'t show it the way others do.'}
+
+With empathy at ${empathy}/100 and intuition at ${intuition}/100, ${empathy > 65 && intuition > 60 ? 'you absorb others\' emotions AND sense what\'s unsaid — this makes you incredibly perceptive but also vulnerable to emotional overload. You might walk into a room and instantly feel the tension without anyone saying a word.' : empathy > 65 ? 'you absorb others\' emotions easily — sometimes to the point where you can\'t tell which feelings are yours and which belong to someone else. This is especially dangerous in relationships.' : 'you sense more than you absorb — you pick up on undercurrents but don\'t get swept away by them. This gives you clarity but can make you seem detached to people who need emotional mirroring.'}
+
+${yogaText} ${doshaText}
+
+Watch for the pattern where you absorb other people's emotions and mistake them for your own. With your ${moon} Moon, this is especially likely when you're tired or stressed.`,
+      traits: ['Emotional Depth', 'Empathy', 'Intuition', 'Inner Conflict'],
+      insightLevel: 'free' as const,
+    },
+    {
+      id: 'relationship-style',
+      title: 'Your Relationship Reality',
+      icon: 'user',
+      content: `Here's the truth about how you love: with your attachment style score at ${attachmentStyle}/100 and trust at ${trust}/100, ${trustDesc}.
+
+Your ${moon} Moon means you crave ${moon === 'Cancer' || moon === 'Pisces' || moon === 'Scorpio' ? 'deep emotional merging — you want to feel completely safe with someone, to let your guard down fully. But that desire for merging can make you hold on too tight when you should let go' : moon === 'Aries' || moon === 'Leo' || moon === 'Sagittarius' ? 'passion and independence in equal measure — you want a partner who excites you but doesn\'t clip your wings. The problem? You sometimes confuse excitement for connection' : moon === 'Taurus' || moon === 'Virgo' || moon === 'Capricorn' ? 'stability and consistency — you want someone who shows up, every day, reliably. But your standard for "reliable" might be so high that you reject people for normal human inconsistency' : 'a balance of depth and freedom — you\'re adaptable in relationships but may struggle to articulate what you actually need'}.
+
+Your ${sun} Sun adds another layer: it wants to be ${sun === 'Aries' || sun === 'Leo' || sun === 'Sagittarius' ? 'seen and admired. You might choose partners who reflect well on your image rather than partners who see the real you' : sun === 'Cancer' || sun === 'Scorpio' || sun === 'Pisces' ? 'loved unconditionally. You might stay in relationships long past their expiration date because you believe love should endure everything' : sun === 'Taurus' || sun === 'Virgo' || sun === 'Capricorn' ? 'respected and valued. You might choose partners based on practical compatibility and wonder why something feels missing emotionally' : 'understood intellectually before emotionally. You might overthink relationships instead of feeling your way through them'}.
+
+The gap: ${trust < 40 ? 'Your low trust score means you test people constantly — often without telling them they\'re being tested. The people who pass are the ones who stay consistent despite your walls. But most people give up before they get through, and you interpret that as proof they weren\'t worth trusting. It\'s a self-fulfilling prophecy.' : trust > 70 ? 'Your high trust means you open up fast — sometimes too fast. You might reveal your deepest self to someone who hasn\'t proven they can hold it, and then feel betrayed when they can\'t. Not everyone has the capacity for your depth, and that\'s not their fault or yours.' : 'Your moderate trust means you\'re cautious but not closed. You give people a chance but keep one foot out the door. This protects you but also prevents the vulnerability that creates genuine intimacy.'}
+
+With social energy at ${socialEnergy}/100, ${socialEnergy > 65 ? 'you need regular social connection to feel alive — isolation drains you faster than conflict' : socialEnergy < 35 ? 'you recharge alone and too much social interaction depletes you — your partner needs to understand that your need for space isn\'t rejection' : 'you balance social time and alone time well, but your relationship needs are very specific and non-negotiable'}.`,
+      traits: ['Attachment Pattern', 'Trust Issues', 'Deep Connection', 'Vulnerability'],
+      insightLevel: 'free' as const,
+    },
+    {
+      id: 'communication-patterns',
+      title: 'How You Really Communicate',
+      icon: 'message',
+      content: `Your communication openness score is ${communicationOpenness}/100. ${communicationOpenness > 65 ? 'You share freely — sometimes too freely. You might tell a stranger your life story in 10 minutes, which creates instant connection but also instant vulnerability. Not everyone deserves that level of access to you.' : communicationOpenness < 35 ? 'You keep a fortress around your inner world. Most people will never get past the moat. This isn\'t coldness — it\'s protection. But the walls that keep out the wrong people also keep out the right ones.' : 'You share selectively — you have different levels of openness for different people. This is actually healthy, but it can confuse people who can\'t figure out where they stand with you.'}
+
+With impulsiveness at ${impulsiveness}/100 and discipline at ${discipline}/100: ${impulsiveness > 65 && discipline < 40 ? 'You speak before you think and regret it later. Your words are honest but sometimes brutal. You\'ve probably said things in arguments you can\'t take back, and the pattern keeps repeating because your impulse to express always outruns your filter.' : impulsiveness < 35 && discipline > 60 ? 'You overthink every word before saying it. By the time you\'ve formulated the perfect response, the moment has passed. People think you\'re distant when you\'re actually just processing. Your written communication is probably 10x better than your spoken.' : 'You balance thought and expression reasonably well, but you may default to silence when you should speak up, especially when the topic is emotionally charged.'}
+
+Your ${asc} Ascendant means people first see you as ${asc === 'Aries' ? 'bold and direct — but they don\'t see the hesitation underneath' : asc === 'Taurus' ? 'calm and grounded — but they don\'t see the stubbornness that comes when you\'re pushed' : asc === 'Gemini' ? 'quick and clever — but they don\'t see the depth behind the wit' : asc === 'Cancer' ? 'warm and caring — but they don\'t see the self-protection underneath' : asc === 'Leo' ? 'confident and expressive — but they don\'t see the vulnerability you mask with performance' : asc === 'Virgo' ? 'precise and helpful — but they don\'t see the anxiety that drives the perfectionism' : asc === 'Libra' ? 'diplomatic and charming — but they don\'t see the indecision behind the pleasantness' : asc === 'Scorpio' ? 'intense and private — but they don\'t see how much you actually want to be understood' : asc === 'Sagittarius' ? 'adventurous and optimistic — but they don\'t see the restlessness that never lets you settle' : asc === 'Capricorn' ? 'serious and capable — but they don\'t see the softness you protect with competence' : asc === 'Aquarius' ? 'independent and unconventional — but they don\'t see the loneliness underneath the detachment' : 'sensitive and intuitive — but they don\'t see the strength behind the gentleness'}.
+
+Your communication superpower: ${empathy > 60 && intuition > 60 ? 'you hear what people AREN\'T saying. You pick up on the unsaid, the hinted, the avoided. This makes you an incredible listener and a terrifying opponent in arguments because you see through deflection instantly.' : creativity > 65 ? 'you find unexpected ways to express complex ideas. You use metaphors, stories, and analogies that make abstract feelings concrete. People remember what you say because you say it differently than anyone else.' : 'your words carry weight because you don\'t waste them. When you speak, people listen — not because you\'re loud, but because you\'re deliberate.'}`,
+      traits: ['Selective Expression', 'Written Strength', 'Passive Patterns', 'Deep Listening'],
+      insightLevel: 'free' as const,
+    },
+  ];
+
+  // Build personalized premium sections (teaser + CTA style)
+  const premiumSections: ReportSection[] = [
+    {
+      id: 'hidden-strengths',
+      title: 'Powers You Don\'t Know You Have',
+      icon: 'sparkles',
+      content: `With creativity at ${creativity} and intuition at ${intuition}, you have strengths you don't fully recognize because they come so naturally that you think everyone has them. They don't.
+
+Your ${strongest.label} (${strongest.score}/100) is your most dominant trait — it shapes almost everything you do, but you probably take it for granted. Meanwhile, your resilience at ${resilience} means ${resilience > 70 ? 'you bounce back from things that would break most people, but you might not even realize you\'re doing it because recovery has become automatic' : resilience > 40 ? 'you endure more than you think you can, but your recovery isn\'t automatic — it requires conscious effort and the right conditions' : 'you\'re more fragile than you let on, and pushing through without recovering is a pattern that will catch up with you'}.
+
+${yogas.length > 0 ? `Your ${yogas[0]} yoga specifically amplifies your innate abilities in ways you haven't fully tapped into yet.` : ''}
+
+**Generate your Deep Intelligence Report to discover your specific hidden powers, how your ${moon} Moon and ${sun} Sun combination creates a unique edge, and what happens when you finally stop doubting your strongest abilities.**`,
+      traits: ['Root-Cause Thinking', 'Strategic Creativity', 'Quiet Resilience', 'Adaptive Strength'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'emotional-blind-spots',
+      title: 'What You Refuse to See',
+      icon: 'eye',
+      content: `With emotional intensity at ${emotionalIntensity} and patience at ${patience}, ${emotionalIntensity > 70 && patience < 40 ? 'you react fast and feel hard — and you probably don\'t notice the loop: you react, feel ashamed of your reaction, suppress it, and then erupt again. This cycle runs on autopilot and it\'s costing you relationships' : emotionalIntensity < 40 && patience > 60 ? 'you suppress your emotions so effectively that you\'ve convinced yourself you\'re "over it" when you\'re actually just numb. Your body keeps score though — pay attention to tension headaches, jaw clenching, or digestive issues' : 'you have a moderate emotional pattern, but there\'s a specific blind spot you can\'t see from inside it'}.
+
+${trust > 65 ? 'Your high trust score means you project your own sincerity onto others — you assume people mean what they say because YOU mean what you say. This gets you betrayed more often than it should.' : trust < 35 ? 'Your low trust means you push people away before they can hurt you — but the people you push away are often the ones who would have stayed. Your self-protection has become self-isolation.' : ''}
+
+**Generate your Deep Intelligence Report to uncover your specific blind spots, how your ${doshas.length > 0 ? doshas[0] + ' dosha' : 'chart patterns'} warp your perception, and the exact pattern you keep repeating that you think is "just how things are."**`,
+      traits: ['Self-Worth Gap', 'Over-Giving', 'Need vs Love', 'Emotional Intelligence Trap'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'money-psychology',
+      title: 'Your Money Story — The Whole Truth',
+      icon: 'wallet',
+      content: `With ambition at ${ambition} and discipline at ${discipline}, ${ambition > 70 && discipline > 60 ? 'you\'re a Builder — slow and steady wealth accumulation is your natural pattern. But you might be building wealth without building freedom, and the money keeps growing while the satisfaction doesn\'t' : ambition > 70 && impulsiveness > 60 ? 'you\'re a Rollercoaster — big earning years followed by big losses. Your ambition drives you to earn but your impulsiveness drives you to spend, and the gap between the two is where your financial stress lives' : ambition < 40 && creativity > 60 ? 'you\'re an Underearner — brilliant but struggling to monetize your talent. You value meaning over money, which is noble, but it\'s also keeping you from the financial security your nervous system craves' : 'your financial pattern is complex — neither purely saver nor spender, but something specific to your chart that needs deeper analysis'}.
+
+Your Soul Urge number is ${soulUrge} — ${soulUrge === 4 ? 'you want SECURITY above all. Money for you equals safety' : soulUrge === 5 ? 'you want FREEDOM above all. Money for you equals the ability to go anywhere and do anything' : soulUrge === 8 ? 'you want POWER and LEGACY. Money for you equals influence and the ability to create lasting impact' : soulUrge === 1 ? 'you want INDEPENDENCE. Money for you equals never having to depend on anyone' : soulUrge === 6 ? 'you want to PROVIDE. Money for you equals the ability to take care of the people you love' : 'money represents something deeply personal that your chart reveals in detail'}.
+
+**Generate your Deep Intelligence Report to understand your complete money psychology, what your ${destiny} Destiny Number says about your financial approach, and the specific blind spot that's keeping you from the financial reality you deserve.**`,
+      traits: ['Emotional Spending', 'Security Seeking', 'Undervaluing Self', 'Financial Anxiety'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'recurring-life-patterns',
+      title: 'Patterns That Keep Repeating',
+      icon: 'repeat',
+      content: `Your Life Path Number is ${lifePath} — this means ${lifePath === 1 ? 'your recurring lesson is about sovereignty: learning to stand strong without isolating, to lead without dominating, to be independent without being alone' : lifePath === 2 || lifePath === 11 ? 'your recurring lesson is about balance: learning to give without losing yourself, to cooperate without compromising your core, to be in relationship without disappearing into it' : lifePath === 3 ? 'your recurring lesson is about self-expression: learning to speak your truth without fear of rejection, to create without needing validation, to be seen without performing' : lifePath === 4 || lifePath === 22 ? 'your recurring lesson is about building: learning to create structure without becoming rigid, to work hard without becoming a workaholic, to build something lasting without sacrificing your joy' : lifePath === 5 ? 'your recurring lesson is about freedom: learning to explore without escaping, to change without running, to be free without being lost' : lifePath === 6 ? 'your recurring lesson is about service: learning to care for others without self-destruction, to love without controlling, to give without resentment' : lifePath === 7 ? 'your recurring lesson is about trust: learning to trust your inner knowing, to seek truth without isolating, to be spiritual without being disconnected from reality' : lifePath === 8 ? 'your recurring lesson is about power: learning to use power ethically, to build wealth without becoming it, to lead without exploiting' : 'your recurring lesson is about completion: learning to let go without bitterness, to end chapters without regret, to serve the world without losing yourself'}.
+
+You're currently in ${dasha !== 'your current Dasha' ? `your ${dasha} period` : 'a significant dasha period'} — ${dasha.includes('Saturn') ? 'this means the universe is demanding you get serious about structure and discipline' : dasha.includes('Jupiter') ? 'this means expansion and opportunity are active themes right now' : dasha.includes('Rahu') ? 'this means unconventional paths and sudden changes are likely' : dasha.includes('Venus') ? 'this means relationships, creativity, and material comfort are heightened' : 'this is a significant life chapter that your chart defines in detail'}.
+
+**Generate your Deep Intelligence Report to discover your specific karmic patterns, how your ${nakshatra !== 'your Nakshatra' ? nakshatra + ' Nakshatra' : 'Nakshatra'} myth plays out in your life, and the ONE pattern that — if interrupted — could change everything.**`,
+      traits: ['Recognition Seeking', 'Self-Worth Lessons', 'Karmic Loops', 'Transformation Cycles'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'your-dark-side',
+      title: 'Your Shadow Self',
+      icon: 'ghost',
+      content: `${emotionalIntensity > 75 ? 'Your shadow is emotional manipulation — not the cartoon-villain kind, but the subtle kind. You withdraw affection to make someone feel your absence. You use your emotional intelligence to steer conversations. You don\'t do this maliciously — you do it because direct requests got you nothing growing up.' : impulsiveness > 70 ? 'Your shadow is chaos-creation — you stir up drama when things are too calm because peace feels like death. You might not even realize you\'re doing it until the dust settles and you\'re standing in the wreckage wondering what happened.' : trust < 35 ? 'Your shadow is paranoid sabotage — you destroy good things before they can be destroyed BY them. Your low trust score isn\'t just caution; it\'s a pattern of preemptive strikes against anything that feels too good to be true.' : 'Your shadow is specific to your chart combination — and it\'s something you probably justify to yourself every day without realizing it.'}
+
+Your ${moon} Moon's dark side: every moon sign has a shadow. ${moon === 'Aries' ? 'Yours is volcanic rage that erupts and then wonders why everyone is upset' : moon === 'Taurus' ? 'Yours is stubborn possessiveness that confuses holding on with loving' : moon === 'Gemini' ? 'Yours is emotional detachment that looks like indifference but is actually fear of depth' : moon === 'Cancer' ? 'Yours is emotional manipulation through guilt and moodiness when you feel unsafe' : moon === 'Leo' ? 'Yours is dramatic self-centeredness that makes everything about your pain' : moon === 'Virgo' ? 'Yours is critical perfectionism that tears down yourself and others in the name of "helping"' : moon === 'Libra' ? 'Yours is people-pleasing that erases your own needs and then resents people for not seeing them' : moon === 'Scorpio' ? 'Yours is vindictive obsession — you can love and hate someone with equal intensity, sometimes simultaneously' : moon === 'Sagittarius' ? 'Yours is running away when things get too real — you confuse escape with freedom' : moon === 'Capricorn' ? 'Yours is emotional coldness that masks how much you actually feel — people think you don\'t care when you care too much' : moon === 'Aquarius' ? 'Yours is intellectualization that distances you from your own feelings — you analyze instead of feel' : 'Yours is emotional absorption that makes you carry other people\'s darkness as your own'}.
+
+**Generate your Deep Intelligence Report to confront your complete shadow self, how it shows up under stress, and what you need to integrate — not eliminate — to become whole.**`,
+      traits: ['Subtle Manipulation', 'Grudge Holding', 'Indirect Strategies', 'Emotional Control'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'love-heartbreak-timeline',
+      title: 'Your Love & Heartbreak Timeline',
+      icon: 'heartcrack',
+      content: `With attachment style at ${attachmentStyle} and emotional intensity at ${emotionalIntensity}, your love archetype is ${attachmentStyle > 60 && empathy > 60 ? 'the Devoted Lover — you give everything and get destroyed when it ends. Your love is genuine but it\'s also consuming' : trust < 40 && emotionalIntensity > 50 ? 'the Guarded Heart — you feel deeply but refuse to show it. You push people away to test if they\'ll stay, and most of them don\'t' : impulsiveness > 60 && socialEnergy > 55 ? 'the Serial Romantic — you love the beginning but bolt when it gets real. The chemistry is always there; the commitment is the challenge' : 'unique to your specific chart combination'}.
+
+Your current ${dasha !== 'your current Dasha' ? `${dasha} period` : 'dasha period'} is directly influencing your love life right now. ${dasha.includes('Venus') ? 'This is a high-activation period for romance — love is in the air but so is the potential for intensity.' : dasha.includes('Saturn') ? 'This is a period where relationships get serious or end — there\'s no middle ground right now.' : dasha.includes('Rahu') ? 'This can bring unconventional or intense connections — be careful of getting swept up in chemistry without compatibility.' : 'The specific timing of your love windows requires deeper analysis of your complete dasha sequence.'}
+
+**Generate your Deep Intelligence Report to get specific year ranges for when love enters, when heartbreak is probable, and when the stars align for your most significant partnership milestone.**`,
+      traits: ['Love Phases', 'Heartbreak Lessons', 'Timing Patterns', 'Dasha Influence'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'career-truth',
+      title: 'What You\'re Actually Meant to Do',
+      icon: 'briefcase',
+      content: `With ambition at ${ambition} and creativity at ${creativity}, ${ambition > 70 && creativity > 65 ? 'you need a career that has BOTH upward mobility AND creative freedom. The moment either one is missing, you start dying inside. You\'re not meant for a straight ladder — you\'re meant for a portfolio career where each role feeds a different part of you' : ambition < 40 && creativity > 65 ? 'you\'re probably in a job that drains you while your real genius goes untapped. You value meaning over prestige, but you\'ve been told that\'s "not ambitious enough." It\'s not — it\'s a different kind of ambition entirely' : ambition > 70 && creativity < 40 ? 'you thrive in structured, competitive environments. You\'re built for the corporate ladder — but make sure you\'re climbing the right wall. Success without fulfillment isn\'t success' : 'your career path is more nuanced than a simple score can capture — your specific chart combination reveals a calling that defies conventional career categories'}.
+
+Your Life Path ${lifePath} means you're here to ${lifePath === 1 ? 'BUILD something of your own — entrepreneurship or independent work calls to you' : lifePath === 2 || lifePath === 11 ? 'BRIDGE people and ideas — mediation, counseling, or partnership-based work is your arena' : lifePath === 3 ? 'EXPRESS and CREATE — communication, writing, or artistic work is where you come alive' : lifePath === 4 || lifePath === 22 ? 'STRUCTURE and BUILD — engineering, architecture, or systems design is your natural domain' : lifePath === 5 ? 'EXPLORE and EXPERIENCE — travel, media, or anything with variety feeds your soul' : lifePath === 6 ? 'HEAL and SERVE — counseling, healthcare, or education is where you find purpose' : lifePath === 7 ? 'RESEARCH and UNDERSTAND — analysis, investigation, or spiritual work is your calling' : lifePath === 8 ? 'LEAD and LEVERAGE — business, finance, or executive leadership is your arena' : 'COMPLETE and ELEVATE — teaching, philanthropy, or wisdom-sharing is your endgame'}.
+
+**Generate your Deep Intelligence Report to discover what you're actually meant to do (it's probably not what your family expects), what your ${nakshatra !== 'your Nakshatra' ? nakshatra + ' Nakshatra' : 'chart'} says about your natural genius at work, and the career trap you're most likely to fall into.**`,
+      traits: ['Mission-Driven', 'Mirror for Others', 'Anti-Corporate', 'Pivoting Path'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'family-karma',
+      title: 'What You Inherited From Your Family',
+      icon: 'home',
+      content: `Your ${moon} Moon in Vedic astrology represents your mother and your emotional foundation. ${moon === 'Cancer' ? 'This suggests an emotionally present but sometimes smothering maternal influence — you learned to nurture by being nurtured, but you may also have learned to hold on too tight' : moon === 'Capricorn' ? 'This suggests a mother who provided materially but may have been emotionally distant — you learned early that feelings were private, not shared' : moon === 'Aries' ? 'This suggests a strong, independent maternal figure who taught you to stand on your own but may not have modeled emotional vulnerability' : moon === 'Scorpio' ? 'This suggests an intense, complex maternal relationship — you learned about power and control early, possibly through emotional extremes' : 'Your Moon sign reveals a specific family pattern that runs deeper than you realize'}.
+
+Your trust score of ${trust} and attachment style of ${attachmentStyle} didn't come from nowhere — ${attachmentStyle > 60 ? 'your anxious attachment likely came from inconsistent emotional availability in childhood' : attachmentStyle < 40 ? 'your avoidant pattern likely came from learning early that expressing needs led to disappointment' : 'your attachment pattern is relatively balanced, which suggests either a secure foundation or significant conscious healing'}.
+
+**Generate your Deep Intelligence Report to uncover your complete family karma — what you inherited, what you need to break, and what you need to honor.**`,
+      traits: ['Father Wound', 'Mother Pattern', 'Wealth Inheritance', 'Generational Cycles'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'health-warnings',
+      title: 'What Your Body Is Prone To',
+      icon: 'heartpulse',
+      content: `Your ${asc} Ascendant governs ${asc === 'Aries' ? 'the head — watch for migraines, sinus issues, and tension headaches when stressed' : asc === 'Taurus' ? 'the throat — thyroid, vocal cords, and neck tension are your weak points' : asc === 'Gemini' ? 'the lungs and nervous system — respiratory issues and anxiety-related symptoms are common' : asc === 'Cancer' ? 'the chest and stomach — digestive issues and emotional eating patterns are likely' : asc === 'Leo' ? 'the heart and spine — cardiovascular health and back problems need attention' : asc === 'Virgo' ? 'the digestive system — IBS, food sensitivities, and stress-induced gut issues' : asc === 'Libra' ? 'the kidneys and lower back — hydration and hormonal balance are key' : asc === 'Scorpio' ? 'the reproductive system and eliminative organs — detox and hormonal health matter' : asc === 'Sagittarius' ? 'the hips and liver — watch for hip issues and liver-related fatigue' : asc === 'Capricorn' ? 'the bones and joints — skeletal health and arthritis prevention matter' : asc === 'Aquarius' ? 'the circulatory system and calves — blood circulation and leg issues' : 'the feet and lymphatic system — foot problems and immune function need attention'}.
+
+Your emotional intensity at ${emotionalIntensity} directly impacts your physical health: ${emotionalIntensity > 70 ? 'suppressed emotions show up as jaw clenching, shoulder tension, and digestive problems. Your body processes what your mind tries to suppress' : 'your moderate emotional processing means your health is generally stable, but watch for psychosomatic symptoms during high-stress periods'}.
+
+**Generate your Deep Intelligence Report for your complete health profile — specific vulnerabilities based on your chart, the stress-body connection your trait scores reveal, and practical vigilance points.**`,
+      traits: ['Gut-Brain Connection', 'Stress Tension', 'Forced Rest', 'Existential Anxiety'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'life-phase-roadmap',
+      title: 'Your Life Phase Roadmap',
+      icon: 'map',
+      content: `Your life isn't one long story — it's chapters, and your chart shows what each chapter is about. With Life Path ${lifePath}, your ${lifePath === 1 ? '20s are about proving you can stand alone, your 30s are about learning that standing alone isn\'t the same as being alone' : lifePath === 6 ? '20s are about learning to care for others without losing yourself, your 30s are about building relationships that are partnerships, not rescue missions' : '20s and 30s have specific themes your chart defines in detail'}.
+
+You're in ${dasha !== 'your current Dasha' ? `your ${dasha} period` : 'a significant dasha period'} — this defines the current chapter of your life. ${dasha.includes('Saturn') ? 'Saturn periods demand discipline and deliver earned rewards — your current chapter is about building something real' : dasha.includes('Jupiter') ? 'Jupiter periods bring expansion and growth — your current chapter is about saying yes to the right opportunities' : 'Each dasha period activates specific themes that shape your decisions, relationships, and growth'}.
+
+**Generate your Deep Intelligence Report for your complete decade-by-decade roadmap — specific themes, challenges, and opportunities for your 20s, 30s, 40s, 50s, and 60s+, all mapped to your dasha timeline with approximate year ranges.**`,
+      traits: ['Decade Themes', 'Dasha Alignment', 'Growth Windows', 'Wisdom Timeline'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'financial-timeline',
+      title: 'When Money Flows & When It Doesn\'t',
+      icon: 'barchart3',
+      content: `Your financial archetype: ${ambition > 70 && discipline > 60 ? 'The Builder — slow and steady wealth accumulation. You rarely get rich quick but rarely go broke' : ambition > 70 && impulsiveness > 60 ? 'The Rollercoaster — big earning years followed by big losses. Your financial drama is a lifestyle' : ambition < 40 && creativity > 60 ? 'The Underearner — brilliant but can\'t monetize. Always "about to" break through' : discipline > 65 && trust < 40 ? 'The Security Seeker — you hoard money out of fear and it never feels like enough' : 'Your specific financial archetype needs deeper analysis of your chart'}.
+
+Your Destiny Number ${destiny} means ${destiny === 8 ? 'you\'re born to handle large sums but money comes with power struggles' : destiny === 4 ? 'you\'re a steady earner who must build brick by brick' : destiny === 3 ? 'you earn through communication and creativity but income is inconsistent' : destiny === 1 ? 'you have entrepreneurial potential but can overspend proving status' : destiny === 6 ? 'you earn through service and responsibility — money follows meaning for you' : 'your financial approach is unique and your chart reveals it in detail'}.
+
+**Generate your Deep Intelligence Report for your complete financial timeline — when money flows, when it tightens, specific year ranges based on your dasha periods, and your biggest financial blind spot.**`,
+      traits: ['Wealth Cycles', 'Career Phases', 'Specialization Value', 'Preservation Strategy'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'spiritual-purpose',
+      title: 'Why Your Soul Chose This Life',
+      icon: 'flame',
+      content: `Your Life Path ${lifePath} is your soul's curriculum: ${lifePath === 1 ? 'sovereignty — learning to stand alone without isolation, to lead without dominating' : lifePath === 2 || lifePath === 11 ? 'balance — learning to give without losing, to cooperate without compromising your core' : lifePath === 3 ? 'self-expression — learning to speak your truth regardless of rejection' : lifePath === 4 || lifePath === 22 ? 'mastery through structure — learning to build without becoming rigid' : lifePath === 5 ? 'freedom — learning to explore without escaping, to change without running' : lifePath === 6 ? 'service without self-destruction — learning to love without controlling, to give without resentment' : lifePath === 7 ? 'inner truth — learning to trust your knowing, to seek without isolating' : lifePath === 8 ? 'ethical power — learning to build wealth without becoming it, to lead without exploiting' : 'completion — learning to let go without bitterness, to end chapters without regret'}.
+
+You keep attracting situations that force you to choose between what others expect and what your soul knows. Every time you choose the expectations, you feel empty. Every time you choose your truth, you feel alive even when it's hard.
+
+**Generate your Deep Intelligence Report to understand your complete spiritual purpose, your ${nakshatra !== 'your Nakshatra' ? nakshatra + ' Nakshatra\'s' : ''} mythological purpose, and what your soul is really here to learn.**`,
+      traits: ['Soul Mission', 'Authenticity Test', 'Guide Dharma', 'Suffering as Curriculum'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'your-deepest-fear',
+      title: 'The Fear That Runs Your Life',
+      icon: 'shieldalert',
+      content: `Your combination of ${trust < 40 ? 'low trust' : trust > 70 ? 'high trust' : 'moderate trust'} and ${emotionalIntensity > 70 ? 'high emotional intensity' : emotionalIntensity < 40 ? 'low emotional intensity' : 'moderate emotional intensity'} creates a specific fear pattern. ${trust < 40 ? 'Your deepest fear is betrayal — you\'re so afraid of being hurt that you\'d rather push people away first. This fear runs your relationships, your career choices, and your willingness to be seen.' : trust > 70 ? 'Your deepest fear is abandonment — you trust so freely that the thought of someone leaving is unbearable. This fear makes you hold on too tight and tolerate too much.' : 'Your fear is specific to your chart and it shows up in the patterns you can\'t break.'}
+
+Every time you get close to something real, this fear whispers something — "don't trust it," "it won't last," "you don't deserve this." And you listen, because the fear feels like protection when it's actually a prison.
+
+**Generate your Deep Intelligence Report to name the specific fear that runs your life, how it shows up in your decisions, and how to stop letting it drive from the back seat.**`,
+      traits: ['Core Fear', 'Self-Protection', 'Avoidance Strategy', 'Hidden Cost'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'your-friendship-pattern',
+      title: 'How You Really Do Friendships',
+      icon: 'users',
+      content: `With empathy at ${empathy} and social energy at ${socialEnergy}, ${empathy > 65 && socialEnergy > 55 ? 'you\'re the therapist friend — everyone comes to you with their problems, but nobody asks how YOU\'RE doing. You give incredible advice but rarely take it yourself' : empathy > 65 && socialEnergy < 40 ? 'you\'re the wise hermit — you have deep insights but few people get close enough to hear them. Your friendships are rare but profound' : socialEnergy > 65 && empathy < 50 ? 'you\'re the life of the party but keep your real self hidden behind the fun. People know the fun version, not the real you' : 'your friendship pattern is unique to your chart combination'}.
+
+**Generate your Deep Intelligence Report to discover your friendship archetype, what you really need from friends but never ask for, and the pattern that keeps repeating in your social life.**`,
+      traits: ['Friendship Archetype', 'Trust Circles', 'Conflict Style', 'Unmet Needs'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'your-anger-blueprint',
+      title: 'What Happens When You Get Angry',
+      icon: 'flame',
+      content: `With impulsiveness at ${impulsiveness} and patience at ${patience}, ${impulsiveness > 65 && patience < 40 ? 'you erupt. Your anger is fast, hot, and destructive. You say things you mean in the moment but regret forever. The damage is done before your rational brain catches up' : impulsiveness < 35 && patience > 60 ? 'you implode. Your anger goes inward, building resentment that leaks out as passive aggression or sudden coldness. People don\'t even know you\'re angry until the relationship is damaged beyond repair' : 'your anger has a specific pattern that your chart reveals in detail — and it\'s probably not what you think it is'}.
+
+Your anger is never about what you think it's about. The person who cut you off? You're not angry about the traffic. You're angry about something deeper.
+
+**Generate your Deep Intelligence Report to decode your anger blueprint — what triggers it, what it's really about, and how to use it instead of being used by it.**`,
+      traits: ['Anger Style', 'Hidden Triggers', 'Damage Pattern', 'Constructive Channel'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'your-power-years',
+      title: 'Your Power Years — When Everything Changes',
+      icon: 'zap',
+      content: `Some years change everything. Your chart and dasha timeline reveal these power years — the ones where life before and life after look completely different. ${dasha !== 'your current Dasha' ? `Your current ${dasha} period is one such window — this is when major life events are most likely to crystallize.` : 'Your current dasha period is one such window.'}
+
+The mistake most people make: they treat power years like regular years. They play safe when they should be bold. They hesitate when they should be decisive.
+
+**Generate your Deep Intelligence Report to identify your specific power years with year ranges, what each one is about, and what you should do (and avoid) during these critical windows.**`,
+      traits: ['Power Windows', 'Dasha Transitions', 'Life Milestones', 'Strategic Timing'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'your-decision-pattern',
+      title: 'How You Make Decisions (And Why You Regret Half of Them)',
+      icon: 'gitbranch',
+      content: `You make relationship decisions with your ${emotionalIntensity > 65 ? 'gut — if it feels right, you go for it, even when the data says otherwise' : 'head — you analyze every angle until the opportunity passes'}, financial decisions with your ${trust < 40 ? 'fear — you protect what you have rather than risk growing it' : ambition > 65 ? 'ambition — you chase the bigger number even when the smaller one would make you happier' : 'instinct — which is better than most people\'s analysis'}, and career decisions with ${discipline > 60 ? 'discipline — you stick with what you started even when you should pivot' : 'impulse — you jump at what excites you even when you should be strategic'}.
+
+The inconsistency is why you second-guess yourself.
+
+**Generate your Deep Intelligence Report to map your specific decision-making pattern, name your regret loop, and get a calibrated process for making better decisions.**`,
+      traits: ['Decision Style', 'Regret Pattern', 'Analysis Method', 'Optimal Process'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'your-parenting-style',
+      title: 'The Parent You Are (Or Will Be)',
+      icon: 'baby',
+      content: `With your ${moon} Moon and empathy at ${empathy}, your nurturing style is ${empathy > 65 ? 'deeply emotional — you feel your children\'s pain before they can express it. This is beautiful but can become smothering if you don\'t allow them their own emotional experience' : empathy < 40 ? 'practical and structured — you provide stability and guidance through action, not words. Your love shows up in what you DO, not what you say' : 'balanced between emotional attunement and practical guidance — but the balance shifts depending on your stress level'}.
+
+The honest truth: you will repeat your parents' patterns unless you consciously choose differently. Under stress, you revert to what you learned.
+
+**Generate your Deep Intelligence Report to name your parenting archetype, your blind spot, and the emotional inheritance you're passing on (or about to).**`,
+      traits: ['Nurturing Style', 'Inherited Patterns', 'Parenting Strength', 'Blind Spot'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'your-personalized-remedies',
+      title: 'Your Personalized Remedies & Solutions',
+      icon: 'shieldcheck',
+      content: `This section turns insight into action. After all the patterns, fears, and blind spots — here are your personalized remedies based on your specific chart data.
+
+**Your 3 Priority Remedies:**
+
+1. **Emotional Boundary Practice** — With emotional intensity at ${emotionalIntensity}/100 ${emotionalIntensity > 70 ? 'and empathy at ' + empathy + '/100, you absorb others\' feelings like a sponge. Before every emotional interaction, pause and ask: "Is this MY feeling or theirs?" This single question, practiced daily, rewires the pattern.' : 'you have significant emotional depth. Practice the 10-minute rule: wait 10 minutes before responding to anything emotionally charged.'}
+
+2. **Trust Calibration** — With trust at ${trust}/100, ${trust > 65 ? 'practice "selective vulnerability": share one small truth with someone safe this week. Not everything — just enough to test the waters. Build trust like a muscle, not a flood.' : trust < 35 ? 'practice "graduated risk": let one person in on one thing you\'ve been holding back. Start small. Trust isn\'t given — it\'s built through repeated small acts of courage.' : 'your trust is moderate — maintain it by checking in quarterly: "Is this person earning my continued trust? Am I giving them reason to earn it?"'}
+
+3. **Pattern Interrupt** — When you catch yourself repeating your signature pattern (identified in your recurring patterns section), physically change your state: stand up, drink water, take 3 deep breaths. Then choose differently.
+
+**Generate your Deep Intelligence Report to get 8 categories of personalized remedies — emotional, relational, financial, career, health, spiritual, planetary, and pattern-interruption techniques — all based on YOUR exact birth chart, trait scores, doshas, and dasha period. Plus a 30-day action plan.**`,
+      traits: ['Emotional Boundaries', 'Trust Calibration', 'Pattern Interrupt', 'Daily Practice'],
+      insightLevel: 'premium' as const,
+    },
+    {
+      id: 'honest-disclaimer',
+      title: 'An Honest Note Before You Go',
+      icon: 'scale',
+      content: `Before you carry all of this with you, there's something important to say.
+
+This report is based on interpretation of your ${sun} Sun, ${moon} Moon, and ${asc} Ascendant — but the MEANING is interpretive, not absolute. Two astrologers could look at the same chart and emphasize completely different things. So take what resonates and leave what doesn't.
+
+This is not 100% accurate. It was never meant to be. Astrology shows tendencies and patterns, not certainties. Your trait scores are approximations, not definitions. A creativity score of ${creativity} doesn't mean you're exactly ${creativity}% creative — it means this factor is significant in your personality.
+
+You are NOT defined by your chart. The chart shows the hand you were dealt — not how you play it. Free will is real. Awareness changes everything. Knowing a pattern exists gives you the power to choose differently, and that's the whole point.
+
+The "nothing to hide" philosophy means we told you the hard truths about your ${moon} Moon's shadow, your ${weakest.label} (${weakest.score}/100) vulnerability, and the patterns your Life Path ${lifePath} creates. But hard truths are still interpretations of data, not objective facts about who you are.
+
+You are more than your chart. You are more than your scores. You are a human being with the capacity to grow, change, and surprise even yourself.`,
+      traits: ['Disclaimer', 'Free Will', 'Interpretation', 'Self-Determination'],
+      insightLevel: 'premium' as const,
+    },
+  ];
+
+  return { freeSections, premiumSections };
+}
 
 // ─── Markdown Renderer (lightweight) ────────────────────────────────────────
 function renderMarkdown(text: string): string {
@@ -325,6 +536,9 @@ export default function ReportView() {
   const sectionsRef = useRef<Record<string, HTMLDivElement | null>>({});
   const tocRef = useRef<HTMLDivElement | null>(null);
 
+  // Generate personalized default sections
+  const { freeSections: defaultFree, premiumSections: defaultPremium } = generatePersonalizedDefaults(astrologyData, numerologyData, traitScores);
+
   // Track scroll progress
   useEffect(() => {
     const handleScroll = () => {
@@ -352,13 +566,13 @@ export default function ReportView() {
     setBookmarkedSections(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // Sections logic
+  // Sections logic — dynamic defaults
   const freeSections = reportSections.filter((s) => s.insightLevel === 'free').length > 0
     ? reportSections.filter((s) => s.insightLevel === 'free')
-    : DEFAULT_FREE_SECTIONS;
+    : defaultFree;
   const premiumSections = reportSections.filter((s) => s.insightLevel === 'premium').length > 0
     ? reportSections.filter((s) => s.insightLevel === 'premium')
-    : DEFAULT_PREMIUM_SECTIONS;
+    : defaultPremium;
   const allSections = [...freeSections, ...premiumSections];
   const totalSections = allSections.length;
   const hasDeepReport = reportSections.length >= 12;
@@ -637,6 +851,14 @@ export default function ReportView() {
     );
   };
 
+  // Zodiac sign data for cosmic identity banner
+  const sunSign = astrologyData?.sunSign || '';
+  const moonSign = astrologyData?.moonSign || '';
+  const ascSign = astrologyData?.ascendant || '';
+  const sunElement = ZODIAC_ELEMENTS[sunSign];
+  const moonElement = ZODIAC_ELEMENTS[moonSign];
+  const ascElement = ZODIAC_ELEMENTS[ascSign];
+
   return (
     <div className="bg-cream px-4 py-6 pb-24 relative min-h-screen">
       {/* Scroll progress bar */}
@@ -668,7 +890,7 @@ export default function ReportView() {
         <span className="text-[9px] font-bold text-gold-dark">{scrollProgress}%</span>
       </div>
 
-      {/* Background texture */}
+      {/* Background texture with zodiac constellation */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.02]"
         style={{
@@ -677,6 +899,15 @@ export default function ReportView() {
         }}
         aria-hidden="true"
       />
+
+      {/* Decorative zodiac constellation background */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+        <div className="absolute top-32 left-4 text-brown-300/10 dark:text-brown-600/10 text-6xl select-none">✦</div>
+        <div className="absolute top-96 right-6 text-gold/8 dark:text-gold/5 text-4xl select-none">⊹</div>
+        <div className="absolute bottom-64 left-8 text-brown-300/8 dark:text-brown-600/8 text-5xl select-none">✧</div>
+        <div className="absolute top-[600px] right-3 text-gold/6 dark:text-gold/4 text-3xl select-none">⋆</div>
+        <div className="absolute bottom-[400px] left-2 text-brown-300/6 dark:text-brown-600/6 text-7xl select-none">✦</div>
+      </div>
 
       <div className="mx-auto max-w-lg space-y-6 relative z-10">
         {/* ═══ Header ═══ */}
@@ -719,6 +950,109 @@ export default function ReportView() {
             </div>
           </div>
 
+          {/* ═══ Cosmic Identity Banner ═══ */}
+          {(sunSign || moonSign || ascSign) && (
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="mt-4"
+            >
+              <div className="relative overflow-hidden rounded-2xl border border-gold/20 dark:border-gold/10 shadow-lg">
+                {/* Gradient background based on sun sign element */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${sunElement?.bgClass || 'from-amber-500/10 to-orange-500/5'} dark:opacity-50`} />
+                <div className="absolute inset-0 bg-gradient-to-t from-brown-900/40 via-transparent to-transparent dark:from-brown-900/60" />
+
+                {/* Decorative constellation pattern */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+                  <span className="absolute top-3 left-4 text-white/10 text-lg">✦</span>
+                  <span className="absolute top-8 right-6 text-white/8 text-sm">⋆</span>
+                  <span className="absolute bottom-6 left-8 text-white/6 text-xs">⊹</span>
+                  <span className="absolute bottom-3 right-4 text-white/10 text-base">✧</span>
+                </div>
+
+                <div className="relative z-10 p-4 pb-5">
+                  <p className="text-[9px] uppercase tracking-[0.2em] text-brown-500/80 dark:text-brown-400/80 font-semibold mb-3 text-center">
+                    Your Cosmic Identity
+                  </p>
+
+                  <div className="flex items-center justify-center gap-3 sm:gap-5">
+                    {/* Sun Sign */}
+                    <div className="flex flex-col items-center">
+                      <div className="flex size-12 sm:size-14 items-center justify-center rounded-full bg-white/25 dark:bg-white/10 backdrop-blur-sm border border-gold/20 shadow-inner">
+                        <span className="text-2xl sm:text-3xl">{ZODIAC_SYMBOLS[sunSign] || '☉'}</span>
+                      </div>
+                      <span className="text-[8px] uppercase tracking-widest text-brown-500/70 dark:text-brown-400/70 mt-1.5 font-bold">Sun</span>
+                      <span className="text-xs sm:text-sm font-bold text-brown-900 dark:text-brown-200">{sunSign || '—'}</span>
+                      {sunElement && (
+                        <span className={`text-[8px] font-semibold ${sunElement.color} dark:opacity-80`}>{sunElement.element}</span>
+                      )}
+                    </div>
+
+                    {/* Connector */}
+                    <div className="flex flex-col items-center gap-0.5">
+                      <div className="w-6 sm:w-8 h-px bg-gradient-to-r from-gold/40 to-gold/20" />
+                      <span className="text-[8px] text-gold/60">✦</span>
+                      <div className="w-6 sm:w-8 h-px bg-gradient-to-r from-gold/20 to-gold/40" />
+                    </div>
+
+                    {/* Moon Sign */}
+                    <div className="flex flex-col items-center">
+                      <div className="flex size-12 sm:size-14 items-center justify-center rounded-full bg-white/25 dark:bg-white/10 backdrop-blur-sm border border-gold/20 shadow-inner">
+                        <span className="text-2xl sm:text-3xl">{ZODIAC_SYMBOLS[moonSign] || '☽'}</span>
+                      </div>
+                      <span className="text-[8px] uppercase tracking-widest text-brown-500/70 dark:text-brown-400/70 mt-1.5 font-bold">Moon</span>
+                      <span className="text-xs sm:text-sm font-bold text-brown-900 dark:text-brown-200">{moonSign || '—'}</span>
+                      {moonElement && (
+                        <span className={`text-[8px] font-semibold ${moonElement.color} dark:opacity-80`}>{moonElement.element}</span>
+                      )}
+                    </div>
+
+                    {/* Connector */}
+                    <div className="flex flex-col items-center gap-0.5">
+                      <div className="w-6 sm:w-8 h-px bg-gradient-to-r from-gold/40 to-gold/20" />
+                      <span className="text-[8px] text-gold/60">✦</span>
+                      <div className="w-6 sm:w-8 h-px bg-gradient-to-r from-gold/20 to-gold/40" />
+                    </div>
+
+                    {/* Ascendant */}
+                    <div className="flex flex-col items-center">
+                      <div className="flex size-12 sm:size-14 items-center justify-center rounded-full bg-white/25 dark:bg-white/10 backdrop-blur-sm border border-gold/20 shadow-inner">
+                        <span className="text-2xl sm:text-3xl">{ZODIAC_SYMBOLS[ascSign] || '↑'}</span>
+                      </div>
+                      <span className="text-[8px] uppercase tracking-widest text-brown-500/70 dark:text-brown-400/70 mt-1.5 font-bold">Asc</span>
+                      <span className="text-xs sm:text-sm font-bold text-brown-900 dark:text-brown-200">{ascSign || '—'}</span>
+                      {ascElement && (
+                        <span className={`text-[8px] font-semibold ${ascElement.color} dark:opacity-80`}>{ascElement.element}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Nakshatra & Dasha info */}
+                  {(astrologyData?.nakshatra || astrologyData?.currentDasha) && (
+                    <div className="flex items-center justify-center gap-3 mt-3 pt-3 border-t border-white/10">
+                      {astrologyData.nakshatra && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-[8px] uppercase tracking-wider text-brown-500/60 dark:text-brown-400/60 font-bold">Nakshatra</span>
+                          <span className="text-[10px] font-semibold text-brown-800 dark:text-brown-300">{astrologyData.nakshatra}</span>
+                        </div>
+                      )}
+                      {astrologyData.nakshatra && astrologyData.currentDasha && (
+                        <span className="text-brown-400/30">·</span>
+                      )}
+                      {astrologyData.currentDasha && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-[8px] uppercase tracking-wider text-brown-500/60 dark:text-brown-400/60 font-bold">Dasha</span>
+                          <span className="text-[10px] font-semibold text-brown-800 dark:text-brown-300">{astrologyData.currentDasha}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Language Toggle */}
           <div className="flex items-center gap-1.5 mt-3 p-1 bg-white/50 dark:bg-white/[0.06] rounded-xl border border-brown-100/50 dark:border-brown-100/20">
             <span className="text-[10px] text-brown-400 dark:text-brown-500 ml-1.5 mr-0.5">Language:</span>
@@ -745,7 +1079,7 @@ export default function ReportView() {
               <Clock className="size-2.5" />
               {readingTime} min read
             </Badge>
-            <Badge className="bg-gold/10 text-gold-dark dark:bg-gold/15 dark:text-gold border-0 text-[10px] px-2.5 py-0.5 flex items-center gap-1">
+            <Badge className="bg-gold/10 text-gold-dark dark:text-gold/15 dark:text-gold border-0 text-[10px] px-2.5 py-0.5 flex items-center gap-1">
               <BookOpen className="size-2.5" />
               {sectionsRead}/{totalSections} read
             </Badge>
@@ -941,7 +1275,7 @@ export default function ReportView() {
                   Unlock the Complete Truth
                 </h3>
                 <p className="text-sm text-brown-500 dark:text-brown-400 mt-2 leading-relaxed">
-                  12 premium sections. Your shadow self, love timeline, career truth, family karma,
+                  15 premium sections. Your shadow self, love timeline, career truth, family karma,
                   health warnings, life phase roadmap, financial timeline, and spiritual purpose.
                 </p>
                 <Button

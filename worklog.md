@@ -3809,3 +3809,97 @@ Stage Summary:
 - AyuAstro branded text logo added to report view
 - Disclaimer banner prominently displayed
 - PremiumView section list updated to reflect new sections
+
+---
+Task ID: 2
+Agent: Backend Remedies Agent
+Task: Add comprehensive "Your Personalized Remedies & Solutions" section to AI report templates
+
+Work Log:
+- Added new 'your-personalized-remedies' section to /src/lib/ai/templates.ts BEFORE the 'honest-disclaimer' section (now second-to-last section)
+- Section id: 'your-personalized-remedies', icon: 'ShieldCheck', traits: ['discipline', 'patience', 'trust', 'resilience'], insightLevel: 'premium'
+- Comprehensive promptGuidance covering 8 remedy categories: Emotional, Relationship, Financial, Career, Health, Spiritual, Planetary (Vedic), Pattern-Interruption Techniques
+- Prompt rules: No expensive gemstones/paid rituals, all remedies FREE and accessible, every remedy must reference specific chart data
+- Includes 30-day action plan requirement with chart-specific references
+- Updated comment in templates.ts from "19 Premium sections" to "20 Premium sections"
+- Updated getDeepIntelligenceTemplates() doc comment from "all 19" to "all 20"
+- Added ShieldCheck import from lucide-react in ReportView.tsx
+- Added shieldcheck: ShieldCheck to ICON_MAP in ReportView.tsx
+- Added 'your-personalized-remedies' color theme to SECTION_COLORS: emerald/teal gradient
+- Added default content for remedies section in DEFAULT_PREMIUM_SECTIONS array before 'honest-disclaimer'
+- Default content includes: 3 priority remedies (Emotional Boundary Practice, Trust Calibration, Pattern Interrupt), CTA to generate Deep Intelligence Report for personalized remedies
+- All lint checks pass with zero errors
+
+Stage Summary:
+- 2 files modified: templates.ts, ReportView.tsx
+- New premium section makes total count: 3 free + 20 premium = 23 sections
+- Section positioned as second-to-last (before honest-disclaimer) as specified
+- Emerald/teal color theme distinguishes remedies from other sections
+- Comprehensive prompt guidance ensures AI generates deeply personalized, actionable remedies
+- Zero lint errors
+
+---
+Task ID: 3+5+6
+Agent: Report View Fix Agent
+Task: Fix generic tone and improve ReportView UI — make default sections dynamic and personalized
+
+Work Log:
+- Replaced static `DEFAULT_FREE_SECTIONS` and `DEFAULT_PREMIUM_SECTIONS` constants with a `generatePersonalizedDefaults()` function defined OUTSIDE the component (before it) to avoid recreation on every render
+- Function takes `AstrologyInfo | null`, `NumerologyInfo | null`, and `TraitScore[]` as parameters and returns `{ freeSections: ReportSection[], premiumSections: ReportSection[] }`
+- Extracts key data points: sun sign, moon sign, ascendant, nakshatra, current dasha, yogas, doshas, life path number, destiny number, soul urge number, all 14 trait scores
+- Finds strongest and weakest traits dynamically
+- Each free section now references specific user data:
+  - "Your Emotional Truth" references Moon sign, emotional intensity score, empathy/intuition scores, yogas, doshas
+  - "Your Relationship Reality" references attachment style score, trust score, Moon sign with sign-specific relationship patterns, Sun sign desires, social energy score
+  - "How You Really Communicate" references communication openness score, impulsiveness/discipline scores, Ascendant sign with sign-specific first impressions, empathy/intuition/creativity-based communication superpower
+- Each premium section now has personalized teaser content referencing user actual data followed by a clear CTA: "Generate your Deep Intelligence Report to unlock the complete personalized analysis of [section topic]"
+- All 20 premium sections dynamically reference: trait scores, sign combinations, numerology numbers, dasha periods, nakshatra, yogas/doshas
+- Added `Users` icon import from lucide-react and added `users` to ICON_MAP for friendship pattern section
+- Added `AstrologyInfo`, `NumerologyInfo`, `TraitScore` type imports from store
+- Updated section logic inside component: replaced `DEFAULT_FREE_SECTIONS`/`DEFAULT_PREMIUM_SECTIONS` with `generatePersonalizedDefaults(astrologyData, numerologyData, traitScores)`
+- Added Cosmic Identity Banner at top of report (after header):
+  - Shows Sun/Moon/Ascendant zodiac symbols in circular badges
+  - Each sign displays element badge (Fire/Earth/Air/Water) with element-specific colors
+  - Connected by gold decorative connectors
+  - Nakshatra and Dasha info displayed below the signs
+  - Gradient background based on sun sign element
+  - Decorative constellation pattern scattered across the banner
+  - Full dark mode support with backdrop-blur-sm and glassmorphism
+- Added decorative zodiac constellation elements throughout the report background
+- Added ZODIAC_SYMBOLS and ZODIAC_ELEMENTS constant maps for reuse
+- Updated Bottom CTA text from "12 premium sections" to "15 premium sections" to match actual section count
+- Full lint check passes with zero errors
+- Dev server compiles successfully with no errors
+
+Stage Summary:
+- ReportView completely overhauled: generic static content replaced with dynamic personalized content
+- Every default section now references the user actual astrological data, numerology numbers, and trait scores
+- Premium sections provide personalized teasers with clear CTA to generate the full AI report
+- New Cosmic Identity Banner provides an immediate visual summary of the user astrological identity
+- Decorative zodiac constellation elements add visual depth
+- All changes have full dark mode support
+- Zero lint errors
+
+---
+Task ID: 3+4+5+6
+Agent: Main Coordinator
+Task: Fix generic tone, add remedies section, fix SVG visibility, improve UI
+
+Work Log:
+- Added comprehensive "Your Personalized Remedies & Solutions" section to templates.ts (id: your-personalized-remedies) with 8 remedy categories: Emotional, Relationship, Financial, Career, Health, Spiritual, Planetary (Vedic), and Pattern-Interruption Techniques, plus a 30-day action plan
+- All remedies must be FREE and accessible, no paid gemstones/rituals, must reference specific chart data
+- Added ShieldCheck icon mapping and emerald/teal color theme for the remedies section
+- Fixed SVG visibility in KundaliChart.tsx: Saturn color changed from #1E3A5F to #5C6BC0 for dark mode visibility, added CSS classes for legend text, moon badge, sun badge, and legend sub-elements, added dark mode CSS overrides in globals.css
+- Replaced static DEFAULT_FREE_SECTIONS and DEFAULT_PREMIUM_SECTIONS with dynamic generatePersonalizedDefaults() function that takes astrologyData, numerologyData, and traitScores
+- Every default section now references the user's actual data: sun sign, moon sign, ascendant, trait scores, numerology numbers, yogas, doshas, dasha period, nakshatra
+- Premium default sections use personalized teaser + CTA pattern instead of generic placeholder text
+- Added cosmic identity banner at top of report with Sun/Moon/Ascendant zodiac symbols in circular badges with element colors
+- Added zodiac constellation decorative elements throughout the report
+- All lint checks pass with zero errors
+
+Stage Summary:
+- Report is now PERSONALIZED - each default section references specific user data
+- Remedies section added with comprehensive prompt guidance for AI generation
+- SVG visibility fixed for dark mode in KundaliChart
+- UI enhanced with cosmic identity banner and decorative elements
+- No more generic "one size fits all" default content
