@@ -14,8 +14,8 @@ import type {
   ReportSectionTemplate,
 } from './types';
 import { AIEngineError, AIErrorType } from './types';
-import { REPORT_SECTION_TEMPLATES } from './templates';
-import { buildReportPrompt, buildSectionPrompt, getSystemPrompt } from './prompts';
+import { REPORT_SECTION_TEMPLATES, getDeepIntelligenceTemplates, getPremiumTemplates, getFreeTemplates } from './templates';
+import { buildReportPrompt, buildSectionPrompt, buildDeepIntelligencePrompt, getSystemPrompt, getDeepIntelligenceSystemPrompt } from './prompts';
 
 // ---------------------------------------------------------------------------
 // SDK Initialization
@@ -443,9 +443,7 @@ export async function generateFreeReport(
 export async function generatePremiumSections(
   input: AIReportInput
 ): Promise<ReportSection[]> {
-  const premiumTemplates = REPORT_SECTION_TEMPLATES.filter(
-    (t) => t.insightLevel === 'premium'
-  );
+  const premiumTemplates = getPremiumTemplates();
 
   const sections: ReportSection[] = [];
 
@@ -456,6 +454,156 @@ export async function generatePremiumSections(
   }
 
   return sections;
+}
+
+/**
+ * Generate a DEEP INTELLIGENCE REPORT — the premium, nothing-to-hide version.
+ *
+ * This generates all 15 sections (3 free + 12 premium) with:
+ * - Brutally honest, human tone
+ * - 500-800 words per premium section
+ * - Life-phase and timeline breakdowns
+ * - Shadow work, karmic patterns, financial timelines
+ *
+ * Because generating 15 sections at once is too large for a single AI call,
+ * we split into batches: first the 3 free sections, then the premium sections
+ * in groups of 3-4 to avoid token limits.
+ */
+export async function generateDeepIntelligenceReport(
+  input: AIReportInput,
+  options?: {
+    /** Temperature for AI generation (0-1, default 0.75). */
+    temperature?: number;
+    /** Callback for progress updates. */
+    onProgress?: (completed: number, total: number, sectionTitle: string) => void;
+    /** Language for the report output. */
+    language?: 'en' | 'hi' | 'hinglish';
+  }
+): Promise<GeneratedReport> {
+  validateInput(input);
+
+  const allTemplates = REPORT_SECTION_TEMPLATES;
+  const freeTemplates = getFreeTemplates();
+  const premiumTemplates = getPremiumTemplates();
+  const temperature = options?.temperature ?? 0.75;
+  const onProgress = options?.onProgress;
+
+  let reportTitle = '';
+  let reportSummary = '';
+  const allSections: ReportSection[] = [];
+
+  // ── Batch 1: Free sections (3) ──────────────────────────────
+  try {
+    const freeReport = await withRetry(async () => {
+      const client = await getAIClient();
+      const systemPrompt = getSystemPrompt(options?.language ?? 'en');
+      const userPrompt = buildReportPrompt(input, freeTemplates);
+
+      const response = await client.chat.completions.create({
+        model: 'default',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        temperature,
+      });
+
+      const content = response.choices?.[0]?.message?.content;
+      if (!content) {
+        throw new AIEngineError(AIErrorType.GENERATION_FAILED, 'AI returned empty response for free sections');
+      }
+
+      return parseAIResponse(content, freeTemplates);
+    });
+
+    reportTitle = freeReport.title;
+    reportSummary = freeReport.summary;
+    allSections.push(...freeReport.sections);
+
+    freeReport.sections.forEach((s) => {
+      onProgress?.(allSections.length, allTemplates.length, s.title);
+    });
+  } catch (error) {
+    console.error('[Deep Intelligence] Free sections failed:', error);
+    // Continue with premium even if free fails
+  }
+
+  // ── Batch 2+: Premium sections in groups of 4 ──────────────
+  const BATCH_SIZE = 4;
+  const deepSystemPrompt = getDeepIntelligenceSystemPrompt(options?.language ?? 'en');
+
+  for (let i = 0; i < premiumTemplates.length; i += BATCH_SIZE) {
+    const batch = premiumTemplates.slice(i, i + BATCH_SIZE);
+
+    try {
+      const batchReport = await withRetry(async () => {
+        const client = await getAIClient();
+        const userPrompt = buildDeepIntelligencePrompt(input, batch);
+
+        const response = await client.chat.completions.create({
+          model: 'default',
+          messages: [
+            { role: 'system', content: deepSystemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          temperature,
+        });
+
+        const content = response.choices?.[0]?.message?.content;
+        if (!content) {
+          throw new AIEngineError(AIErrorType.GENERATION_FAILED, `AI returned empty response for premium batch starting at ${i}`);
+        }
+
+        return parseAIResponse(content, batch);
+      });
+
+      // Use the title/summary from the first premium batch (most comprehensive)
+      if (i === 0 && batchReport.title) {
+        reportTitle = batchReport.title;
+      }
+      if (i === 0 && batchReport.summary) {
+        reportSummary = batchReport.summary;
+      }
+
+      allSections.push(...batchReport.sections);
+
+      batchReport.sections.forEach((s) => {
+        onProgress?.(allSections.length, allTemplates.length, s.title);
+      });
+    } catch (error) {
+      console.error(`[Deep Intelligence] Premium batch ${i}-${i + BATCH_SIZE} failed:`, error);
+      // Try generating sections individually as fallback
+      for (const template of batch) {
+        try {
+          const section = await generateSection(input, template.id, { temperature });
+          allSections.push(section);
+          onProgress?.(allSections.length, allTemplates.length, section.title);
+        } catch (sectionError) {
+          console.error(`[Deep Intelligence] Section ${template.id} failed individually:`, sectionError);
+          // Add a fallback section
+          allSections.push({
+            id: template.id,
+            title: template.title,
+            icon: template.icon,
+            content: `This section could not be generated. Your ${template.title} analysis requires deeper processing. Please try regenerating your report.`,
+            traits: template.traits,
+            insightLevel: template.insightLevel,
+          });
+          onProgress?.(allSections.length, allTemplates.length, template.title);
+        }
+      }
+    }
+  }
+
+  // ── Sort sections in template order ──────────────────────────
+  const sectionOrder = allTemplates.map((t) => t.id);
+  allSections.sort((a, b) => sectionOrder.indexOf(a.id) - sectionOrder.indexOf(b.id));
+
+  return {
+    title: reportTitle || 'Your Deep Intelligence Report',
+    summary: reportSummary || 'A comprehensive analysis of your personality, patterns, and life trajectory.',
+    sections: allSections,
+  };
 }
 
 /**

@@ -27,6 +27,7 @@ export {
   generateSection,
   generateFreeReport,
   generatePremiumSections,
+  generateDeepIntelligenceReport,
   checkAIService,
 } from './report-generator';
 
@@ -37,7 +38,8 @@ export {
   getPremiumTemplates,
   getTemplateById,
   getSectionOrder,
+  getDeepIntelligenceTemplates,
 } from './templates';
 
 // --- Prompts (for testing/auditing) ---
-export { getSystemPrompt, getSafetyConstraints } from './prompts';
+export { getSystemPrompt, getDeepIntelligenceSystemPrompt, getSafetyConstraints } from './prompts';

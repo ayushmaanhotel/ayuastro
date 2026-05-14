@@ -3690,3 +3690,122 @@ Stage Summary:
 - All preferences sync to backend via /api/auth/preferences
 - Comprehensive Vedic i18n translation system created for future use across the app
 - 7 new files created, 4 existing files modified
+---
+Task ID: premium-report-overhaul
+Agent: Main Agent
+Task: Make the premium deep dive intelligence report highly comprehensive with human tone, nothing-to-hide mentality, and life-phase breakdowns
+
+Work Log:
+- Analyzed complete codebase: AI templates, prompts, report generator, ReportView, store, APIs
+- Identified core issues: only 7 sections (4 premium), 150-250 words each, clinical AI tone, no life-phase breakdown
+- Rewrote AI templates (templates.ts): expanded from 7 to 15 sections (3 free + 12 premium) with 300-500 word guidance per section
+- Added 8 NEW premium sections: your-dark-side, love-heartbreak-timeline, career-truth, family-karma, health-warnings, life-phase-roadmap, financial-timeline, spiritual-purpose
+- Rewrote AI prompts (prompts.ts): "Nothing to Hide" tone standard, brutally honest human voice, 500-800 words per premium section, life-phase decade breakdowns with dasha-based year ranges
+- Added deep intelligence system prompt with pre-analyzed pattern summary (high/low/tension traits auto-identified)
+- Updated report generator: added generateDeepIntelligenceReport() with batched generation (4 sections per batch), individual fallback, progress callbacks
+- Created new API endpoint: /api/ai/deep-intelligence with full validation and progress tracking
+- Completely redesigned ReportView with: 15-section layout, per-section color themes, markdown rendering, expand/collapse for long content, word count & reading time per section, Table of Contents with active section tracking, Deep Intelligence Report generation button with progress bar, premium unlock CTA at bottom, comprehensive default sections with human tone, disclaimer footer
+- All lint checks pass cleanly
+
+Stage Summary:
+- Premium report now has 15 sections (3 free + 12 premium) vs previous 7
+- Premium sections are 500-800 words vs previous 150-250 words
+- Human tone: "like a wise friend who tells you the truth even when it hurts"
+- Life-phase sections break down by decades (20s, 30s, 40s, 50s, 60s+) with dasha-based year ranges
+- New sections cover: shadow self, love timeline, career truth, family karma, health warnings, financial timeline, spiritual purpose
+- Deep Intelligence API generates all 15 sections in batches with fallback
+- ReportView shows comprehensive TOC, per-section stats, and generation progress
+
+---
+Task ID: 1
+Agent: Templates Rewriter
+Task: Add 7 new premium sections and update helper functions
+
+Work Log:
+- Added 7 new premium sections to templates.ts after the spiritual-purpose section
+- Updated comment at top of file from "12 Premium sections" to "19 Premium sections"
+- Updated PREMIUM SECTIONS comment from "(12)" to "(19)"
+- Updated helper function comment from "all 12 premium sections" to "all 19 premium sections"
+- Added new icon entries to ReportView.tsx ICON_MAP: shieldalert, gitbranch, baby, scale
+- Imported ShieldAlert, GitBranch, Baby, Scale from lucide-react
+- Added 7 new SECTION_COLORS entries for new sections (your-deepest-fear, your-friendship-pattern, your-anger-blueprint, your-power-years, your-decision-pattern, your-parenting-style, honest-disclaimer)
+- Added 7 new DEFAULT_PREMIUM_SECTIONS entries with placeholder content matching the tone
+- Updated deepReportProgress total from 15 to 22 (3 free + 19 premium = 22 sections)
+- All lint checks pass with zero errors
+
+Stage Summary:
+- Report now has 22 sections (3 free + 19 premium)
+- New sections: Your Deepest Fear, Friendship Pattern, Anger Blueprint, Power Years, Decision Pattern, Parenting Style, Honest Disclaimer
+- All new sections have proper icon mappings, color themes, and default content
+- deepReportProgress total updated to reflect new section count
+
+---
+Task ID: 2
+Agent: Prompts Rewriter
+Task: Rewrite AI prompts to be hyper-personalized, use simple language, add disclaimer requirement, and support language parameter
+
+Work Log:
+- Replaced TONE_GUIDELINES constant in prompts.ts with enhanced version:
+  - Added "CRITICAL RULE — PERSONALIZATION IS NON-NEGOTIABLE" section requiring every paragraph to reference specific data points
+  - Added "LANGUAGE RULES — KEEP IT SIMPLE AND HUMAN" section enforcing simple words, short sentences, concrete examples
+  - Added "MANDATORY DISCLAIMER RULE" requiring at least one disclaimer sentence per premium section
+  - Updated length requirements: Free 300-400 words, Premium 600-1000 words (up from 250-350 / 500-800)
+- Updated getSystemPrompt() to accept language parameter ('en' | 'hi' | 'hinglish') with langInstruction injected before OUTPUT FORMAT
+- Replaced getDeepIntelligenceSystemPrompt() with enhanced version:
+  - Accepts language parameter with detailed Hindi/Hinglish instructions
+  - Added point 6: "You are PERSONAL — every sentence must feel like it was written for THIS ONE SPECIFIC PERSON"
+  - Added "SIMPLE LANGUAGE" rule: not "manifests as a pattern of emotional dysregulation" but "you can't control your feelings"
+  - Added "PERSONALIZATION MANDATE" requiring comparison of trait scores for unique insights
+  - Added "DISCLAIMER INTEGRATION" requiring at least one interpretation disclaimer per section
+  - Updated length: Premium 600-1000 words, Free 300-400 words
+  - Updated JSON output format with [Name]'s in title template and enhanced summary description
+- Enhanced buildDeepIntelligencePrompt() with new trait analysis:
+  - Added strongestTrait calculation (highest scoring trait)
+  - Added weakestTrait calculation (lowest scoring trait)
+  - Added biggestGap calculation (trait furthest from 50, most distinctive)
+  - Added these 3 new data points to the "Pre-Analyzed Pattern Summary" section of the prompt
+- Updated report-generator.ts generateDeepIntelligenceReport():
+  - Added language?: 'en' | 'hi' | 'hinglish' to options parameter type
+  - Passes language to getSystemPrompt() in Batch 1 (free sections)
+  - Passes language to getDeepIntelligenceSystemPrompt() in Batch 2+ (premium sections)
+- Updated deep-intelligence API route:
+  - Added language: z.enum(['en', 'hi', 'hinglish']).optional() to schema
+  - Passes parsed.data.language ?? 'en' to generateDeepIntelligenceReport()
+- All lint checks pass with zero errors
+
+Stage Summary:
+- 3 files modified: prompts.ts, report-generator.ts, route.ts
+- AI prompts now enforce hyper-personalization (every paragraph must reference specific data)
+- Simple language requirement replaces academic/astrological jargon
+- Mandatory disclaimer per premium section (interpretation acknowledgment)
+- Language parameter (en/hi/hinglish) supported end-to-end from API to AI prompt
+- Enhanced trait analysis provides strongest/weakest/biggest contrast insights to AI
+- Zero lint errors
+---
+Task ID: 1-4
+Agent: Main Agent (coordinating subagents)
+Task: Complete overhaul of premium deep intelligence report - personalization, language support, new sections, UI improvements
+
+Work Log:
+- Added 7 new premium sections to templates.ts: Your Deepest Fear, Friendship Pattern, Anger Blueprint, Power Years, Decision Pattern, Parenting Style, Honest Disclaimer
+- Rewrote TONE_GUIDELINES in prompts.ts with mandatory personalization rules, simple language rules, disclaimer requirements
+- Updated getDeepIntelligenceSystemPrompt() to accept language parameter ('en'|'hi'|'hinglish') with full Hindi and Hinglish instructions
+- Updated getSystemPrompt() to accept language parameter
+- Added strongestTrait, weakestTrait, biggestGap calculations to buildDeepIntelligencePrompt() for more personalized prompts
+- Updated generateDeepIntelligenceReport() to pass language to prompt functions
+- Updated deep-intelligence API route to accept and pass language parameter
+- Created AyuAstro text-based SVG logo at /public/ayuastro-text-logo.svg (no background, gold gradient)
+- Added AyuAstro text logo to ReportView header
+- Added language toggle (English/Hindi/Hinglish) to ReportView header
+- Added "Honest Note" disclaimer banner to ReportView
+- Updated Generate Full Report button to show selected language
+- Added language hint text below generate button
+- All lint checks pass
+
+Stage Summary:
+- Report now has 22 sections (3 free + 19 premium) instead of 15
+- AI prompts now enforce personalization, simple language, and disclaimer integration
+- Language support: English, Hindi (Devanagari), Hinglish (Roman)
+- AyuAstro branded text logo added to report view
+- Disclaimer banner prominently displayed
+- PremiumView section list updated to reflect new sections

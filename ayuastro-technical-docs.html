@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AyuAstro — Complete Technical Documentation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    @page {
+      size: A4;
+      margin: 20mm 18mm 20mm 18mm;
+    }
+
+    :root {
+      --cream: #FDF6EC;
+      --cream-dark: #F5E6D0;
+      --brown-900: #3E2723;
+      --brown-700: #5D4037;
+      --brown-500: #8D6E63;
+      --brown-400: #A1887F;
+      --brown-100: #EFEBE9;
+      --gold: #C4973B;
+      --gold-dark: #8B6914;
+      --gold-light: #F0C14B;
+      --sage: #4A7C59;
+      --sage-light: #E8F0E9;
+      --code-bg: #1E1E2E;
+      --code-text: #CDD6F4;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: white;
+      color: var(--brown-900);
+      line-height: 1.7;
+      font-size: 13px;
+    }
+
+    /* ═══════════ COVER PAGE ═══════════ */
+    .cover-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: linear-gradient(160deg, var(--cream) 0%, #F5E6D0 30%, #EDD9B7 50%, #F5E6D0 70%, var(--cream) 100%);
+      padding: 4rem 2rem;
+      page-break-after: always;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover-page::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(ellipse at 30% 20%, rgba(196,151,59,0.08) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(74,124,89,0.06) 0%, transparent 50%);
+    }
+
+    .cover-content { position: relative; z-index: 1; }
+
+    .cover-zodiac-ring {
+      font-size: 2rem;
+      color: var(--gold);
+      letter-spacing: 0.8rem;
+      margin-bottom: 2rem;
+      opacity: 0.6;
+    }
+
+    .cover-logo {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: var(--brown-900);
+      margin-bottom: 0.25rem;
+    }
+
+    .cover-tagline {
+      font-size: 0.85rem;
+      color: var(--gold-dark);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .cover-divider {
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 1.5rem auto;
+    }
+
+    .cover-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.8rem;
+      color: var(--brown-900);
+      margin-bottom: 0.5rem;
+    }
+
+    .cover-subtitle {
+      font-size: 1rem;
+      color: var(--brown-500);
+      margin-bottom: 2rem;
+      max-width: 500px;
+    }
+
+    .cover-meta {
+      font-size: 0.85rem;
+      color: var(--brown-400);
+      line-height: 2;
+    }
+
+    .cover-meta strong { color: var(--brown-700); }
+
+    /* ═══════════ TABLE OF CONTENTS ═══════════ */
+    .toc {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      page-break-after: always;
+      border: 1px solid var(--brown-100);
+    }
+
+    .toc h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.5rem;
+      color: var(--brown-900);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .toc-section {
+      margin-bottom: 1rem;
+    }
+
+    .toc-section-title {
+      font-weight: 600;
+      color: var(--brown-900);
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .toc-item {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.2rem 0 0.2rem 1rem;
+      border-bottom: 1px dotted var(--brown-100);
+      font-size: 0.8rem;
+      color: var(--brown-700);
+    }
+
+    .toc-num {
+      color: var(--gold-dark);
+      font-weight: 600;
+      min-width: 1.5rem;
+    }
+
+    /* ═══════════ CONTENT AREA ═══════════ */
+    .content {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Section */
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--brown-100);
+      page-break-inside: avoid;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--sage-light);
+    }
+
+    .section-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: white;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.3rem;
+      color: var(--brown-900);
+    }
+
+    h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.05rem;
+      color: var(--brown-900);
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid var(--brown-100);
+    }
+
+    h4 {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--brown-700);
+      margin-top: 0.75rem;
+      margin-bottom: 0.3rem;
+    }
+
+    p {
+      color: var(--brown-700);
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    /* Code blocks */
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      line-height: 1.5;
+      margin: 0.75rem 0;
+      page-break-inside: avoid;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--brown-100);
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+      font-size: 0.78rem;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.75rem 0;
+      font-size: 0.8rem;
+    }
+
+    th {
+      background: var(--brown-900);
+      color: white;
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    td {
+      padding: 0.4rem 0.75rem;
+      border-bottom: 1px solid var(--brown-100);
+    }
+
+    tr:nth-child(even) {
+      background: var(--cream);
+    }
+
+    /* Info boxes */
+    .info-box {
+      border-left: 3px solid var(--sage);
+      background: var(--sage-light);
+      padding: 0.75rem 1rem;
+      border-radius: 0 8px 8px 0;
+      margin: 0.75rem 0;
+      font-size: 0.82rem;
+    }
+
+    .warning-box {
+      border-left: 3px solid var(--gold);
+      background: #FFF8E1;
+      padding: 0.75rem 1rem;
+      border-radius: 0 8px 8px 0;
+      margin: 0.75rem 0;
+      font-size: 0.82rem;
+    }
+
+    /* Flow diagram */
+    .flow-diagram {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 1rem 0;
+      justify-content: center;
+    }
+
+    .flow-box {
+      background: var(--cream);
+      border: 1.5px solid var(--gold);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 500;
+      min-width: 100px;
+    }
+
+    .flow-box.primary {
+      background: var(--gold);
+      color: white;
+      font-weight: 600;
+    }
+
+    .flow-arrow {
+      color: var(--gold-dark);
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    /* Badge styles */
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .badge-sage { background: var(--sage-light); color: var(--sage); }
+    .badge-gold { background: #FFF3E0; color: var(--gold-dark); }
+    .badge-brown { background: var(--brown-100); color: var(--brown-700); }
+
+    /* Lists */
+    ul, ol {
+      margin: 0.5rem 0 0.5rem 1.5rem;
+      font-size: 0.85rem;
+      color: var(--brown-700);
+    }
+
+    li { margin-bottom: 0.25rem; }
+
+    /* Zodiac table */
+    .zodiac-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin: 0.75rem 0;
+    }
+
+    .zodiac-cell {
+      background: var(--cream);
+      border-radius: 6px;
+      padding: 0.5rem;
+      text-align: center;
+      border: 1px solid var(--brown-100);
+    }
+
+    .zodiac-symbol {
+      font-size: 1.5rem;
+      display: block;
+    }
+
+    .zodiac-name {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--brown-900);
+    }
+
+    .zodiac-details {
+      font-size: 0.6rem;
+      color: var(--brown-500);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--brown-400);
+      font-size: 0.75rem;
+      border-top: 2px solid var(--brown-100);
+      margin-top: 2rem;
+    }
+
+    .footer .brand {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 0.9rem;
+      color: var(--brown-700);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Print */
+    @media print {
+      body { background: white; font-size: 11pt; }
+      .cover-page { min-height: auto; padding: 2in 1in; }
+      .section { box-shadow: none; border: 1px solid #eee; page-break-inside: avoid; }
+      .toc { box-shadow: none; border: 1px solid #eee; page-break-after: always; }
+      pre { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ COVER PAGE ═══════════ -->
+<div class="cover-page">
+  <div class="cover-content">
+    <div class="cover-zodiac-ring">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</div>
+    <div class="cover-logo">AyuAstro</div>
+    <div class="cover-tagline">Nothing to Hide</div>
+    <div class="cover-divider"></div>
+    <div class="cover-title">Complete Technical Documentation</div>
+    <div class="cover-subtitle">Algorithm Design, Architecture, Implementation Details & System Specification</div>
+    <div class="cover-divider"></div>
+    <div class="cover-meta">
+      <strong>Version:</strong> 1.0<br>
+      <strong>Date:</strong> March 2025<br>
+      <strong>Author:</strong> Ayush UPADHYAY (Founder)<br>
+      <strong>Stack:</strong> Next.js 16 · TypeScript · Swiss Ephemeris · Prisma · Tailwind CSS
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TABLE OF CONTENTS ═══════════ -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+
+  <div class="toc-section">
+    <div class="toc-section-title">Part I — Application Overview</div>
+    <div class="toc-item"><span class="toc-num">1</span> Product Vision & Philosophy</div>
+    <div class="toc-item"><span class="toc-num">2</span> Architecture Overview</div>
+    <div class="toc-item"><span class="toc-num">3</span> Technology Stack</div>
+    <div class="toc-item"><span class="toc-num">4</span> Data Flow Pipeline</div>
+  </div>
+
+  <div class="toc-section">
+    <div class="toc-section-title">Part II — Kundali Algorithm (Complete)</div>
+    <div class="toc-item"><span class="toc-num">5</span> Swiss Ephemeris Integration</div>
+    <div class="toc-item"><span class="toc-num">6</span> Meeus Fallback Engine</div>
+    <div class="toc-item"><span class="toc-num">7</span> Julian Day Calculation</div>
+    <div class="toc-item"><span class="toc-num">8</span> Lahiri Ayanamsa</div>
+    <div class="toc-item"><span class="toc-num">9</span> Planetary Position Calculation</div>
+    <div class="toc-item"><span class="toc-num">10</span> Ascendant (Lagna) Calculation</div>
+    <div class="toc-item"><span class="toc-num">11</span> Whole Sign House System</div>
+    <div class="toc-item"><span class="toc-num">12</span> Nakshatra Calculation</div>
+    <div class="toc-item"><span class="toc-num">13</span> Vimshottari Dasha System</div>
+    <div class="toc-item"><span class="toc-num">14</span> Planet-Sign Relationships</div>
+    <div class="toc-item"><span class="toc-num">15</span> Exaltation & Debilitation</div>
+    <div class="toc-item"><span class="toc-num">16</span> Combustion Detection</div>
+    <div class="toc-item"><span class="toc-num">17</span> Retrograde Detection</div>
+  </div>
+
+  <div class="toc-section">
+    <div class="toc-section-title">Part III — Yoga & Dosha Detection</div>
+    <div class="toc-item"><span class="toc-num">18</span> 16 Yoga Detection Algorithms</div>
+    <div class="toc-item"><span class="toc-num">19</span> 6 Dosha Detection Algorithms</div>
+  </div>
+
+  <div class="toc-section">
+    <div class="toc-section-title">Part IV — Complementary Engines</div>
+    <div class="toc-item"><span class="toc-num">20</span> Numerology Engine (Pythagorean)</div>
+    <div class="toc-item"><span class="toc-num">21</span> Trait Scoring Engine (14 Traits)</div>
+    <div class="toc-item"><span class="toc-num">22</span> Jaimini Karaka System</div>
+    <div class="toc-item"><span class="toc-num">23</span> Divisional Charts</div>
+  </div>
+
+  <div class="toc-section">
+    <div class="toc-section-title">Part V — AI & Analysis Layer</div>
+    <div class="toc-item"><span class="toc-num">24</span> AI Interpretation Engine</div>
+    <div class="toc-item"><span class="toc-num">25</span> 12-Dimension Comprehensive Analysis</div>
+    <div class="toc-item"><span class="toc-num">26</span> Planetary Transits System</div>
+  </div>
+
+  <div class="toc-section">
+    <div class="toc-section-title">Part VI — Frontend & Visualization</div>
+    <div class="toc-item"><span class="toc-num">27</span> North Indian Kundali Chart SVG</div>
+    <div class="toc-item"><span class="toc-num">28</span> Dasha Timeline Visualization</div>
+    <div class="toc-item"><span class="toc-num">29</span> Trait Map & Elemental Balance</div>
+    <div class="toc-item"><span class="toc-num">30</span> Premium Report Generation</div>
+  </div>
+
+  <div class="toc-section">
+    <div class="toc-section-title">Part VII — API & Data</div>
+    <div class="toc-item"><span class="toc-num">31</span> API Endpoints Reference</div>
+    <div class="toc-item"><span class="toc-num">32</span> Database Schema</div>
+    <div class="toc-item"><span class="toc-num">33</span> Data Types & Interfaces</div>
+  </div>
+</div>
+
+<!-- ═══════════ CONTENT ═══════════ -->
+<div class="content">
+
+<!-- ═══ SECTION 1: Product Vision ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Product Vision & Philosophy</div>
+  </div>
+  <p><strong>AyuAstro</strong> is an AI-powered Vedic astrology platform that provides brutally honest, psychologically grounded emotional intelligence reports. Founded by Ayush UPADHYAY, the platform's tagline — <em>"Nothing to Hide"</em> — reflects its core philosophy: no sugarcoating, no Barnum statements, no superstition.</p>
+
+  <h3>Core Principles</h3>
+  <ul>
+    <li><strong>Deterministic Calculations:</strong> Same birth details → identical results, always. No randomness, no AI hallucination in calculations.</li>
+    <li><strong>Swiss Ephemeris Accuracy:</strong> Professional-grade arc-minute level planetary positions using the same library trusted by professional astrologers worldwide.</li>
+    <li><strong>Psychological Grounding:</strong> Every interpretation is anchored in planetary dignity, house placement, and classical Vedic rules — never vague fortune-telling.</li>
+    <li><strong>Multi-Source Synthesis:</strong> Astrology (40%) + Numerology (20%) + Behavioral Science (40%) = holistic emotional architecture mapping.</li>
+    <li><strong>AI as Synthesizer Only:</strong> AI never defines truth — it only synthesizes and articulates what the deterministic algorithms have computed.</li>
+  </ul>
+
+  <h3>Target Users</h3>
+  <p>Spiritually curious individuals (20-40 years old, primarily Indian market) seeking self-understanding through the lens of Vedic wisdom, combined with modern psychological insight.</p>
+</div>
+
+<!-- ═══ SECTION 2: Architecture ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Architecture Overview</div>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-box primary">User Input<br><small>Name, DOB, Time, Place</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">Onboarding API<br><small>Validation & Persistence</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">Swiss Ephemeris<br><small>Planetary Positions</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">Kundali Engine<br><small>Houses, Nakshatras, Dasha</small></div>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-box">Yoga/Dosha<br><small>16 Yogas, 6 Doshas</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">Numerology<br><small>7 Core Numbers</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">Trait Engine<br><small>14 Traits × 3 Sources</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box primary">AI Synthesis<br><small>7 Report Sections</small></div>
+  </div>
+
+  <h3>Layer Architecture</h3>
+  <table>
+    <tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr>
+    <tr><td>Frontend</td><td>Next.js 16 + React 19 + Tailwind CSS 4</td><td>SPA with 8+ views, shadcn/ui components, Framer Motion</td></tr>
+    <tr><td>API Layer</td><td>Next.js App Router + Zod</td><td>RESTful endpoints with strict validation</td></tr>
+    <tr><td>Astrology Engine</td><td>TypeScript + Swiss Ephemeris (sweph)</td><td>Deterministic planetary calculations</td></tr>
+    <tr><td>Numerology Engine</td><td>TypeScript (Pythagorean system)</td><td>7 numerological calculations</td></tr>
+    <tr><td>Scoring Engine</td><td>TypeScript (rule-based)</td><td>14 traits scored 0-100 from 3 sources</td></tr>
+    <tr><td>AI Layer</td><td>z-ai-web-dev-sdk (LLM)</td><td>Report synthesis, chat, horoscope</td></tr>
+    <tr><td>Database</td><td>Prisma ORM + SQLite</td><td>Persistent storage for user data</td></tr>
+  </table>
+</div>
+
+<!-- ═══ SECTION 3: Technology Stack ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Technology Stack</div>
+  </div>
+  <table>
+    <tr><th>Component</th><th>Library / Tool</th><th>Version</th></tr>
+    <tr><td>Framework</td><td>Next.js (App Router)</td><td>16.x</td></tr>
+    <tr><td>Language</td><td>TypeScript</td><td>5.x</td></tr>
+    <tr><td>Styling</td><td>Tailwind CSS + shadcn/ui</td><td>4.x / New York</td></tr>
+    <tr><td>Animations</td><td>Framer Motion</td><td>11.x</td></tr>
+    <tr><td>State</td><td>Zustand (persisted)</td><td>5.x</td></tr>
+    <tr><td>Ephemeris</td><td>sweph (Swiss Ephemeris N-API)</td><td>2.10.3</td></tr>
+    <tr><td>Database</td><td>Prisma + SQLite</td><td>6.x</td></tr>
+    <tr><td>Validation</td><td>Zod</td><td>3.x</td></tr>
+    <tr><td>AI SDK</td><td>z-ai-web-dev-sdk</td><td>Latest</td></tr>
+    <tr><td>Icons</td><td>Lucide React</td><td>Latest</td></tr>
+  </table>
+</div>
+
+<!-- ═══ SECTION 4: Data Flow Pipeline ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Data Flow Pipeline</div>
+  </div>
+
+  <p>The complete processing pipeline transforms raw birth data into a comprehensive emotional intelligence report through 6 sequential stages:</p>
+
+  <table>
+    <tr><th>Stage</th><th>Input</th><th>Output</th><th>Time</th></tr>
+    <tr><td>1. User Creation</td><td>Name, DOB, Time, Place, Gender, Relationship</td><td>userId + Profile in DB</td><td>~50ms</td></tr>
+    <tr><td>2. Astrology Calculation</td><td>DOB, Time, Lat/Lng, Timezone</td><td>Sun/Moon/Asc signs, 9 planet positions, 12 houses, Nakshatra, Dasha, 16 Yogas, 6 Doshas</td><td>~200ms</td></tr>
+    <tr><td>3. Numerology Calculation</td><td>Full Name + DOB</td><td>7 core numbers with descriptions</td><td>~10ms</td></tr>
+    <tr><td>4. Trait Scoring</td><td>Astrology + Numerology + Questionnaire</td><td>14 traits scored 0-100 with audit trail</td><td>~50ms</td></tr>
+    <tr><td>5. AI Report Generation</td><td>All computed data + templates</td><td>7 report sections (3 free + 4 premium)</td><td>~12s</td></tr>
+    <tr><td>6. Persistence</td><td>All results</td><td>Complete data saved to DB + Zustand store</td><td>~50ms</td></tr>
+  </table>
+
+  <div class="info-box">
+    <strong>Total Pipeline Time:</strong> ~13 seconds (dominated by AI generation). All deterministic calculations (Stages 1-4) complete in under 500ms.
+  </div>
+</div>
+
+<!-- ═══ SECTION 5: Swiss Ephemeris ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Swiss Ephemeris Integration</div>
+  </div>
+
+  <p>The <strong>primary calculation path</strong> uses the Swiss Ephemeris (<code>sweph</code>) — the same professional-grade astronomical library used by astrologers and researchers worldwide. It provides <strong>arc-minute level accuracy</strong> (vs ~1-3° error in simplified methods).</p>
+
+  <h3>Module Architecture</h3>
+  <pre><code>// swiss-ephemeris.ts — Wrapper Module
+
+// Lazy initialization with graceful fallback
+let swephModule: typeof import('sweph') | null = null;
+
+async function initSweph(): Promise&lt;{ ready: boolean; error?: string }&gt; {
+  try {
+    swephModule = require('sweph');
+    // Test with utc_to_jd to verify module works
+    const testResult = swephModule.utc_to_jd(2000, 1, 1, 12, 0, 0, 
+                          swephModule.constants.SE_GREG_CAL);
+    return { ready: true, version: '2.10.3' };
+  } catch (err) {
+    swephModule = null;
+    return { ready: false, error: err.message };
+  }
+}</code></pre>
+
+  <h3>Planet ID Mapping</h3>
+  <table>
+    <tr><th>Planet</th><th>Swiss Ephemeris Constant</th><th>Notes</th></tr>
+    <tr><td>Sun ☉</td><td><code>SE_SUN</code></td><td>Central luminary</td></tr>
+    <tr><td>Moon ☽</td><td><code>SE_MOON</code></td><td>Lunar position</td></tr>
+    <tr><td>Mars ♂</td><td><code>SE_MARS</code></td><td></td></tr>
+    <tr><td>Mercury ☿</td><td><code>SE_MERCURY</code></td><td></td></tr>
+    <tr><td>Jupiter ♃</td><td><code>SE_JUPITER</code></td><td></td></tr>
+    <tr><td>Venus ♀</td><td><code>SE_VENUS</code></td><td></td></tr>
+    <tr><td>Saturn ♄</td><td><code>SE_SATURN</code></td><td></td></tr>
+    <tr><td>Rahu ☊</td><td><code>SE_MEAN_NODE</code></td><td>Vedic standard: mean node</td></tr>
+    <tr><td>Ketu ☋</td><td><code>SE_MEAN_NODE + 180°</code></td><td>Derived from Rahu</td></tr>
+  </table>
+
+  <h3>Calculation Flags</h3>
+  <pre><code>const flags = constants.SEFLG_MOSEPH | constants.SEFLG_SPEED;
+// SEFLG_MOSEPH  → Use built-in Moshier ephemeris (no external files needed)
+// SEFLG_SPEED   → Calculate longitudinal speed (negative = retrograde)</code></pre>
+
+  <h3>House System</h3>
+  <pre><code>// Whole Sign house system ('W') — Vedic standard
+const result = swephModule.houses_ex2(jd_ut, flags, latitude, longitude, 'W');</code></pre>
+
+  <h3>Lahiri Ayanamsa</h3>
+  <pre><code>// Set Lahiri sidereal mode before getting ayanamsa
+swephModule.set_sid_mode(constants.SE_SIDM_LAHIRI, 0, 0);
+const ayanamsa = swephModule.get_ayanamsa_ut(jd_ut, 0);</code></pre>
+
+  <div class="warning-box">
+    <strong>Important:</strong> The sweph module uses native N-API bindings and can ONLY be used in server-side code (API routes, server components). It cannot be imported in client-side code.
+  </div>
+</div>
+
+<!-- ═══ SECTION 6: Meeus Fallback ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Meeus Fallback Engine</div>
+  </div>
+
+  <p>When Swiss Ephemeris is unavailable (e.g., N-API module fails to load in certain runtime environments), the system automatically falls back to simplified <strong>Meeus orbital mechanics</strong> with ~1-3° accuracy. This ensures the application never crashes due to ephemeris issues.</p>
+
+  <h3>Planetary Longitude Formulas (Simplified)</h3>
+  <p>Each planet's tropical longitude is calculated using the Meeus method:</p>
+  <pre><code>// Sun Longitude (Meeus)
+L₀ = 280.46646 + 36000.76983 × T + 0.0003032 × T²    // Mean longitude
+M  = 357.52911 + 35999.05029 × T - 0.0001537 × T²    // Mean anomaly
+C  = (1.914602 - 0.004817×T) × sin(M)                  // Equation of center
+   + 0.019993 × sin(2M) + 0.000289 × sin(3M)
+SunLongitude = L₀ + C
+
+// Moon Longitude (Meeus)
+L  = 218.3165 + 481267.8813 × T    // Mean longitude
+M  = 134.9634 + 477198.8676 × T    // Mean anomaly
+Ms = 357.5291 + 35999.0503 × T     // Sun's mean anomaly
+D  = 297.8502 + 445267.1115 × T    // Mean elongation
+F  = 93.2720 + 483202.0175 × T     // Argument of latitude
+MoonLongitude = L + 6.289×sin(M) + 1.274×sin(2D-M) + ...</code></pre>
+
+  <h3>Retrograde Detection (Meeus)</h3>
+  <p>Without Swiss Ephemeris speed data, retrograde is approximated from elongation angles:</p>
+  <pre><code>function isPlanetRetrograde(planet, tropicalLon, sunTropicalLon) {
+  const elongation = normalize(tropicalLon - sunTropicalLon);
+  switch (planet) {
+    case 'Mercury': return elongation &lt; 22 || elongation &gt; 338;
+    case 'Venus':   return elongation &lt; 10 || elongation &gt; 350;
+    case 'Mars':    return elongation &gt; 130 && elongation &lt; 230;
+    case 'Jupiter': return elongation &gt; 145 && elongation &lt; 215;
+    case 'Saturn':  return elongation &gt; 150 && elongation &lt; 210;
+  }
+}</code></pre>
+</div>
+
+<!-- ═══ SECTION 7: Julian Day ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">Julian Day Calculation</div>
+  </div>
+
+  <p>The Julian Day Number (JDN) is the foundational time coordinate for all astronomical calculations. Two variants are used:</p>
+  <ul>
+    <li><code>jd_et</code> — Ephemeris Time (Terrestrial Time): Used for planet position calculations</li>
+    <li><code>jd_ut</code> — Universal Time: Used for house cusps, ascendant, and ayanamsa</li>
+  </ul>
+
+  <h3>Meeus Algorithm</h3>
+  <pre><code>function dateToJulianDayMeeus(date: Date): number {
+  let y = year, m = month;
+  if (m &lt;= 2) { y -= 1; m += 12; }
+  const A = Math.floor(y / 100);
+  const B = 2 - A + Math.floor(A / 4);
+  return Math.floor(365.25 × (y + 4716)) 
+       + Math.floor(30.6001 × (m + 1)) 
+       + day + hour/24 + B - 1524.5;
+}
+
+// Julian centuries from J2000.0
+function julianCenturies(jd: number): number {
+  return (jd - 2451545.0) / 36525.0;
+}</code></pre>
+</div>
+
+<!-- ═══ SECTION 8: Lahiri Ayanamsa ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <div class="section-title">Lahiri Ayanamsa</div>
+  </div>
+
+  <p>The <strong>ayanamsa</strong> is the angular difference between the tropical (sayana) and sidereal (nirayana) zodiacs. AyuAstro uses the <strong>Lahiri (Chitrapaksha)</strong> ayanamsa — the official standard for Vedic astrology in India.</p>
+
+  <h3>Swiss Ephemeris Method (Primary)</h3>
+  <pre><code>set_sid_mode(SE_SIDM_LAHIRI, 0, 0);
+const ayanamsa = get_ayanamsa_ut(jd_ut, 0);</code></pre>
+
+  <h3>Meeus Fallback Formula</h3>
+  <pre><code>function calculateLahiriAyanamsaMeeus(date: Date): number {
+  const T = julianCenturies(jd);
+  const omega = 259.18 - 1934.14 × T;
+  return 23.85394444 + 0.01396222 × (T × 100) 
+       + 0.00156 × sin(omega × π/180);
+}</code></pre>
+
+  <div class="info-box">
+    <strong>Current Value:</strong> As of 2025, Lahiri ayanamsa ≈ 24°12' (24.2°). This means a tropical Aries at 25° becomes a sidereal Aries at ~0.8° — barely in Aries. All AyuAstro calculations use sidereal positions.
+  </div>
+</div>
+
+<!-- ═══ SECTION 9: Planetary Positions ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">9</div>
+    <div class="section-title">Planetary Position Calculation</div>
+  </div>
+
+  <p>For each of the 9 Vedic planets, the following data is computed:</p>
+
+  <h3>PlanetPosition Interface</h3>
+  <pre><code>interface PlanetPosition {
+  planet: Planet;           // 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn' | 'Rahu' | 'Ketu'
+  longitude: number;        // 0-360 tropical longitude
+  siderealLongitude: number; // 0-360 sidereal (Lahiri) longitude  
+  sign: ZodiacSign;          // Which zodiac sign the planet occupies
+  signIndex: number;         // 0-11 (0=Aries, 11=Pisces)
+  degreeInSign: number;      // 0-30 degrees within the sign
+  house: number;             // 1-12 house number (whole sign system)
+  nakshatra: string;         // Nakshatra name
+  nakshatraIndex: number;    // 0-26
+  nakshatraPada: number;     // 1-4
+  isRetrograde: boolean;     // True if planet is moving backward
+  isCombust: boolean;        // True if too close to Sun
+  eclipticLatitude?: number; // From Swiss Ephemeris
+  speed?: number;            // Degrees/day (negative = retrograde)
+  distanceAU?: number;       // Distance from Earth in AU
+}</code></pre>
+
+  <h3>Conversion Process</h3>
+  <pre><code>// Step 1: Get tropical longitude from Swiss Ephemeris
+const tropicalLon = swephCalcPlanet(jd_et, planet).longitude;
+
+// Step 2: Convert to sidereal by subtracting ayanamsa
+const siderealLon = normalize(tropicalLon - ayanamsa);
+
+// Step 3: Derive sign from sidereal longitude
+const signIndex = Math.floor(siderealLon / 30);
+const sign = ZODIAC_SIGNS[signIndex]; // e.g., 'Aries', 'Taurus', ...
+const degreeInSign = siderealLon % 30;
+
+// Step 4: Derive nakshatra from sidereal longitude
+const nakshatraIndex = Math.floor(siderealLon / 13.333); // 360/27
+const nakshatraPada = Math.floor((siderealLon % 13.333) / 3.333) + 1;
+
+// Step 5: Retrograde from actual speed (Swiss Ephemeris)
+const isRetrograde = (planet === 'Rahu' || planet === 'Ketu') 
+  ? true  // Nodes always retrograde in Vedic astrology
+  : lonSpeed &lt; 0;
+
+// Step 6: Combustion check
+const isCombust = angularDistance(planetLon, sunLon) &lt; COMBUSTION_DEGREES[planet];</code></pre>
+</div>
+
+<!-- ═══ SECTION 10: Ascendant ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <div class="section-title">Ascendant (Lagna) Calculation</div>
+  </div>
+
+  <p>The Ascendant is the zodiac sign rising on the eastern horizon at the moment of birth. It forms the first house of the kundali and is critical for all house-based interpretations.</p>
+
+  <h3>Swiss Ephemeris Method</h3>
+  <pre><code>const houseData = swephCalcHouses(jd_ut, latitude, longitude);
+const ascTropical = houseData.ascendant;
+const ascSidereal = normalize(ascTropical - ayanamsa);
+const ascSignIndex = Math.floor(ascSidereal / 30);</code></pre>
+
+  <h3>Meeus Fallback Method</h3>
+  <pre><code>// Local Sidereal Time → Ramc → Ascendant
+const gmst = 280.46061837 + 360.98564736629 × (jd - 2451545.0) + 0.000387933×T²;
+const lst = normalize(gmst + longitude);
+const ramc = lst × π/180;
+const obliquity = (23.4393 - 0.0130 × T) × π/180;
+const ascendant = atan2(cos(ramc), 
+  -(sin(ramc)×cos(obliquity) + tan(latitude)×sin(obliquity)));</code></pre>
+</div>
+
+<!-- ═══ SECTION 11: House System ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">11</div>
+    <div class="section-title">Whole Sign House System</div>
+  </div>
+
+  <p>AyuAstro uses the <strong>Whole Sign house system</strong> — the oldest and most traditional Vedic system. In this system, each zodiac sign equals one house, starting from the ascendant sign as House 1.</p>
+
+  <h3>Algorithm</h3>
+  <pre><code>function calculateHouses(ascendant, planetaryPositions) {
+  const houses = [];
+  for (let houseNum = 1; houseNum &lt;= 12; houseNum++) {
+    const signIndex = (ascendant.signIndex + houseNum - 1) % 12;
+    const sign = ZODIAC_SIGNS[signIndex];
+    
+    // Find planets in this house (same sign = same house in whole sign)
+    const planetsInHouse = Object.entries(planetaryPositions)
+      .filter(([_, pos]) => pos.signIndex === signIndex)
+      .map(([name]) => name);
+    
+    houses.push({ houseNumber: houseNum, sign, signIndex, planets: planetsInHouse });
+  }
+  return houses;
+}</code></pre>
+
+  <h3>12 House Significations</h3>
+  <table>
+    <tr><th>House</th><th>Sanskrit</th><th>Name</th><th>Significations</th><th>Karaka</th></tr>
+    <tr><td>1</td><td>Lagna / Tanu</td><td>Self</td><td>Body, Personality, Health</td><td>Sun</td></tr>
+    <tr><td>2</td><td>Dhana</td><td>Wealth</td><td>Money, Family, Speech</td><td>Jupiter</td></tr>
+    <tr><td>3</td><td>Sahaja</td><td>Siblings</td><td>Courage, Communication</td><td>Mars</td></tr>
+    <tr><td>4</td><td>Sukha</td><td>Home</td><td>Mother, Comforts, Education</td><td>Moon</td></tr>
+    <tr><td>5</td><td>Putra</td><td>Children</td><td>Intelligence, Creativity, Romance</td><td>Jupiter</td></tr>
+    <tr><td>6</td><td>Ripu</td><td>Enemies</td><td>Disease, Debt, Service</td><td>Saturn</td></tr>
+    <tr><td>7</td><td>Kalatra</td><td>Partnership</td><td>Marriage, Business Partners</td><td>Venus</td></tr>
+    <tr><td>8</td><td>Ayur</td><td>Transformation</td><td>Longevity, Inheritance, Occult</td><td>Saturn</td></tr>
+    <tr><td>9</td><td>Bhagya</td><td>Fortune</td><td>Luck, Religion, Father, Dharma</td><td>Jupiter</td></tr>
+    <tr><td>10</td><td>Karma</td><td>Career</td><td>Status, Authority, Public Image</td><td>Sun</td></tr>
+    <tr><td>11</td><td>Labha</td><td>Gains</td><td>Income, Friends, Social Circle</td><td>Jupiter</td></tr>
+    <tr><td>12</td><td>Vyaya</td><td>Loss</td><td>Expenses, Liberation, Foreign</td><td>Saturn</td></tr>
+  </table>
+</div>
+
+<!-- ═══ SECTION 12: Nakshatras ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">12</div>
+    <div class="section-title">Nakshatra Calculation</div>
+  </div>
+
+  <p>The 27 Nakshatras (lunar mansions) divide the zodiac into 27 equal segments of 13°20' each. Each nakshatra has 4 padas (quarters) of 3°20'.</p>
+
+  <pre><code>// Constants
+DEGREES_PER_NAKSHATRA = 360 / 27 = 13.333...  // 13°20'
+DEGREES_PER_PADA = DEGREES_PER_NAKSHATRA / 4 = 3.333...  // 3°20'
+
+// Calculate from sidereal longitude
+const nakshatraIndex = Math.floor(siderealLongitude / 13.333);
+const pada = Math.floor((siderealLongitude % 13.333) / 3.333) + 1;</code></pre>
+
+  <p>Each nakshatra is ruled by one of the 9 planets, which determines the starting point of the Vimshottari Dasha system.</p>
+</div>
+
+<!-- ═══ SECTION 13: Dasha System ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">13</div>
+    <div class="section-title">Vimshottari Dasha System</div>
+  </div>
+
+  <p>The Vimshottari Dasha is the most widely used planetary period system in Vedic astrology, based on the Moon's nakshatra at birth. The total cycle spans <strong>120 years</strong>.</p>
+
+  <h3>Dasha Sequence & Durations</h3>
+  <table>
+    <tr><th>#</th><th>Planet</th><th>Years</th><th>Proportion</th></tr>
+    <tr><td>1</td><td>Ketu ☋</td><td>7</td><td>5.83%</td></tr>
+    <tr><td>2</td><td>Venus ♀</td><td>20</td><td>16.67%</td></tr>
+    <tr><td>3</td><td>Sun ☉</td><td>6</td><td>5.00%</td></tr>
+    <tr><td>4</td><td>Moon ☽</td><td>10</td><td>8.33%</td></tr>
+    <tr><td>5</td><td>Mars ♂</td><td>7</td><td>5.83%</td></tr>
+    <tr><td>6</td><td>Rahu ☊</td><td>18</td><td>15.00%</td></tr>
+    <tr><td>7</td><td>Jupiter ♃</td><td>16</td><td>13.33%</td></tr>
+    <tr><td>8</td><td>Saturn ♄</td><td>19</td><td>15.83%</td></tr>
+    <tr><td>9</td><td>Mercury ☿</td><td>17</td><td>14.17%</td></tr>
+    <tr><td colspan="2"><strong>Total</strong></td><td><strong>120</strong></td><td><strong>100%</strong></td></tr>
+  </table>
+
+  <h3>Algorithm</h3>
+  <pre><code>// Step 1: Find Moon's nakshatra lord = starting dasha planet
+const startLord = NAKSHATRAS[moonNakshatraIndex].ruler;
+
+// Step 2: Calculate fraction of nakshatra already traversed
+const fractionElapsed = (moonDegreeInNakshatra) / 13.333;
+const fractionRemaining = 1 - fractionElapsed;
+
+// Step 3: First mahadasha has reduced duration
+const firstDuration = DASHA_YEARS[startLord] × fractionRemaining;
+
+// Step 4: Subsequent dashas follow standard sequence
+for (let i = 1; i &lt; 9; i++) {
+  const planet = DASHA_SEQUENCE[(startIndex + i) % 9];
+  const duration = DASHA_YEARS[planet];
+  // Each mahadasha has 9 antardashas
+}
+
+// Step 5: Antardasha within each Mahadasha
+antardashaYears = (mahadashaYears × antardashaPlanetYears) / 120;</code></pre>
+</div>
+
+<!-- ═══ SECTION 14: Planet-Sign Relationships ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">14</div>
+    <div class="section-title">Planet-Sign Relationships</div>
+  </div>
+
+  <p>Per Brihat Parashara Hora Shastra (BPHS), a planet's relationship with a sign is determined by its relationship with the <strong>lord of that sign</strong>:</p>
+
+  <h3>Algorithm</h3>
+  <pre><code>function getPlanetSignRelationship(planet, sign) {
+  if (getSignLord(sign) === planet) return 'Own Sign';
+  const signLord = getSignLord(sign);
+  const relationship = getPermanentRelationship(planet, signLord);
+  switch (relationship) {
+    case 'Friend':       return 'Friendly';
+    case 'Enemy':        return 'Enemy';
+    case 'Great Friend': return 'Friendly';
+    case 'Great Enemy':  return 'Enemy';
+    default:             return 'Neutral';
+  }
+}</code></pre>
+
+  <h3>Permanent Friendship Table</h3>
+  <table>
+    <tr><th>Planet</th><th>Friends</th><th>Enemies</th><th>Neutral</th></tr>
+    <tr><td>Sun ☉</td><td>Moon, Mars, Jupiter</td><td>Venus, Saturn</td><td>Mercury</td></tr>
+    <tr><td>Moon ☽</td><td>Sun, Mercury</td><td>Rahu, Ketu</td><td>Mars, Jupiter, Venus, Saturn</td></tr>
+    <tr><td>Mars ♂</td><td>Sun, Moon, Jupiter</td><td>Mercury</td><td>Venus, Saturn</td></tr>
+    <tr><td>Mercury ☿</td><td>Sun, Venus</td><td>Moon</td><td>Mars, Jupiter, Saturn</td></tr>
+    <tr><td>Jupiter ♃</td><td>Sun, Moon, Mars</td><td>Mercury, Venus</td><td>Saturn</td></tr>
+    <tr><td>Venus ♀</td><td>Mercury, Saturn</td><td>Sun, Moon</td><td>Mars, Jupiter</td></tr>
+    <tr><td>Saturn ♄</td><td>Mercury, Venus</td><td>Sun, Moon, Mars</td><td>Jupiter</td></tr>
+  </table>
+
+  <div class="info-box">
+    <strong>Key Rule:</strong> Mars is <em>Neutral</em> to Mercury (NOT enemy), per BPHS. This was a common source of errors in earlier implementations where Mars was incorrectly listed as Mercury's enemy.
+  </div>
+</div>
+
+<!-- ═══ SECTION 15: Exaltation & Debilitation ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">15</div>
+    <div class="section-title">Exaltation & Debilitation</div>
+  </div>
+
+  <p>Each planet has a sign of <strong>exaltation</strong> (maximum strength) and a sign of <strong>debilitation</strong> (minimum strength), which is always the opposite sign (7th from exaltation).</p>
+
+  <table>
+    <tr><th>Planet</th><th>Exaltation Sign</th><th>Exaltation Degree</th><th>Debilitation Sign</th></tr>
+    <tr><td>Sun ☉</td><td>Aries ♈</td><td>10°</td><td>Libra ♎</td></tr>
+    <tr><td>Moon ☽</td><td>Taurus ♉</td><td>3°</td><td>Scorpio ♏</td></tr>
+    <tr><td>Mars ♂</td><td>Capricorn ♑</td><td>28°</td><td>Cancer ♋</td></tr>
+    <tr><td>Mercury ☿</td><td>Virgo ♍</td><td>15°</td><td>Pisces ♓</td></tr>
+    <tr><td>Jupiter ♃</td><td>Cancer ♋</td><td>5°</td><td>Capricorn ♑</td></tr>
+    <tr><td>Venus ♀</td><td>Pisces ♓</td><td>27°</td><td>Virgo ♍</td></tr>
+    <tr><td>Saturn ♄</td><td>Libra ♎</td><td>20°</td><td>Aries ♈</td></tr>
+    <tr><td>Rahu ☊</td><td>Gemini ♊</td><td>15°</td><td>Sagittarius ♐</td></tr>
+    <tr><td>Ketu ☋</td><td>Sagittarius ♐</td><td>15°</td><td>Gemini ♊</td></tr>
+  </table>
+</div>
+
+<!-- ═══ SECTION 16: Combustion ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">16</div>
+    <div class="section-title>Combustion Detection</div>
+  </div>
+  <p>A planet is <strong>combust</strong> when it is too close to the Sun, rendering it weak. The combustion degrees vary by planet:</p>
+  <table>
+    <tr><th>Planet</th><th>Combustion Degree</th></tr>
+    <tr><td>Moon</td><td>12°</td></tr>
+    <tr><td>Mars</td><td>17°</td></tr>
+    <tr><td>Mercury</td><td>14° (avg, varies with retrograde)</td></tr>
+    <tr><td>Jupiter</td><td>11°</td></tr>
+    <tr><td>Venus</td><td>10° (avg, varies with retrograde)</td></tr>
+    <tr><td>Saturn</td><td>15°</td></tr>
+  </table>
+  <pre><code>function isCombust(planet, planetLon, sunLon) {
+  if (planet === 'Sun' || planet === 'Rahu' || planet === 'Ketu') return false;
+  const diff = Math.abs(planetLon - sunLon);
+  const normalizedDiff = Math.min(diff, 360 - diff);
+  return normalizedDiff &lt; COMBUSTION_DEGREES[planet];
+}</code></pre>
+</div>
+
+<!-- ═══ SECTION 17: Retrograde ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">17</div>
+    <div class="section-title">Retrograde Detection</div>
+  </div>
+
+  <h3>Swiss Ephemeris Method (Primary)</h3>
+  <p>The actual longitudinal speed is extracted from the ephemeris. Negative speed = retrograde.</p>
+  <pre><code>const retrograde = (planet === 'Rahu' || planet === 'Ketu')
+  ? true  // Nodes always retrograde in Vedic astrology
+  : lonSpeed &lt; 0;</code></pre>
+
+  <h3>Meeus Approximation (Fallback)</h3>
+  <p>Without speed data, retrograde is estimated from elongation angles:</p>
+  <table>
+    <tr><th>Planet</th><th>Retrograde Zone (elongation from Sun)</th></tr>
+    <tr><td>Mercury</td><td>&lt; 22° or &gt; 338°</td></tr>
+    <tr><td>Venus</td><td>&lt; 10° or &gt; 350°</td></tr>
+    <tr><td>Mars</td><td>130° — 230°</td></tr>
+    <tr><td>Jupiter</td><td>145° — 215°</td></tr>
+    <tr><td>Saturn</td><td>150° — 210°</td></tr>
+  </table>
+</div>
+
+<!-- ═══ SECTION 18: Yoga Detection ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">18</div>
+    <div class="section-title">16 Yoga Detection Algorithms</div>
+  </div>
+
+  <p>Yogas are special planetary combinations indicating specific life patterns. AyuAstro detects 16 yogas:</p>
+
+  <table>
+    <tr><th>#</th><th>Yoga</th><th>Detection Logic</th><th>Strength</th></tr>
+    <tr><td>1</td><td>Raj Yoga</td><td>Kendra lord in Trikona or vice versa, or conjunction of Kendra + Trikona lords</td><td>Strong if direct placement</td></tr>
+    <tr><td>2</td><td>Gaj Kesari</td><td>Jupiter in Kendra (1,4,7,10) from Moon</td><td>Strong if Jupiter in own/exalted sign</td></tr>
+    <tr><td>3</td><td>Neech Bhang Raj</td><td>Debilitated planet's dispositor in Kendra from Lagna/Moon</td><td>Strong if dispositor also strong</td></tr>
+    <tr><td>4</td><td>Chandra Mangal</td><td>Moon and Mars in conjunction or mutual aspect</td><td>Strong if conjunction</td></tr>
+    <tr><td>5</td><td>Budh Aditya</td><td>Sun + Mercury conjunction (not if Mercury combust)</td><td>Strong if Mercury not debilitated</td></tr>
+    <tr><td>6</td><td>Hansa</td><td>Jupiter in own/exalted/Moolatrikona sign in Kendra</td><td>Strong if exalted</td></tr>
+    <tr><td>7</td><td>Malavya</td><td>Venus in own/exalted/Moolatrikona sign in Kendra</td><td>Strong if exalted</td></tr>
+    <tr><td>8</td><td>Shasha</td><td>Saturn in own/exalted/Moolatrikona sign in Kendra</td><td>Strong if exalted</td></tr>
+    <tr><td>9</td><td>Ruchaka</td><td>Mars in own/exalted/Moolatrikona sign in Kendra</td><td>Strong if exalted</td></tr>
+    <tr><td>10</td><td>Bhadra</td><td>Mercury in own/exalted/Moolatrikona sign in Kendra</td><td>Strong if exalted</td></tr>
+    <tr><td>11</td><td>Amala</td><td>Venus AND Jupiter both in Kendra from Moon</td><td>Strong if both in own sign</td></tr>
+    <tr><td>12</td><td>Veshi</td><td>Planets (not Moon) in 2nd from Sun</td><td>3+ planets = Strong</td></tr>
+    <tr><td>13</td><td>Voshi</td><td>Planets (not Moon) in 12th from Sun</td><td>3+ planets = Strong</td></tr>
+    <tr><td>14</td><td>Ubhayachari</td><td>Planets in BOTH 2nd AND 12th from Sun</td><td>4+ planets = Strong</td></tr>
+    <tr><td>15</td><td>Dhana</td><td>2nd + 11th lords in conjunction or mutual aspect</td><td>Strong if direct conjunction</td></tr>
+    <tr><td>16</td><td>Vipreet Raj</td><td>Dushtana lords (6,8,12) in other Dushtana houses</td><td>Harsha + Sarala + Vimala sub-yogas</td></tr>
+  </table>
+</div>
+
+<!-- ═══ SECTION 19: Dosha Detection ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">19</div>
+    <div class="section-title">6 Dosha Detection Algorithms</div>
+  </div>
+
+  <p>Doshas are astrological afflictions indicating challenges. AyuAstro detects 6 doshas with severity levels and remedies:</p>
+
+  <table>
+    <tr><th>#</th><th>Dosha</th><th>Detection Logic</th><th>Severity</th></tr>
+    <tr><td>1</td><td>Mangal Dosha</td><td>Mars in houses 1,4,7,8,12 from Lagna/Moon/Venus</td><td>High if from 7th house</td></tr>
+    <tr><td>2</td><td>Kaal Sarp Dosha</td><td>All planets hemmed between Rahu and Ketu</td><td>12 types by Rahu house</td></tr>
+    <tr><td>3</td><td>Pitra Dosha</td><td>Sun + Rahu/Saturn conjunction or Rahu in 9th house</td><td>High if Sun + Rahu</td></tr>
+    <tr><td>4</td><td>Shani Sade Sati</td><td>Saturn transiting 12th, 1st, 2nd from natal Moon</td><td>Peak when over Moon</td></tr>
+    <tr><td>5</td><td>Grahan Dosha</td><td>Sun/Moon conjunct Rahu/Ketu (eclipse energy)</td><td>High if both luminaries afflicted</td></tr>
+    <tr><td>6</td><td>Shrapit Dosha</td><td>Saturn + Rahu conjunction or mutual aspect</td><td>High if in key houses</td></tr>
+  </table>
+
+  <div class="info-box">
+    <strong>Cancellation Logic:</strong> Mangal Dosha is reduced if Mars is in own sign (Aries/Scorpio), exalted (Capricorn), or conjunct Jupiter. Each dosha has specific cancellation conditions.
+  </div>
+</div>
+
+<!-- ═══ SECTION 20: Numerology Engine ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">20</div>
+    <div class="section-title">Numerology Engine (Pythagorean System)</div>
+  </div>
+
+  <p>The numerology engine uses the <strong>Pythagorean number system</strong> to derive 7 core numbers from the birth name and date:</p>
+
+  <table>
+    <tr><th>Number</th><th>Calculation</th><th>Significance</th></tr>
+    <tr><td>Life Path</td><td>Reduce month + day + year separately, then sum</td><td>Core life trajectory</td></tr>
+    <tr><td>Destiny</td><td>Sum of all letter values in full name</td><td>Talents and shortcomings</td></tr>
+    <tr><td>Soul Urge</td><td>Sum of vowels in full name</td><td>Inner motivations</td></tr>
+    <tr><td>Personality</td><td>Sum of consonants in full name</td><td>External persona</td></tr>
+    <tr><td>Birthday</td><td>Day of birth (reduced)</td><td>Special gift/talent</td></tr>
+    <tr><td>Maturity</td><td>Life Path + Destiny (reduced)</td><td>Growing awareness after 35-45</td></tr>
+    <tr><td>Personal Year</td><td>Birth month + day + current year (reduced)</td><td>Current year theme</td></tr>
+  </table>
+
+  <h3>Master Numbers</h3>
+  <p>Master numbers (11, 22, 33) are preserved throughout calculations and not reduced to single digits. They indicate heightened potential and spiritual significance.</p>
+
+  <h3>Letter-to-Number Mapping (Pythagorean)</h3>
+  <pre><code>1: A, J, S
+2: B, K, T
+3: C, L, U
+4: D, M, V
+5: E, N, W
+6: F, O, X
+7: G, P, Y
+8: H, Q, Z
+9: I, R</code></pre>
+</div>
+
+<!-- ═══ SECTION 21: Trait Scoring ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">21</div>
+    <div class="section-title">Trait Scoring Engine (14 Traits)</div>
+  </div>
+
+  <p>The scoring engine converts astrology, numerology, and questionnaire data into <strong>14 normalized trait scores (0-100)</strong>:</p>
+
+  <h3>14 Traits</h3>
+  <table>
+    <tr><th>Trait</th><th>Astro Source</th><th>Numero Source</th><th>Behavioral Source</th></tr>
+    <tr><td>Emotional Intensity</td><td>Moon sign, house, aspects</td><td>Life Path</td><td>Emotional questionnaire</td></tr>
+    <tr><td>Attachment Style</td><td>Venus/Moon relationship</td><td>Destiny Number</td><td>Relational questionnaire</td></tr>
+    <tr><td>Ambition</td><td>Sun/Mars/10th house</td><td>Life Path</td><td>Behavioral questionnaire</td></tr>
+    <tr><td>Trust Capacity</td><td>Jupiter/9th house</td><td>Soul Urge</td><td>Relational questionnaire</td></tr>
+    <tr><td>Communication</td><td>Mercury sign/house</td><td>Destiny Number</td><td>Social questionnaire</td></tr>
+    <tr><td>Impulsiveness</td><td>Mars/Moon relationship</td><td>Life Path</td><td>Behavioral questionnaire</td></tr>
+    <tr><td>Empathy</td><td>Moon/Neptune influence</td><td>Soul Urge</td><td>Emotional questionnaire</td></tr>
+    <tr><td>Resilience</td><td>Saturn sign/house</td><td>Life Path</td><td>Behavioral questionnaire</td></tr>
+    <tr><td>Creativity</td><td>Venus/5th house</td><td>Destiny Number</td><td>Behavioral questionnaire</td></tr>
+    <tr><td>Intuition</td><td>Moon/Ketu relationship</td><td>Soul Urge</td><td>Emotional questionnaire</td></tr>
+    <tr><td>Discipline</td><td>Saturn sign/house</td><td>Personality Number</td><td>Behavioral questionnaire</td></tr>
+    <tr><td>Social Energy</td><td>Mercury/Venus relationship</td><td>Destiny Number</td><td>Social questionnaire</td></tr>
+    <tr><td>Patience</td><td>Saturn/2nd house</td><td>Life Path</td><td>Behavioral questionnaire</td></tr>
+    <tr><td>Adaptability</td><td>Mercury sign strength</td><td>Personal Year</td><td>Social questionnaire</td></tr>
+  </table>
+
+  <h3>Weighted Blending</h3>
+  <pre><code>// Default weights
+const weights = {
+  astrological: 0.40,   // 40% - Primary source
+  numerological: 0.20,  // 20% - Supplementary
+  behavioral: 0.40       // 40% - Self-reported reality
+};
+
+// Blend formula
+function blendContributions(contributions, normalization, weights) {
+  const astroScore = weightedAverage(contributions.filter(c => c.source === 'astrological'));
+  const numeroScore = weightedAverage(contributions.filter(c => c.source === 'numerological'));
+  const behavScore = weightedAverage(contributions.filter(c => c.source === 'behavioral'));
+  
+  return (astroScore × weights.astrological 
+        + numeroScore × weights.numerological 
+        + behavScore × weights.behavioral);
+}</code></pre>
+</div>
+
+<!-- ═══ SECTION 22: Jaimini Karakas ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">22</div>
+    <div class="section-title">Jaimini Karaka System</div>
+  </div>
+
+  <p>The Jaimini system uses <strong>degree-based significators</strong> (Karakas) instead of house-based ones. The planet with the highest degree becomes the Atmakaraka (soul significator).</p>
+
+  <h3>7 Karakas (by degree, descending)</h3>
+  <table>
+    <tr><th>Karaka</th><th>Meaning</th><th>Determined By</th></tr>
+    <tr><td>Atmakaraka</td><td>Soul's desire</td><td>Planet with highest degree</td></tr>
+    <tr><td>Amatyakaraka</td><td>Career/Minister</td><td>2nd highest degree</td></tr>
+    <tr><td>Bhratrikaraka</td><td>Siblings</td><td>3rd highest degree</td></tr>
+    <tr><td>Matrikaraka</td><td>Mother</td><td>4th highest degree</td></tr>
+    <tr><td>Putrakaraka</td><td>Children</td><td>5th highest degree</td></tr>
+    <tr><td>Gnatikaraka</td><td>Obstacles/Enemies</td><td>6th highest degree</td></tr>
+    <tr><td>Darakaraka</td><td>Spouse</td><td>7th highest degree (lowest)</td></tr>
+  </table>
+
+  <div class="info-box">
+    <strong>Rahu Exception:</strong> Rahu's degree is subtracted from 30° before ranking (since Rahu moves retrograde, its apparent degree is inverted).
+  </div>
+</div>
+
+<!-- ═══ SECTION 23: Divisional Charts ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">23</div>
+    <div class="section-title">Divisional Charts (Vargas)</div>
+  </div>
+
+  <p>Divisional charts (Vargas) provide deeper analysis of specific life areas by dividing each sign into finer segments:</p>
+
+  <table>
+    <tr><th>Chart</th><th>Division</th><th>Area of Life</th></tr>
+    <tr><td>D1 (Rasi)</td><td>1</td><td>Overall life</td></tr>
+    <tr><td>D9 (Navamsha)</td><td>9</td><td>Marriage, inner self, soul maturity</td></tr>
+    <tr><td>D10 (Dashamsha)</td><td>10</td><td>Career, profession</td></tr>
+    <tr><td>D7 (Saptamsha)</td><td>7</td><td>Children, progeny</td></tr>
+    <tr><td>D12 (Dwadasamsha)</td><td>12</td><td>Parents, ancestry</td></tr>
+    <tr><td>D20 (Vimsamsha)</td><td>20</td><td>Spirituality</td></tr>
+    <tr><td>D24 (Chaturvimshamsha)</td><td>24</td><td>Education, learning</td></tr>
+    <tr><td>D60 (Shastyamsha)</td><td>60</td><td>Deep karma, past life</td></tr>
+  </table>
+
+  <h3>Calculation Method</h3>
+  <pre><code>// For D9 (Navamsha): Divide 30° sign into 9 parts of 3°20' each
+// Each part is ruled by a zodiac sign starting from Aries, Leo, or Sagittarius
+// depending on the element of the natal sign
+
+function calculateNavamsha(planetSiderealLon, natalSignElement) {
+  const degreeInSign = planetSiderealLon % 30;
+  const navamshaIndex = Math.floor(degreeInSign / (30/9));
+  
+  let startSign;
+  switch (natalSignElement) {
+    case 'Fire':  startSign = 0; break;  // Aries
+    case 'Earth': startSign = 4; break;  // Capricorn (corrected per BPHS)
+    case 'Air':   startSign = 8; break;  // Libra
+    case 'Water': startSign = 8; break;  // Cancer (corrected)
+  }
+  return (startSign + navamshaIndex) % 12;
+}</code></pre>
+</div>
+
+<!-- ═══ SECTION 24: AI Interpretation ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">24</div>
+    <div class="section-title">AI Interpretation Engine</div>
+  </div>
+
+  <p>The AI layer synthesizes deterministic calculations into emotionally intelligent narratives. It <strong>never defines truth</strong> — only articulates what the algorithms have computed.</p>
+
+  <h3>7 Report Sections</h3>
+  <table>
+    <tr><th>Section</th><th>Level</th><th>Source Data</th></tr>
+    <tr><td>Emotional Personality</td><td>Free</td><td>Moon sign, house, emotional traits</td></tr>
+    <tr><td>Relationship Style</td><td>Free</td><td>Venus, 7th house, attachment trait</td></tr>
+    <tr><td>Communication Patterns</td><td>Free</td><td>Mercury sign/house, communication trait</td></tr>
+    <tr><td>Hidden Strengths</td><td>Premium</td><td>Atmakaraka, hidden patterns, yogas</td></tr>
+    <tr><td>Emotional Blind Spots</td><td>Premium</td><td>Doshas, weak planets, Saturn placement</td></tr>
+    <tr><td>Money Psychology</td><td>Premium</td><td>2nd/10th/11th houses, Dhana yoga, ambition trait</td></tr>
+    <tr><td>Recurring Life Patterns</td><td>Premium</td><td>Rahu/Ketu axis, Dasha, karmic patterns</td></tr>
+  </table>
+
+  <h3>Safety Constraints</h3>
+  <ul>
+    <li>No death predictions or timing</li>
+    <li>No fear creation or doom-prophecy</li>
+    <li>No disease diagnosis or medical advice</li>
+    <li>No curse removal or superstition selling</li>
+    <li>No emotional manipulation</li>
+  </ul>
+</div>
+
+<!-- ═══ SECTION 25: 12-Dimension Analysis ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">25</div>
+    <div class="section-title">12-Dimension Comprehensive Analysis</div>
+  </div>
+
+  <p>The comprehensive kundali analysis covers 12 dimensions of life, all generated deterministically from the birth chart:</p>
+
+  <table>
+    <tr><th>#</th><th>Dimension</th><th>Key Planetary Factors</th></tr>
+    <tr><td>1</td><td>Personality Blueprint</td><td>Lagna, Moon, Sun, Atmakaraka</td></tr>
+    <tr><td>2</td><td>Karma & Past Life</td><td>Rahu, Ketu, Saturn, 6/8/12 houses</td></tr>
+    <tr><td>3</td><td>Career & Dharma</td><td>10th lord, D10 chart, Sun, Mars</td></tr>
+    <tr><td>4</td><td>Marriage & Relationships</td><td>7th lord, Venus, Darakaraka, D9 chart</td></tr>
+    <tr><td>5</td><td>Health & Wellness</td><td>6th lord, Ayurvedic constitution, Mars/Saturn</td></tr>
+    <tr><td>6</td><td>Life Timing</td><td>Vimshottari Dasha, current Mahadasha/Antardasha</td></tr>
+    <tr><td>7</td><td>Spiritual Evolution</td><td>9th/12th houses, Jupiter, Ketu, Moksha tendency</td></tr>
+    <tr><td>8</td><td>Family & Home</td><td>4th lord, Moon, 9th lord, ancestor karma</td></tr>
+    <tr><td>9</td><td>Hidden Patterns</td><td>8th house, Rahu, self-sabotage patterns</td></tr>
+    <tr><td>10</td><td>Special Combinations</td><td>16 Yogas, Panch Mahapurusha yogas</td></tr>
+    <tr><td>11</td><td>Divisional Charts</td><td>D9, D10, D7, D12, D20, D24, D60</td></tr>
+    <tr><td>12</td><td>Nakshatra Deep Analysis</td><td>Moon nakshatra, pada, deity, symbol</td></tr>
+  </table>
+</div>
+
+<!-- ═══ SECTION 26: Planetary Transits ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">26</div>
+    <div class="section-title">Planetary Transits System</div>
+  </div>
+
+  <p>Current planetary transits are analyzed relative to the natal chart to provide real-time cosmic guidance:</p>
+
+  <h3>Transit Planets Tracked</h3>
+  <ul>
+    <li><strong>Saturn ♄</strong> (2.5 years per sign) — Major life lessons, Sade Sati check</li>
+    <li><strong>Jupiter ♃</strong> (1 year per sign) — Growth, expansion, opportunities</li>
+    <li><strong>Rahu ☊ / Ketu ☋</strong> (1.5 years per sign) — Karmic axis, illusions</li>
+    <li><strong>Mercury ☿</strong> — Communication, short-term influences</li>
+    <li><strong>Venus ♀</strong> — Love, finances, creative energy</li>
+  </ul>
+
+  <h3>House-Specific Effects</h3>
+  <p>Each transit planet's effect depends on which natal house it transits through. For example, Saturn transiting the 10th house from natal Moon brings career pressure and authority challenges.</p>
+</div>
+
+<!-- ═══ SECTION 27: Kundali Chart SVG ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">27</div>
+    <div class="section-title">North Indian Kundali Chart SVG</div>
+  </div>
+
+  <p>The birth chart is visualized using the traditional <strong>North Indian diamond layout</strong> as inline SVG:</p>
+
+  <h3>Layout Algorithm</h3>
+  <pre><code>// North Indian chart: diamond grid with 12 houses
+// House 1 (Ascendant) is ALWAYS the top-center diamond
+// Houses 2-12 go counterclockwise
+
+// SVG coordinate mapping (450x450 viewBox)
+const HOUSE_POLYS = {
+  1:  [topLeft, topRight, centerTop],       // Top center
+  2:  [topRight, rightTop, rightInner, centerTop],
+  3:  [rightTop, rightBottom, rightInner],
+  // ... 12 polygon definitions
+};
+
+// Each house displays:
+// 1. Zodiac symbol (e.g., ♈ for Aries)
+// 2. Sign abbreviation (e.g., "Ari")
+// 3. Planet abbreviations (e.g., "Su", "Mo", "Ma")
+// 4. House 1 gets gold highlight (ascendant)</code></pre>
+</div>
+
+<!-- ═══ SECTION 28: Dasha Timeline ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">28</div>
+    <div class="Title">Dasha Timeline Visualization</div>
+  </div>
+
+  <p>The Dasha Timeline renders 9 Mahadasha periods as a horizontal color-coded bar:</p>
+
+  <ul>
+    <li>Each block is proportional to the dasha duration (7-20 years)</li>
+    <li>Planet symbols (☉ ☽ ♂ ☿ ♃ ♀ ♄ ☊ ☋) label each period</li>
+    <li>Current dasha is highlighted with a glowing gold border</li>
+    <li>Timeline is horizontally scrollable on mobile</li>
+    <li>Auto-scrolls to the current dasha on mount</li>
+  </ul>
+</div>
+
+<!-- ═══ SECTION 29: Trait Map & Elemental Balance ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">29</div>
+    <div class="section-title">Trait Map & Elemental Balance Visualization</div>
+  </div>
+
+  <h3>Emotional Trait Map</h3>
+  <ul>
+    <li>14 horizontal bars scored 0-100</li>
+    <li>Color-coded: Green (≥70), Brown (40-69), Gold (&lt;40)</li>
+    <li>Animated with Framer Motion width transitions</li>
+    <li>Legend with High/Moderate/Growth Area labels</li>
+  </ul>
+
+  <h3>Elemental Balance</h3>
+  <ul>
+    <li>4 horizontal gradient bars: Fire 🔥, Earth 🌍, Air 💨, Water 🌊</li>
+    <li>Counts planets in Fire/Earth/Air/Water signs</li>
+    <li>Dominant element highlighted with gold accent</li>
+    <li>Quality descriptions per element</li>
+  </ul>
+</div>
+
+<!-- ═══ SECTION 30: Premium Report ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">30</div>
+    <div class="section-title">Premium Report Generation</div>
+  </div>
+
+  <p>The downloadable report is a self-contained HTML document with print-friendly CSS:</p>
+
+  <h3>Report Sections</h3>
+  <ol>
+    <li><strong>Cover Page</strong> — Cosmic design with zodiac ring, user details, Sun/Moon/Ascendant</li>
+    <li><strong>Table of Contents</strong> — 12+ sections numbered</li>
+    <li><strong>Cosmic Identity Card</strong> — 3-column zodiac cards with element/modality badges</li>
+    <li><strong>North Indian Kundali Chart</strong> — Inline SVG with 12 houses and planet labels</li>
+    <li><strong>Planetary Positions Table</strong> — Dignity color-coded (gold=exalted, sage=own, red=debilitated)</li>
+    <li><strong>Elemental Balance</strong> — Gradient horizontal bars</li>
+    <li><strong>Emotional Trait Map</strong> — 14 color-coded trait bars</li>
+    <li><strong>Numerology Blueprint</strong> — 2×2 grid with large numbers</li>
+    <li><strong>Dasha Timeline</strong> — Color-coded horizontal timeline</li>
+    <li><strong>Yogas & Doshas</strong> — Green/amber cards with remedies</li>
+    <li><strong>Free Report Sections</strong> — Emotional Personality, Relationship Style, Communication</li>
+    <li><strong>Premium Report Sections</strong> — Hidden Strengths, Blind Spots, Money, Patterns</li>
+  </ol>
+
+  <div class="info-box">
+    <strong>Output Format:</strong> Self-contained HTML (~56KB) with all CSS inline. Can be opened in any browser and printed to PDF. No external dependencies or images required.
+  </div>
+</div>
+
+<!-- ═══ SECTION 31: API Endpoints ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">31</div>
+    <div class="section-title">API Endpoints Reference</div>
+  </div>
+
+  <table>
+    <tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr>
+    <tr><td>POST</td><td>/api/onboarding</td><td>Create user with birth details</td></tr>
+    <tr><td>POST</td><td>/api/astrology/calculate</td><td>Calculate Vedic astrology data</td></tr>
+    <tr><td>POST</td><td>/api/astrology/comprehensive-kundali</td><td>12-dimension kundali analysis</td></tr>
+    <tr><td>POST</td><td>/api/astrology/kundali-score</td><td>Kundali strength scoring</td></tr>
+    <tr><td>POST</td><td>/api/astrology/vedic-analysis</td><td>Vedic analysis summary</td></tr>
+    <tr><td>POST</td><td>/api/numerology/calculate</td><td>Calculate numerology data</td></tr>
+    <tr><td>POST</td><td>/api/traits/generate</td><td>Generate trait scores</td></tr>
+    <tr><td>POST</td><td>/api/ai/generate-report</td><td>Generate AI interpretation</td></tr>
+    <tr><td>POST</td><td>/api/process-all</td><td>Full pipeline (all calculations)</td></tr>
+    <tr><td>GET</td><td>/api/horoscope/daily</td><td>Daily horoscope by sun/moon sign</td></tr>
+    <tr><td>GET</td><td>/api/transits/current</td><td>Current planetary transits</td></tr>
+    <tr><td>POST</td><td>/api/reports/generate-pdf</td><td>Generate downloadable report</td></tr>
+    <tr><td>POST</td><td>/api/chat</td><td>AI Cosmic Counselor chatbot</td></tr>
+    <tr><td>POST</td><td>/api/chat/astrologer</td><td>Chat with astrologer</td></tr>
+    <tr><td>POST</td><td>/api/mood/entry</td><td>Create mood entry</td></tr>
+    <tr><td>GET</td><td>/api/mood/history</td><td>Fetch mood history</td></tr>
+    <tr><td>POST</td><td>/api/gratitude/entry</td><td>Create gratitude entry</td></tr>
+    <tr><td>GET</td><td>/api/gratitude/history</td><td>Fetch gratitude history</td></tr>
+    <tr><td>GET</td><td>/api/nakshatra/details</td><td>Nakshatra deep details</td></tr>
+    <tr><td>POST</td><td>/api/auth/signup</td><td>User registration</td></tr>
+    <tr><td>POST</td><td>/api/auth/signin</td><td>User login</td></tr>
+  </table>
+</div>
+
+<!-- ═══ SECTION 32: Database Schema ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">32</div>
+    <div class="section-title">Database Schema</div>
+  </div>
+
+  <table>
+    <tr><th>Model</th><th>Key Fields</th><th>Relationships</th></tr>
+    <tr><td>User</td><td>id, email, name, phone, hasPaid</td><td>→ Profile, AstrologyData, NumerologyData, Traits, Reports, MoodEntries</td></tr>
+    <tr><td>Profile</td><td>dateOfBirth, timeOfBirth, placeOfBirth, lat/lng, timezone, gender, relationshipStatus</td><td>→ User</td></tr>
+    <tr><td>AstrologyData</td><td>sunSign, moonSign, ascendant, planetaryPositions (JSON), houses (JSON), nakshatra, dashaPeriods (JSON), yogas (JSON), doshas (JSON)</td><td>→ User</td></tr>
+    <tr><td>NumerologyData</td><td>lifePathNumber, destinyNumber, soulUrgeNumber, personalityNumber, descriptions</td><td>→ User</td></tr>
+    <tr><td>TraitScores</td><td>14 trait columns (0-100), additionalTraits (JSON)</td><td>→ User</td></tr>
+    <tr><td>Report</td><td>sections (JSON), summary</td><td>→ User</td></tr>
+    <tr><td>QuestionnaireAnswer</td><td>questionId, answer, category, score</td><td>→ User</td></tr>
+    <tr><td>MoodEntry</td><td>mood (1-5), emoji, note, tags (JSON)</td><td>→ User</td></tr>
+    <tr><td>Transaction</td><td>amount, status, paymentId</td><td>→ User</td></tr>
+  </table>
+</div>
+
+<!-- ═══ SECTION 33: Data Types ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">33</div>
+    <div class="section-title">Data Types & Interfaces</div>
+  </div>
+
+  <h3>Core Type Definitions</h3>
+  <pre><code>// Zodiac & Signs
+type ZodiacSign = 'Aries' | 'Taurus' | 'Gemini' | 'Cancer' | 'Leo' | 'Virgo'
+                | 'Libra' | 'Scorpio' | 'Sagittarius' | 'Capricorn' | 'Aquarius' | 'Pisces';
+type Planet = 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn' | 'Rahu' | 'Ketu';
+type Element = 'Fire' | 'Earth' | 'Air' | 'Water';
+type Modality = 'Movable' | 'Fixed' | 'Dual';
+
+// Kundali
+interface KundaliData {
+  birthDate: string;
+  ayanamsa: number;
+  sunSign: ZodiacSign;
+  moonSign: ZodiacSign;
+  ascendant: ZodiacSign;
+  planetaryPositions: Record&lt;string, PlanetPosition&gt;;
+  houses: HouseData[];
+  nakshatra: NakshatraData;
+  dashaPeriods: DashaData;
+  yogas: YogaData[];
+  doshas: DoshaData[];
+}
+
+// Vimshottari Dasha
+interface MahadashaPeriod {
+  planet: Planet;
+  startDate: Date;
+  endDate: Date;
+  durationYears: number;
+  antardashas: AntardashaPeriod[];
+}
+
+// Yoga & Dosha
+type YogaType = 'Raj Yoga' | 'Gaj Kesari Yoga' | 'Neech Bhang Raj Yoga' | ... | 'Vipreet Raj Yoga';
+type DoshaType = 'Mangal Dosha' | 'Kaal Sarp Dosha' | 'Pitra Dosha' | 'Shani Sade Sati' | 'Grahan Dosha' | 'Shrapit Dosha';</code></pre>
+</div>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<div class="footer">
+  <div class="brand">AyuAstro — AI-Powered Emotional Intelligence</div>
+  <div>This technical documentation was generated in March 2025 for the AyuAstro platform.</div>
+  <div style="margin-top: 0.5rem;">AyuAstro combines Vedic astrology, numerology, and behavioral science to map your emotional architecture.</div>
+  <div style="margin-top: 0.5rem; font-size: 0.7rem; color: #A1887F;">
+    Founder: Ayush UPADHYAY | Stack: Next.js 16 + Swiss Ephemeris + TypeScript | License: Proprietary
+  </div>
+</div>
+
+</div>
+</body>
+</html>
