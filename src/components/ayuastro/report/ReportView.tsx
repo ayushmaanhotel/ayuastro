@@ -562,58 +562,8 @@ export default function ReportView() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // ─── Auto-trigger Deep Intelligence Report for premium users ────────────
-  const autoTriggerRef = useRef(false);
-  useEffect(() => {
-    // Only auto-trigger once per session
-    if (autoTriggerRef.current) return;
-    // Must be paid, not have a deep report yet, and have required data
-    if (!hasPaid) return;
-    if (reportSections.length >= 12) return;
-    if (!userId || !astrologyData || !numerologyData) return;
-    if (deepReportGenerating) return;
-
-    autoTriggerRef.current = true;
-    // Small delay so the view renders first
-    const timer = setTimeout(() => {
-      handleGenerateDeepReport();
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [hasPaid, userId, astrologyData, numerologyData, reportSections.length, deepReportGenerating, handleGenerateDeepReport]);
-
-  const toggleBookmark = (id: string) => {
-    setBookmarkedSections(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  // Sections logic — dynamic defaults
-  const freeSections = reportSections.filter((s) => s.insightLevel === 'free').length > 0
-    ? reportSections.filter((s) => s.insightLevel === 'free')
-    : defaultFree;
-  const premiumSections = reportSections.filter((s) => s.insightLevel === 'premium').length > 0
-    ? reportSections.filter((s) => s.insightLevel === 'premium')
-    : defaultPremium;
-  const allSections = [...freeSections, ...premiumSections];
-  const totalSections = allSections.length;
-  const hasDeepReport = reportSections.length >= 12;
-
-  // Calculate reading time (180 words per min for detailed content)
-  const totalWords = allSections.reduce((sum, s) => sum + s.content.split(/\s+/).length, 0);
-  const readingTime = Math.max(1, Math.ceil(totalWords / 180));
-
-  // Count expanded sections as "read"
-  const sectionsRead = Object.values(expandedSections).filter(Boolean).length;
-  const continueReadingSection = allSections.find(s => !expandedSections[s.id] && (s.insightLevel === 'free' || hasPaid));
-
-  const scrollToSection = useCallback((id: string) => {
-    const el = sectionsRef.current[id];
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setExpandedSections(prev => ({ ...prev, [id]: true }));
-    }
-  }, []);
-
   // ─── Deep Intelligence Report Generation ─────────────────────────────────
-  const handleGenerateDeepReport = async () => {
+  const handleGenerateDeepReport = useCallback(async () => {
     if (!userId || !astrologyData || !numerologyData) {
       cosmicToast.error('Missing data', 'Please complete onboarding first');
       return;
@@ -667,7 +617,57 @@ export default function ReportView() {
       setDeepReportGenerating(false);
       setDeepReportProgress({ completed: 0, total: 22, sectionTitle: '' });
     }
+  }, [userId, astrologyData, numerologyData, traitScores, language, hasPaid]);
+
+  // ─── Auto-trigger Deep Intelligence Report for premium users ────────────
+  const autoTriggerRef = useRef(false);
+  useEffect(() => {
+    // Only auto-trigger once per session
+    if (autoTriggerRef.current) return;
+    // Must be paid, not have a deep report yet, and have required data
+    if (!hasPaid) return;
+    if (reportSections.length >= 12) return;
+    if (!userId || !astrologyData || !numerologyData) return;
+    if (deepReportGenerating) return;
+
+    autoTriggerRef.current = true;
+    // Small delay so the view renders first
+    const timer = setTimeout(() => {
+      handleGenerateDeepReport();
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [hasPaid, userId, astrologyData, numerologyData, reportSections.length, deepReportGenerating, handleGenerateDeepReport]);
+
+  const toggleBookmark = (id: string) => {
+    setBookmarkedSections(prev => ({ ...prev, [id]: !prev[id] }));
   };
+
+  // Sections logic — dynamic defaults
+  const freeSections = reportSections.filter((s) => s.insightLevel === 'free').length > 0
+    ? reportSections.filter((s) => s.insightLevel === 'free')
+    : defaultFree;
+  const premiumSections = reportSections.filter((s) => s.insightLevel === 'premium').length > 0
+    ? reportSections.filter((s) => s.insightLevel === 'premium')
+    : defaultPremium;
+  const allSections = [...freeSections, ...premiumSections];
+  const totalSections = allSections.length;
+  const hasDeepReport = reportSections.length >= 12;
+
+  // Calculate reading time (180 words per min for detailed content)
+  const totalWords = allSections.reduce((sum, s) => sum + s.content.split(/\s+/).length, 0);
+  const readingTime = Math.max(1, Math.ceil(totalWords / 180));
+
+  // Count expanded sections as "read"
+  const sectionsRead = Object.values(expandedSections).filter(Boolean).length;
+  const continueReadingSection = allSections.find(s => !expandedSections[s.id] && (s.insightLevel === 'free' || hasPaid));
+
+  const scrollToSection = useCallback((id: string) => {
+    const el = sectionsRef.current[id];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setExpandedSections(prev => ({ ...prev, [id]: true }));
+    }
+  }, []);
 
   // ─── Download Handler ────────────────────────────────────────────────────
   const [downloadError, setDownloadError] = useState<string | null>(null);
