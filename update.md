@@ -98,3 +98,13 @@ The Flutter app was failing during kundali generation with a "computation fail" 
 - **Route Switcher Integration**: Integrated `LoginScreen` in `main.dart` switcher router to redirect non-onboarded credential users to the onboarding questionnaire.
 - **Compilation Diagnostics**: Fixed compile errors in `login_screen.dart` (removed invalid dynamic `const` qualifiers and replaced undefined `AppColors.brown300` with `AppColors.brown400`). Simplified `http_get_profile` dummy method in `app_state.dart` to resolve `BirthDetails` instantiation errors.
 - **Secrets Security**: Untracked `.env` from the Git repository cache to prevent credentials and token leaks while preserving local configuration.
+
+---
+
+## 8. Vercel Production Backend Deployment & App Integration (2026-05-27)
+- **Vercel Project Setup**: Authenticated and created a new project named `ayuastro-backend` on Vercel.
+- **Environment Variables Configuration**: Securely configured Supabase backend variables (`DATABASE_URL`, `DIRECT_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`) in the Vercel Dashboard cleanly, eliminating whitespace anomalies.
+- **Production Deployment**: Compiled and deployed Next.js backend to Vercel (Production URL: `https://ayuastro-backend.vercel.app`).
+- **Flutter API Integration**: Updated the API base address (`baseUrl`) in `api_service.dart` from the local `10.0.2.2:3000` loopback to the live production endpoint: `https://ayuastro-backend.vercel.app`.
+- **App Navigation Fix**: Added a missing `notifyListeners()` call in the successful path of `fetchCalculations()` inside `app_state.dart`. This ensures the onboarding screen immediately dismisses the loading state and navigates directly to the insights dashboard upon successfully computing the cosmic results.
+- **APK Update**: Started compiling a fresh, live production build release APK.

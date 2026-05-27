@@ -495,6 +495,7 @@ class AppState extends ChangeNotifier {
       fetchDailyHoroscope();
       fetchTransits();
       fetchMoodHistory();
+      notifyListeners();
     } catch (e) {
       _isLoading = false;
       _error = e.toString().replaceAll('Exception:', '');
