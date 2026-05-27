@@ -81,3 +81,9 @@ The Flutter app was failing during kundali generation with a "computation fail" 
 - **Repository Setup**: Created a private GitHub repository named `ayuastro` under user account `bunfeastburger` using the updated PAT with enabled scopes.
 - **Initial Push**: Configured the remote origin, staged all current files (Next.js project + Flutter app), committed, and successfully pushed the codebase to the `main` branch.
 - **Cleanup**: Cleaned up all temporary helper scripts (`test_token.js`, `check_scopes.js`, and `create_repo_and_push.js`) from the workspace.
+
+---
+
+## 6. Server & Network Permission Fixes (2026-05-27)
+- **Next.js Server Launch**: Started the Next.js development server on port 3000 using `npx next dev` (the standard package script failed on Windows due to the missing `tee` utility).
+- **Android Network Permissions**: Added `<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />` to the main `AndroidManifest.xml` to improve network detection and compatibility in the Flutter app.
