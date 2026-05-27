@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../models/models.dart';
 import '../widgets/custom_widgets.dart';
+import '../widgets/kundali_score_card.dart';
+import '../widgets/dosha_detail_card.dart';
+import '../widgets/kundali_chart.dart';
 
 class InsightsScreen extends StatefulWidget {
   const InsightsScreen({Key? key}) : super(key: key);
@@ -86,6 +89,14 @@ class _InsightsScreenState extends State<InsightsScreen> {
             children: [
               // ─── 1. DAILY COSMIC INSIGHT ───
               _buildCosmicInsightCard(),
+              const SizedBox(height: 16),
+
+              // ─── KUNDALI SCORE CARD ───
+              const KundaliScoreCard(),
+              const SizedBox(height: 16),
+
+              // ─── DOSHA DETAIL CARD ───
+              DoshaDetailCard(doshas: astro.doshas),
               const SizedBox(height: 16),
 
               // ─── 2. DAILY AFFIRMATION & RITUAL ───
@@ -762,15 +773,17 @@ class _InsightsScreenState extends State<InsightsScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          // CustomPaint for Kundali
+          // Premium Kundali Chart
           AspectRatio(
-            aspectRatio: 1.0,
-            child: CustomPaint(
-              painter: KundaliPainter(
-                planetaryPositions: astro.planetaryPositions,
-                ascendant: astro.ascendant,
-                isDark: Theme.of(context).brightness == Brightness.dark,
-              ),
+            aspectRatio: 460 / 710,
+            child: KundaliChart(
+              planetaryPositions: astro.planetaryPositions,
+              ascendant: astro.ascendant,
+              sunSign: astro.sunSign,
+              moonSign: astro.moonSign,
+              birthDetails: birthDetails,
+              nakshatra: astro.nakshatra,
+              compact: false,
             ),
           ),
           const SizedBox(height: 12),
@@ -859,160 +872,5 @@ class _InsightsScreenState extends State<InsightsScreen> {
       ),
     );
   }
-}
-
-// ─── KUNDALI CHART CUSTOM PAINTER ───
-class KundaliPainter extends CustomPainter {
-  final Map<String, PlanetaryPositionInfo> planetaryPositions;
-  final String ascendant;
-  final bool isDark;
-
-  static const List<String> zodiacOrder = [
-    'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
-    'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
-  ];
-
-  KundaliPainter({
-    required this.planetaryPositions,
-    required this.ascendant,
-    required this.isDark,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double w = size.width;
-    final double h = size.height;
-
-    // Background color
-    final bgPaint = Paint()..color = isDark ? AppColors.darkCard : AppColors.cream;
-    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), bgPaint);
-
-    // Border paint
-    final borderPaint = Paint()
-      ..color = isDark ? AppColors.gold.withOpacity(0.5) : AppColors.brown700
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.stroke;
-
-    final linePaint = Paint()
-      ..color = isDark ? AppColors.gold.withOpacity(0.3) : AppColors.brown700.withOpacity(0.6)
-      ..strokeWidth = 1.2
-      ..style = PaintingStyle.stroke;
-
-    // Draw main outer box
-    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), borderPaint);
-
-    // Draw diagonals
-    canvas.drawLine(const Offset(0, 0), Offset(w, h), linePaint);
-    canvas.drawLine(Offset(w, 0), Offset(0, h), linePaint);
-
-    // Draw inner diamond (midpoint connectors)
-    final path = Path()
-      ..moveTo(w / 2, 0)
-      ..lineTo(w, h / 2)
-      ..lineTo(w / 2, h)
-      ..lineTo(0, h / 2)
-      ..close();
-    canvas.drawPath(path, linePaint);
-
-    
-    // In North Indian system, the 1st house is actually the central top diamond formed by
-    // diagonals and diamond: vertices are (w/4, h/4), (3w/4, h/4), (w/2, 0), (w/2, h/2)?
-    // Wait! Let's check the vertices of House 1 in the Next.js SVG code:
-    // `1: [fGrid(70, 10), fGrid(230, 10), fGrid(150, 70)]`
-    // Wait! If the box goes from `x=10` to `290` and `y=10` to `290`,
-    // the midpoint top is `(150, 10)`.
-    // The points are `(70, 70)` which is the top-left inner intersection.
-    // The points of House 1 are: `(70, 70)`, `(230, 70)`, `(150, 10)`.
-    // Wait, let's verify.
-    // In Next.js: `1: [fGrid(70, 10), fGrid(230, 10), fGrid(150, 70)]`
-    // Oh, the coordinates are: x=70, y=10 (near top left), x=230, y=10 (near top right), and x=150, y=70 (top center inner).
-    // This is the top triangle!
-    // Let's paint the house numbers.
-    // We will place house numbers in each of the 12 houses.
-    // Let's calculate the positions of the 12 houses' centers in a 0 to 1 scale:
-    final centroids = [
-      Offset(w / 2, h / 4 - 10),       // House 1 (Top Center)
-      Offset(w * 0.75, h * 0.12),      // House 2 (Top Right Corner)
-      Offset(w * 0.88, h * 0.25),      // House 3 (Right Top Side)
-      Offset(w * 0.88, h * 0.75),      // House 4 (Right Bottom Side)
-      Offset(w * 0.75, h * 0.88),      // House 5 (Bottom Right Corner)
-      Offset(w / 2, h * 0.75 + 10),    // House 6 (Bottom Center)
-      Offset(w * 0.25, h * 0.88),      // House 7 (Bottom Left Corner)
-      Offset(w * 0.12, h * 0.75),      // House 8 (Left Bottom Side)
-      Offset(w * 0.12, h * 0.25),      // House 9 (Left Top Side)
-      Offset(w * 0.25, h * 0.12),      // House 10 (Top Left Corner)
-      Offset(w * 0.35, h * 0.35),      // House 11 (Inner Left Square)
-      Offset(w * 0.65, h * 0.35),      // House 12 (Inner Right Square)
-    ];
-
-    // Find the zodiac signs for each house
-    final Map<int, String> signByHouse = {};
-    final ascIdx = zodiacOrder.indexOf(ascendant);
-    if (ascIdx >= 0) {
-      for (int h = 1; h <= 12; h++) {
-        signByHouse[h] = zodiacOrder[(ascIdx + h - 1) % 12];
-      }
-    }
-
-    // Paint house zodiac numbers
-    for (int h = 1; h <= 12; h++) {
-      final signName = signByHouse[h] ?? 'Aries';
-      final signNumber = (zodiacOrder.indexOf(signName) + 1).toString();
-
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: signNumber,
-          style: TextStyle(
-            color: h == 1 ? AppColors.gold : AppColors.brown500,
-            fontWeight: FontWeight.bold,
-            fontSize: h == 1 ? 12 : 10,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-
-      // Position the zodiac number slightly away from the center of each house
-      final offset = centroids[h - 1] + const Offset(-6, -14);
-      textPainter.paint(canvas, offset);
-    }
-
-    // Group planets by house
-    final Map<int, List<String>> planetsInHouse = {};
-    planetaryPositions.forEach((planet, pos) {
-      final house = pos.house;
-      if (!planetsInHouse.containsKey(house)) {
-        planetsInHouse[house] = [];
-      }
-      // Abbreviation of planet
-      String abbr = planet.substring(0, min(2, planet.length));
-      if (pos.retrograde) abbr += "℞";
-      planetsInHouse[house]!.add(abbr);
-    });
-
-    // Paint planets in houses
-    for (int h = 1; h <= 12; h++) {
-      if (!planetsInHouse.containsKey(h)) continue;
-      final list = planetsInHouse[h]!;
-      final text = list.join(" ");
-
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: text,
-          style: TextStyle(
-            color: isDark ? Colors.white70 : AppColors.brown900,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-
-      // Position planets at the centroid of each house
-      final offset = centroids[h - 1] + Offset(-textPainter.width / 2, 2);
-      textPainter.paint(canvas, offset);
-    }
-  }
-
-  @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

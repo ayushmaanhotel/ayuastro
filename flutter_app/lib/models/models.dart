@@ -479,3 +479,233 @@ class ChatMessage {
     timestamp: json['timestamp'] != null ? DateTime.parse(json['timestamp']) : DateTime.now(),
   );
 }
+
+class CalendarEvent {
+  final DateTime date;
+  final String type; // 'transit', 'eclipse', 'retrograde', 'festival', 'moonPhase', 'specialYoga'
+  final String title;
+  final String description;
+  final int emotionalImpact; // 1-5
+  final String emoji;
+  final String guidance;
+
+  CalendarEvent({
+    required this.date,
+    required this.type,
+    required this.title,
+    required this.description,
+    required this.emotionalImpact,
+    required this.emoji,
+    required this.guidance,
+  });
+
+  factory CalendarEvent.fromJson(Map<String, dynamic> json) => CalendarEvent(
+    date: json['date'] != null ? DateTime.parse(json['date']) : DateTime.now(),
+    type: json['type'] ?? 'transit',
+    title: json['title'] ?? '',
+    description: json['description'] ?? '',
+    emotionalImpact: json['emotionalImpact'] ?? 3,
+    emoji: json['emoji'] ?? '',
+    guidance: json['guidance'] ?? '',
+  );
+}
+
+class GratitudeEntry {
+  final String id;
+  final String slot; // 'morning', 'afternoon', 'evening'
+  final String content;
+  final DateTime createdAt;
+
+  GratitudeEntry({
+    required this.id,
+    required this.slot,
+    required this.content,
+    required this.createdAt,
+  });
+
+  factory GratitudeEntry.fromJson(Map<String, dynamic> json) => GratitudeEntry(
+    id: json['id'] ?? '',
+    slot: json['slot'] ?? 'morning',
+    content: json['content'] ?? '',
+    createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'slot': slot,
+    'content': content,
+    'createdAt': createdAt.toIso8601String(),
+  };
+}
+
+class GratitudeStats {
+  final int streak;
+  final int totalEntries;
+  final String mostCommonSlot;
+
+  GratitudeStats({
+    required this.streak,
+    required this.totalEntries,
+    required this.mostCommonSlot,
+  });
+
+  factory GratitudeStats.fromJson(Map<String, dynamic> json) => GratitudeStats(
+    streak: json['streak'] ?? 0,
+    totalEntries: json['totalEntries'] ?? 0,
+    mostCommonSlot: json['mostCommonSlot'] ?? 'morning',
+  );
+}
+
+class StoreItem {
+  final String id;
+  final String name;
+  final String category; // 'puja', 'gemstone', 'rudraksha'
+  final String description;
+  final List<String> benefits;
+  final String rulingPlanet;
+  final String price;
+  final String emoji;
+
+  const StoreItem({
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.description,
+    required this.benefits,
+    required this.rulingPlanet,
+    required this.price,
+    required this.emoji,
+  });
+}
+
+class BreakdownItem {
+  final int score;
+  final String label;
+  final String description;
+  final List<String> details;
+  final Map<String, int> subScores;
+
+  BreakdownItem({
+    required this.score,
+    required this.label,
+    required this.description,
+    required this.details,
+    required this.subScores,
+  });
+
+  factory BreakdownItem.fromJson(Map<String, dynamic> json) {
+    var detailsRaw = json['details'] as List<dynamic>? ?? [];
+    var subScoresRaw = json['subScores'] as Map<String, dynamic>? ?? {};
+    
+    return BreakdownItem(
+      score: (json['score'] as num?)?.toInt() ?? 0,
+      label: json['label'] ?? '',
+      description: json['description'] ?? '',
+      details: detailsRaw.map((e) => e.toString()).toList(),
+      subScores: subScoresRaw.map((k, v) => MapEntry(k, (v as num?)?.toInt() ?? 0)),
+    );
+  }
+}
+
+class ShadbalaDetails {
+  final int sthanaBala;
+  final int digBala;
+  final int chestaBala;
+  final int navamshaBonus;
+
+  ShadbalaDetails({
+    required this.sthanaBala,
+    required this.digBala,
+    required this.chestaBala,
+    required this.navamshaBonus,
+  });
+
+  factory ShadbalaDetails.fromJson(Map<String, dynamic> json) => ShadbalaDetails(
+    sthanaBala: (json['sthanaBala'] as num?)?.toInt() ?? 0,
+    digBala: (json['digBala'] as num?)?.toInt() ?? 0,
+    chestaBala: (json['chestaBala'] as num?)?.toInt() ?? 0,
+    navamshaBonus: (json['navamshaBonus'] as num?)?.toInt() ?? 0,
+  );
+}
+
+class VedicRemedies {
+  final List<String> gemstones;
+  final List<String> mantras;
+  final List<String> dayPractices;
+  final List<String> fasting;
+  final String disclaimer;
+
+  VedicRemedies({
+    required this.gemstones,
+    required this.mantras,
+    required this.dayPractices,
+    required this.fasting,
+    required this.disclaimer,
+  });
+
+  factory VedicRemedies.fromJson(Map<String, dynamic> json) {
+    var gemstonesRaw = json['gemstones'] as List<dynamic>? ?? [];
+    var mantrasRaw = json['mantras'] as List<dynamic>? ?? [];
+    var dayPracticesRaw = json['dayPractices'] as List<dynamic>? ?? [];
+    var fastingRaw = json['fasting'] as List<dynamic>? ?? [];
+
+    return VedicRemedies(
+      gemstones: gemstonesRaw.map((e) => e.toString()).toList(),
+      mantras: mantrasRaw.map((e) => e.toString()).toList(),
+      dayPractices: dayPracticesRaw.map((e) => e.toString()).toList(),
+      fasting: fastingRaw.map((e) => e.toString()).toList(),
+      disclaimer: json['disclaimer'] ?? '',
+    );
+  }
+}
+
+class KundaliScoreData {
+  final int overallScore;
+  final String grade;
+  final String gradeDescription;
+  final List<BreakdownItem> breakdown;
+  final String honestAssessment;
+  final String topStrength;
+  final String topChallenge;
+  final List<String> remedies;
+  final ShadbalaDetails? shadbalaDetails;
+  final VedicRemedies? vedicRemedies;
+
+  KundaliScoreData({
+    required this.overallScore,
+    required this.grade,
+    required this.gradeDescription,
+    required this.breakdown,
+    required this.honestAssessment,
+    required this.topStrength,
+    required this.topChallenge,
+    required this.remedies,
+    this.shadbalaDetails,
+    this.vedicRemedies,
+  });
+
+  factory KundaliScoreData.fromJson(Map<String, dynamic> json) {
+    var breakdownRaw = json['breakdown'] as Map<String, dynamic>? ?? {};
+    List<BreakdownItem> breakdownItems = [];
+    breakdownRaw.forEach((k, v) {
+      if (v is Map<String, dynamic>) {
+        breakdownItems.add(BreakdownItem.fromJson(v));
+      }
+    });
+
+    var remediesRaw = json['remedies'] as List<dynamic>? ?? [];
+
+    return KundaliScoreData(
+      overallScore: (json['overallScore'] as num?)?.toInt() ?? 0,
+      grade: json['grade'] ?? '',
+      gradeDescription: json['gradeDescription'] ?? '',
+      breakdown: breakdownItems,
+      honestAssessment: json['honestAssessment'] ?? '',
+      topStrength: json['topStrength'] ?? '',
+      topChallenge: json['topChallenge'] ?? '',
+      remedies: remediesRaw.map((e) => e.toString()).toList(),
+      shadbalaDetails: json['shadbalaDetails'] != null ? ShadbalaDetails.fromJson(json['shadbalaDetails']) : null,
+      vedicRemedies: json['vedicRemedies'] != null ? VedicRemedies.fromJson(json['vedicRemedies']) : null,
+    );
+  }
+}

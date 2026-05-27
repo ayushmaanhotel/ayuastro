@@ -6,6 +6,7 @@ class AppColors {
   static const Color cream = Color(0xFFFDF6EC);
   static const Color creamDark = Color(0xFFF5E6D0);
   static const Color brown900 = Color(0xFF3E2723);
+  static const Color brown800 = Color(0xFF4E342E);
   static const Color brown700 = Color(0xFF5D4037);
   static const Color brown500 = Color(0xFF8D6E63);
   static const Color brown400 = Color(0xFFA1887F);

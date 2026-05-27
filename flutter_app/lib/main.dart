@@ -7,6 +7,16 @@ import 'screens/onboarding_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/yoga_dosha_screen.dart';
 import 'screens/report_screen.dart';
+import 'screens/comprehensive_kundali_screen.dart';
+import 'screens/cosmic_calendar_screen.dart';
+import 'screens/breathing_meditation_screen.dart';
+import 'screens/cosmic_sounds_screen.dart';
+import 'screens/gratitude_journal_screen.dart';
+import 'screens/zodiac_game_screen.dart';
+import 'screens/store_screen.dart';
+import 'screens/settings_screen.dart';
+import 'screens/zodiac_deep_dive_screen.dart';
+import 'screens/nakshatra_deep_dive_screen.dart';
 import 'widgets/custom_widgets.dart';
 
 void main() {
@@ -135,6 +145,26 @@ class AppViewSwitcher extends StatelessWidget {
         return const YogaDoshaScreen();
       case 'report':
         return const ReportScreen();
+      case 'comprehensiveKundali':
+        return const ComprehensiveKundaliScreen();
+      case 'cosmicCalendar':
+        return const CosmicCalendarScreen();
+      case 'breathing':
+        return const BreathingMeditationScreen();
+      case 'cosmicSounds':
+        return const CosmicSoundsScreen();
+      case 'gratitudeJournal':
+        return const GratitudeJournalScreen();
+      case 'zodiacGame':
+        return const ZodiacGameScreen();
+      case 'store':
+        return const StoreScreen();
+      case 'settings':
+        return const SettingsScreen();
+      case 'zodiacDeepDive':
+        return const ZodiacDeepDiveScreen();
+      case 'nakshatraDeepDive':
+        return const NakshatraDeepDiveScreen();
       default:
         return const LandingScreen();
     }

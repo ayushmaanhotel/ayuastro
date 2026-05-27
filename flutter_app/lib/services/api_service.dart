@@ -220,6 +220,127 @@ class ApiService {
     }
   }
 
+  // 7. Fetch Kundali Score
+  static Future<KundaliScoreData> getKundaliScore({
+    String? userId,
+    required String sunSign,
+    required String moonSign,
+    required String ascendant,
+    required Map<String, dynamic> planetaryPositions,
+    required List<String> yogas,
+    required List<String> doshas,
+    required String nakshatra,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/astrology/kundali-score'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        if (userId != null) 'userId': userId,
+        'sunSign': sunSign,
+        'moonSign': moonSign,
+        'ascendant': ascendant,
+        'planetaryPositions': planetaryPositions,
+        'yogas': yogas,
+        'doshas': doshas,
+        'nakshatra': nakshatra,
+      }),
+    ).timeout(const Duration(seconds: 15));
+
+    if (response.statusCode == 200) {
+      final raw = jsonDecode(response.body);
+      final data = raw['data'] ?? raw;
+      return KundaliScoreData.fromJson(data);
+    } else {
+      throw Exception('Failed to fetch Kundali score');
+    }
+  }
+
+  // Fetch Gratitude History
+  static Future<Map<String, dynamic>> getGratitudeHistory({
+    required String userId,
+    int days = 30,
+  }) async {
+    final uri = Uri.parse('$baseUrl/api/gratitude/history').replace(
+      queryParameters: {
+        'userId': userId,
+        'days': days.toString(),
+      },
+    );
+
+    final response = await http.get(uri).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200) {
+      final raw = jsonDecode(response.body);
+      final data = raw['data'] ?? raw;
+      
+      final List<dynamic> entriesRaw = data['entries'] ?? [];
+      final entries = entriesRaw.map((e) => GratitudeEntry.fromJson(e)).toList();
+      
+      final summaryRaw = data['summary'] ?? {};
+      final summaryMap = Map<String, dynamic>.from(summaryRaw);
+      if (summaryMap.containsKey('streakDays') && !summaryMap.containsKey('streak')) {
+        summaryMap['streak'] = summaryMap['streakDays'];
+      }
+      final stats = GratitudeStats.fromJson(summaryMap);
+
+      return {
+        'entries': entries,
+        'summary': stats,
+      };
+    } else {
+      throw Exception('Failed to fetch gratitude history');
+    }
+  }
+
+  // Save Gratitude Entry
+  static Future<GratitudeEntry> saveGratitudeEntry({
+    required String userId,
+    required String slot,
+    required String content,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/gratitude/entry'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'userId': userId,
+        'slot': slot,
+        'content': content,
+      }),
+    ).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final raw = jsonDecode(response.body);
+      final data = raw['data'] ?? raw;
+      return GratitudeEntry.fromJson(data);
+    } else {
+      final errorMsg = _tryExtractErrorMessage(response.body);
+      throw Exception(errorMsg ?? 'Failed to save gratitude entry');
+    }
+  }
+
+  // Fetch Calendar Events
+  static Future<List<CalendarEvent>> getCalendarEvents({
+    required int month,
+    required int year,
+  }) async {
+    final uri = Uri.parse('$baseUrl/api/calendar/events').replace(
+      queryParameters: {
+        'month': month.toString(),
+        'year': year.toString(),
+      },
+    );
+
+    final response = await http.get(uri).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200) {
+      final raw = jsonDecode(response.body);
+      final List<dynamic> eventsRaw = raw['events'] ?? [];
+      return eventsRaw.map((e) => CalendarEvent.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to fetch calendar events');
+    }
+  }
+
   // Helpers
   static String? _tryExtractErrorMessage(String body) {
     try {
@@ -230,3 +351,4 @@ class ApiService {
     }
   }
 }
+

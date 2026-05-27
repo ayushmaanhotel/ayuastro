@@ -51,6 +51,16 @@ class AppState extends ChangeNotifier {
   List<MoodEntry> _moodHistory = [];
   MoodHistorySummary? _moodSummary;
   bool _markedAffirmationDone = false;
+  KundaliScoreData? _kundaliScore;
+  bool _isScoreLoading = false;
+
+  // Gratitude & Calendar state
+  List<GratitudeEntry> _gratitudeHistory = [];
+  GratitudeStats? _gratitudeStats;
+  List<CalendarEvent> _calendarEvents = [];
+  bool _isGratitudeHistoryLoading = false;
+  bool _isCalendarLoading = false;
+
 
   // Loading states
   bool _isLoading = false;
@@ -94,6 +104,14 @@ class AppState extends ChangeNotifier {
   List<MoodEntry> get moodHistory => _moodHistory;
   MoodHistorySummary? get moodSummary => _moodSummary;
   bool get markedAffirmationDone => _markedAffirmationDone;
+  KundaliScoreData? get kundaliScore => _kundaliScore;
+  bool get isScoreLoading => _isScoreLoading;
+
+  List<GratitudeEntry> get gratitudeHistory => _gratitudeHistory;
+  GratitudeStats? get gratitudeStats => _gratitudeStats;
+  List<CalendarEvent> get calendarEvents => _calendarEvents;
+  bool get isGratitudeHistoryLoading => _isGratitudeHistoryLoading;
+  bool get isCalendarLoading => _isCalendarLoading;
 
   bool get isLoading => _isLoading;
   String get loadingMessage => _loadingMessage;
@@ -173,6 +191,7 @@ class AppState extends ChangeNotifier {
           fetchDailyHoroscope();
           fetchTransits();
           fetchMoodHistory();
+          fetchKundaliScore();
         }
       }
     } catch (e) {
@@ -418,6 +437,7 @@ class AppState extends ChangeNotifier {
           fetchDailyHoroscope();
           fetchTransits();
           fetchMoodHistory();
+          fetchKundaliScore();
         }
       } else {
         throw Exception(res['error'] ?? 'Sign in failed');
@@ -495,6 +515,7 @@ class AppState extends ChangeNotifier {
       fetchDailyHoroscope();
       fetchTransits();
       fetchMoodHistory();
+      fetchKundaliScore();
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -740,6 +761,95 @@ class AppState extends ChangeNotifier {
   }
 
   // Reset all
+  // Fetch Kundali Score
+  Future<void> fetchKundaliScore() async {
+    if (_astrologyData == null) return;
+    _isScoreLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final data = await ApiService.getKundaliScore(
+        userId: _userId,
+        sunSign: _astrologyData!.sunSign,
+        moonSign: _astrologyData!.moonSign,
+        ascendant: _astrologyData!.ascendant,
+        planetaryPositions: _astrologyData!.planetaryPositions.map((k, v) => MapEntry(k, v.toJson())),
+        yogas: _astrologyData!.yogas,
+        doshas: _astrologyData!.doshas,
+        nakshatra: _astrologyData!.nakshatra,
+      );
+      _kundaliScore = data;
+      _isScoreLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isScoreLoading = false;
+      debugPrint("Error fetching Kundali score: $e");
+      notifyListeners();
+    }
+  }
+
+  // Fetch Gratitude History
+  Future<void> fetchGratitudeHistory() async {
+    if (_userId == null) return;
+    _isGratitudeHistoryLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final res = await ApiService.getGratitudeHistory(userId: _userId!);
+      _gratitudeHistory = res['entries'] as List<GratitudeEntry>;
+      _gratitudeStats = res['summary'] as GratitudeStats;
+      _isGratitudeHistoryLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isGratitudeHistoryLoading = false;
+      debugPrint("Error fetching gratitude history: $e");
+      notifyListeners();
+    }
+  }
+
+  // Save Gratitude Entry
+  Future<void> saveGratitude(String slot, String content) async {
+    if (_userId == null) return;
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await ApiService.saveGratitudeEntry(
+        userId: _userId!,
+        slot: slot,
+        content: content,
+      );
+      _isLoading = false;
+      await fetchGratitudeHistory();
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString();
+      debugPrint("Error saving gratitude: $e");
+      notifyListeners();
+    }
+  }
+
+  // Fetch Calendar Events
+  Future<void> fetchCalendarEvents(int month, int year) async {
+    _isCalendarLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final events = await ApiService.getCalendarEvents(month: month, year: year);
+      _calendarEvents = events;
+      _isCalendarLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isCalendarLoading = false;
+      debugPrint("Error fetching calendar events: $e");
+      notifyListeners();
+    }
+  }
+
   void reset() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -773,6 +883,9 @@ class AppState extends ChangeNotifier {
     _markedAffirmationDone = false;
     _error = null;
     _isLoading = false;
+    _gratitudeHistory = [];
+    _gratitudeStats = null;
+    _calendarEvents = [];
 
     notifyListeners();
   }

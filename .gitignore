@@ -53,3 +53,11 @@ server.log
 # Skills directory
 /skills/
 .vercel
+
+# Portable Git and archives
+git-portable/
+mingit.zip
+
+# Original web project directory
+original/
+
