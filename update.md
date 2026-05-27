@@ -78,4 +78,6 @@ The Flutter app was failing during kundali generation with a "computation fail" 
 
 ## 5. Git Repository Integration (2026-05-27)
 - **Token Configuration**: Stored the provided GitHub Personal Access Token (PAT) inside the local `.env` file as `GITHUB_PAT` so it is kept secure and ignored by Git.
-- **Scope Verification**: Attempted repository creation on GitHub under user `bunfeastburger` but encountered a `404 Not Found` API response. Verification of the token's OAuth scopes revealed that `x-oauth-scopes` is empty (`''`). A token with the `repo` scope is required to create a repository and push the code.
+- **Repository Setup**: Created a private GitHub repository named `ayuastro` under user account `bunfeastburger` using the updated PAT with enabled scopes.
+- **Initial Push**: Configured the remote origin, staged all current files (Next.js project + Flutter app), committed, and successfully pushed the codebase to the `main` branch.
+- **Cleanup**: Cleaned up all temporary helper scripts (`test_token.js`, `check_scopes.js`, and `create_repo_and_push.js`) from the workspace.
