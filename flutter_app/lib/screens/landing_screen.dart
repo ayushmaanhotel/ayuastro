@@ -209,7 +209,7 @@ class _LandingScreenState extends State<LandingScreen> {
                           if (state.userId != null) {
                             state.setView('insights');
                           } else {
-                            state.setView('onboarding');
+                            state.setView('login');
                           }
                         },
                       ),

@@ -66,6 +66,7 @@ const processAllSchema = z.object({
   questionnaireAnswers: z.array(questionnaireAnswerSchema).optional(),
   reportType: z.enum(['personality', 'relationship', 'emotional_pattern']).optional(),
   freeOnly: z.boolean().optional(),
+  userId: z.string().optional(),
 });
 
 // ─── Helper: Serialize dates for JSON ─────────────────────────────────────────
@@ -102,13 +103,30 @@ export async function POST(request: NextRequest) {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    // ── Step 1: Create User & Profile ────────────────────────────────────────
-    const user = await db.user.create({
-      data: {
-        name: data.name,
-        isOnboarded: true,
-      },
-    });
+    // ── Step 1: Create or Update User & Profile ──────────────────────────────
+    let user;
+    if (data.userId) {
+      user = await db.user.update({
+        where: { id: data.userId },
+        data: {
+          name: data.name,
+          isOnboarded: true,
+        },
+      });
+      // Clean up any existing calculations/profile for this user to avoid conflicts
+      await db.profile.deleteMany({ where: { userId: user.id } });
+      await db.astrologyData.deleteMany({ where: { userId: user.id } });
+      await db.numerologyData.deleteMany({ where: { userId: user.id } });
+      await db.traitScores.deleteMany({ where: { userId: user.id } });
+      await db.questionnaireAnswer.deleteMany({ where: { userId: user.id } });
+    } else {
+      user = await db.user.create({
+        data: {
+          name: data.name,
+          isOnboarded: true,
+        },
+      });
+    }
 
     await db.profile.create({
       data: {

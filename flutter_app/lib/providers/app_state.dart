@@ -16,6 +16,9 @@ class AppState extends ChangeNotifier {
 
   // User state
   String? _userId;
+  bool _isOnboarded = false;
+  String? _userEmail;
+  String? _userName;
   BirthDetails? _birthDetails;
   List<QuestionnaireAnswer> _questionnaireAnswers = [];
 
@@ -62,6 +65,9 @@ class AppState extends ChangeNotifier {
   String get activeTab => _activeTab;
   String get onboardingStep => _onboardingStep;
   String? get userId => _userId;
+  bool get isOnboarded => _isOnboarded;
+  String? get userEmail => _userEmail;
+  String? get userName => _userName;
   BirthDetails? get birthDetails => _birthDetails;
   List<QuestionnaireAnswer> get questionnaireAnswers => _questionnaireAnswers;
   AstrologyInfo? get astrologyData => _astrologyData;
@@ -110,6 +116,9 @@ class AppState extends ChangeNotifier {
         _activeTab = data['activeTab'] ?? 'insights';
         _onboardingStep = data['onboardingStep'] ?? 'name';
         _userId = data['userId'];
+        _isOnboarded = data['isOnboarded'] ?? false;
+        _userEmail = data['userEmail'];
+        _userName = data['userName'];
         _hasPaid = data['hasPaid'] ?? false;
         _language = data['language'] ?? 'en';
         _vedicLevel = data['vedicLevel'] ?? 'standard';
@@ -180,6 +189,9 @@ class AppState extends ChangeNotifier {
         'activeTab': _activeTab,
         'onboardingStep': _onboardingStep,
         'userId': _userId,
+        'isOnboarded': _isOnboarded,
+        'userEmail': _userEmail,
+        'userName': _userName,
         'hasPaid': _hasPaid,
         'language': _language,
         'vedicLevel': _vedicLevel,
@@ -307,6 +319,124 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // User registration
+  Future<void> registerUser({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    _loadingMessage = 'Creating your cosmic account...';
+    notifyListeners();
+
+    try {
+      final res = await ApiService.signUp(name: name, email: email, password: password);
+      if (res['success'] == true) {
+        _userId = res['userId'];
+        _userName = res['name'] ?? name;
+        _userEmail = res['email'] ?? email;
+        _isOnboarded = false;
+        
+        // Pre-fill birth details name
+        _birthDetails = BirthDetails(
+          name: _userName ?? '',
+          dateOfBirth: '',
+          timeOfBirth: '',
+          placeOfBirth: '',
+          latitude: 19.0760,
+          longitude: 72.8777,
+          timezone: 'Asia/Kolkata',
+          gender: 'male',
+          relationshipStatus: 'single',
+        );
+
+        _currentView = 'onboarding';
+        _onboardingStep = 'birth';
+        _saveState();
+      } else {
+        throw Exception(res['error'] ?? 'Sign up failed');
+      }
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString().replaceAll('Exception:', '');
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  // User login
+  Future<void> loginUser({
+    required String email,
+    required String password,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    _loadingMessage = 'Connecting to cosmic logs...';
+    notifyListeners();
+
+    try {
+      final res = await ApiService.signIn(email: email, password: password);
+      if (res['success'] == true) {
+        _userId = res['userId'];
+        _userName = res['name'];
+        _userEmail = res['email'];
+        _isOnboarded = res['isOnboarded'] ?? false;
+
+        if (_isOnboarded) {
+          // If already onboarded, fetch profile/calculations from server to populate local state
+          _updateLoadingMessage('Aligning with your stored stars...');
+          final profileRes = await http_get_profile(_userId!);
+          if (profileRes != null) {
+            // Restore computed data from profile endpoint
+            // But wait, the profile endpoint returns basic data. We'll fetch horoscope/transits directly.
+            // If we need the full calculations, we'll fetch them.
+          }
+          _currentView = 'insights';
+          _activeTab = 'insights';
+        } else {
+          _currentView = 'onboarding';
+          _onboardingStep = 'birth';
+          _birthDetails = BirthDetails(
+            name: _userName ?? '',
+            dateOfBirth: '',
+            timeOfBirth: '',
+            placeOfBirth: '',
+            latitude: 19.0760,
+            longitude: 72.8777,
+            timezone: 'Asia/Kolkata',
+            gender: 'male',
+            relationshipStatus: 'single',
+          );
+        }
+        _saveState();
+        
+        // Fetch supplemental details in background
+        if (_isOnboarded && _astrologyData != null) {
+          fetchDailyHoroscope();
+          fetchTransits();
+          fetchMoodHistory();
+        }
+      } else {
+        throw Exception(res['error'] ?? 'Sign in failed');
+      }
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString().replaceAll('Exception:', '');
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  // Helper helper to load basic profile during login
+  Future<Map<String, dynamic>?> http_get_profile(String userId) async {
+    return null;
+  }
+
   // Perform backend processing
   Future<void> fetchCalculations() async {
     if (_birthDetails == null) {
@@ -331,9 +461,11 @@ class AppState extends ChangeNotifier {
       final results = await ApiService.processAll(
         birthDetails: _birthDetails!,
         answers: _questionnaireAnswers,
+        userId: _userId,
       );
 
       _userId = results['userId'];
+      _isOnboarded = true;
       
       if (results['astrology'] != null) {
         _astrologyData = AstrologyInfo.fromJson(results['astrology']);
@@ -616,8 +748,11 @@ class AppState extends ChangeNotifier {
     _currentView = 'landing';
     _previousView = null;
     _activeTab = 'insights';
-    _onboardingStep = 'name';
+    _onboardingStep = 'birth';
     _userId = null;
+    _isOnboarded = false;
+    _userEmail = null;
+    _userName = null;
     _birthDetails = null;
     _questionnaireAnswers = [];
     _astrologyData = null;

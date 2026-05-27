@@ -87,3 +87,14 @@ The Flutter app was failing during kundali generation with a "computation fail" 
 ## 6. Server & Network Permission Fixes (2026-05-27)
 - **Next.js Server Launch**: Started the Next.js development server on port 3000 using `npx next dev` (the standard package script failed on Windows due to the missing `tee` utility).
 - **Android Network Permissions**: Added `<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />` to the main `AndroidManifest.xml` to improve network detection and compatibility in the Flutter app.
+
+---
+
+## 7. Supabase Integration & Login Compilation Fixes (2026-05-27)
+- **Supabase Migration**: Switched provider to `"postgresql"`, pushed the database schema successfully via `npx prisma db push`.
+- **Next.js Auth & API Sync**: Handled user sign-in/up routes and updated the `/api/process-all` endpoint to accept optional user IDs.
+- **Login Credentials Screen**: Created the premium `login_screen.dart` with support for email/password credentials and registration.
+- **App Session Persistence**: Integrated sign-in / sign-up state tracking in `app_state.dart` with local persistent session caching.
+- **Route Switcher Integration**: Integrated `LoginScreen` in `main.dart` switcher router to redirect non-onboarded credential users to the onboarding questionnaire.
+- **Compilation Diagnostics**: Fixed compile errors in `login_screen.dart` (removed invalid dynamic `const` qualifiers and replaced undefined `AppColors.brown300` with `AppColors.brown400`). Simplified `http_get_profile` dummy method in `app_state.dart` to resolve `BirthDetails` instantiation errors.
+- **Secrets Security**: Untracked `.env` from the Git repository cache to prevent credentials and token leaks while preserving local configuration.

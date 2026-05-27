@@ -196,10 +196,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _submitData(AppState state) async {
-    if (_nameController.text.trim().length < 2) {
-      _showSnackBar("Please enter a valid name");
-      return;
-    }
     if (_selectedDate == null || _selectedTime == null) {
       _showSnackBar("Please select birth date and time");
       return;
@@ -213,7 +209,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     // Set details in provider state
     state.setBirthDetails(
-      name: _nameController.text.trim(),
+      name: state.userName ?? 'Seeker',
       dateOfBirth: dateStr,
       timeOfBirth: timeStr,
       placeOfBirth: _placeController.text,
@@ -286,10 +282,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         leading: IconButton(
           icon: Icon(LucideIcons.arrow_left, color: isDark ? Colors.white : AppColors.brown900),
           onPressed: () {
-            if (state.onboardingStep == 'name') {
-              state.setView('landing');
-            } else if (state.onboardingStep == 'birth') {
-              state.setOnboardingStep('name');
+            if (state.onboardingStep == 'birth') {
+              state.setView('login');
             } else if (state.onboardingStep == 'relationship') {
               state.setOnboardingStep('birth');
             } else if (state.onboardingStep == 'questionnaire') {
@@ -332,13 +326,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   text: state.onboardingStep == 'questionnaire' ? "Generate Cosmic Profile" : "Continue",
                   icon: LucideIcons.arrow_right,
                   onPressed: () {
-                    if (state.onboardingStep == 'name') {
-                      if (_nameController.text.trim().length < 2) {
-                        _showSnackBar("Please enter your name");
-                        return;
-                      }
-                      state.setOnboardingStep('birth');
-                    } else if (state.onboardingStep == 'birth') {
+                    if (state.onboardingStep == 'birth') {
                       if (_selectedDate == null || _selectedTime == null || _placeController.text.isEmpty) {
                         _showSnackBar("Please fill in all birth details");
                         return;
@@ -366,15 +354,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildProgressIndicators(String currentStep) {
     int activeIndex = 0;
-    if (currentStep == 'birth') activeIndex = 1;
-    if (currentStep == 'relationship') activeIndex = 2;
-    if (currentStep == 'questionnaire') activeIndex = 3;
+    if (currentStep == 'relationship') activeIndex = 1;
+    if (currentStep == 'questionnaire') activeIndex = 2;
 
-    final steps = ['Profile', 'Birth', 'Heart', 'Quiz'];
+    final steps = ['Birth', 'Heart', 'Quiz'];
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(4, (index) {
+      children: List.generate(3, (index) {
         final isActive = index == activeIndex;
         final isCompleted = index < activeIndex;
         return Expanded(
@@ -410,7 +397,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
-              if (index < 3)
+              if (index < 2)
                 Expanded(
                   child: Container(
                     height: 1.5,
@@ -429,56 +416,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     switch (state.onboardingStep) {
-      case 'name':
-        return GlassPremiumCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Let's begin with your name",
-                style: TextStyle(
-                  color: AppColors.goldDark,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Playfair Display',
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _nameController,
-                style: TextStyle(color: isDark ? Colors.white : AppColors.brown900),
-                decoration: InputDecoration(
-                  labelText: "Your Full Name",
-                  labelStyle: const TextStyle(color: AppColors.brown500),
-                  prefixIcon: const Icon(LucideIcons.user, color: AppColors.gold),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.brown100),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: AppColors.gold),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                "Select Gender",
-                style: TextStyle(color: AppColors.brown500, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  _buildGenderChip('male', '♂ Male'),
-                  const SizedBox(width: 12),
-                  _buildGenderChip('female', '♀ Female'),
-                  const SizedBox(width: 12),
-                  _buildGenderChip('other', '✦ Other'),
-                ],
-              ),
-            ],
-          ),
-        );
 
       case 'birth':
         final dobLabel = _selectedDate == null
@@ -581,6 +518,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       decoration: const InputDecoration(labelText: "Longitude", labelStyle: TextStyle(fontSize: 11)),
                     ),
                   ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Select Gender",
+                style: TextStyle(color: AppColors.brown500, fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  _buildGenderChip('male', '♂ Male'),
+                  const SizedBox(width: 12),
+                  _buildGenderChip('female', '♀ Female'),
+                  const SizedBox(width: 12),
+                  _buildGenderChip('other', '✦ Other'),
                 ],
               ),
             ],

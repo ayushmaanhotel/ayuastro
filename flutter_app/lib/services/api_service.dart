@@ -15,10 +15,57 @@ class ApiService {
     }
   }
 
+  // Sign In API
+  static Future<Map<String, dynamic>> signIn({
+    required String email,
+    required String password,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/auth/signin'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+      }),
+    ).timeout(const Duration(seconds: 15));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      final errorMsg = _tryExtractErrorMessage(response.body);
+      throw Exception(errorMsg ?? 'Failed to sign in. Please check your credentials.');
+    }
+  }
+
+  // Sign Up API
+  static Future<Map<String, dynamic>> signUp({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/auth/signup'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'password': password,
+      }),
+    ).timeout(const Duration(seconds: 15));
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      final errorMsg = _tryExtractErrorMessage(response.body);
+      throw Exception(errorMsg ?? 'Failed to create account. Please try again.');
+    }
+  }
+
   // 1. Process All (Onboarding calculation)
   static Future<Map<String, dynamic>> processAll({
     required BirthDetails birthDetails,
     required List<QuestionnaireAnswer> answers,
+    String? userId,
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/process-all'),
@@ -26,6 +73,7 @@ class ApiService {
       body: jsonEncode({
         ...birthDetails.toJson(),
         'questionnaireAnswers': answers.map((a) => a.toJson()).toList(),
+        if (userId != null) 'userId': userId,
       }),
     ).timeout(const Duration(seconds: 60));
 

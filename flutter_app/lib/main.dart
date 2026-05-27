@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/app_state.dart';
 import 'screens/landing_screen.dart';
+import 'screens/login_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/yoga_dosha_screen.dart';
@@ -124,6 +125,8 @@ class AppViewSwitcher extends StatelessWidget {
     switch (state.currentView) {
       case 'landing':
         return const LandingScreen();
+      case 'login':
+        return const LoginScreen();
       case 'onboarding':
         return const OnboardingScreen();
       case 'insights':
