@@ -54,6 +54,10 @@ class AppState extends ChangeNotifier {
   KundaliScoreData? _kundaliScore;
   bool _isScoreLoading = false;
 
+  // Vedic Analysis data (7-tab deep dive)
+  Map<String, dynamic>? _vedicAnalysis;
+  bool _isVedicAnalysisLoading = false;
+
   // Gratitude & Calendar state
   List<GratitudeEntry> _gratitudeHistory = [];
   GratitudeStats? _gratitudeStats;
@@ -61,6 +65,9 @@ class AppState extends ChangeNotifier {
   bool _isGratitudeHistoryLoading = false;
   bool _isCalendarLoading = false;
 
+  // Astrologer chats and remaining messages tracking
+  Map<String, List<ChatMessage>> _astrologerChats = {};
+  Map<String, int> _astrologerRemaining = {};
 
   // Loading states
   bool _isLoading = false;
@@ -106,12 +113,17 @@ class AppState extends ChangeNotifier {
   bool get markedAffirmationDone => _markedAffirmationDone;
   KundaliScoreData? get kundaliScore => _kundaliScore;
   bool get isScoreLoading => _isScoreLoading;
+  Map<String, dynamic>? get vedicAnalysis => _vedicAnalysis;
+  bool get isVedicAnalysisLoading => _isVedicAnalysisLoading;
 
   List<GratitudeEntry> get gratitudeHistory => _gratitudeHistory;
   GratitudeStats? get gratitudeStats => _gratitudeStats;
   List<CalendarEvent> get calendarEvents => _calendarEvents;
   bool get isGratitudeHistoryLoading => _isGratitudeHistoryLoading;
   bool get isCalendarLoading => _isCalendarLoading;
+
+  Map<String, List<ChatMessage>> get astrologerChats => _astrologerChats;
+  Map<String, int> get astrologerRemaining => _astrologerRemaining;
 
   bool get isLoading => _isLoading;
   String get loadingMessage => _loadingMessage;
@@ -178,6 +190,14 @@ class AppState extends ChangeNotifier {
           _chatMessages = list.map((e) => ChatMessage.fromJson(e)).toList();
         }
 
+        if (data['astrologerChats'] != null) {
+          final Map<String, dynamic> chatsMap = data['astrologerChats'];
+          _astrologerChats = chatsMap.map((key, value) {
+            final List<dynamic> list = value;
+            return MapEntry(key, list.map((e) => ChatMessage.fromJson(e)).toList());
+          });
+        }
+
         // Custom base URL config if previously saved
         final savedBaseUrl = prefs.getString('ayuastro_api_base_url');
         if (savedBaseUrl != null) {
@@ -192,6 +212,7 @@ class AppState extends ChangeNotifier {
           fetchTransits();
           fetchMoodHistory();
           fetchKundaliScore();
+          fetchVedicAnalysis();
         }
       }
     } catch (e) {
@@ -230,6 +251,7 @@ class AppState extends ChangeNotifier {
         'compatCommunicationScore': _compatCommunicationScore,
         'compatTrustScore': _compatTrustScore,
         'chatMessages': _chatMessages.map((m) => m.toJson()).toList(),
+        'astrologerChats': _astrologerChats.map((key, value) => MapEntry(key, value.map((m) => m.toJson()).toList())),
       };
       await prefs.setString(_storageKey, jsonEncode(data));
     } catch (e) {
@@ -438,6 +460,7 @@ class AppState extends ChangeNotifier {
           fetchTransits();
           fetchMoodHistory();
           fetchKundaliScore();
+          fetchVedicAnalysis();
         }
       } else {
         throw Exception(res['error'] ?? 'Sign in failed');
@@ -516,6 +539,62 @@ class AppState extends ChangeNotifier {
       fetchTransits();
       fetchMoodHistory();
       fetchKundaliScore();
+      fetchVedicAnalysis();
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString().replaceAll('Exception:', '');
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateBirthDetails(BirthDetails details) async {
+    _birthDetails = details;
+    _saveState();
+    notifyListeners();
+
+    _isLoading = true;
+    _error = null;
+    _loadingMessage = 'Recalculating Cosmic Alignments...';
+    notifyListeners();
+
+    try {
+      final results = await ApiService.processAll(
+        birthDetails: _birthDetails!,
+        answers: _questionnaireAnswers,
+        userId: _userId,
+      );
+
+      _userId = results['userId'];
+      _isOnboarded = true;
+
+      if (results['astrology'] != null) {
+        _astrologyData = AstrologyInfo.fromJson(results['astrology']);
+      }
+      if (results['numerology'] != null) {
+        _numerologyData = NumerologyInfo.fromJson(results['numerology']);
+      }
+      if (results['traits'] != null) {
+        final List<dynamic> list = results['traits'];
+        _traitScores = list.map((e) => TraitScore.fromJson(e)).toList();
+      }
+      if (results['report'] != null) {
+        final report = results['report'];
+        if (report['sections'] != null) {
+          final List<dynamic> list = report['sections'];
+          _reportSections = list.map((e) => ReportSection.fromJson(e)).toList();
+        }
+        _reportSummary = report['summary'] ?? '';
+      }
+
+      _isLoading = false;
+      _saveState();
+
+      fetchDailyHoroscope();
+      fetchTransits();
+      fetchMoodHistory();
+      fetchKundaliScore();
+      fetchVedicAnalysis();
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -640,6 +719,108 @@ class AppState extends ChangeNotifier {
     _chatMessages.clear();
     _saveState();
     notifyListeners();
+  }
+
+  // Send message to Astrologer Chat
+  Future<void> sendAstrologerMessage(String astrologerId, String messageText, String systemPrompt) async {
+    if (messageText.trim().isEmpty) return;
+    if (_astrologyData == null || _userId == null) return;
+
+    if (!_astrologerChats.containsKey(astrologerId)) {
+      _astrologerChats[astrologerId] = [];
+    }
+
+    final userMessage = ChatMessage(
+      role: 'user',
+      content: messageText,
+      timestamp: DateTime.now(),
+    );
+
+    _astrologerChats[astrologerId]!.add(userMessage);
+    _isChatLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final context = {
+        'name': _birthDetails?.name ?? 'Seeker',
+        'sunSign': _astrologyData!.sunSign,
+        'moonSign': _astrologyData!.moonSign,
+        'ascendant': _astrologyData!.ascendant,
+        'nakshatra': _astrologyData!.nakshatra,
+        'currentDasha': _astrologyData!.currentDasha,
+        'yogas': _astrologyData!.yogas,
+        'doshas': _astrologyData!.doshas,
+        'lifePathNumber': _numerologyData?.lifePathNumber ?? 1,
+        'destinyNumber': _numerologyData?.destinyNumber ?? 1,
+        'soulUrgeNumber': _numerologyData?.soulUrgeNumber ?? 1,
+        'archetype': _traitScores.isNotEmpty ? 'Explorer' : null,
+        'topTraits': _traitScores.map((s) => s.name).toList(),
+        'relationshipStatus': _birthDetails?.relationshipStatus ?? 'single',
+      };
+
+      // Limit history to last 10 messages
+      final history = _astrologerChats[astrologerId]!.length > 10
+          ? _astrologerChats[astrologerId]!.sublist(_astrologerChats[astrologerId]!.length - 11, _astrologerChats[astrologerId]!.length - 1)
+          : _astrologerChats[astrologerId]!.sublist(0, _astrologerChats[astrologerId]!.length - 1);
+
+      final sessionId = 'chat-${_userId!}-$astrologerId';
+
+      final result = await ApiService.sendAstrologerChatMessage(
+        message: messageText,
+        sessionId: sessionId,
+        context: context,
+        conversationHistory: history,
+        astrologerId: astrologerId,
+        astrologerSystemPrompt: systemPrompt,
+      );
+
+      final reply = result['response'] ?? '';
+      final remaining = result['remaining'] as int?;
+
+      if (remaining != null) {
+        _astrologerRemaining[astrologerId] = remaining;
+      }
+
+      final aiMessage = ChatMessage(
+        role: 'assistant',
+        content: reply,
+        timestamp: DateTime.now(),
+      );
+
+      _astrologerChats[astrologerId]!.add(aiMessage);
+      _isChatLoading = false;
+      _saveState();
+      notifyListeners();
+    } catch (e) {
+      _isChatLoading = false;
+      
+      final fallbacks = [
+        "The celestial paths are momentarily obscured, yet your strength is clear. Look inside to find the answers you seek.",
+        "A wise seeker listens to the silence between the stars. Rest your mind, and ask me again in a moment.",
+        "Your planetary alignments show great inner resilience. Continue your journey with courage.",
+        "The Cosmic Counsel is temporarily quiet. Focus on your breath and re-establish your query shortly."
+      ];
+      final fallbackReply = fallbacks[DateTime.now().second % fallbacks.length];
+      
+      _astrologerChats[astrologerId]!.add(ChatMessage(
+        role: 'assistant',
+        content: fallbackReply,
+        timestamp: DateTime.now(),
+      ));
+      
+      _error = e.toString().replaceAll('Exception:', '');
+      notifyListeners();
+    }
+  }
+
+  void clearAstrologerChat(String astrologerId) {
+    if (_astrologerChats.containsKey(astrologerId)) {
+      _astrologerChats[astrologerId]!.clear();
+      _astrologerRemaining.remove(astrologerId);
+      _saveState();
+      notifyListeners();
+    }
   }
 
   // Log Mood
@@ -789,6 +970,24 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  // Fetch Vedic Analysis (7-tab deep dive data)
+  Future<void> fetchVedicAnalysis() async {
+    if (_userId == null) return;
+    _isVedicAnalysisLoading = true;
+    notifyListeners();
+
+    try {
+      final data = await ApiService.getVedicAnalysis(userId: _userId!);
+      _vedicAnalysis = data;
+      _isVedicAnalysisLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isVedicAnalysisLoading = false;
+      debugPrint("Error fetching vedic analysis: $e");
+      notifyListeners();
+    }
+  }
+
   // Fetch Gratitude History
   Future<void> fetchGratitudeHistory() async {
     if (_userId == null) return;
@@ -886,6 +1085,8 @@ class AppState extends ChangeNotifier {
     _gratitudeHistory = [];
     _gratitudeStats = null;
     _calendarEvents = [];
+    _vedicAnalysis = null;
+    _isVedicAnalysisLoading = false;
 
     notifyListeners();
   }

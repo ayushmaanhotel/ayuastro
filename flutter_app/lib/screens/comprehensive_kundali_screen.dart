@@ -590,6 +590,14 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
         if (data['personalityArchetype'] != null) {
           widgets.add(_archetypeCard(data['personalityArchetype'], data['archetypeDescription'] ?? '', isDark));
         }
+        if (data['ayurvedicConstitution'] is Map) {
+          final constData = data['ayurvedicConstitution'] as Map<String, dynamic>;
+          widgets.add(_doshaCard(
+            constData['dosha']?.toString() ?? '',
+            constData['note']?.toString() ?? '',
+            isDark,
+          ));
+        }
         _addText(widgets, 'How You Think', data['mentalWiring'], isDark);
         _addText(widgets, 'How You Feel', data['emotionalTendencies'], isDark);
         _addText(widgets, 'Bravery & Worries', data['courageAndFear'], isDark);
@@ -626,6 +634,29 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
         if (data['industryCompatibility'] is List) {
           widgets.add(_badgeList('Compatible Industries', data['industryCompatibility'], Colors.green, isDark));
         }
+        if (data['foreignLandsNote'] != null && data['foreignLandsNote'].toString().isNotEmpty) {
+          final benefit = data['foreignLandsBenefit'] == true;
+          widgets.add(Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withOpacity(0.04) : AppColors.cream.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: isDark ? Colors.white12 : AppColors.brown100),
+            ),
+            child: Row(
+              children: [
+                Text(benefit ? '🌍' : '🏠', style: const TextStyle(fontSize: 16)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    data['foreignLandsNote'].toString(),
+                    style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : AppColors.brown700),
+                  ),
+                ),
+              ],
+            ),
+          ));
+        }
         break;
 
       case 'marriageDynamics':
@@ -635,9 +666,11 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
         _addText(widgets, 'How Loyal You Tend to Be', data['loyaltyIndicators'], isDark);
         _addText(widgets, 'Possible Delays', data['delays'], isDark);
         _addText(widgets, 'Relationship Challenges', data['divorcePotential'], isDark);
+        _addText(widgets, 'Who Holds More Power', data['powerImbalance'], isDark);
         _addText(widgets, 'Your Partner\'s Inner World', data['spousePsychology'], isDark);
         _addText(widgets, 'When Marriage Is Likely', data['marriageTiming'], isDark);
         _addText(widgets, 'Quality of Married Life', data['qualityOfMarriedLife'], isDark);
+        _addText(widgets, 'Patterns in Relationships', data['repeatingPatterns'], isDark);
         break;
 
       case 'healthTendencies':
@@ -650,6 +683,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
         _addText(widgets, 'Long-term Health Patterns', data['chronicDiseaseTendency'], isDark);
         _addText(widgets, 'How Stress Affects You', data['stressPattern'], isDark);
         _addText(widgets, 'Mental Health Patterns', data['mentalInstability'], isDark);
+        _addText(widgets, 'Risk of Accidents', data['accidentVulnerability'], isDark);
         _addText(widgets, 'Habit-Forming Tendencies', data['addictionTendencies'], isDark);
         break;
 
@@ -664,6 +698,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
             widgets.add(_upcomingPeriodCard(p, isDark));
           }
         }
+        _addText(widgets, 'Important Timing Factors', data['keyTimingFactors'], isDark);
         break;
 
       case 'spiritualEvolution':
@@ -693,6 +728,8 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
         _addText(widgets, 'Pride Traps', data['egoTraps'], isDark);
         _addText(widgets, 'Procrastination', data['laziness'], isDark);
         _addText(widgets, 'Running from Problems', data['escapism'], isDark);
+        _addText(widgets, 'Fixation Tendencies', data['obsession'], isDark);
+        _addText(widgets, 'Withdrawing from Others', data['isolation'], isDark);
         _addText(widgets, 'Trust Issues', data['betrayalTendencies'], isDark);
         if (data['hiddenStrengths'] is List) {
           widgets.add(_bulletList('Hidden Strengths', data['hiddenStrengths'], AppColors.sage, isDark));
@@ -727,6 +764,23 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
             }
           }
         }
+        if (data['yogaContextNote'] != null && data['yogaContextNote'].toString().isNotEmpty) {
+          widgets.add(Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withOpacity(0.04) : AppColors.cream.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: isDark ? Colors.white12 : AppColors.brown100),
+            ),
+            child: Text(
+              data['yogaContextNote'].toString(),
+              style: TextStyle(
+                fontSize: 11, fontStyle: FontStyle.italic,
+                color: isDark ? Colors.white54 : AppColors.brown500,
+              ),
+            ),
+          ));
+        }
         break;
 
       case 'divisionalCharts':
@@ -742,6 +796,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
         if (data['vargottamaPlanets'] is List && (data['vargottamaPlanets'] as List).isNotEmpty) {
           widgets.add(_badgeList('Planets in Same Sign (Very Strong)', data['vargottamaPlanets'], AppColors.gold, isDark));
         }
+        _addText(widgets, 'Main Birth Chart', data['d1Main'], isDark);
         break;
 
       case 'nakshatraDeepAnalysis':
@@ -762,6 +817,8 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
 
     if (data['keyFactors'] is Map) {
       widgets.add(_keyFactorsGrid(data['keyFactors'], isDark));
+    } else if (data['keyIndicators'] is Map) {
+      widgets.add(_keyFactorsGrid(data['keyIndicators'], isDark));
     }
 
     return Column(
@@ -879,11 +936,14 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
   }
 
   Widget _upcomingPeriodCard(Map<String, dynamic> p, bool isDark) {
+    final areas = p['areasAffected'] is List ? p['areasAffected'] as List : null;
     return Container(
+      margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isDark ? Colors.white.withOpacity(0.04) : AppColors.cream.withOpacity(0.6),
         borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: isDark ? Colors.white12 : AppColors.brown100),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -899,6 +959,22 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
             Text(p['interpretation'], style: TextStyle(
               fontSize: 12, color: isDark ? Colors.white54 : AppColors.brown700,
             )),
+          ],
+          if (areas != null && areas.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 4, runSpacing: 4,
+              children: areas.map((a) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white10 : AppColors.brown100.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(a.toString(), style: TextStyle(
+                  fontSize: 9, color: isDark ? Colors.white54 : AppColors.brown500,
+                )),
+              )).toList(),
+            ),
           ],
         ],
       ),
@@ -1009,9 +1085,9 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [AppColors.gold.withOpacity(0.1), AppColors.gold.withOpacity(0.03)]),
+        gradient: LinearGradient(colors: [AppColors.gold.withOpacity(0.15), AppColors.gold.withOpacity(0.03)]),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.gold.withOpacity(0.2)),
+        border: Border.all(color: AppColors.gold.withOpacity(0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1025,7 +1101,15 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
           )),
           if (data['analysis'] != null) ...[
             const SizedBox(height: 6),
-            Text(data['analysis'], style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : AppColors.brown700)),
+            Text(data['analysis'], style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : AppColors.brown700, height: 1.4)),
+          ],
+          if (data['keyPlanets'] != null && data['keyPlanets'].toString().isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(data['keyPlanets'].toString(), style: TextStyle(fontSize: 11, color: isDark ? Colors.white38 : AppColors.brown500)),
+          ],
+          if (data['soulMaturity'] != null && data['soulMaturity'].toString().isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(data['soulMaturity'].toString(), style: TextStyle(fontSize: 11, color: isDark ? Colors.white38 : AppColors.brown500)),
           ],
         ],
       ),

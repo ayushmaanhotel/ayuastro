@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 // Theme Colors Constant
 class AppColors {
-  static const Color cream = Color(0xFFFDF6EC);
+  static const Color cream = Color(0xFFF4EFE6);
   static const Color creamDark = Color(0xFFF5E6D0);
   static const Color brown900 = Color(0xFF3E2723);
   static const Color brown800 = Color(0xFF4E342E);

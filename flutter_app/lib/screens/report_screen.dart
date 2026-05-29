@@ -9,6 +9,7 @@ import '../providers/app_state.dart';
 import '../models/models.dart';
 import '../widgets/custom_widgets.dart';
 import '../services/api_service.dart';
+import 'pdf_viewer_screen.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({Key? key}) : super(key: key);
@@ -513,16 +514,16 @@ class _ReportScreenState extends State<ReportScreen> {
           'userId': state.userId,
           'includePremium': state.hasPaid,
         }),
-      ).timeout(const Duration(seconds: 20));
+      ).timeout(const Duration(seconds: 35));
 
       if (response.statusCode == 200) {
-        final htmlContent = response.body;
+        final pdfBytes = response.bodyBytes;
 
-        // Save HTML report to user documents directory
+        // Save PDF report to user documents directory
         final directory = await getApplicationDocumentsDirectory();
         final nameSlug = state.birthDetails?.name.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_').toLowerCase() ?? 'seeker';
-        final file = File('${directory.path}/ayuastro_report_$nameSlug.html');
-        await file.writeAsString(htmlContent);
+        final file = File('${directory.path}/ayuastro_report_$nameSlug.pdf');
+        await file.writeAsBytes(pdfBytes);
 
         if (mounted) {
           showDialog(
@@ -533,17 +534,33 @@ class _ReportScreenState extends State<ReportScreen> {
                 children: [
                   Icon(LucideIcons.file_check, color: AppColors.sage),
                   SizedBox(width: 8),
-                  Text("Report Saved"),
+                  Text("Report Generated"),
                 ],
               ),
               content: Text(
-                "Your detailed astrological report has been saved to your local storage:\n\n${file.path}\n\nYou can open this HTML file in any browser to print or save it as a PDF.",
+                "Your detailed astrological report has been generated and saved natively to your local storage as a PDF:\n\n${file.path}",
                 style: const TextStyle(fontSize: 12.5, height: 1.45),
               ),
               actions: [
                 TextButton(
-                  child: const Text("OK", style: TextStyle(color: AppColors.gold)),
+                  child: const Text("Later", style: TextStyle(color: AppColors.brown500)),
                   onPressed: () => Navigator.pop(context),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.gold,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text("View PDF", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PdfViewerScreen(filePath: file.path),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

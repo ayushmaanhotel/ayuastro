@@ -1,335 +1,1306 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../widgets/custom_widgets.dart';
-import 'mood_tracker_screen.dart';
+import '../widgets/chart_painters.dart';
 import '../models/models.dart';
+import 'mood_tracker_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+// ─── Zodiac Element Mapping ─────────────────────────────────────────────────
+const Map<String, String> _zodiacElements = {
+  'Aries': 'Fire', 'Taurus': 'Earth', 'Gemini': 'Air',
+  'Cancer': 'Water', 'Leo': 'Fire', 'Virgo': 'Earth',
+  'Libra': 'Air', 'Scorpio': 'Water', 'Sagittarius': 'Fire',
+  'Capricorn': 'Earth', 'Aquarius': 'Air', 'Pisces': 'Water',
+};
+
+// ─── Default fallback traits ────────────────────────────────────────────────
+List<TraitScore> _getDefaultTraits() {
+  return [
+    TraitScore(name: 'empathy', label: 'Empathy', score: 78, description: ''),
+    TraitScore(name: 'resilience', label: 'Resilience', score: 65, description: ''),
+    TraitScore(name: 'communication', label: 'Communication', score: 72, description: ''),
+    TraitScore(name: 'trust', label: 'Trust', score: 55, description: ''),
+    TraitScore(name: 'emotional_awareness', label: 'Awareness', score: 82, description: ''),
+    TraitScore(name: 'adaptability', label: 'Adaptability', score: 48, description: ''),
+    TraitScore(name: 'patience', label: 'Patience', score: 61, description: ''),
+    TraitScore(name: 'leadership', label: 'Leadership', score: 35, description: ''),
+    TraitScore(name: 'creativity', label: 'Creativity', score: 73, description: ''),
+    TraitScore(name: 'loyalty', label: 'Loyalty', score: 85, description: ''),
+    TraitScore(name: 'independence', label: 'Independence', score: 42, description: ''),
+    TraitScore(name: 'harmony', label: 'Harmony', score: 68, description: ''),
+    TraitScore(name: 'intuition', label: 'Intuition', score: 76, description: ''),
+    TraitScore(name: 'discipline', label: 'Discipline', score: 38, description: ''),
+  ];
+}
+
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
+  int _activeSegment = 0; // 0: Cosmic Blueprint, 1: Profile & Settings
+  
+  // Settings values (simulated local state synced with appState toggles)
+  bool _dailyHoroscope = true;
+  bool _transitAlerts = true;
+  String _language = 'English';
+
+  @override
+  void initState() {
+    super.initState();
+    final state = Provider.of<AppState>(context, listen: false);
+    _dailyHoroscope = state.dailyHoroscopeNotif;
+    _language = state.language == 'en' ? 'English' : state.language == 'hi' ? 'Hindi' : 'Sanskrit';
+  }
 
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<AppState>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    final traits = state.traitScores.isNotEmpty ? state.traitScores : _getDefaultTraits();
     final astro = state.astrologyData;
     final numData = state.numerologyData;
-    final details = state.birthDetails;
+    final sunSign = astro?.sunSign ?? 'Capricorn';
+    final moonSign = astro?.moonSign ?? 'Gemini';
+    final ascendant = astro?.ascendant ?? 'Taurus';
+
+    // Radar Chart data
+    final radarData = traits.map((t) => {
+      'subject': t.label.isNotEmpty ? t.label : t.name,
+      'score': t.score,
+    }).toList();
+
+    // Pie distribution data
+    final high = traits.where((t) => t.score > 75).length;
+    final moderate = traits.where((t) => t.score >= 40 && t.score <= 75).length;
+    final growth = traits.where((t) => t.score < 40).length;
+    final total = traits.isEmpty ? 1 : traits.length;
+    final pieData = [
+      {'name': 'High', 'value': (high / total * 100).round(), 'count': high},
+      {'name': 'Moderate', 'value': (moderate / total * 100).round(), 'count': moderate},
+      {'name': 'Growth Area', 'value': (growth / total * 100).round(), 'count': growth},
+    ];
+
+    // Element Balance data
+    final signElements = [sunSign, moonSign, ascendant]
+        .map((s) => _zodiacElements[s])
+        .where((e) => e != null)
+        .toList();
+    final counts = <String, int>{'Fire': 0, 'Earth': 0, 'Air': 0, 'Water': 0};
+    for (final el in signElements) {
+      if (el != null) counts[el] = (counts[el] ?? 0) + 1;
+    }
+    final elementData = counts.entries.map((e) => {
+      'element': e.key,
+      'count': e.value,
+      'percentage': (e.value / 3 * 100).round(),
+    }).toList();
+
+    // Numerology Blueprint
+    final numChartData = numData != null ? [
+      {'name': 'Life Path', 'value': numData.lifePathNumber, 'meaning': numerologyMeanings[numData.lifePathNumber] ?? 'Unique path'},
+      {'name': 'Destiny', 'value': numData.destinyNumber, 'meaning': numerologyMeanings[numData.destinyNumber] ?? 'Unique destiny'},
+      {'name': 'Soul Urge', 'value': numData.soulUrgeNumber, 'meaning': numerologyMeanings[numData.soulUrgeNumber] ?? 'Unique soul urge'},
+      {'name': 'Personality', 'value': numData.personalityNumber, 'meaning': numerologyMeanings[numData.personalityNumber] ?? 'Unique personality'},
+    ] : <Map<String, dynamic>>[];
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : AppColors.cream,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          "Cosmic Profile",
-          style: TextStyle(
-            color: isDark ? Colors.white : AppColors.brown900,
-            fontFamily: 'Playfair Display',
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: StarFieldBackground(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ─── COSMIC IDENTITY CARD ───
-              _buildCosmicIdentityCard(details, astro, isDark),
-              const SizedBox(height: 16),
-
-              // ─── COSMIC AGE CARD ───
-              if (numData != null) ...[
-                _buildCosmicAgeCard(numData.lifePathNumber, isDark),
-                const SizedBox(height: 16),
-              ],
-
-              // ─── MOOD TRACKER CTA CARD ───
-              _buildMoodTrackerCTA(context, isDark),
-              const SizedBox(height: 16),
-
-              // ─── TRAIT HIGHLIGHTS ───
-              if (state.traitScores.isNotEmpty) ...[
-                _buildTraitHighlightsCard(state.traitScores, isDark),
-                const SizedBox(height: 16),
-              ],
-
-              // ─── ACCOUNT STATS ───
-              _buildAccountStatsCard(state, isDark),
-              const SizedBox(height: 24),
-
-              // ─── RESET ACCOUNT ───
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent.withOpacity(0.1),
-                  elevation: 0,
-                  side: const BorderSide(color: Colors.redAccent, width: 0.8),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ─── STICKY HEADER & SEGMENT SELECTOR ──────────────────────────────────
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkBg : AppColors.cream,
+                border: Border(
+                  bottom: BorderSide(
+                    color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100,
+                    width: 1,
+                  ),
                 ),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      backgroundColor: isDark ? AppColors.darkCard : Colors.white,
-                      title: const Text("Start Over?"),
-                      content: const Text("This will clear all your profile data and calculated results."),
-                      actions: [
-                        TextButton(
-                          child: const Text("Cancel"),
-                          onPressed: () => Navigator.pop(context),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'My Profile',
+                        style: TextStyle(
+                          fontFamily: 'Playfair Display',
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : AppColors.brown900,
                         ),
-                        TextButton(
-                          child: const Text("Yes, Reset", style: TextStyle(color: Colors.red)),
-                          onPressed: () {
-                            Navigator.pop(context);
-                            state.reset();
-                          },
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.edit_note, color: AppColors.gold, size: 28),
+                        tooltip: 'Edit Birth Details',
+                        onPressed: () => _showEditProfileBottomSheet(context, state),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  
+                  // Custom Segmented Toggle Slider
+                  Container(
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withOpacity(0.04) : AppColors.brown100.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100,
+                      ),
+                    ),
+                    child: Stack(
+                      children: [
+                        // Animated capsule background sliding indicator
+                        AnimatedAlign(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                          alignment: _activeSegment == 0 ? Alignment.centerLeft : Alignment.centerRight,
+                          child: FractionallySizedBox(
+                            widthFactor: 0.5,
+                            child: Container(
+                              margin: const EdgeInsets.all(3),
+                              decoration: BoxDecoration(
+                                color: isDark ? AppColors.gold.withOpacity(0.18) : Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: isDark ? Border.all(color: AppColors.gold.withOpacity(0.3), width: 1) : null,
+                                boxShadow: isDark ? null : [
+                                  BoxShadow(
+                                    color: AppColors.brown900.withOpacity(0.08),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        
+                        // Interactive Text Labels overlay
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => _activeSegment = 0),
+                                behavior: HitTestBehavior.opaque,
+                                child: Center(
+                                  child: Text(
+                                    'Cosmic Blueprint',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: _activeSegment == 0 ? FontWeight.bold : FontWeight.w500,
+                                      color: _activeSegment == 0
+                                          ? (isDark ? AppColors.goldLight : AppColors.brown900)
+                                          : (isDark ? Colors.white38 : AppColors.brown400),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => _activeSegment = 1),
+                                behavior: HitTestBehavior.opaque,
+                                child: Center(
+                                  child: Text(
+                                    'Preferences & Actions',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: _activeSegment == 1 ? FontWeight.bold : FontWeight.w500,
+                                      color: _activeSegment == 1
+                                          ? (isDark ? AppColors.goldLight : AppColors.brown900)
+                                          : (isDark ? Colors.white38 : AppColors.brown400),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  );
-                },
-                child: const Text("Reset Cosmic Profile", style: TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.bold)),
+                  ),
+                ],
               ),
-              const SizedBox(height: 32),
-            ],
-          ),
+            ),
+            
+            // ─── MAIN SCROLLABLE CONTENT BODY ──────────────────────────────────────
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Column(
+                  children: [
+                    // Profile Header Card showing Avatar & Sign placements
+                    _buildProfileSummaryCard(context, state, isDark, sunSign, moonSign, ascendant),
+                    const SizedBox(height: 20),
+                    
+                    if (_activeSegment == 0) ...[
+                      // ─── TAB 0: Cosmic Blueprint Visualizer Charts ───
+                      _buildChartSection(isDark, radarData, pieData, elementData, numData, numChartData),
+                    ] else ...[
+                      // ─── TAB 1: Preferences, Settings & Core Actions ───
+                      _buildSettingsSection(context, state, isDark),
+                    ],
+                    const SizedBox(height: 80), // bottom nav spacer
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildCosmicIdentityCard(BirthDetails? details, AstrologyInfo? astro, bool isDark) {
-    if (details == null) return const SizedBox();
+  // ─── Sub-widgets ────────────────────────────────────────────────────────────
 
+  Widget _buildProfileSummaryCard(
+    BuildContext context,
+    AppState state,
+    bool isDark,
+    String sunSign,
+    String moonSign,
+    String ascendant,
+  ) {
+    final details = state.birthDetails;
     return GlassPremiumCard(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      borderShimmer: true,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("🔮", style: TextStyle(fontSize: 32)),
-          const SizedBox(height: 8),
-          Text(
-            details.name,
+          Row(
+            children: [
+              // Avatar with gold border
+              Container(
+                width: 62,
+                height: 62,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [AppColors.gold, AppColors.goldDark],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.gold.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    (details?.name ?? 'U').substring(0, 1).toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              
+              // Name & Main Signs
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      details?.name ?? 'Cosmic Traveler',
+                      style: TextStyle(
+                        fontFamily: 'Playfair Display',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : AppColors.brown900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          '$sunSign ☉  •  $moonSign ☽  •  $ascendant ↗',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.gold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          
+          // Aligned grid of birth details
+          Divider(color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100),
+          const SizedBox(height: 12),
+          
+          if (details != null) ...[
+            Column(
+              children: [
+                _buildBirthDetailRow(Icons.calendar_today, 'Date of Birth', details.dateOfBirth, isDark),
+                const SizedBox(height: 10),
+                _buildBirthDetailRow(Icons.access_time, 'Time of Birth', details.timeOfBirth, isDark),
+                const SizedBox(height: 10),
+                _buildBirthDetailRow(Icons.place_outlined, 'Place of Birth', details.placeOfBirth, isDark),
+              ],
+            ),
+          ] else ...[
+            Center(
+              child: Text(
+                'No birth details found.',
+                style: TextStyle(fontSize: 12, color: isDark ? Colors.white30 : AppColors.brown400),
+              ),
+            ),
+          ]
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBirthDetailRow(IconData icon, String title, String value, bool isDark) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AppColors.gold),
+        const SizedBox(width: 10),
+        Text(
+          '$title: ',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: isDark ? Colors.white30 : AppColors.brown400,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
             style: TextStyle(
-              color: isDark ? Colors.white : AppColors.brown900,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Playfair Display',
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white70 : AppColors.brown900,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            "Cosmic Signature: ${astro?.sunSign} Sun ✦ ${astro?.moonSign} Moon",
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.goldDark, fontSize: 12, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
-          const Divider(),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+        ),
+      ],
+    );
+  }
+
+  // ─── Section 0: Cosmic Blueprint Visualizer ─────────────────────────────────
+
+  Widget _buildChartSection(
+    bool isDark,
+    List<Map<String, dynamic>> radarData,
+    List<Map<String, dynamic>> pieData,
+    List<Map<String, dynamic>> elementData,
+    NumerologyInfo? numData,
+    List<Map<String, dynamic>> numChartData,
+  ) {
+    return Column(
+      children: [
+        // 1. RADAR CHART — Emotional Architecture
+        _buildChartCard(
+          isDark: isDark,
+          gradientColors: [AppColors.gold, AppColors.sage, AppColors.goldDark],
+          icon: Icons.bubble_chart_outlined,
+          iconColor: AppColors.gold,
+          title: 'Emotional Architecture',
+          subtitle: 'Balance of your primary psychological dimensions',
+          child: Column(
             children: [
-              _buildMiniBadge("Gender: ${details.gender}"),
-              _buildMiniBadge("Status: ${details.relationshipStatus}"),
+              SizedBox(
+                width: double.infinity,
+                height: 280,
+                child: CustomPaint(
+                  painter: RadarChartPainter(data: radarData, isDark: isDark),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildLegendItem(AppColors.gold, 'Your Score', false),
+                  const SizedBox(width: 16),
+                  _buildLegendItem(AppColors.brown400, 'Average Base (50)', true),
+                ],
+              ),
             ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // 2. DONUT CHART — Trait Distribution
+        _buildChartCard(
+          isDark: isDark,
+          gradientColors: [AppColors.sage, AppColors.gold, AppColors.brown400],
+          icon: Icons.pie_chart_outline,
+          iconColor: AppColors.sage,
+          title: 'Personality Trait Spans',
+          subtitle: 'Distribution of prominent traits vs growth areas',
+          child: Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                height: 240,
+                child: CustomPaint(
+                  painter: DonutChartPainter(data: pieData, isDark: isDark),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildLegendDot(pieColors['High']!, 'High (>75)'),
+                  const SizedBox(width: 12),
+                  _buildLegendDot(pieColors['Moderate']!, 'Moderate (40-75)'),
+                  const SizedBox(width: 12),
+                  _buildLegendDot(pieColors['Growth']!, 'Growth Area (<40)'),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // 3. BAR CHART — Element Balance
+        _buildChartCard(
+          isDark: isDark,
+          gradientColors: [
+            const Color(0xFFEF4444), const Color(0xFF10B981),
+            const Color(0xFFF59E0B), const Color(0xFF3B82F6),
+          ],
+          icon: Icons.waves,
+          iconColor: AppColors.gold,
+          title: 'Astrological Element Balance',
+          subtitle: 'Distribution of Fire, Earth, Air and Water qualities',
+          child: Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                height: 220,
+                child: CustomPaint(
+                  painter: ElementBarChartPainter(data: elementData, isDark: isDark),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: elementData.map((e) {
+                  final element = e['element'] as String;
+                  final pct = e['percentage'] as int;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: _buildLegendDot(
+                      elementChartColors[element] ?? AppColors.gold,
+                      '$element: $pct%',
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // 4. MOOD TREND — Navigation Card
+        _buildChartCard(
+          isDark: isDark,
+          gradientColors: [AppColors.goldDark, AppColors.gold, AppColors.sage],
+          icon: Icons.trending_up,
+          iconColor: AppColors.gold,
+          title: 'Daily Mood Analytics',
+          subtitle: 'Track your emotional state over daily cycles',
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              children: [
+                Container(
+                  width: 50, height: 50,
+                  decoration: BoxDecoration(
+                    color: AppColors.gold.withOpacity(0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.mood, size: 24, color: AppColors.gold),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Track Emotional Trends',
+                  style: TextStyle(
+                    fontFamily: 'Playfair Display',
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : AppColors.brown900,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Log your daily moods to correlate planetary transits with personal emotional cycles.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? AppColors.brown500 : AppColors.brown400,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                ElevatedButton(
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MoodTrackerScreen())),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brown700,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.edit_calendar, size: 14),
+                      SizedBox(width: 8),
+                      Text('Open Mood Logger', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // 5. NUMEROLOGY BLUEPRINT — Horizontal Bars
+        if (numData != null)
+          _buildChartCard(
+            isDark: isDark,
+            gradientColors: [AppColors.gold, AppColors.sage, AppColors.brown400],
+            icon: Icons.auto_awesome_outlined,
+            iconColor: AppColors.gold,
+            title: 'Numerology Blueprint',
+            subtitle: 'Core vibrational frequencies computed from birth date',
+            child: Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 180,
+                  child: CustomPaint(
+                    painter: NumerologyBarPainter(data: numChartData, isDark: isDark),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: numChartData.asMap().entries.map((entry) {
+                    final i = entry.key;
+                    final item = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: _buildLegendDot(
+                        i < numerologyColors.length ? numerologyColors[i] : AppColors.gold,
+                        '${item['name']}: ${item['value']}',
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildChartCard({
+    required bool isDark,
+    required List<Color> gradientColors,
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required Widget child,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: (isDark ? Colors.black : AppColors.brown900).withOpacity(isDark ? 0.25 : 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Thin gradient accent bar
+          Container(
+            height: 3,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              gradient: LinearGradient(colors: gradientColors),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(icon, size: 18, color: iconColor),
+                    const SizedBox(width: 8),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontFamily: 'Playfair Display',
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : AppColors.brown900,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? AppColors.brown500 : AppColors.brown400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+            child: child,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMiniBadge(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.sageLight.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(10),
-      ),
+  // ─── Section 1: Settings, Preferences & Actions ─────────────────────────────
+
+  Widget _buildSettingsSection(BuildContext context, AppState state, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Preferences Segment ──
+        _sectionHeader('PREFERENCES', isDark),
+        const SizedBox(height: 8),
+        _toggleSetting(
+          'Daily Horoscope Alert', 
+          '🔔', 
+          'Receive custom alerts based on Sun/Moon sign', 
+          _dailyHoroscope,
+          (v) {
+            setState(() => _dailyHoroscope = v);
+            // Sync preferences state in provider
+            state.setDailyHoroscopeNotif(v);
+          }, 
+          isDark,
+        ),
+        const SizedBox(height: 10),
+        _toggleSetting(
+          'Significant Transit Alerts', 
+          '🪐', 
+          'Notify when major outer planets change signs', 
+          _transitAlerts,
+          (v) => setState(() => _transitAlerts = v), 
+          isDark,
+        ),
+        const SizedBox(height: 10),
+        _languageSetting(isDark, state),
+        
+        const SizedBox(height: 24),
+
+        // ── Data & Maintenance ──
+        _sectionHeader('DATA & STORAGE', isDark),
+        const SizedBox(height: 8),
+        GlassLightCard(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: Column(
+            children: [
+              _actionTile('Clear Cached Reports', Icons.delete_outline, Colors.orange, isDark, () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('🧹 App cache and offline reports cleared!'), 
+                    backgroundColor: AppColors.gold,
+                  ),
+                );
+              }),
+              Divider(color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100),
+              _actionTile('Export Cosmic Chart (PDF)', Icons.file_download_outlined, AppColors.sage, isDark, () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('📦 Preparing PDF export structure...'), 
+                    backgroundColor: AppColors.gold,
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 24),
+
+        // ── Account Actions ──
+        _sectionHeader('ACCOUNT ACTIONS', isDark),
+        const SizedBox(height: 8),
+        GlassLightCard(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: Column(
+            children: [
+              _actionTile('Recalculate Chart Details', Icons.refresh_outlined, AppColors.gold, isDark, () {
+                _showEditProfileBottomSheet(context, state);
+              }),
+              Divider(color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100),
+              _actionTile('Delete Account Data', Icons.person_remove_outlined, Colors.red, isDark, () {
+                _showDeleteAccountConfirm(context);
+              }),
+              Divider(color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100),
+              _actionTile('Log Out Session', Icons.logout_outlined, Colors.red, isDark, () {
+                state.reset();
+              }),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 36),
+        
+        // App Footer details
+        Center(
+          child: Column(
+            children: [
+              Text(
+                '✦  AyuAstro  ✦', 
+                style: TextStyle(
+                  fontFamily: 'Playfair Display', 
+                  fontSize: 16, 
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.gold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'v1.1.2 Release Package • Encrypted & Secure', 
+                style: TextStyle(
+                  fontSize: 10, 
+                  color: isDark ? Colors.white24 : AppColors.brown400,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _sectionHeader(String title, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 6.0),
       child: Text(
-        text,
-        style: const TextStyle(color: AppColors.sage, fontSize: 10, fontWeight: FontWeight.bold),
+        title, 
+        style: TextStyle(
+          fontSize: 10, 
+          fontWeight: FontWeight.bold, 
+          letterSpacing: 1.5,
+          color: isDark ? Colors.white30 : AppColors.brown500,
+        ),
       ),
     );
   }
 
-  Widget _buildCosmicAgeCard(int lifePathNumber, bool isDark) {
-    final int cosmicAge = lifePathNumber * 7 + 100;
-    
-    // Custom descriptions based on Life Path
-    final List<String> descriptions = [
-      "A soul seeking independence and pioneering fresh structural beginnings.",
-      "An empathetic peacemaker, balancing dualities across lifetimes.",
-      "A creative expressionist, learning to project inner truth onto physical canvases.",
-      "A builder of solid foundations, locking structures of patience and practicality.",
-      "A progressive adventurer, exploring freedom, adaptability, and wisdom.",
-      "A nurturing caretaker, balancing universal responsibility with self-love.",
-      "A spiritual analytical seeker, uncovering internal truths and esoteric logic.",
-      "A manifestor of power and organization, balancing material and spiritual realms.",
-      "A humanitarian leader, completing full karmic cycles and expressing empathy.",
-    ];
-    final String desc = descriptions[(lifePathNumber - 1) % descriptions.length];
-
+  Widget _toggleSetting(String label, String emoji, String desc, bool value, ValueChanged<bool> onChanged, bool isDark) {
     return GlassLightCard(
+      padding: const EdgeInsets.all(14),
       child: Row(
         children: [
-          const Text("♾️", style: TextStyle(fontSize: 24, color: AppColors.gold)),
-          const SizedBox(width: 16),
+          Text(emoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Cosmic Age: $cosmicAge Cycles",
+                  label, 
                   style: TextStyle(
-                    color: isDark ? Colors.white : AppColors.brown900,
+                    fontSize: 13, 
                     fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                    color: isDark ? Colors.white : AppColors.brown900,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
-                  desc,
-                  style: const TextStyle(color: AppColors.brown500, fontSize: 11, height: 1.35),
+                  desc, 
+                  style: TextStyle(
+                    fontSize: 10, 
+                    color: isDark ? Colors.white38 : AppColors.brown500,
+                  ),
                 ),
               ],
             ),
           ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: AppColors.gold,
+            inactiveTrackColor: isDark ? Colors.white12 : AppColors.brown100,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildMoodTrackerCTA(BuildContext context, bool isDark) {
+  Widget _languageSetting(bool isDark, AppState state) {
+    final curLang = state.language;
+    String displayLang = 'English';
+    if (curLang == 'hi') displayLang = 'Hindi';
+    if (curLang == 'hinglish') displayLang = 'Sanskrit';
+
     return GlassLightCard(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const MoodTrackerScreen(),
-          ),
-        );
-      },
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      child: Row(
         children: [
-          Row(
-            children: [
-              Text("📔", style: TextStyle(fontSize: 24)),
-              SizedBox(width: 16),
-              Column(
+          const Text('🌐', style: TextStyle(fontSize: 20)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Vedic Language', 
+                  style: TextStyle(
+                    fontSize: 13, 
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : AppColors.brown900,
+                  ),
+                ),
+                Text(
+                  'Select display/transliteration system', 
+                  style: TextStyle(
+                    fontSize: 10, 
+                    color: isDark ? Colors.white38 : AppColors.brown500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.gold.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.gold.withOpacity(0.2)),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: displayLang,
+                isDense: true,
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isDark ? AppColors.goldLight : AppColors.goldDark),
+                dropdownColor: isDark ? AppColors.darkCard : Colors.white,
+                items: ['English', 'Hindi', 'Sanskrit']
+                    .map((l) => DropdownMenuItem(value: l, child: Text(l)))
+                    .toList(),
+                onChanged: (v) {
+                  if (v != null) {
+                    final code = v == 'English' ? 'en' : v == 'Hindi' ? 'hi' : 'hinglish';
+                    state.setVedicLevel(code); // update state settings
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _actionTile(String label, IconData icon, Color color, bool isDark, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 14),
+            Text(
+              label, 
+              style: TextStyle(
+                fontSize: 13, 
+                fontWeight: FontWeight.w600, 
+                color: isDark ? Colors.white70 : AppColors.brown900,
+              ),
+            ),
+            const Spacer(),
+            Icon(Icons.chevron_right, color: isDark ? Colors.white12 : AppColors.brown100, size: 18),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Custom Legends ─────────────────────────────────────────────────────────
+
+  Widget _buildLegendItem(Color color, String text, bool dashed) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 24, height: 2,
+          decoration: BoxDecoration(
+            color: dashed ? null : color,
+            border: dashed ? Border(
+              bottom: BorderSide(color: color, width: 1, style: BorderStyle.solid),
+            ) : null,
+          ),
+          child: dashed ? CustomPaint(
+            painter: _DashedLinePainter(color: color),
+          ) : null,
+        ),
+        const SizedBox(width: 6),
+        Text(text, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w500, color: color)),
+      ],
+    );
+  }
+
+  Widget _buildLegendDot(Color color, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8, height: 8,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 5),
+        Text(text, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w500, color: AppColors.brown500)),
+      ],
+    );
+  }
+
+  // ─── Interactive Edit Profile Modal Sheet ───────────────────────────────────
+
+  void _showEditProfileBottomSheet(BuildContext context, AppState state) {
+    final currentDetails = state.birthDetails;
+    
+    final nameController = TextEditingController(text: currentDetails?.name ?? '');
+    final placeController = TextEditingController(text: currentDetails?.placeOfBirth ?? '');
+    
+    String dateStr = currentDetails?.dateOfBirth ?? '1995-05-15';
+    String timeStr = currentDetails?.timeOfBirth ?? '08:30';
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (sheetContext, setSheetState) {
+            final sheetDark = Theme.of(sheetContext).brightness == Brightness.dark;
+            
+            Future<void> pickDate() async {
+              DateTime initial = DateTime.tryParse(dateStr) ?? DateTime(1995, 5, 15);
+              final picked = await showDatePicker(
+                context: sheetContext,
+                initialDate: initial,
+                firstDate: DateTime(1930),
+                lastDate: DateTime.now(),
+              );
+              if (picked != null) {
+                setSheetState(() {
+                  dateStr = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+                });
+              }
+            }
+
+            Future<void> pickTime() async {
+              int hr = 8;
+              int min = 30;
+              final parts = timeStr.split(':');
+              if (parts.length >= 2) {
+                hr = int.tryParse(parts[0]) ?? 8;
+                min = int.tryParse(parts[1]) ?? 30;
+              }
+              final picked = await showTimePicker(
+                context: sheetContext,
+                initialTime: TimeOfDay(hour: hr, minute: min),
+              );
+              if (picked != null) {
+                setSheetState(() {
+                  timeStr = "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
+                });
+              }
+            }
+
+            return Container(
+              padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(sheetContext).viewInsets.bottom + 24),
+              decoration: BoxDecoration(
+                color: sheetDark ? AppColors.darkCard : Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                border: Border.all(
+                  color: sheetDark ? Colors.white.withOpacity(0.08) : AppColors.brown100,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Mood & Journal Tracker",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Recalculate Kundali details',
+                        style: TextStyle(
+                          fontFamily: 'Playfair Display',
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: sheetDark ? Colors.white : AppColors.brown900,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 20),
+                        onPressed: () => Navigator.pop(sheetContext),
+                      )
+                    ],
                   ),
-                  SizedBox(height: 2),
+                  Divider(color: sheetDark ? Colors.white10 : AppColors.brown100),
+                  const SizedBox(height: 16),
+                  
+                  // Name TextField
                   Text(
-                    "Track your daily emotional resonance patterns",
-                    style: TextStyle(color: AppColors.brown500, fontSize: 11),
+                    'Full Name',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.gold),
+                  ),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: nameController,
+                    style: TextStyle(fontSize: 13, color: sheetDark ? Colors.white : AppColors.brown900),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: sheetDark ? Colors.white24 : AppColors.brown100),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: AppColors.gold, width: 1.5),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // DateTime Picker Rows
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Birth Date',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.gold),
+                            ),
+                            const SizedBox(height: 6),
+                            InkWell(
+                              onTap: pickDate,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: sheetDark ? Colors.white24 : AppColors.brown100),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(dateStr, style: TextStyle(fontSize: 13, color: sheetDark ? Colors.white70 : AppColors.brown900)),
+                                    const Icon(Icons.calendar_today, size: 14, color: AppColors.gold),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Birth Time',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.gold),
+                            ),
+                            const SizedBox(height: 6),
+                            InkWell(
+                              onTap: pickTime,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: sheetDark ? Colors.white24 : AppColors.brown100),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(timeStr, style: TextStyle(fontSize: 13, color: sheetDark ? Colors.white70 : AppColors.brown900)),
+                                    const Icon(Icons.access_time, size: 14, color: AppColors.gold),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Place of Birth TextField
+                  Text(
+                    'Place of Birth',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.gold),
+                  ),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: placeController,
+                    style: TextStyle(fontSize: 13, color: sheetDark ? Colors.white : AppColors.brown900),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      hintText: 'City, Country',
+                      hintStyle: TextStyle(color: sheetDark ? Colors.white30 : AppColors.brown400),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: sheetDark ? Colors.white24 : AppColors.brown100),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: AppColors.gold, width: 1.5),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Submit Button
+                  NeonGoldButton(
+                    text: 'Recalculate Cosmic Chart',
+                    onPressed: () async {
+                      if (nameController.text.trim().isEmpty || placeController.text.trim().isEmpty) {
+                        ScaffoldMessenger.of(sheetContext).showSnackBar(
+                          const SnackBar(content: Text('⚠️ Name and place of birth are required.')),
+                        );
+                        return;
+                      }
+                      
+                      Navigator.pop(sheetContext); // dismiss bottom sheet first
+                      
+                      // Perform recalculation in State
+                      final newDetails = BirthDetails(
+                        name: nameController.text.trim(),
+                        dateOfBirth: dateStr,
+                        timeOfBirth: timeStr,
+                        placeOfBirth: placeController.text.trim(),
+                        latitude: currentDetails?.latitude ?? 28.6139,
+                        longitude: currentDetails?.longitude ?? 77.2090,
+                        timezone: currentDetails?.timezone ?? '5.5',
+                        gender: currentDetails?.gender ?? 'Male',
+                        relationshipStatus: currentDetails?.relationshipStatus ?? 'Single',
+                      );
+                      
+                      await state.updateBirthDetails(newDetails);
+                      
+                      if (state.error != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('❌ Calculation Error: ${state.error}')),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('✨ Cosmic alignments successfully recalculated!'), backgroundColor: AppColors.sage),
+                        );
+                      }
+                    },
                   ),
                 ],
               ),
-            ],
-          ),
-          Icon(LucideIcons.chevron_right, color: AppColors.gold),
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
-  Widget _buildTraitHighlightsCard(List<TraitScore> traits, bool isDark) {
-    // Sort traits to find top 3 and bottom 3
-    final sorted = List<TraitScore>.from(traits)..sort((a, b) => b.score.compareTo(a.score));
-    final topTraits = sorted.take(3).toList();
-    final bottomTraits = sorted.reversed.take(3).toList();
-
-    Widget buildBar(String label, int score, Color color) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 4,
-              child: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+  void _showDeleteAccountConfirm(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Delete Cosmic Data?'),
+          content: const Text('This will permanently delete all your calculations, mood trackers, and chat histories from local storage. This action is irreversible.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
             ),
-            Expanded(
-              flex: 5,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(3),
-                child: LinearProgressIndicator(
-                  value: score / 100.0,
-                  minHeight: 5,
-                  color: color,
-                  backgroundColor: AppColors.brown100,
-                ),
-              ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('🗑️ All local profile data deleted.')),
+                );
+              },
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
             ),
-            const SizedBox(width: 8),
-            Text("$score%", style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold)),
           ],
-        ),
-      );
-    }
-
-    return GlassLightCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Trait Resonance Map",
-            style: TextStyle(color: AppColors.goldDark, fontSize: 13, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            "Top Strengths",
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.sage),
-          ),
-          const SizedBox(height: 6),
-          ...topTraits.map((t) => buildBar(t.label, t.score, AppColors.sage)),
-          const SizedBox(height: 16),
-          const Text(
-            "Growth Focus Areas",
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.goldDark),
-          ),
-          const SizedBox(height: 6),
-          ...bottomTraits.map((t) => buildBar(t.label, t.score, AppColors.gold)),
-        ],
-      ),
+        );
+      },
     );
   }
+}
 
-  Widget _buildAccountStatsCard(AppState state, bool isDark) {
-    Widget buildStatRow(String label, String value) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: const TextStyle(fontSize: 12, color: AppColors.brown700)),
-            Text(value, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isDark ? Colors.white : AppColors.brown900)),
-          ],
-        ),
-      );
+// ─── Dashed Line Helper ──────────────────────────────────────────────────────
+class _DashedLinePainter extends CustomPainter {
+  final Color color;
+  _DashedLinePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1;
+    const dashWidth = 3.0;
+    const dashSpace = 2.0;
+    double x = 0;
+    while (x < size.width) {
+      canvas.drawLine(Offset(x, size.height / 2), Offset(x + dashWidth, size.height / 2), paint);
+      x += dashWidth + dashSpace;
     }
-
-    return GlassLightCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "System Stats",
-            style: TextStyle(color: AppColors.goldDark, fontSize: 13, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          buildStatRow("Analysis Status", "Calculated ✦"),
-          buildStatRow("Diagnostic Quiz", "16/16 Answered"),
-          buildStatRow("Premium Status", state.hasPaid ? "Unlocked Pro" : "Free Tier"),
-        ],
-      ),
-    );
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

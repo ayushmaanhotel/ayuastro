@@ -341,6 +341,67 @@ class ApiService {
     }
   }
 
+  // Fetch Vedic Analysis
+  static Future<Map<String, dynamic>> getVedicAnalysis({
+    required String userId,
+  }) async {
+    final uri = Uri.parse('$baseUrl/api/astrology/vedic-analysis').replace(
+      queryParameters: {
+        'userId': userId,
+      },
+    );
+
+    final response = await http.get(uri).timeout(const Duration(seconds: 25));
+
+    if (response.statusCode == 200) {
+      final raw = jsonDecode(response.body);
+      final data = raw['data'] ?? raw;
+      return Map<String, dynamic>.from(data);
+    } else {
+      final errorMsg = _tryExtractErrorMessage(response.body);
+      throw Exception(errorMsg ?? 'Failed to load Vedic analysis details');
+    }
+  }
+
+  // Chat with Astrologer
+  static Future<Map<String, dynamic>> sendAstrologerChatMessage({
+    required String message,
+    required String sessionId,
+    required Map<String, dynamic> context,
+    required List<ChatMessage> conversationHistory,
+    required String astrologerId,
+    required String astrologerSystemPrompt,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/chat/astrologer'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'message': message,
+        'sessionId': sessionId,
+        'context': context,
+        'conversationHistory': conversationHistory
+            .map((msg) => {
+                  'role': msg.role,
+                  'content': msg.content,
+                })
+            .toList(),
+        'astrologerId': astrologerId,
+        'astrologerSystemPrompt': astrologerSystemPrompt,
+      }),
+    ).timeout(const Duration(seconds: 20));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return {
+        'response': data['response'] ?? '',
+        'remaining': data['remaining'],
+      };
+    } else {
+      final errorMsg = _tryExtractErrorMessage(response.body);
+      throw Exception(errorMsg ?? 'Astrologer is meditating. Try again later.');
+    }
+  }
+
   // Helpers
   static String? _tryExtractErrorMessage(String body) {
     try {

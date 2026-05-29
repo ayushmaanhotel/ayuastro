@@ -176,7 +176,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   }),
                   Divider(color: isDark ? Colors.white10 : AppColors.brown100),
                   _actionTile('Log Out', Icons.logout, Colors.red, isDark, () {
-                    state.setView('login');
+                    state.reset();
                   }),
                 ],
               ),

@@ -8,6 +8,7 @@ import '../widgets/custom_widgets.dart';
 import '../widgets/kundali_score_card.dart';
 import '../widgets/dosha_detail_card.dart';
 import '../widgets/kundali_chart.dart';
+import '../widgets/personality_cards.dart';
 
 class InsightsScreen extends StatefulWidget {
   const InsightsScreen({Key? key}) : super(key: key);
@@ -140,6 +141,14 @@ class _InsightsScreenState extends State<InsightsScreen> {
               // ─── 10. PLANETARY POSITIONS TABLE ───
               _buildPlanetsTableCard(astro),
               const SizedBox(height: 24),
+
+              // ─── 11. PERSONALITY BLUEPRINT ───
+              PersonalityCards(
+                astrologyData: astro,
+                numerologyData: numData,
+                traitScores: state.traitScores,
+              ),
+              const SizedBox(height: 16),
 
               // ─── CLICKABLE NAVIGATION SHORTCUTS ───
               InkWell(

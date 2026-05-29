@@ -149,3 +149,82 @@ To achieve complete feature and visual parity with the Next.js web interface, th
    - Added a suspenseful "Reveal Score" overlay with particle burst effects.
    - Integrated a final Scoreboard grading results into rank categories (Cosmic Soulmates, Stellar Match, Harmonic Resonance, Astrological Friction) matching Next.js Web logic.
 
+---
+
+## 11. Complete Parity for Chat, Store, and Wisdom Library Screens (2026-05-28)
+Achieved absolute visual and functional parity for the remaining core screens in the Flutter client:
+
+1. **Astrologer Chat Screen (`chat_screen.dart` & `api_service.dart` & `app_state.dart`)**:
+   - Integrated the `/api/chat/astrologer` endpoint in `ApiService`.
+   - Setup a picker dashboard listing 6 online/offline astrologers (Rishi Parasher, Jyoti Nanda, Santanu Mishra, Dr. Om Thakur, Anjali Tripathi, Markandaya) with experience, rating stars, and specializations.
+   - Built a pulsing story outline indicator for online astrologers.
+   - Setup state maps `_astrologerChats` and `_astrologerRemaining` in `AppState` with full `SharedPreferences` persistence.
+   - Re-implemented the individual chat window with custom suggested questions, welcome cards, rate limit remaining indicators, and a clean, responsive bubble layout.
+
+2. **Vedic Store Screen (`store_screen.dart`)**:
+   - Defined all 19 products from the Next.js Store catalog with rating stars, reviews, price savings, and stock markers.
+   - Implemented an active planet/dosha recommendation engine matching products against the user's active placements.
+   - Added category filter chips (All, Pujas, Gemstones, Rudraksha, Remedies, Rituals).
+   - Designed a premium, detailed modal bottom sheet/drawer displaying authentic certification trust badges, key benefits checklist, and call to enquire action.
+
+3. **Wisdom Library Screen (`wisdom_screen.dart`)**:
+   - Expanded the article list to the full 8 articles from Next.js.
+   - Integrated a "Recently Viewed" horizontal list tracking article clicks and providing quick expansion shortcuts.
+   - Re-styled chips and article cards with custom left-accent vertical stripes.
+
+---
+
+## 12. Fix Compilation Errors & Build Release APK (2026-05-28)
+- **Compiler Fix**: Replaced two instances of undefined color `AppColors.brown600` on lines 848 and 1017 in `lib/screens/store_screen.dart` with `AppColors.brown700` to resolve build-breaking symbol resolution issues.
+- **Android APK Build**: Successfully compiled and generated a fresh release build to `flutter_app/build/app/outputs/flutter-apk/app-release.apk` (54.7 MB).
+
+---
+
+## 13. Premium Design Upgrade & Consolidated Profile-Settings Section (2026-05-28)
+- **Global Warm Beige Background Migration**:
+  - Changed `AppColors.cream` in `lib/widgets/custom_widgets.dart` from the pale off-white (`#FDF6EC`) to a luxurious warm beige (`#F4EFE6`), updating the background across all views in light mode.
+- **Consolidated Tabbed Profile Section**:
+  - Completely redesigned `profile_screen.dart`, integrating both the visual charts (Cosmic Blueprint) and account preferences/actions under an animated Cupertino-style sliding toggle switch.
+  - Added a profile initial avatar container with gold borders, birth details row pills, settings toggles (notifications, language drop-down, clear cache, export pdf, logout).
+- **Dynamic Birth Details Editor**:
+  - Built an interactive bottom-sheet modal form inside `ProfileScreen` letting users edit their Name, Date, Time, and Location of birth.
+  - Recalculates all traits and cosmic variables on-the-fly and refreshes the dashboard in-place using the new `updateBirthDetails` state handler.
+- **Borders & Typography Alignments**:
+  - Refined inner paddings of cards to standardize layout alignments and prevent text overlap with container boundaries.
+- **Widget Testing & Verification**:
+  - Wrote a dedicated UI widget test in `test/widget_test.dart` to verify the new tabbed layout and components.
+  - Fixed a runtime `TypeError` in `DonutChartPainter` (type mismatch during list reduction) by replacing the dynamic lambda reduction with a type-safe loop finding the dominant count.
+  - Verified tests pass (`All tests passed!`) and compiled a fresh release APK to `build/app/outputs/flutter-apk/app-release.apk` (54.8 MB) with zero compiler errors.
+
+---
+
+## 14. Verification of Implementation Plan & Test Automation (2026-05-28)
+- **Profile Rendering Test File**: Created `flutter_app/test/profile_rendering_test.dart` to verify that `ProfileScreen` renders correctly, allows switching between tabs (Cosmic Blueprint vs Preferences & Actions), and opens the birth details bottom sheet.
+- **Test Automation Run**: Successfully executed `flutter test` inside `flutter_app/`, passing all tests (`All tests passed!`) with zero errors.
+- **Static Analysis**: Verified compile correctness and resolved analyzer warnings.
+
+---
+
+## 15. Binary PDF Generation & Native PDF Viewer (2026-05-28)
+- **Backend PDF Generation**: Installed `pdfkit` and `@types/pdfkit` in Next.js backend. Rewrote `/api/reports/generate-pdf` to generate beautiful multi-page binary PDF files natively using vector shapes, custom borders, and layout colors.
+- **Flutter PDF Viewer Screen**: Installed `pdfx` in `flutter_app/pubspec.yaml`. Created `pdf_viewer_screen.dart` featuring zoom and float controllers.
+- **Download & Open Flow**: Refactored `_downloadReport` in `report_screen.dart` to write PDF binary data and open the view immediately.
+- **Logout Reset Integration**: Modified both settings and profile screens to trigger `state.reset()`, wiping local data on log out.
+- **Release APK Compile**: Successfully compiled a fresh release build to `build/app/outputs/flutter-apk/app-release.apk` (55.5 MB) incorporating the full native PDF viewer suite and all session/auth synchronizations.
+
+---
+
+## 16. Comprehensive Kundali Screen Feature & Visual Parity (2026-05-29)
+
+Completely synchronized the comprehensive Kundali screen in the Flutter client (`comprehensive_kundali_screen.dart`) with the original Next.js component (`ComprehensiveKundaliView.tsx`) to achieve absolute visual and structural feature parity:
+
+- **Personality Blueprint**: Integrated the dynamic `ayurvedicConstitution` rendering inside the Personality card as a beautifully styled `_doshaCard` mapping Pitta, Vata, or Kapha traits.
+- **Karma Patterns**: Added key-value factors support mapping to `keyIndicators` returned by the backend API.
+- **Career & Money**: Designed the "Foreign Lands" travel recommendation card with visual highlights, rendering a dynamic globe (`🌍`) or house (`🏠`) based on benefit status.
+- **Love & Relationships**: Integrated the missing `powerImbalance` and `repeatingPatterns` text blocks.
+- **Health & Wellness**: Added the missing `accidentVulnerability` warnings.
+- **Life Timing**: Integrated the `keyTimingFactors` block and upgraded `_upcomingPeriodCard` to render nested horizontal `areasAffected` badges under their respective interpretations.
+- **Hidden Strengths**: Added the missing `obsession` (Fixation Tendencies) and `isolation` (Withdrawing from Others) details.
+- **Special Combinations**: Integrated the `yogaContextNote` italicized note card at the bottom of the section.
+- **Divisional Charts**: Refactored `_vargaHighlightCard` to unpack and display D9 Navamsha `keyPlanets` and `soulMaturity` summaries, and added the `d1Main` (Main Birth Chart) analysis block.
+- **Verification**: Successfully compiled the Flutter client and validated using the test suite (`flutter test`), with all unit/widget tests passing.

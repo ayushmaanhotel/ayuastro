@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import PDFDocument from 'pdfkit';
 import { db } from '@/lib/db';
-
-/**
- * PDF Report Generation API
- *
- * NOTE: In a production environment, this would use a proper PDF generation library
- * like Puppeteer, jsPDF, or a server-side PDF service. Since we're in a restricted
- * environment without those heavy dependencies, we generate a beautifully styled HTML
- * document that serves as the report — browsers can print/save it as PDF natively.
- *
- * The HTML includes print-friendly @media print styles for clean PDF output.
- */
 
 interface ReportRequestBody {
   userId: string;
@@ -22,27 +12,7 @@ const ZODIAC_SYMBOLS: Record<string, string> = {
   Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
 };
 
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function generateTraitBar(score: number, label: string): string {
-  const color = score > 70 ? '#4a7c59' : score >= 40 ? '#6b4c3b' : '#c4973b';
-  return `
-    <div class="trait-row">
-      <div class="trait-label">${escapeHtml(label)}</div>
-      <div class="trait-bar-bg">
-        <div class="trait-bar-fill" style="width: ${score}%; background-color: ${color};"></div>
-      </div>
-      <div class="trait-score">${score}%</div>
-    </div>`;
-}
-
-function generateHTMLReport(data: {
+function drawPDFReport(data: {
   name: string;
   birthDetails: {
     dateOfBirth: string;
@@ -77,612 +47,346 @@ function generateHTMLReport(data: {
     insightLevel: string;
   }[];
   includePremium: boolean;
-}): string {
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+}): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({ size: 'A4', margin: 50 });
+      const chunks: Buffer[] = [];
+      doc.on('data', (chunk) => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', (err) => reject(err));
+
+      const sunSign = data.astrology?.sunSign || 'Unknown';
+      const moonSign = data.astrology?.moonSign || 'Unknown';
+      const ascendant = data.astrology?.ascendant || 'Unknown';
+
+      const freeSections = data.reportSections.filter((s) => s.insightLevel === 'free');
+      const premiumSections = data.includePremium
+        ? data.reportSections.filter((s) => s.insightLevel === 'premium')
+        : [];
+      
+      const activeSections = [...freeSections, ...premiumSections];
+
+      // Page background colors
+      const drawBackground = () => {
+        doc.save();
+        doc.rect(0, 0, doc.page.width, doc.page.height).fill('#F4EFE6'); // Warm beige
+        doc.restore();
+      };
+
+      const drawHeaderLine = () => {
+        doc.save();
+        doc.strokeColor('#EFEBE9').lineWidth(0.5).moveTo(50, 32).lineTo(doc.page.width - 50, 32).stroke();
+        doc.restore();
+      };
+
+      const drawFooter = (pageNum: number) => {
+        doc.save();
+        doc.strokeColor('#EFEBE9').lineWidth(0.5).moveTo(50, doc.page.height - 45).lineTo(doc.page.width - 50, doc.page.height - 45).stroke();
+        doc.fillColor('#A1887F').fontSize(8).font('Helvetica').text(`Page ${pageNum}`, 50, doc.page.height - 35, { align: 'right' });
+        doc.restore();
+      };
+
+      // ─── 1. COVER PAGE ───
+      drawBackground();
+      
+      // Gold decorative borders
+      doc.lineWidth(2).rect(30, 30, doc.page.width - 60, doc.page.height - 60).stroke('#C4973B');
+      doc.lineWidth(0.5).rect(35, 35, doc.page.width - 70, doc.page.height - 70).stroke('#C4973B');
+
+      doc.y = 120;
+      doc.fillColor('#3E2723').fontSize(42).font('Times-Bold').text('AyuAstro', { align: 'center' });
+      doc.moveDown(0.2);
+      doc.fontSize(10).font('Helvetica-Bold').fillColor('#8D6E63').text('AI-POWERED EMOTIONAL INTELLIGENCE', { align: 'center', characterSpacing: 1.5 });
+      
+      doc.moveDown(2.5);
+      // Gold line separator
+      doc.strokeColor('#C4973B').lineWidth(1.2).moveTo(160, doc.y).lineTo(doc.page.width - 160, doc.y).stroke();
+      
+      doc.moveDown(3);
+      doc.fontSize(20).font('Times-Bold').fillColor('#3E2723').text('Deep Intelligence Report', { align: 'center' });
+      doc.moveDown(2);
+
+      // User details container
+      const userBoxY = doc.y;
+      doc.rect(100, userBoxY, doc.page.width - 200, 155).fillAndStroke('#FFFFFF', '#EFEBE9');
+      
+      doc.fillColor('#A1887F').fontSize(9).font('Helvetica-Bold').text('PREPARED FOR', 120, userBoxY + 18);
+      doc.fillColor('#3E2723').fontSize(18).font('Times-Bold').text(data.name, 120, userBoxY + 32);
+      
+      doc.fillColor('#5D4037').fontSize(10).font('Helvetica').text(`Born: ${data.birthDetails.dateOfBirth} at ${data.birthDetails.timeOfBirth}`, 120, userBoxY + 68);
+      doc.text(`Place: ${data.birthDetails.placeOfBirth}`, 120, userBoxY + 83);
+      
+      const sunSymbol = ZODIAC_SYMBOLS[sunSign] || '✦';
+      const moonSymbol = ZODIAC_SYMBOLS[moonSign] || '✦';
+      const ascSymbol = ZODIAC_SYMBOLS[ascendant] || '✦';
+      
+      doc.fillColor('#C4973B').fontSize(11).font('Helvetica-Bold').text(
+        `☉ ${sunSymbol} ${sunSign}    ☽ ${moonSymbol} ${moonSign}    ↑ ${ascSymbol} ${ascendant}`,
+        120, userBoxY + 115
+      );
+
+      // Date at the bottom
+      const todayStr = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      doc.fillColor('#A1887F').fontSize(9).font('Helvetica').text(`Generated on ${todayStr}`, 50, doc.page.height - 80, { align: 'center' });
+
+      // ─── 2. TABLE OF CONTENTS ───
+      doc.addPage();
+      drawBackground();
+      drawHeaderLine();
+      
+      doc.fillColor('#A1887F').fontSize(8).font('Helvetica').text('AyuAstro Deep Intelligence Report', 50, 20);
+      
+      doc.y = 70;
+      doc.fillColor('#3E2723').fontSize(22).font('Times-Bold').text('Table of Contents', 50, doc.y);
+      doc.moveDown(1.5);
+
+      const tableOfContents = [
+        { num: 1, title: 'Your Cosmic Identity' },
+        { num: 2, title: 'Emotional Trait Map' },
+        { num: 3, title: 'Numerology Blueprint' },
+        { num: 4, title: 'Vedic Astrology Summary' },
+        ...activeSections.map((s, idx) => ({ num: 5 + idx, title: s.title + (s.insightLevel === 'premium' ? ' (Premium)' : '') }))
+      ];
+
+      tableOfContents.forEach((item, index) => {
+        const itemY = doc.y;
+        doc.fontSize(11).font('Helvetica-Bold').fillColor('#C4973B').text(`${item.num}.`, 50, itemY);
+        doc.font('Helvetica').fillColor('#5D4037').text(item.title, 80, itemY);
+        
+        // Dot leaders
+        const endDotX = doc.page.width - 80;
+        doc.strokeColor('#A1887F').lineWidth(0.5).dash(2, { space: 2 }).moveTo(350, itemY + 8).lineTo(endDotX, itemY + 8).stroke().undash();
+        
+        doc.font('Helvetica-Bold').fillColor('#3E2723').text(`${index + 3}`, doc.page.width - 70, itemY, { align: 'right' });
+        doc.moveDown(0.9);
+      });
+
+      drawFooter(2);
+
+      // ─── 3. COSMIC IDENTITY DETAILS ───
+      doc.addPage();
+      drawBackground();
+      drawHeaderLine();
+      doc.fillColor('#A1887F').fontSize(8).font('Helvetica').text('AyuAstro Deep Intelligence Report', 50, 20);
+
+      doc.y = 70;
+      doc.fillColor('#3E2723').fontSize(20).font('Times-Bold').text('1. Your Cosmic Identity', 50, doc.y);
+      doc.moveDown(1.2);
+
+      // Placements side-by-side cards
+      const cardWidth = (doc.page.width - 120) / 3;
+      const cardHeight = 90;
+      const cardsData = [
+        { label: 'SUN SIGN', value: sunSign, symbol: sunSymbol },
+        { label: 'MOON SIGN', value: moonSign, symbol: moonSymbol },
+        { label: 'ASCENDANT', value: ascendant, symbol: ascSymbol }
+      ];
+
+      const placementsY = doc.y;
+      cardsData.forEach((c, idx) => {
+        const cardX = 50 + idx * (cardWidth + 10);
+        doc.rect(cardX, placementsY, cardWidth, cardHeight).fillAndStroke('#FFFFFF', '#EFEBE9');
+        
+        // Draw symbol
+        doc.fillColor('#C4973B').fontSize(26).font('Times-Roman').text(c.symbol, cardX, placementsY + 12, { width: cardWidth, align: 'center' });
+        doc.fillColor('#A1887F').fontSize(8).font('Helvetica-Bold').text(c.label, cardX, placementsY + 45, { width: cardWidth, align: 'center' });
+        doc.fillColor('#3E2723').fontSize(13).font('Times-Bold').text(c.value, cardX, placementsY + 58, { width: cardWidth, align: 'center' });
+      });
+
+      doc.y = placementsY + cardHeight + 25;
+      doc.fillColor('#5D4037').fontSize(10.5).font('Helvetica').text(
+        `Your Sun in ${sunSign} represents your core identity and conscious purpose — the light you radiate into the world. It governs your willpower, creative essence, and the central ego strength driving your goals.\n\n` +
+        `Your Moon in ${moonSign} reveals your emotional nature — how you process feelings, respond to challenges, and what you require to feel emotionally secure and nurtured in relationships.\n\n` +
+        `Your Ascendant in ${ascendant} represents the mask you wear, your social personality, and the first impression you give to others. It dictates your outward behavior and approach to physical reality.\n\n` +
+        `Together, this "Cosmic Trinity" provides the foundational architecture of your psychological profile, bridging conscious expression, subconscious needs, and external interaction.`,
+        { lineGap: 5 }
+      );
+
+      drawFooter(3);
+
+      // ─── 4. EMOTIONAL TRAIT MAP ───
+      doc.addPage();
+      drawBackground();
+      drawHeaderLine();
+      doc.fillColor('#A1887F').fontSize(8).font('Helvetica').text('AyuAstro Deep Intelligence Report', 50, 20);
+
+      doc.y = 70;
+      doc.fillColor('#3E2723').fontSize(20).font('Times-Bold').text('2. Emotional Trait Map', 50, doc.y);
+      doc.moveDown(0.6);
+      doc.fontSize(10).font('Helvetica').fillColor('#5D4037').text(
+        'Your emotional traits are scored on a 0-100 scale, derived from the synthesis of planetary placements, nakshatras, and your questionnaire responses. Scores above 70 indicate innate strengths; 40-70 represent moderate capacities; below 40 are growth zones.',
+        { lineGap: 3.5 }
+      );
+      
+      doc.moveDown(1.5);
+      
+      const progressBarWidth = doc.page.width - 260;
+      const progressBarHeight = 8;
+
+      data.traits.forEach((t) => {
+        const itemY = doc.y;
+        
+        // Trait Label
+        doc.fillColor('#3E2723').fontSize(9.5).font('Helvetica-Bold').text(t.label || t.name, 50, itemY);
+        
+        const barX = 180;
+        const barY = itemY - 1;
+        
+        // Progress bar background
+        doc.rect(barX, barY, progressBarWidth, progressBarHeight).fill('#EFEBE9');
+        
+        // Color mapping
+        const color = t.score > 70 ? '#4A7C59' : t.score >= 40 ? '#6B4C3B' : '#C4973B';
+        if (t.score > 0) {
+          doc.rect(barX, barY, progressBarWidth * (t.score / 100), progressBarHeight).fill(color);
+        }
+        
+        // Score percentage
+        doc.fillColor('#5D4037').fontSize(9).font('Helvetica-Bold').text(`${t.score}%`, doc.page.width - 80, itemY, { align: 'right' });
+        doc.moveDown(0.9);
+      });
+
+      // Legend
+      doc.moveDown(1.2);
+      const legendY = doc.y;
+      doc.fillColor('#4A7C59').fontSize(9).font('Helvetica-Bold').text('■ High Strength (70+)', 50, legendY);
+      doc.fillColor('#6B4C3B').text('■ Moderate (40-70)', 190, legendY);
+      doc.fillColor('#C4973B').text('■ Growth Area (<40)', 320, legendY);
+
+      drawFooter(4);
+
+      // ─── 5. NUMEROLOGY BLUEPRINT ───
+      doc.addPage();
+      drawBackground();
+      drawHeaderLine();
+      doc.fillColor('#A1887F').fontSize(8).font('Helvetica').text('AyuAstro Deep Intelligence Report', 50, 20);
+
+      doc.y = 70;
+      doc.fillColor('#3E2723').fontSize(20).font('Times-Bold').text('3. Numerology Blueprint', 50, doc.y);
+      doc.moveDown(0.6);
+      doc.fontSize(10).font('Helvetica').fillColor('#5D4037').text(
+        'Numerology reveals the mathematical frequencies underlying your personality and destiny. Your core numbers represent coordinates of your life path, outer personality, and inner motivations.',
+        { lineGap: 3.5 }
+      );
+      
+      doc.moveDown(1.2);
+
+      if (data.numerology) {
+        const numCardW = (doc.page.width - 110) / 2;
+        const numCardH = 75;
+        const numList = [
+          { label: 'Life Path Number', val: data.numerology.lifePathNumber, desc: data.numerology.lifePathDesc?.split('.')[0] || 'Path of evolution' },
+          { label: 'Destiny Number', val: data.numerology.destinyNumber, desc: data.numerology.destinyDesc?.split('.')[0] || 'External expression' },
+          { label: 'Soul Urge Number', val: data.numerology.soulUrgeNumber, desc: data.numerology.soulUrgeDesc?.split('.')[0] || 'Deepest motivation' },
+          { label: 'Personality Number', val: data.numerology.personalityNumber, desc: 'Your outer persona and first impression' }
+        ];
+
+        const gridY = doc.y;
+        numList.forEach((n, idx) => {
+          const row = Math.floor(idx / 2);
+          const col = idx % 2;
+          const x = 50 + col * (numCardW + 10);
+          const y = gridY + row * (numCardH + 10);
+          
+          doc.rect(x, y, numCardW, numCardH).fillAndStroke('#FFFFFF', '#EFEBE9');
+          doc.fillColor('#A1887F').fontSize(7.5).font('Helvetica-Bold').text(n.label.toUpperCase(), x, y + 10, { width: numCardW, align: 'center' });
+          doc.fillColor('#3E2723').fontSize(24).font('Times-Bold').text(`${n.val}`, x, y + 22, { width: numCardW, align: 'center' });
+          doc.fillColor('#8D6E63').fontSize(8).font('Helvetica').text(n.desc, x + 12, y + 50, { width: numCardW - 24, align: 'center', lineGap: 2 });
+        });
+
+        doc.y = gridY + (numCardH * 2) + 20;
+      } else {
+        doc.fillColor('#A1887F').fontSize(10).text('Numerology profile unavailable.', 50, doc.y);
+        doc.moveDown(1.5);
+      }
+
+      // ─── 6. VEDIC ASTROLOGY SUMMARY ───
+      doc.fillColor('#3E2723').fontSize(20).font('Times-Bold').text('4. Vedic Astrology Summary', 50, doc.y);
+      doc.moveDown(1);
+
+      const infoBoxY = doc.y;
+      doc.rect(50, infoBoxY, (doc.page.width - 110) / 2, 50).fillAndStroke('#FFFFFF', '#EFEBE9');
+      doc.fillColor('#A1887F').fontSize(7.5).font('Helvetica-Bold').text('NAKSHATRA', 65, infoBoxY + 12);
+      doc.fillColor('#3E2723').fontSize(12).font('Times-Bold').text(data.astrology?.nakshatra || 'Unknown', 65, infoBoxY + 24);
+
+      doc.rect(50 + (doc.page.width - 110) / 2 + 10, infoBoxY, (doc.page.width - 110) / 2, 50).fillAndStroke('#FFFFFF', '#EFEBE9');
+      doc.fillColor('#A1887F').fontSize(7.5).font('Helvetica-Bold').text('CURRENT DASHA PERIOD', 50 + (doc.page.width - 110) / 2 + 20, infoBoxY + 12);
+      doc.fillColor('#3E2723').fontSize(12).font('Times-Bold').text(data.astrology?.currentDasha || 'Unknown', 50 + (doc.page.width - 110) / 2 + 20, infoBoxY + 24);
+
+      doc.y = infoBoxY + 65;
+      
+      const columnW = (doc.page.width - 110) / 2;
+      const textY = doc.y;
+      
+      doc.fontSize(10).font('Helvetica-Bold').fillColor('#A1887F').text('Key Astrological Yogas', 50, textY);
+      const yogasStr = data.astrology?.yogas?.join(', ') || 'None active in current chart';
+      doc.fontSize(9.5).font('Helvetica').fillColor('#5D4037').text(yogasStr, 50, textY + 15, { width: columnW, lineGap: 3 });
+
+      doc.fontSize(10).font('Helvetica-Bold').fillColor('#A1887F').text('Doshas Detected', 50 + columnW + 10, textY);
+      const doshasStr = data.astrology?.doshas?.join(', ') || 'None detected in current chart';
+      doc.fontSize(9.5).font('Helvetica').fillColor('#5D4037').text(doshasStr, 50 + columnW + 10, textY + 15, { width: columnW, lineGap: 3 });
+
+      drawFooter(5);
+
+      // ─── 7+. DETAILED REPORT SECTIONS ───
+      let pageNumber = 6;
+      activeSections.forEach((s) => {
+        doc.addPage();
+        drawBackground();
+        drawHeaderLine();
+        doc.fillColor('#A1887F').fontSize(8).font('Helvetica').text('AyuAstro Deep Intelligence Report', 50, 20);
+
+        doc.y = 70;
+        doc.fillColor('#3E2723').fontSize(20).font('Times-Bold').text(s.title, 50, doc.y);
+        
+        if (s.insightLevel === 'premium') {
+          doc.fillColor('#C4973B').fontSize(7.5).font('Helvetica-Bold').text('👑 PREMIUM INSIGHT SEGMENT', 50, 56, { characterSpacing: 1 });
+        }
+        
+        doc.moveDown(1.5);
+        doc.fillColor('#5D4037').fontSize(11).font('Helvetica').text(s.content, 50, doc.y, { lineGap: 5.5 });
+        
+        doc.moveDown(2);
+        doc.fillColor('#A1887F').fontSize(10).font('Helvetica-Bold').text('Traits Addressed:', 50, doc.y);
+        doc.moveDown(0.6);
+
+        s.traits.forEach((t) => {
+          doc.fillColor('#4A7C59').fontSize(10).font('Helvetica-Bold').text(`• ${t}`, 65, doc.y);
+          doc.moveDown(0.25);
+        });
+
+        drawFooter(pageNumber);
+        pageNumber++;
+      });
+
+      // ─── BACK COVER ───
+      doc.addPage();
+      drawBackground();
+      
+      // Decorative border
+      doc.lineWidth(1).rect(50, 50, doc.page.width - 100, doc.page.height - 100).stroke('#C4973B');
+      
+      doc.y = doc.page.height / 2 - 100;
+      doc.fillColor('#3E2723').fontSize(32).font('Times-Bold').text('AyuAstro', { align: 'center' });
+      doc.moveDown(0.2);
+      doc.fontSize(10).font('Helvetica').fillColor('#8D6E63').text('Vedic Wisdom for Modern Self-Reflection', { align: 'center' });
+      
+      doc.moveDown(4);
+      doc.fontSize(9).font('Helvetica').fillColor('#A1887F').text(
+        'This intelligence profile is a synthesis of celestial positions at birth mapped against modern psychometric models. It is designed for personal development, meditation guidance, and self-understanding. It does not constitute medical, psychological, or financial advice.',
+        100, doc.y, { width: doc.page.width - 200, align: 'center', lineGap: 4 }
+      );
+
+      doc.end();
+    } catch (err) {
+      reject(err);
+    }
   });
-
-  const sunSign = data.astrology?.sunSign || 'Unknown';
-  const moonSign = data.astrology?.moonSign || 'Unknown';
-  const ascendant = data.astrology?.ascendant || 'Unknown';
-
-  const freeSections = data.reportSections.filter((s) => s.insightLevel === 'free');
-  const premiumSections = data.includePremium
-    ? data.reportSections.filter((s) => s.insightLevel === 'premium')
-    : [];
-
-  const traitBars = data.traits
-    .map((t) => generateTraitBar(t.score, t.label || t.name))
-    .join('\n');
-
-  const freeSectionHTML = freeSections
-    .map(
-      (s, i) => `
-    <div class="section">
-      <h2 class="section-title">${i + 1}. ${escapeHtml(s.title)}</h2>
-      <p class="section-content">${escapeHtml(s.content)}</p>
-      <div class="trait-tags">
-        ${s.traits.map((t) => `<span class="trait-tag">${escapeHtml(t)}</span>`).join('')}
-      </div>
-    </div>`
-    )
-    .join('\n');
-
-  const premiumSectionHTML = premiumSections.length > 0
-    ? premiumSections
-        .map(
-          (s, i) => `
-    <div class="section">
-      <h2 class="section-title">${freeSections.length + i + 1}. ${escapeHtml(s.title)} <span class="premium-badge">PREMIUM</span></h2>
-      <p class="section-content">${escapeHtml(s.content)}</p>
-      <div class="trait-tags">
-        ${s.traits.map((t) => `<span class="trait-tag">${escapeHtml(t)}</span>`).join('')}
-      </div>
-    </div>`
-        )
-        .join('\n')
-    : '';
-
-  const numerologyGrid = data.numerology
-    ? `
-    <div class="num-grid">
-      <div class="num-card">
-        <div class="num-label">Life Path</div>
-        <div class="num-value">${data.numerology.lifePathNumber}</div>
-        <div class="num-desc">${escapeHtml(data.numerology.lifePathDesc?.split('.')[0] || '')}</div>
-      </div>
-      <div class="num-card">
-        <div class="num-label">Destiny</div>
-        <div class="num-value">${data.numerology.destinyNumber}</div>
-        <div class="num-desc">${escapeHtml(data.numerology.destinyDesc?.split('.')[0] || '')}</div>
-      </div>
-      <div class="num-card">
-        <div class="num-label">Soul Urge</div>
-        <div class="num-value">${data.numerology.soulUrgeNumber}</div>
-        <div class="num-desc">${escapeHtml(data.numerology.soulUrgeDesc?.split('.')[0] || '')}</div>
-      </div>
-      <div class="num-card">
-        <div class="num-label">Personality</div>
-        <div class="num-value">${data.numerology.personalityNumber}</div>
-        <div class="num-desc">Your outer persona</div>
-      </div>
-    </div>`
-    : '<p class="section-content">Numerology data not available.</p>';
-
-  const yogasHTML = data.astrology?.yogas?.length
-    ? data.astrology.yogas.map((y) => `<span class="yoga-tag">${escapeHtml(y)}</span>`).join(' ')
-    : '<span class="muted">None detected</span>';
-
-  const doshasHTML = data.astrology?.doshas?.length
-    ? data.astrology.doshas.map((d) => `<span class="dosha-tag">${escapeHtml(d)}</span>`).join(' ')
-    : '<span class="muted">None detected</span>';
-
-  const tableOfContents = [
-    { num: 1, title: 'Your Cosmic Identity' },
-    { num: 2, title: 'Emotional Trait Map' },
-    { num: 3, title: 'Numerology Blueprint' },
-    { num: 4, title: 'Vedic Astrology Summary' },
-    ...freeSections.map((s, i) => ({ num: 5 + i, title: s.title })),
-    ...premiumSections.map((s, i) => ({ num: 5 + freeSections.length + i, title: `${s.title} ★` })),
-  ];
-
-  const tocHTML = tableOfContents
-    .map((item) => `<div class="toc-item"><span class="toc-num">${item.num}.</span> <span class="toc-title">${escapeHtml(item.title)}</span></div>`)
-    .join('\n');
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AyuAstro Deep Intelligence Report — ${escapeHtml(data.name)}</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
-
-    :root {
-      --cream: #FDF6EC;
-      --brown-900: #3E2723;
-      --brown-700: #5D4037;
-      --brown-500: #8D6E63;
-      --brown-400: #A1887F;
-      --brown-100: #EFEBE9;
-      --gold: #C4973B;
-      --gold-dark: #8B6914;
-      --sage: #4A7C59;
-      --sage-light: #E8F0E9;
-      --purple: #6B4C8A;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--cream);
-      color: var(--brown-900);
-      line-height: 1.7;
-      font-size: 14px;
-    }
-
-    /* Title Page */
-    .title-page {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      background: linear-gradient(135deg, var(--cream) 0%, #F5E6D0 50%, var(--cream) 100%);
-      padding: 4rem 2rem;
-      page-break-after: always;
-    }
-
-    .title-page .logo-text {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 3rem;
-      font-weight: 700;
-      color: var(--brown-900);
-      margin-bottom: 0.5rem;
-    }
-
-    .title-page .subtitle {
-      font-size: 1.2rem;
-      color: var(--brown-500);
-      margin-bottom: 3rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-    }
-
-    .title-page .report-title {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 2rem;
-      color: var(--brown-900);
-      margin-bottom: 2rem;
-    }
-
-    .title-page .zodiac-symbols {
-      font-size: 2.5rem;
-      color: var(--gold);
-      letter-spacing: 0.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .title-page .user-info {
-      font-size: 1.1rem;
-      color: var(--brown-700);
-      line-height: 2;
-    }
-
-    .title-page .user-info strong {
-      color: var(--brown-900);
-    }
-
-    .title-page .date {
-      margin-top: 3rem;
-      font-size: 0.9rem;
-      color: var(--brown-400);
-    }
-
-    /* Content Area */
-    .content {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-
-    /* Table of Contents */
-    .toc {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      page-break-after: always;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-
-    .toc h2 {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 1.5rem;
-      color: var(--brown-900);
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 2px solid var(--gold);
-    }
-
-    .toc-item {
-      display: flex;
-      gap: 0.75rem;
-      padding: 0.5rem 0;
-      border-bottom: 1px dotted var(--brown-100);
-    }
-
-    .toc-num {
-      color: var(--gold-dark);
-      font-weight: 600;
-      min-width: 2rem;
-    }
-
-    .toc-title {
-      color: var(--brown-700);
-    }
-
-    /* Sections */
-    .section {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      page-break-inside: avoid;
-    }
-
-    .section-title {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 1.3rem;
-      color: var(--brown-900);
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--sage-light);
-    }
-
-    .section-content {
-      color: var(--brown-700);
-      line-height: 1.8;
-    }
-
-    /* Cosmic Identity Grid */
-    .identity-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      margin: 1rem 0;
-    }
-
-    .identity-card {
-      text-align: center;
-      background: var(--cream);
-      border-radius: 10px;
-      padding: 1.25rem 0.75rem;
-    }
-
-    .identity-card .zodiac-symbol {
-      font-size: 2rem;
-      margin-bottom: 0.25rem;
-    }
-
-    .identity-card .label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--brown-400);
-    }
-
-    .identity-card .value {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--brown-900);
-    }
-
-    /* Trait Bars */
-    .trait-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.6rem;
-    }
-
-    .trait-label {
-      min-width: 140px;
-      font-size: 0.85rem;
-      color: var(--brown-700);
-      font-weight: 500;
-    }
-
-    .trait-bar-bg {
-      flex: 1;
-      height: 8px;
-      background: var(--brown-100);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .trait-bar-fill {
-      height: 100%;
-      border-radius: 4px;
-    }
-
-    .trait-score {
-      min-width: 40px;
-      text-align: right;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--brown-500);
-    }
-
-    /* Numerology Grid */
-    .num-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      margin: 1rem 0;
-    }
-
-    .num-card {
-      text-align: center;
-      background: var(--cream);
-      border-radius: 10px;
-      padding: 1.25rem;
-    }
-
-    .num-label {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--brown-400);
-      margin-bottom: 0.25rem;
-    }
-
-    .num-value {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--brown-900);
-    }
-
-    .num-desc {
-      font-size: 0.75rem;
-      color: var(--brown-400);
-      margin-top: 0.25rem;
-    }
-
-    /* Tags */
-    .trait-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-top: 1rem;
-    }
-
-    .trait-tag {
-      display: inline-block;
-      background: var(--brown-100);
-      color: var(--brown-700);
-      font-size: 0.75rem;
-      padding: 0.2rem 0.6rem;
-      border-radius: 20px;
-    }
-
-    .yoga-tag {
-      display: inline-block;
-      background: var(--sage-light);
-      color: var(--sage);
-      font-size: 0.75rem;
-      padding: 0.2rem 0.6rem;
-      border-radius: 20px;
-      margin: 0.2rem;
-    }
-
-    .dosha-tag {
-      display: inline-block;
-      background: #FFF3E0;
-      color: var(--gold-dark);
-      font-size: 0.75rem;
-      padding: 0.2rem 0.6rem;
-      border-radius: 20px;
-      margin: 0.2rem;
-    }
-
-    .premium-badge {
-      display: inline-block;
-      background: linear-gradient(135deg, var(--gold), #D4A84B);
-      color: white;
-      font-size: 0.6rem;
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
-      letter-spacing: 0.1em;
-      vertical-align: middle;
-      margin-left: 0.5rem;
-    }
-
-    .muted { color: var(--brown-400); font-style: italic; }
-
-    /* Vedic Info */
-    .vedic-info {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin: 1rem 0;
-    }
-
-    .vedic-item {
-      background: var(--cream);
-      border-radius: 10px;
-      padding: 1rem;
-    }
-
-    .vedic-item .label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--brown-400);
-    }
-
-    .vedic-item .value {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--brown-900);
-    }
-
-    /* Footer */
-    .footer {
-      text-align: center;
-      padding: 3rem 2rem;
-      color: var(--brown-400);
-      font-size: 0.8rem;
-      border-top: 2px solid var(--brown-100);
-      margin-top: 2rem;
-    }
-
-    .footer .brand {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 1rem;
-      color: var(--brown-700);
-      margin-bottom: 0.5rem;
-    }
-
-    /* Print Styles */
-    @media print {
-      body {
-        background: white;
-        font-size: 11pt;
-      }
-
-      .title-page {
-        min-height: auto;
-        padding: 2in 1in;
-      }
-
-      .section {
-        box-shadow: none;
-        border: 1px solid #eee;
-        page-break-inside: avoid;
-      }
-
-      .toc {
-        box-shadow: none;
-        border: 1px solid #eee;
-        page-break-after: always;
-      }
-
-      .trait-bar-fill {
-        print-color-adjust: exact;
-        -webkit-print-color-adjust: exact;
-      }
-
-      .identity-card, .num-card, .vedic-item {
-        background: #f8f8f8;
-        print-color-adjust: exact;
-        -webkit-print-color-adjust: exact;
-      }
-    }
-  </style>
-</head>
-<body>
-  <!-- Title Page -->
-  <div class="title-page">
-    <div class="logo-text">AyuAstro</div>
-    <div class="subtitle">AI-Powered Emotional Intelligence</div>
-    <div class="zodiac-symbols">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</div>
-    <div class="report-title">Deep Intelligence Report</div>
-    <div class="user-info">
-      Prepared for <strong>${escapeHtml(data.name)}</strong><br>
-      Born ${escapeHtml(data.birthDetails.dateOfBirth)} at ${escapeHtml(data.birthDetails.timeOfBirth)}<br>
-      ${escapeHtml(data.birthDetails.placeOfBirth)}<br><br>
-      ☉ ${ZODIAC_SYMBOLS[sunSign] || '✦'} ${escapeHtml(sunSign)} &nbsp; ☽ ${ZODIAC_SYMBOLS[moonSign] || '✦'} ${escapeHtml(moonSign)} &nbsp; ↑ ${ZODIAC_SYMBOLS[ascendant] || '✦'} ${escapeHtml(ascendant)}
-    </div>
-    <div class="date">Generated on ${dateStr}</div>
-  </div>
-
-  <!-- Table of Contents -->
-  <div class="toc">
-    <h2>Table of Contents</h2>
-    ${tocHTML}
-  </div>
-
-  <!-- Section 1: Cosmic Identity -->
-  <div class="content">
-    <div class="section">
-      <h2 class="section-title">1. Your Cosmic Identity</h2>
-      <div class="identity-grid">
-        <div class="identity-card">
-          <div class="zodiac-symbol">${ZODIAC_SYMBOLS[sunSign] || '✦'}</div>
-          <div class="label">Sun Sign</div>
-          <div class="value">${escapeHtml(sunSign)}</div>
-        </div>
-        <div class="identity-card">
-          <div class="zodiac-symbol">${ZODIAC_SYMBOLS[moonSign] || '✦'}</div>
-          <div class="label">Moon Sign</div>
-          <div class="value">${escapeHtml(moonSign)}</div>
-        </div>
-        <div class="identity-card">
-          <div class="zodiac-symbol">${ZODIAC_SYMBOLS[ascendant] || '✦'}</div>
-          <div class="label">Ascendant</div>
-          <div class="value">${escapeHtml(ascendant)}</div>
-        </div>
-      </div>
-      <p class="section-content">
-        Your Sun in ${escapeHtml(sunSign)} represents your core identity and conscious purpose — the light you radiate into the world.
-        Your Moon in ${escapeHtml(moonSign)} reveals your emotional nature — how you process feelings and what you need to feel secure.
-        Your Ascendant in ${escapeHtml(ascendant)} is the mask you wear and the first impression you give — your social personality and approach to life.
-        Together, these three placements form the foundation of your unique cosmic signature.
-      </p>
-    </div>
-
-    <!-- Section 2: Emotional Trait Map -->
-    <div class="section">
-      <h2 class="section-title">2. Emotional Trait Map</h2>
-      <p class="section-content" style="margin-bottom: 1rem;">
-        Your emotional traits are scored on a 0-100 scale, derived from the synthesis of astrological patterns, numerological influences, and behavioral indicators. Scores above 70 are innate strengths; 40-70 are developing areas; below 40 represent growth opportunities.
-      </p>
-      ${traitBars}
-      <div style="margin-top: 1rem; display: flex; gap: 1.5rem; font-size: 0.75rem; color: var(--brown-400);">
-        <span>■ High (70+)</span>
-        <span>■ Moderate (40-70)</span>
-        <span>■ Growth Area (&lt;40)</span>
-      </div>
-    </div>
-
-    <!-- Section 3: Numerology Blueprint -->
-    <div class="section">
-      <h2 class="section-title">3. Numerology Blueprint</h2>
-      <p class="section-content" style="margin-bottom: 1rem;">
-        Your numerology reveals the mathematical blueprint underlying your personality. Each number carries specific energetic patterns that influence your life path, destiny, and inner motivations.
-      </p>
-      ${numerologyGrid}
-    </div>
-
-    <!-- Section 4: Vedic Astrology Summary -->
-    <div class="section">
-      <h2 class="section-title">4. Vedic Astrology Summary</h2>
-      <div class="vedic-info">
-        <div class="vedic-item">
-          <div class="label">Nakshatra</div>
-          <div class="value">${escapeHtml(data.astrology?.nakshatra || 'Not available')}</div>
-        </div>
-        <div class="vedic-item">
-          <div class="label">Current Dasha</div>
-          <div class="value">${escapeHtml(data.astrology?.currentDasha || 'Not available')}</div>
-        </div>
-      </div>
-      <div style="margin-top: 1rem;">
-        <p style="font-size: 0.85rem; color: var(--brown-400); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;">Key Yogas</p>
-        ${yogasHTML}
-      </div>
-      <div style="margin-top: 1rem;">
-        <p style="font-size: 0.85rem; color: var(--brown-400); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em;">Doshas</p>
-        ${doshasHTML}
-      </div>
-    </div>
-
-    <!-- Section 5+: Free Report Sections -->
-    ${freeSectionHTML}
-
-    <!-- Premium Sections (if included) -->
-    ${premiumSectionHTML}
-
-    <!-- Footer -->
-    <div class="footer">
-      <div class="brand">AyuAstro — AI-Powered Emotional Intelligence</div>
-      <div>This report was generated on ${dateStr} and is intended for personal reflection only.</div>
-      <div style="margin-top: 0.5rem;">AyuAstro combines Vedic astrology, numerology, and behavioral science to map your emotional architecture.</div>
-    </div>
-  </div>
-</body>
-</html>`;
 }
 
 export async function POST(request: NextRequest) {
@@ -860,8 +564,8 @@ export async function POST(request: NextRequest) {
       ];
     }
 
-    // Generate the HTML report
-    const html = generateHTMLReport({
+    // Generate binary PDF
+    const pdfBuffer = await drawPDFReport({
       name: user.name || 'Seeker',
       birthDetails: {
         dateOfBirth: user.profile?.dateOfBirth || 'Unknown',
@@ -875,13 +579,12 @@ export async function POST(request: NextRequest) {
       includePremium,
     });
 
-    // Return HTML with download headers
-    // In production, this would use Puppeteer/jsPDF to generate actual PDF
-    return new NextResponse(html, {
+    const slug = (user.name || 'seeker').toLowerCase().replace(/[^a-z0-9]/g, '_');
+    return new NextResponse(pdfBuffer, {
       status: 200,
       headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Content-Disposition': `attachment; filename="ayuastro-report-${user.name || 'seeker'}.html"`,
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="ayuastro-report-${slug}.pdf"`,
       },
     });
   } catch (error) {
