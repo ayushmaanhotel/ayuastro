@@ -493,3 +493,15 @@ Integrated a professional-grade "Nothing to Hide" transparency initiative global
 4. **APK Compilation**:
    - Replaced undefined color bindings with defined constants (`AppColors.brown500`).
    - Re-compiled the final production release APK successfully to `build\app\outputs\flutter-apk\app-release.apk` (55.9 MB) in 170.6 seconds.
+
+---
+
+## 29. Git Synchronization and GitHub Push (2026-05-31)
+1. **Repository Cleanup**:
+   - Updated `.gitignore` to explicitly exclude local `scratch/` directories and temporary verification scripts (`test-api-calls.js`, `test-db-lookup.js`, `test-deepseek.ts`, `test-ephemeris.ts`, `update-max-duration.js`).
+2. **Commit & Push to Main**:
+   - Staged all Next.js backend updates, UCP routes, mcp-server implementation, and Flutter code.
+   - Pushed cleanly to GitHub repository `bunfeastburger/ayuastro` on the `main` branch.
+3. **Deployment Strategy**:
+   - Advised user to configure Git synchronization on the Vercel dashboard to automate future production deployments directly from git pushes.
+
