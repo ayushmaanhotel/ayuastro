@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import ZAI from 'z-ai-web-dev-sdk';
+import deepseek from '@/lib/ai/deepseek';
 
 // ─── Rate Limiting (in-memory, per session) ────────────────────────────────
 
@@ -41,25 +41,25 @@ const chatSchema = z.object({
   message: z.string().min(1, 'Message is required').max(500, 'Message too long (max 500 characters)'),
   sessionId: z.string().min(1, 'Session ID is required'),
   context: z.object({
-    name: z.string().optional(),
-    sunSign: z.string().optional(),
-    moonSign: z.string().optional(),
-    ascendant: z.string().optional(),
-    nakshatra: z.string().optional(),
-    currentDasha: z.string().optional(),
-    yogas: z.array(z.string()).optional(),
-    doshas: z.array(z.string()).optional(),
-    lifePathNumber: z.number().optional(),
-    destinyNumber: z.number().optional(),
-    soulUrgeNumber: z.number().optional(),
-    archetype: z.string().optional(),
-    topTraits: z.array(z.string()).optional(),
-    relationshipStatus: z.string().optional(),
-  }).optional(),
+    name: z.string().nullish(),
+    sunSign: z.string().nullish(),
+    moonSign: z.string().nullish(),
+    ascendant: z.string().nullish(),
+    nakshatra: z.string().nullish(),
+    currentDasha: z.string().nullish(),
+    yogas: z.array(z.string()).nullish(),
+    doshas: z.array(z.string()).nullish(),
+    lifePathNumber: z.number().nullish(),
+    destinyNumber: z.number().nullish(),
+    soulUrgeNumber: z.number().nullish(),
+    archetype: z.string().nullish(),
+    topTraits: z.array(z.string()).nullish(),
+    relationshipStatus: z.string().nullish(),
+  }).nullish(),
   conversationHistory: z.array(z.object({
     role: z.enum(['user', 'assistant']),
     content: z.string(),
-  })).optional(),
+  })).nullish(),
 });
 
 // ─── System Prompt ──────────────────────────────────────────────────────────
@@ -90,11 +90,11 @@ ${context.relationshipStatus ? `- Relationship Status: ${context.relationshipSta
 ${contextBlock}
 
 Your guiding principles:
-1. Reference the user's astrological data when giving guidance — their signs, nakshatra, and numerology are the lens through which you interpret their questions.
-2. Blend Vedic astrology insights with behavioral science — for example, explain how a moon sign's emotional nature interacts with attachment styles or communication patterns.
-3. Use warm, compassionate, and empowering language. You are a counselor, not a fortune teller.
-4. Keep responses concise — maximum 2-3 paragraphs. Be insightful but not overwhelming.
-5. Focus on self-awareness, emotional intelligence, and actionable growth.
+1. Speak in a natural, warm, and friendly human tone.
+2. Keep your answers extremely precise and to the point.
+3. Every response must be very short — between 10 to 30 words, and under no circumstances exceed 50 words maximum.
+4. Reference the user's astrological data very briefly (e.g. Moon sign or life path number) when relevant, blending it with a behavioral psychology angle.
+5. Do NOT use cliché AI phrases like "I am not sugarcoating", "without sugarcoating", or "no sugarcoating". Be honest, direct, but gentle and warm.
 
 SAFETY RULES (non-negotiable):
 - NEVER predict death, accidents, or catastrophic events
@@ -122,15 +122,8 @@ function getFallbackResponse(): string {
   return FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)];
 }
 
-// ─── SDK Client (lazy singleton) ───────────────────────────────────────────
-
-let zaiInstance: Awaited<ReturnType<typeof ZAI.create>> | null = null;
-
 async function getAIClient() {
-  if (!zaiInstance) {
-    zaiInstance = await ZAI.create();
-  }
-  return zaiInstance;
+  return deepseek;
 }
 
 // ─── POST Handler ───────────────────────────────────────────────────────────

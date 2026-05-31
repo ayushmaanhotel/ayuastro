@@ -1,3 +1,4 @@
+export const maxDuration = 300;
 /**
  * AyuAstro - Comprehensive Kundali Analysis API
  *
@@ -12,7 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { calculateKundali } from '@/lib/astrology';
+import { calculateKundali, initializeSwissEphemeris } from '@/lib/astrology';
 import {
   type Planet,
   type ZodiacSign,
@@ -587,6 +588,9 @@ function generateNakshatraDeepAnalysis(positions: Record<string, PlanetPosition>
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure Swiss Ephemeris is initialized before calculations
+    await initializeSwissEphemeris();
+
     const body = await request.json();
     const { userId } = requestSchema.parse(body);
 

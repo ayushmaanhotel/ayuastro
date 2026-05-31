@@ -5,7 +5,7 @@
 // IMPORTANT: This file MUST only be used in backend code (API routes, etc.)
 // ============================================================================
 
-import ZAI from 'z-ai-web-dev-sdk';
+import deepseek from './deepseek';
 import type {
   AIReportInput,
   GeneratedReport,
@@ -21,26 +21,13 @@ import { buildReportPrompt, buildSectionPrompt, buildDeepIntelligencePrompt, get
 // SDK Initialization
 // ---------------------------------------------------------------------------
 
-let zaiInstance: Awaited<ReturnType<typeof ZAI.create>> | null = null;
-
 /**
- * Initialize the z-ai-web-dev-sdk client (lazy singleton).
+ * Get the custom DeepSeek AI client wrapper.
  */
 async function getAIClient() {
-  if (!zaiInstance) {
-    try {
-      zaiInstance = await ZAI.create();
-    } catch (error) {
-      throw new AIEngineError(
-        AIErrorType.SDK_ERROR,
-        'Failed to initialize AI SDK client',
-        true,
-        error
-      );
-    }
-  }
-  return zaiInstance;
+  return deepseek;
 }
+
 
 // ---------------------------------------------------------------------------
 // Input Validation
@@ -202,7 +189,7 @@ function parseAIResponse(
     throw new AIEngineError(
       AIErrorType.PARSING_FAILED,
       `Failed to parse AI response: ${error instanceof Error ? error.message : String(error)}`,
-      false,
+      true,
       error
     );
   }
@@ -332,7 +319,7 @@ function parseSectionResponse(
     throw new AIEngineError(
       AIErrorType.PARSING_FAILED,
       `Failed to parse section response: ${error instanceof Error ? error.message : String(error)}`,
-      false,
+      true,
       error
     );
   }
@@ -459,12 +446,13 @@ export async function generateReport(
     const userPrompt = buildReportPrompt(input, templates);
 
     const response = await client.chat.completions.create({
-      model: 'default',
+      model: 'deepseek-v4-flash',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
-      temperature: options?.temperature ?? 0.7,
+      thinking: { type: 'enabled' },
+      response_format: { type: 'json_object' },
     });
 
     const content = response.choices?.[0]?.message?.content;
@@ -513,12 +501,14 @@ export async function generateSection(
     const userPrompt = buildSectionPrompt(input, template);
 
     const response = await client.chat.completions.create({
-      model: 'default',
+      model: 'deepseek-v4-flash',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
       temperature: options?.temperature ?? 0.7,
+      thinking: { type: 'disabled' },
+      response_format: { type: 'json_object' },
     });
 
     const content = response.choices?.[0]?.message?.content;
@@ -607,101 +597,50 @@ export async function generateDeepIntelligenceReport(
   const allSections: ReportSection[] = [];
   const startTime = Date.now();
 
-  // ── Batch 1: Free sections (3) ──────────────────────────────
-  console.info('[Deep Intelligence] Generating free sections...');
-  try {
-    const freeReport = await withRetry(async () => {
-      const client = await getAIClient();
-      const systemPrompt = getSystemPrompt(options?.language ?? 'en');
-      const userPrompt = buildReportPrompt(input, freeTemplates);
+  // Helper function to generate a batch with fallback to individual section generation
+  const generateBatchWithFallback = async (batchTemplates: ReportSectionTemplate[], isFree: boolean) => {
+    const batchDesc = batchTemplates.map(t => t.id).join(', ');
+    console.info(`[Deep Intelligence] Generating batch: ${batchDesc}...`);
+    const batchStart = Date.now();
+    try {
+      const systemPrompt = isFree 
+        ? getSystemPrompt(options?.language ?? 'en')
+        : getDeepIntelligenceSystemPrompt(options?.language ?? 'en');
+      const userPrompt = isFree
+        ? buildReportPrompt(input, batchTemplates)
+        : buildDeepIntelligencePrompt(input, batchTemplates);
 
+      const client = await getAIClient();
       const response = await client.chat.completions.create({
-        model: 'default',
+        model: 'deepseek-v4-flash',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
-        temperature,
+        thinking: { type: 'enabled' },
+        response_format: { type: 'json_object' },
       });
 
       const content = response.choices?.[0]?.message?.content;
       if (!content) {
-        throw new AIEngineError(AIErrorType.GENERATION_FAILED, 'AI returned empty response for free sections');
+        throw new AIEngineError(AIErrorType.GENERATION_FAILED, `AI returned empty response for batch: ${batchDesc}`);
       }
 
-      return parseAIResponse(content, freeTemplates);
-    });
-
-    reportTitle = freeReport.title;
-    reportSummary = freeReport.summary;
-    allSections.push(...freeReport.sections);
-
-    freeReport.sections.forEach((s) => {
-      onProgress?.(allSections.length, allTemplates.length, s.title);
-    });
-    console.info(`[Deep Intelligence] Free sections complete — ${freeReport.sections.length} sections in ${Date.now() - startTime}ms`);
-  } catch (error) {
-    console.error('[Deep Intelligence] Free sections failed:', error);
-    // Continue with premium even if free fails
-  }
-
-  // ── Batch 2+: Premium sections in groups of 3 ──────────────
-  const deepSystemPrompt = getDeepIntelligenceSystemPrompt(options?.language ?? 'en');
-
-  for (let i = 0; i < premiumTemplates.length; i += BATCH_SIZE) {
-    const batch = premiumTemplates.slice(i, i + BATCH_SIZE);
-    const batchStart = Date.now();
-    console.info(`[Deep Intelligence] Generating premium batch ${Math.floor(i / BATCH_SIZE) + 1} (${batch.map(t => t.id).join(', ')})...`);
-
-    try {
-      const batchReport = await withRetry(async () => {
-        const client = await getAIClient();
-        const userPrompt = buildDeepIntelligencePrompt(input, batch);
-
-        const response = await client.chat.completions.create({
-          model: 'default',
-          messages: [
-            { role: 'system', content: deepSystemPrompt },
-            { role: 'user', content: userPrompt },
-          ],
-          temperature,
-        });
-
-        const content = response.choices?.[0]?.message?.content;
-        if (!content) {
-          throw new AIEngineError(AIErrorType.GENERATION_FAILED, `AI returned empty response for premium batch starting at ${i}`);
-        }
-
-        return parseAIResponse(content, batch);
-      });
-
-      // Use the title/summary from the first premium batch (most comprehensive)
-      if (i === 0 && batchReport.title) {
-        reportTitle = batchReport.title;
-      }
-      if (i === 0 && batchReport.summary) {
-        reportSummary = batchReport.summary;
-      }
-
-      allSections.push(...batchReport.sections);
-
-      batchReport.sections.forEach((s) => {
-        onProgress?.(allSections.length, allTemplates.length, s.title);
-      });
-      console.info(`[Deep Intelligence] Premium batch complete — ${batchReport.sections.length} sections in ${Date.now() - batchStart}ms (total: ${allSections.length}/${allTemplates.length})`);
+      const parsed = parseAIResponse(content, batchTemplates);
+      console.info(`[Deep Intelligence] Batch complete: ${batchDesc} in ${Date.now() - batchStart}ms`);
+      return parsed;
     } catch (error) {
-      console.error(`[Deep Intelligence] Premium batch ${i}-${i + BATCH_SIZE} failed:`, error);
-      // Try generating sections individually as fallback
-      console.info(`[Deep Intelligence] Falling back to individual section generation...`);
-      for (const template of batch) {
+      console.warn(`[Deep Intelligence] Batch failed for ${batchDesc}:`, error);
+      console.info(`[Deep Intelligence] Falling back to individual generation for batch: ${batchDesc}`);
+      
+      const sections: ReportSection[] = [];
+      for (const template of batchTemplates) {
         try {
           const section = await generateSection(input, template.id, { temperature });
-          allSections.push(section);
-          onProgress?.(allSections.length, allTemplates.length, section.title);
+          sections.push(section);
         } catch (sectionError) {
           console.error(`[Deep Intelligence] Section ${template.id} failed individually:`, sectionError);
-          // Add a fallback section
-          allSections.push({
+          sections.push({
             id: template.id,
             title: template.title,
             icon: template.icon,
@@ -709,11 +648,43 @@ export async function generateDeepIntelligenceReport(
             traits: template.traits,
             insightLevel: template.insightLevel,
           });
-          onProgress?.(allSections.length, allTemplates.length, template.title);
         }
       }
+      return {
+        title: isFree ? 'Your Personality Report' : '',
+        summary: isFree ? 'A comprehensive analysis of your personality and patterns.' : '',
+        sections,
+      };
     }
+  };
+
+  // Run all batches concurrently in parallel using Promise.all
+  const promises = [];
+  // Push Batch 1 (Free)
+  promises.push(generateBatchWithFallback(freeTemplates, true));
+  // Push Premium batches (in groups of 3)
+  for (let i = 0; i < premiumTemplates.length; i += BATCH_SIZE) {
+    const batch = premiumTemplates.slice(i, i + BATCH_SIZE);
+    promises.push(generateBatchWithFallback(batch, false));
   }
+
+  const results = await Promise.all(promises);
+
+  results.forEach((res, index) => {
+    if (index === 0) {
+      reportTitle = res.title;
+      reportSummary = res.summary;
+    } else if (index === 1 && !reportTitle) {
+      reportTitle = res.title;
+      reportSummary = res.summary;
+    }
+    allSections.push(...res.sections);
+
+    // Trigger progress callbacks
+    res.sections.forEach((s) => {
+      onProgress?.(allSections.length, allTemplates.length, s.title);
+    });
+  });
 
   // ── Sort sections in template order ──────────────────────────
   const sectionOrder = allTemplates.map((t) => t.id);
@@ -741,11 +712,12 @@ export async function checkAIService(): Promise<{
     const client = await getAIClient();
     // Simple test call
     const response = await client.chat.completions.create({
-      model: 'default',
+      model: 'deepseek-v4-flash',
       messages: [
         { role: 'user', content: 'Reply with the word "ok" and nothing else.' },
       ],
       temperature: 0,
+      thinking: { type: 'disabled' },
     });
 
     const content = response.choices?.[0]?.message?.content;

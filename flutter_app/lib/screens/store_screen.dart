@@ -343,26 +343,333 @@ class _StoreScreenState extends State<StoreScreen> {
         'Rituals': Colors.pink,
       };
 
-  List<_Product> get _recommendedProducts {
-    final state = Provider.of<AppState>(context, listen: false);
-    final userDoshas = state.astrologyData?.doshas ?? [];
-    final userPlanets = state.astrologyData?.planetaryPositions.keys.toList() ?? [];
+  Map<String, dynamic> _getPrimaryRecommendation(AppState state) {
+    final astrology = state.astrologyData;
+    if (astrology == null) {
+      return {
+        'title': 'Universal Protection Shield',
+        'reason': 'Shield your path from negative cosmic transits and stabilize nine planetary nodes.',
+        'gemstoneId': 'panch-mukhi-rudraksha',
+        'pujaId': 'navagraha-puja',
+        'planet': 'All Planets',
+      };
+    }
 
-    return _products.where((product) {
-      // Match by dosha
-      if (product.doshaRelated != null) {
-        final matchesDosha = product.doshaRelated!.any((d) =>
-            userDoshas.any((ud) => ud.toLowerCase().contains(d.toLowerCase().split(' ')[0])));
-        if (matchesDosha) return true;
-      }
-      // Match by planet
-      if (product.planetRelated != null) {
-        final matchesPlanet = product.planetRelated!.any((p) =>
-            userPlanets.any((up) => up.toLowerCase() == p.toLowerCase()));
-        if (matchesPlanet) return true;
-      }
-      return false;
-    }).toList();
+    final doshas = astrology.doshas;
+    final planetaryPositions = astrology.planetaryPositions;
+
+    // Check Mangal Dosha first
+    final hasMangalDosha = doshas.any((d) => d.toLowerCase().contains('mangal')) ||
+        doshas.any((d) => d.toLowerCase().contains('mars'));
+    final marsHouse = planetaryPositions['Mars']?.house;
+    final isMarsChallenging = marsHouse == 1 || marsHouse == 4 || marsHouse == 7 || marsHouse == 8 || marsHouse == 12;
+
+    if (hasMangalDosha || isMarsChallenging) {
+      return {
+        'title': 'Mars Pacification & Relationship Harmony',
+        'reason': 'Mars occupies a highly dominant placement in your chart, causing intensive energetic friction and relationship hurdles. Pacify its influence to restore alignment.',
+        'gemstoneId': 'red-coral',
+        'pujaId': 'mangal-dosha-puja',
+        'planet': 'Mars',
+      };
+    }
+
+    // Check Saturn / Sade Sati next
+    final saturnHouse = planetaryPositions['Saturn']?.house;
+    final saturnRetro = planetaryPositions['Saturn']?.retrograde ?? false;
+    final isSaturnChallenging = saturnHouse == 1 || saturnHouse == 4 || saturnHouse == 7 || saturnHouse == 8 || saturnHouse == 12 || saturnRetro;
+
+    if (isSaturnChallenging) {
+      return {
+        'title': 'Saturn Stability & Karmic Protection',
+        'reason': 'Saturn occupies a heavy and challenging house placement in your chart. Strengthen your endurance, dissolve cosmic delays, and safeguard your career paths.',
+        'gemstoneId': 'blue-sapphire',
+        'pujaId': 'saturn-shanti-puja',
+        'planet': 'Saturn',
+      };
+    }
+
+    // Check Jupiter (Brihaspati)
+    final jupiterHouse = planetaryPositions['Jupiter']?.house;
+    final jupiterSign = planetaryPositions['Jupiter']?.sign ?? '';
+    final isJupiterChallenging = jupiterHouse == 6 || jupiterHouse == 8 || jupiterHouse == 12 || jupiterSign.toLowerCase().contains('capricorn');
+
+    if (isJupiterChallenging) {
+      return {
+        'title': 'Jupiter Abundance & Wisdom Key',
+        'reason': 'Jupiter is positioned in a weak house or sign in your birth chart. Amplify your luck, wisdom, marriage prospects, and spiritual abundance with targeted remedies.',
+        'gemstoneId': 'yellow-sapphire',
+        'pujaId': 'navagraha-puja',
+        'planet': 'Jupiter',
+      };
+    }
+
+    // Fallback default
+    return {
+      'title': 'Universal Protection & Abundance Combo',
+      'reason': 'Perfect for balancing your current planetary dashas, cleansing your energy field, and shielding against unpredictable daily transit currents.',
+      'gemstoneId': 'panch-mukhi-rudraksha',
+      'pujaId': 'navagraha-puja',
+      'planet': 'All Planets',
+    };
+  }
+
+  Widget _buildSmartRecommendationBanner(AppState state, bool isDark) {
+    final reco = _getPrimaryRecommendation(state);
+    
+    // Safety check fallback queries
+    final _Product gemstone = _products.firstWhere(
+      (p) => p.id == reco['gemstoneId'],
+      orElse: () => _products.firstWhere((p) => p.category == 'Gemstones'),
+    );
+    final _Product puja = _products.firstWhere(
+      (p) => p.id == reco['pujaId'],
+      orElse: () => _products.firstWhere((p) => p.category == 'Pujas'),
+    );
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          colors: isDark
+              ? [AppColors.gold.withOpacity(0.15), Colors.black.withOpacity(0.4)]
+              : [AppColors.gold.withOpacity(0.08), Colors.white],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(
+          color: AppColors.gold.withOpacity(0.4),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.gold.withOpacity(0.08),
+            blurRadius: 16,
+            spreadRadius: 2,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.gold.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.gold, width: 0.8),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(LucideIcons.sparkles, color: AppColors.goldDark, size: 12),
+                        SizedBox(width: 5),
+                        Text(
+                          "COSMIC ALIGNMENT REMEDIES",
+                          style: TextStyle(
+                            color: AppColors.goldDark,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(LucideIcons.shield_check, color: Colors.green, size: 10),
+                        SizedBox(width: 3),
+                        Text(
+                          "Lab Certified",
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                reco['title'],
+                style: TextStyle(
+                  color: isDark ? Colors.white : AppColors.brown900,
+                  fontFamily: 'Playfair Display',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                reco['reason'],
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : AppColors.brown500,
+                  fontSize: 12,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Divider(color: AppColors.gold, thickness: 0.5),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => _showProductDetails(gemstone, isDark),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.darkCard.withOpacity(0.6) : Colors.white.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: AppColors.brown100.withOpacity(0.4),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(gemstone.emoji, style: const TextStyle(fontSize: 20)),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    "Gemstone",
+                                    style: TextStyle(
+                                      color: isDark ? Colors.white54 : AppColors.brown400,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              gemstone.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : AppColors.brown900,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "₹${gemstone.price.toInt()}",
+                              style: const TextStyle(
+                                color: AppColors.goldDark,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => _showProductDetails(puja, isDark),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.darkCard.withOpacity(0.6) : Colors.white.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: AppColors.brown100.withOpacity(0.4),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(puja.emoji, style: const TextStyle(fontSize: 20)),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    "Vedic Puja",
+                                    style: TextStyle(
+                                      color: isDark ? Colors.white54 : AppColors.brown400,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              puja.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : AppColors.brown900,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "₹${puja.price.toInt()}",
+                              style: const TextStyle(
+                                color: AppColors.goldDark,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(LucideIcons.sparkles, color: AppColors.goldDark, size: 12),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      "Pujas performed by Kashi priests. Gemstones with govt-lab certification and 30-day return policy.",
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : AppColors.brown400,
+                        fontSize: 9,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   List<_Product> get _filteredProducts {
@@ -696,11 +1003,105 @@ class _StoreScreenState extends State<StoreScreen> {
     );
   }
 
+  Widget _buildRemediesDisclosureCard(bool isDark) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard.withOpacity(0.3) : AppColors.gold.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.gold.withOpacity(0.3),
+          width: 1.0,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(LucideIcons.shield_check, color: AppColors.gold, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                "REMEDIAL TRANSPARENCY DECREE ✦",
+                style: TextStyle(
+                  color: isDark ? AppColors.goldLight : AppColors.goldDark,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "Astrology platforms hide markups on overpriced gemstones, claiming they rewrite your fate. Here is what we stand by:",
+            style: TextStyle(
+              color: isDark ? Colors.white70 : AppColors.brown700,
+              fontSize: 11,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildRemedyBullet(
+            title: "Gemstones Do Not Change Your Karma",
+            text: "Science states gemstones reflect light refraction. Vedic texts explain they focus the mind and balance biological light-vibrations. They are optional tools. Buying a ₹50,000 stone is never a spiritual requirement.",
+            isDark: isDark,
+          ),
+          const SizedBox(height: 8),
+          _buildRemedyBullet(
+            title: "Free Alternatives are More Effective",
+            text: "Sound resonance (mantra chanting), physical disciplines (fasts), and mental alignment (charity to the poor on Saturdays or Tuesdays) are free/low-cost remedies that Vedic texts prioritize over material transactions.",
+            isDark: isDark,
+          ),
+          const SizedBox(height: 8),
+          _buildRemedyBullet(
+            title: "No Fear-Coercion Policy",
+            text: "We sell lab-certified items for convenience, but you do NOT need to buy anything to align your chart. If any counselor tries to terrify you into buying a remedy, report them immediately. Your karma belongs to your character, not your wallet.",
+            isDark: isDark,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRemedyBullet({required String title, required String text, required bool isDark}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text("✦", style: TextStyle(color: AppColors.gold, fontSize: 10)),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: isDark ? Colors.white : AppColors.brown900,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          text,
+          style: TextStyle(
+            color: isDark ? Colors.white60 : AppColors.brown500,
+            fontSize: 10,
+            height: 1.35,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final state = Provider.of<AppState>(context);
-    final recommendations = _recommendedProducts;
     final filtered = _filteredProducts;
 
     return Scaffold(
@@ -766,101 +1167,10 @@ class _StoreScreenState extends State<StoreScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ─── RECOMMENDED FOR YOU (CAROUSEL) ───
-                    if (recommendations.isNotEmpty && _searchQuery.trim().isEmpty) ...[
-                      const Padding(
-                        padding: EdgeInsets.only(left: 20, top: 12, bottom: 8),
-                        child: Text(
-                          "Recommended for Your Chart",
-                          style: TextStyle(
-                            color: AppColors.goldDark,
-                            fontFamily: 'Playfair Display',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        height: 140,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: recommendations.length,
-                          itemBuilder: (context, idx) {
-                            final product = recommendations[idx];
-
-                            // Antigravity Design Rule: Weightless glassmorphism, soft diffused drop-shadow
-                            return GestureDetector(
-                              onTap: () => _showProductDetails(product, isDark),
-                              child: Container(
-                                width: 220,
-                                margin: const EdgeInsets.only(right: 12, bottom: 8),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: isDark ? AppColors.darkCard.withOpacity(0.8) : Colors.white.withOpacity(0.8),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: AppColors.gold.withOpacity(0.3), width: 0.8),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: [
-                                    Text(product.emoji, style: const TextStyle(fontSize: 32)),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            product.name,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              color: isDark ? Colors.white : AppColors.brown900,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            "₹${product.price.toInt()}",
-                                            style: const TextStyle(
-                                              color: AppColors.goldDark,
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Row(
-                                            children: [
-                                              const Icon(Icons.star, color: Colors.amber, size: 10),
-                                              const SizedBox(width: 2),
-                                              Text(
-                                                product.rating.toString(),
-                                                style: TextStyle(
-                                                  color: isDark ? Colors.white70 : AppColors.brown700,
-                                                  fontSize: 9,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                    // ─── RECOMMENDED FOR YOU (SMART BANNER) ───
+                    if (_searchQuery.trim().isEmpty) ...[
+                      _buildSmartRecommendationBanner(state, isDark),
+                      _buildRemediesDisclosureCard(isDark),
                     ],
 
                     // ─── CATEGORY TAB FILTERS ───
@@ -885,20 +1195,30 @@ class _StoreScreenState extends State<StoreScreen> {
                                   children: [
                                     Icon(icon, color: isActive ? Colors.white : color, size: 13),
                                     const SizedBox(width: 6),
-                                    Text(cat, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                                    Text(
+                                      cat,
+                                      style: TextStyle(
+                                        color: isActive ? Colors.white : (isDark ? Colors.white70 : AppColors.brown700),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 selected: isActive,
-                                selectedColor: AppColors.gold,
+                                selectedColor: color,
                                 backgroundColor: isDark ? AppColors.darkCard : Colors.white,
-                                labelStyle: TextStyle(
-                                  color: isActive
-                                      ? Colors.white
-                                      : (isDark ? Colors.white70 : AppColors.brown800),
+                                elevation: 0,
+                                pressElevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: BorderSide(
+                                    color: isActive ? Colors.transparent : (isDark ? Colors.white12 : AppColors.brown100),
+                                    width: 0.8,
+                                  ),
                                 ),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                onSelected: (selected) {
-                                  if (selected) {
+                                onSelected: (val) {
+                                  if (val) {
                                     setState(() {
                                       _activeCategory = cat;
                                     });
@@ -920,69 +1240,55 @@ class _StoreScreenState extends State<StoreScreen> {
                         itemCount: filtered.length,
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
+                          childAspectRatio: 150 / 185,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
-                          childAspectRatio: 0.85,
                         ),
                         itemBuilder: (context, index) {
                           final product = filtered[index];
-
-                          // Antigravity Design Rule: Staggered entrance transition
-                          return TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0.0, end: 1.0),
-                            duration: Duration(milliseconds: 300 + (index % 6 * 60)),
-                            curve: Curves.easeOut,
-                            builder: (context, value, child) {
-                              return Opacity(
-                                opacity: value,
-                                child: Transform.translate(
-                                  offset: Offset(0, 20 * (1 - value)),
-                                  child: child,
+                          return Card(
+                            margin: EdgeInsets.zero,
+                            color: isDark ? AppColors.darkCard : Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(color: AppColors.brown100.withOpacity(0.4), width: 0.8),
+                            ),
+                            elevation: 0,
+                            child: InkWell(
+                              onTap: () => _showProductDetails(product, isDark),
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  gradient: LinearGradient(
+                                    colors: isDark
+                                        ? [Colors.white.withOpacity(0.01), Colors.black.withOpacity(0.1)]
+                                        : [Colors.transparent, AppColors.brown100.withOpacity(0.1)],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
                                 ),
-                              );
-                            },
-                            child: Card(
-                              color: isDark ? AppColors.darkCard : Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                side: BorderSide(
-                                  color: AppColors.brown100.withOpacity(0.4),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: InkWell(
-                                onTap: () => _showProductDetails(product, isDark),
-                                borderRadius: BorderRadius.circular(16),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
+                                  padding: const EdgeInsets.all(12),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: [
-                                      // Top info: category + wishlist icon
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            product.category,
-                                            style: const TextStyle(color: AppColors.brown400, fontSize: 9, fontWeight: FontWeight.bold),
+                                      // Image/Emoji container
+                                      Expanded(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: AppColors.gold.withOpacity(0.05),
+                                            borderRadius: BorderRadius.circular(12),
                                           ),
-                                          Icon(
-                                            _wishlist.contains(product.id) ? Icons.favorite : Icons.favorite_border,
-                                            color: _wishlist.contains(product.id) ? Colors.red : AppColors.brown400,
-                                            size: 14,
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            product.emoji,
+                                            style: const TextStyle(fontSize: 32),
                                           ),
-                                        ],
-                                      ),
-                                      const Spacer(),
-                                      // Product visual represent
-                                      Center(
-                                        child: Text(
-                                          product.emoji,
-                                          style: const TextStyle(fontSize: 32),
                                         ),
                                       ),
-                                      const Spacer(),
-                                      // Product title
+                                      const SizedBox(height: 8),
+                                      // Title
                                       Text(
                                         product.name,
                                         maxLines: 2,

@@ -402,6 +402,64 @@ class ApiService {
     }
   }
 
+  // Fetch Deep Intelligence Report
+  static Future<Map<String, dynamic>> fetchDeepIntelligenceReport({
+    required String userId,
+    required Map<String, dynamic> astrologyData,
+    required Map<String, dynamic> numerologyData,
+    required Map<String, dynamic> traitScores,
+    String language = 'en',
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/ai/deep-intelligence'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'userId': userId,
+        'astrologyData': astrologyData,
+        'numerologyData': numerologyData,
+        'traitScores': traitScores,
+        'language': language,
+      }),
+    ).timeout(const Duration(seconds: 120));
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final raw = jsonDecode(response.body);
+      final data = raw['data'] ?? raw;
+      return data;
+    } else {
+      final errorMsg = _tryExtractErrorMessage(response.body);
+      throw Exception(errorMsg ?? 'Failed to generate deep cosmic insights (${response.statusCode})');
+    }
+  }
+
+  // Update Preferences API
+  static Future<Map<String, dynamic>> updatePreferences({
+    required String userId,
+    bool? ucpEnabled,
+    bool? rotateUcpToken,
+    String? language,
+    String? vedicLevel,
+  }) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/api/auth/preferences'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'userId': userId,
+        if (ucpEnabled != null) 'ucpEnabled': ucpEnabled,
+        if (rotateUcpToken != null) 'rotateUcpToken': rotateUcpToken,
+        if (language != null) 'language': language,
+        if (vedicLevel != null) 'vedicLevel': vedicLevel,
+      }),
+    ).timeout(const Duration(seconds: 15));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      final errorMsg = _tryExtractErrorMessage(response.body);
+      throw Exception(errorMsg ?? 'Failed to update preferences on server');
+    }
+  }
+
   // Helpers
   static String? _tryExtractErrorMessage(String body) {
     try {
@@ -411,5 +469,21 @@ class ApiService {
       return null;
     }
   }
+
+  // Fetch User Profile API
+  static Future<Map<String, dynamic>> fetchUserProfile(String userId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/auth/profile?userId=$userId'),
+      headers: {'Content-Type': 'application/json'},
+    ).timeout(const Duration(seconds: 15));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      final errorMsg = _tryExtractErrorMessage(response.body);
+      throw Exception(errorMsg ?? 'Failed to fetch user profile from server');
+    }
+  }
 }
+
 

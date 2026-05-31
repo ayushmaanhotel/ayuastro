@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { calculateKundali } from '@/lib/astrology';
+import { calculateKundali, initializeSwissEphemeris } from '@/lib/astrology';
 import {
   type PlanetPosition,
   type HouseData,
@@ -1222,6 +1222,8 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
   try {
+    // Ensure Swiss Ephemeris is initialized before calculations
+    await initializeSwissEphemeris();
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 

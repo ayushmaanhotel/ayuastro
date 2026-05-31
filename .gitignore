@@ -61,3 +61,11 @@ mingit.zip
 # Original web project directory
 original/
 
+# temporary and scratch files
+scratch/
+test-api-calls.js
+test-db-lookup.js
+test-deepseek.ts
+test-ephemeris.ts
+update-max-duration.js
+flutter_app/upade.md

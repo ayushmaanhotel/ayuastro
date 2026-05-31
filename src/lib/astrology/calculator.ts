@@ -88,6 +88,7 @@ let swephReady = false;
 
 /** Whether we've attempted initialization */
 let swephInitAttempted = false;
+let swephInitPromise: Promise<boolean> | null = null;
 
 /**
  * Initialize the Swiss Ephemeris module.
@@ -95,27 +96,31 @@ let swephInitAttempted = false;
  * Returns true if sweph is ready for use.
  */
 export async function initializeSwissEphemeris(): Promise<boolean> {
-  if (swephInitAttempted) return swephReady;
-  swephInitAttempted = true;
+  if (swephInitPromise) return swephInitPromise;
 
-  try {
-    const result = await initSweph();
-    swephReady = result.ready;
-    if (swephReady) {
-      console.log('[Calculator] ✓ Swiss Ephemeris initialized successfully — using arc-minute accuracy');
-    } else {
-      console.error('[Calculator] ✗ Swiss Ephemeris UNAVAILABLE: %s', result.error);
+  swephInitPromise = (async () => {
+    swephInitAttempted = true;
+    try {
+      const result = await initSweph();
+      swephReady = result.ready;
+      if (swephReady) {
+        console.log('[Calculator] ✓ Swiss Ephemeris initialized successfully — using arc-minute accuracy');
+      } else {
+        console.error('[Calculator] ✗ Swiss Ephemeris UNAVAILABLE: %s', result.error);
+        console.error('[Calculator] ✗ Falling back to Meeus calculations with ~1-3° error');
+        console.error('[Calculator] ✗ THIS IS A CRITICAL ISSUE — planetary sign placements may be WRONG at sign boundaries');
+      }
+    } catch (err) {
+      console.error('[Calculator] ✗ Swiss Ephemeris init error:', err);
       console.error('[Calculator] ✗ Falling back to Meeus calculations with ~1-3° error');
-      console.error('[Calculator] ✗ THIS IS A CRITICAL ISSUE — planetary sign placements may be WRONG at sign boundaries');
+      swephReady = false;
     }
-  } catch (err) {
-    console.error('[Calculator] ✗ Swiss Ephemeris init error:', err);
-    console.error('[Calculator] ✗ Falling back to Meeus calculations with ~1-3° error');
-    swephReady = false;
-  }
+    return swephReady;
+  })();
 
-  return swephReady;
+  return swephInitPromise;
 }
+
 
 /**
  * Check if Swiss Ephemeris is ready for use.

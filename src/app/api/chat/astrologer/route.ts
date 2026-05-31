@@ -1,6 +1,7 @@
+export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import ZAI from 'z-ai-web-dev-sdk';
+import deepseek from '@/lib/ai/deepseek';
 
 // ─── Rate Limiting (in-memory, per session) ────────────────────────────────
 
@@ -41,27 +42,27 @@ const chatSchema = z.object({
   message: z.string().min(1, 'Message is required').max(500, 'Message too long (max 500 characters)'),
   sessionId: z.string().min(1, 'Session ID is required'),
   context: z.object({
-    name: z.string().optional(),
-    sunSign: z.string().optional(),
-    moonSign: z.string().optional(),
-    ascendant: z.string().optional(),
-    nakshatra: z.string().optional(),
-    currentDasha: z.string().optional(),
-    yogas: z.array(z.string()).optional(),
-    doshas: z.array(z.string()).optional(),
-    lifePathNumber: z.number().optional(),
-    destinyNumber: z.number().optional(),
-    soulUrgeNumber: z.number().optional(),
-    archetype: z.string().optional(),
-    topTraits: z.array(z.string()).optional(),
-    relationshipStatus: z.string().optional(),
-  }).optional(),
+    name: z.string().nullish(),
+    sunSign: z.string().nullish(),
+    moonSign: z.string().nullish(),
+    ascendant: z.string().nullish(),
+    nakshatra: z.string().nullish(),
+    currentDasha: z.string().nullish(),
+    yogas: z.array(z.string()).nullish(),
+    doshas: z.array(z.string()).nullish(),
+    lifePathNumber: z.number().nullish(),
+    destinyNumber: z.number().nullish(),
+    soulUrgeNumber: z.number().nullish(),
+    archetype: z.string().nullish(),
+    topTraits: z.array(z.string()).nullish(),
+    relationshipStatus: z.string().nullish(),
+  }).nullish(),
   conversationHistory: z.array(z.object({
     role: z.enum(['user', 'assistant']),
     content: z.string(),
   })).optional(),
-  astrologerId: z.string().optional(),
-  astrologerSystemPrompt: z.string().optional(),
+  astrologerId: z.string().nullish(),
+  astrologerSystemPrompt: z.string().nullish(),
 });
 
 // ─── System Prompt Builder ──────────────────────────────────────────────────
@@ -94,18 +95,17 @@ ${context.relationshipStatus ? `- Relationship Status: ${context.relationshipSta
     ? `\n\nASTROLOGER PERSONA:\n${astrologerSystemPrompt}`
     : '';
 
-  return `You are an AyuAstro astrologer — a wise, empathetic, and emotionally intelligent guide who blends Vedic astrology wisdom with behavioral psychology. You help users explore their emotional patterns, relationships, and personal growth through the lens of their unique cosmic blueprint.
+  return `You are an AyuAstro astrologer — a master of your specific astrological domain. You speak with a friendly, authoritative, and easy-to-understand tone. You help users explore their emotional patterns, relationships, and personal growth through the lens of their unique cosmic blueprint.
 ${astrologerBlock}
 
 ${contextBlock}
 
 Your guiding principles:
-1. Reference the user's astrological data when giving guidance — their signs, nakshatra, and numerology are the lens through which you interpret their questions.
-2. Blend Vedic astrology insights with behavioral science — for example, explain how a moon sign's emotional nature interacts with attachment styles or communication patterns.
-3. Speak in a warm, conversational, human tone — like a trusted friend who happens to know the stars. Not robotic, not formal. Use natural language.
-4. Keep responses concise — maximum 2-3 paragraphs. Be insightful but not overwhelming.
-5. Focus on self-awareness, emotional intelligence, and actionable growth.
-6. AyuAstro's motto is "Nothing to Hide" — be honest and direct. No sugarcoating, no false hope, but always compassionate.
+1. Speak strictly within your ASTROLOGER PERSONA and domain expertise, but keep your responses extremely short and to the point.
+2. Every response must be between 10 to 30 words, and under no circumstances exceed 50 words maximum.
+3. Reference the user's astrological data (like their moon sign, nakshatra, or a specific planet placement) very briefly when answering, blending it with a behavioral psychology angle.
+4. Speak in simple language, with a natural, friendly, and warm human tone.
+5. Do NOT use cliché AI phrases like "I am not sugarcoating", "without sugarcoating", or "no sugarcoating". Be honest, direct, but gentle and supportive.
 
 SAFETY RULES (non-negotiable):
 - NEVER predict death, accidents, or catastrophic events
@@ -133,15 +133,8 @@ function getFallbackResponse(): string {
   return FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)];
 }
 
-// ─── SDK Client (lazy singleton) ───────────────────────────────────────────
-
-let zaiInstance: Awaited<ReturnType<typeof ZAI.create>> | null = null;
-
 async function getAIClient() {
-  if (!zaiInstance) {
-    zaiInstance = await ZAI.create();
-  }
-  return zaiInstance;
+  return deepseek;
 }
 
 // ─── POST Handler ───────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { calculateKundali } from '@/lib/astrology';
+import { calculateKundali, initializeSwissEphemeris } from '@/lib/astrology';
 import { calculateNumerology } from '@/lib/numerology';
 import {
   computeAllTraits,
@@ -78,6 +78,9 @@ function safeStringify(obj: unknown): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure Swiss Ephemeris is initialized before calculations
+    await initializeSwissEphemeris();
+
     const body = await request.json();
     const parsed = quickCalculateSchema.safeParse(body);
 

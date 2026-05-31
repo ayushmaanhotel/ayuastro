@@ -188,7 +188,7 @@ class _ReportScreenState extends State<ReportScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  "Unlock Full Celestial Report",
+                  "Unlock Premium Kundali PDF Guide",
                   style: TextStyle(
                     color: isDark ? Colors.white : AppColors.brown900,
                     fontWeight: FontWeight.bold,
@@ -203,9 +203,43 @@ class _ReportScreenState extends State<ReportScreen> {
             "Access 4 specialized premium sections: Hidden Strengths, Emotional Blind Spots, Money Psychology, and Recurring Life Patterns. Plus, download a beautifully formatted offline PDF report.",
             style: TextStyle(color: AppColors.brown700, fontSize: 11.5, height: 1.45),
           ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Text(
+                "₹99",
+                style: TextStyle(
+                  color: AppColors.goldDark,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                "₹499",
+                style: TextStyle(
+                  color: AppColors.brown400,
+                  fontSize: 14,
+                  decoration: TextDecoration.lineThrough,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Text(
+                  "80% OFF (Limited Offer)",
+                  style: TextStyle(color: Colors.green, fontSize: 9, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
           NeonGoldButton(
-            text: "Unlock Premium (Simulated)",
+            text: "Unlock Detailed Report Now",
             icon: LucideIcons.lock_open,
             onPressed: () => _simulateUnlock(context, state),
           ),
@@ -344,10 +378,10 @@ class _ReportScreenState extends State<ReportScreen> {
               const SizedBox(height: 12),
               const Divider(),
               const SizedBox(height: 8),
-              Text(
-                section.content,
-                style: const TextStyle(
-                  color: AppColors.brown700,
+              AstroMarkdownText(
+                text: section.content,
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : AppColors.brown700,
                   fontSize: 12.5,
                   height: 1.45,
                 ),
@@ -429,74 +463,348 @@ class _ReportScreenState extends State<ReportScreen> {
 
   void _simulateUnlock(BuildContext context, AppState state) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) {
         bool processing = false;
+        String selectedUpiApp = '';
+
         return StatefulBuilder(
           builder: (context, setStateDialog) {
-            return AlertDialog(
-              backgroundColor: isDark ? AppColors.darkCard : Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: Row(
-                children: [
-                  const Text("👑 ", style: TextStyle(fontSize: 20)),
-                  Text(
-                    "Unlock Premium",
-                    style: TextStyle(
-                      fontFamily: 'Playfair Display',
-                      color: isDark ? Colors.white : AppColors.brown900,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+            void handleUpiTap(String appName) async {
+              setStateDialog(() {
+                processing = true;
+                selectedUpiApp = appName;
+              });
+              await Future.delayed(const Duration(milliseconds: 2000));
+              if (context.mounted) {
+                Navigator.pop(context); // Close the UPI payment sheet
+              }
+              _triggerReportGeneration(context, state, appName);
+            }
+
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.75,
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkBg : AppColors.cream,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                border: Border.all(color: AppColors.gold.withOpacity(0.4), width: 1.0),
               ),
-              content: processing
-                  ? const SizedBox(
-                      height: 100,
-                      child: Center(
-                        child: CosmicLoader(message: "Authorizing cosmic access..."),
-                      ),
-                    )
-                  : const Text(
-                      "Unlock all 4 premium report sections and enable typeset PDF generation. (This is a free simulation of the purchase flow.)",
-                      style: TextStyle(fontSize: 12.5, height: 1.45),
-                    ),
-              actions: processing
-                  ? []
-                  : [
-                      TextButton(
-                        child: const Text("Maybe Later", style: TextStyle(color: AppColors.brown500)),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.gold,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: StarFieldBackground(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 48,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: AppColors.brown400,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
                         ),
-                        child: const Text("Unlock Now", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                        onPressed: () async {
-                          setStateDialog(() {
-                            processing = true;
-                          });
-                          await Future.delayed(const Duration(milliseconds: 1800));
-                          state.setHasPaid(true);
-                          if (mounted) {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("All cosmic insights successfully unlocked! ✦"),
-                                backgroundColor: AppColors.sage,
-                              ),
-                            );
-                          }
-                        },
                       ),
+                      const SizedBox(height: 20),
+                      if (processing) ...[
+                        Expanded(
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const CosmicLoader(message: "Initializing secure merchant handshake..."),
+                                const SizedBox(height: 20),
+                                Text(
+                                  "Connecting securely to $selectedUpiApp App...",
+                                  style: const TextStyle(color: AppColors.brown500, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ] else ...[
+                        Row(
+                          children: [
+                            const Text("👑", style: TextStyle(fontSize: 26)),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Premium Kundali Guide",
+                                    style: TextStyle(
+                                      color: isDark ? Colors.white : AppColors.brown900,
+                                      fontFamily: 'Playfair Display',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  const Text(
+                                    "Astro-Remedial PDF & Golden Insights",
+                                    style: TextStyle(color: AppColors.goldDark, fontSize: 11, fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            child: Column(
+                              children: [
+                                _buildBenefitRow("Complete 35+ Page Kundali PDF Guidebook", "Download & read offline anytime"),
+                                _buildBenefitRow("Hidden Strengths & Potential Mapping", "Uncover cosmic advantages in career/life"),
+                                _buildBenefitRow("Emotional Blind Spots & Sade Sati Care", "Actionable methods to dissolve hurdles"),
+                                _buildBenefitRow("Money Psychology & Wealth Guidance", "Tailored financial astro-remedies"),
+                                const SizedBox(height: 16),
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? AppColors.darkCard : Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: AppColors.gold.withOpacity(0.3)),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text("Payable Amount", style: TextStyle(color: AppColors.brown400, fontSize: 11)),
+                                          Text("Includes PDF Generation", style: TextStyle(color: AppColors.brown500, fontSize: 9)),
+                                        ],
+                                      ),
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                                        textBaseline: TextBaseline.alphabetic,
+                                        children: [
+                                          const Text(
+                                            "₹99",
+                                            style: TextStyle(color: AppColors.goldDark, fontSize: 24, fontWeight: FontWeight.bold),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            "₹499",
+                                            style: TextStyle(
+                                              color: isDark ? Colors.white30 : AppColors.brown100,
+                                              fontSize: 14,
+                                              decoration: TextDecoration.lineThrough,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                const Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    "CHOOSE INSTANT UPI OPTION",
+                                    style: TextStyle(
+                                      color: AppColors.goldDark,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                _buildUpiButton(
+                                  context: context,
+                                  appName: "Google Pay",
+                                  color: Colors.blue.shade600,
+                                  icon: "GPay",
+                                  onPressed: () => handleUpiTap("Google Pay"),
+                                ),
+                                const SizedBox(height: 8),
+                                _buildUpiButton(
+                                  context: context,
+                                  appName: "PhonePe",
+                                  color: Colors.purple.shade600,
+                                  icon: "PhonePe",
+                                  onPressed: () => handleUpiTap("PhonePe"),
+                                ),
+                                const SizedBox(height: 8),
+                                _buildUpiButton(
+                                  context: context,
+                                  appName: "Paytm",
+                                  color: Colors.cyan.shade700,
+                                  icon: "Paytm",
+                                  onPressed: () => handleUpiTap("Paytm"),
+                                ),
+                                const SizedBox(height: 8),
+                                _buildUpiButton(
+                                  context: context,
+                                  appName: "Other UPI / BHIM",
+                                  color: Colors.orange.shade700,
+                                  icon: "UPI",
+                                  onPressed: () => handleUpiTap("UPI App"),
+                                ),
+                                const SizedBox(height: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
+                  ),
+                ),
+              ),
             );
           },
         );
       },
+    );
+  }
+
+  void _triggerReportGeneration(BuildContext context, AppState state, String appName) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return WillPopScope(
+          onWillPop: () async => false, // Prevent dismissing
+          child: const AlertDialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            content: Center(
+              child: CosmicLoader(
+                message: "Analyzing celestial alignment...\nSynthesizing 15-segment deep insights...",
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    try {
+      await state.generateDeepReport();
+      if (mounted) {
+        Navigator.pop(context); // Close loader dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("✨ Payment of ₹99 successful via $appName! Deep AI Insights generated."),
+            backgroundColor: AppColors.sage,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Close loader dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkCard : Colors.white,
+            title: const Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red),
+                SizedBox(width: 8),
+                Text("AI Generation Error"),
+              ],
+            ),
+            content: Text(
+              "We encountered an issue while generating your deep astrological report: $e\n\nPlease try again.",
+              style: const TextStyle(fontSize: 13, height: 1.4),
+            ),
+            actions: [
+              TextButton(
+                child: const Text("OK", style: TextStyle(color: AppColors.goldDark)),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildBenefitRow(String title, String subtitle) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.check_circle, color: Colors.green, size: 16),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, height: 1.3),
+                ),
+                Text(
+                  subtitle,
+                  style: const TextStyle(color: AppColors.brown500, fontSize: 10, height: 1.3),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUpiButton({
+    required BuildContext context,
+    required String appName,
+    required Color color,
+    required String icon,
+    required VoidCallback onPressed,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkCard : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.brown100.withOpacity(0.4), width: 1.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 30,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: color.withOpacity(0.4), width: 0.8),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                icon,
+                style: TextStyle(color: color, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                appName,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+            ),
+            const Icon(LucideIcons.chevron_right, size: 14, color: AppColors.brown400),
+          ],
+        ),
+      ),
     );
   }
 

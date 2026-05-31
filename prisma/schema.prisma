@@ -43,6 +43,8 @@ model UserPreferences {
   moodReminders     Boolean  @default(true)
   vedicLevel        String   @default("standard") // standard, detailed, hinglish
   notificationsEnabled Boolean @default(true)
+  ucpEnabled        Boolean  @default(false)
+  ucpToken          String?  @unique
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

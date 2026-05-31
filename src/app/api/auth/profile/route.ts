@@ -56,6 +56,8 @@ export async function GET(request: NextRequest) {
           moodReminders: user.preferences.moodReminders,
           vedicLevel: user.preferences.vedicLevel,
           notificationsEnabled: user.preferences.notificationsEnabled,
+          ucpEnabled: user.preferences.ucpEnabled,
+          ucpToken: user.preferences.ucpToken,
         }
       : {
           language: 'en',
@@ -64,6 +66,8 @@ export async function GET(request: NextRequest) {
           moodReminders: true,
           vedicLevel: 'standard',
           notificationsEnabled: true,
+          ucpEnabled: false,
+          ucpToken: null,
         };
 
     // Build astrology summary if available

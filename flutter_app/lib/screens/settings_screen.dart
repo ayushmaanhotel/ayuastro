@@ -121,9 +121,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // Appearance
             _sectionHeader('APPEARANCE', isDark),
             const SizedBox(height: 10),
-            _toggleSetting('Dark Mode', '🌙', 'Switch between light and dark themes', _darkMode, (v) {
-              setState(() => _darkMode = v);
-              // In production, this would update the theme
+            _toggleSetting('Dark Mode', '🌙', 'Switch between light and dark themes', state.themeMode == ThemeMode.dark, (v) {
+              state.setThemeMode(v ? ThemeMode.dark : ThemeMode.light);
             }, isDark),
 
             const SizedBox(height: 12),

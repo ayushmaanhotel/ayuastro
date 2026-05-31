@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createHash, randomBytes } from 'crypto';
 import { db } from '@/lib/db';
+import { createClient } from '@/lib/supabase/server';
 
 // ─── Zod Schema ─────────────────────────────────────────────────────────────
 
@@ -16,14 +16,6 @@ const signupSchema = z
     message: 'Either email or phone is required',
     path: ['email'],
   });
-
-// ─── Password Hashing ───────────────────────────────────────────────────────
-
-function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString('hex');
-  const hash = createHash('sha256').update(salt + password).digest('hex');
-  return `${salt}:${hash}`;
-}
 
 // ─── POST Handler ───────────────────────────────────────────────────────────
 
@@ -45,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     const { name, email, phone, password } = parsed.data;
 
-    // Check for duplicate email
+    // Check for duplicate email in Prisma
     if (email) {
       const existingEmail = await db.user.findUnique({ where: { email } });
       if (existingEmail) {
@@ -56,7 +48,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check for duplicate phone
+    // Check for duplicate phone in Prisma
     if (phone) {
       const existingPhone = await db.user.findUnique({ where: { phone } });
       if (existingPhone) {
@@ -67,16 +59,50 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Hash password
-    const passwordHash = hashPassword(password);
+    const supabase = await createClient();
 
-    // Create user with default preferences
+    // Sign up with Supabase
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: email as string,
+      password,
+      options: {
+        data: {
+          name,
+        },
+      },
+    });
+
+    if (authError) {
+      return NextResponse.json(
+        { success: false, error: authError.message },
+        { status: 400 }
+      );
+    }
+
+    const supabaseUserId = authData.user?.id;
+    if (!supabaseUserId) {
+      throw new Error('Supabase user creation failed');
+    }
+
+    // Auto-confirm the user in Supabase auth.users table
+    try {
+      await db.$executeRawUnsafe(
+        `UPDATE auth.users SET email_confirmed_at = NOW(), confirmed_at = NOW() WHERE id = $1`,
+        supabaseUserId
+      );
+      console.log(`[Signup API] Auto-confirmed email for user ${supabaseUserId}`);
+    } catch (dbErr) {
+      console.error('[Signup API] Failed to auto-confirm user in auth.users:', dbErr);
+    }
+
+    // Create user in Prisma with Supabase ID
     const user = await db.user.create({
       data: {
+        id: supabaseUserId, // Sync IDs
         name,
         email: email ?? null,
         phone: phone ?? null,
-        passwordHash,
+        passwordHash: 'SUPABASE_AUTH', // Password handled by Supabase
         isOnboarded: false,
         preferences: {
           create: {
@@ -97,6 +123,7 @@ export async function POST(request: NextRequest) {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        message: 'Signup successful',
       },
       { status: 201 }
     );

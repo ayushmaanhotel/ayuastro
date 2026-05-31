@@ -35,6 +35,9 @@ class AppState extends ChangeNotifier {
   bool _dailyHoroscopeNotif = true;
   bool _moodRemindersNotif = true;
   bool _hasPaid = false;
+  ThemeMode _themeMode = ThemeMode.system;
+  bool _ucpEnabled = false;
+  String? _ucpToken;
 
   // Compatibility detail
   String? _compatPartnerName;
@@ -69,6 +72,12 @@ class AppState extends ChangeNotifier {
   Map<String, List<ChatMessage>> _astrologerChats = {};
   Map<String, int> _astrologerRemaining = {};
 
+  // Yoga/Dosha AI Analyses
+  Map<String, String> _yogaAiAnalysis = {};
+  Map<String, String> _doshaAiAnalysis = {};
+  final Map<String, bool> _yogaAiLoading = {};
+  final Map<String, bool> _doshaAiLoading = {};
+
   // Loading states
   bool _isLoading = false;
   String _loadingMessage = '';
@@ -97,6 +106,8 @@ class AppState extends ChangeNotifier {
   bool get dailyHoroscopeNotif => _dailyHoroscopeNotif;
   bool get moodRemindersNotif => _moodRemindersNotif;
   bool get hasPaid => _hasPaid;
+  bool get ucpEnabled => _ucpEnabled;
+  String? get ucpToken => _ucpToken;
 
   String? get compatPartnerName => _compatPartnerName;
   String? get compatPartnerSign => _compatPartnerSign;
@@ -125,11 +136,24 @@ class AppState extends ChangeNotifier {
   Map<String, List<ChatMessage>> get astrologerChats => _astrologerChats;
   Map<String, int> get astrologerRemaining => _astrologerRemaining;
 
+  Map<String, String> get yogaAiAnalysis => _yogaAiAnalysis;
+  Map<String, String> get doshaAiAnalysis => _doshaAiAnalysis;
+  bool isYogaAiLoading(String yogaName) => _yogaAiLoading[yogaName] ?? false;
+  bool isDoshaAiLoading(String doshaName) => _doshaAiLoading[doshaName] ?? false;
+
   bool get isLoading => _isLoading;
   String get loadingMessage => _loadingMessage;
   String? get error => _error;
   bool get isChatLoading => _isChatLoading;
   bool get isMoodHistoryLoading => _isMoodHistoryLoading;
+
+  ThemeMode get themeMode => _themeMode;
+
+  void setThemeMode(ThemeMode mode) {
+    _themeMode = mode;
+    _saveState();
+    notifyListeners();
+  }
 
   AppState() {
     _loadState();
@@ -154,6 +178,15 @@ class AppState extends ChangeNotifier {
         _vedicLevel = data['vedicLevel'] ?? 'standard';
         _dailyHoroscopeNotif = data['dailyHoroscopeNotif'] ?? true;
         _moodRemindersNotif = data['moodRemindersNotif'] ?? true;
+        _ucpEnabled = data['ucpEnabled'] ?? false;
+        _ucpToken = data['ucpToken'];
+        if (data['themeMode'] != null) {
+          final modeStr = data['themeMode'] as String;
+          _themeMode = ThemeMode.values.firstWhere(
+            (e) => e.toString() == modeStr,
+            orElse: () => ThemeMode.system,
+          );
+        }
 
         if (data['birthDetails'] != null) {
           _birthDetails = BirthDetails.fromJson(data['birthDetails']);
@@ -177,6 +210,13 @@ class AppState extends ChangeNotifier {
           _reportSections = list.map((e) => ReportSection.fromJson(e)).toList();
         }
         _reportSummary = data['reportSummary'] ?? '';
+
+        if (data['yogaAiAnalysis'] != null) {
+          _yogaAiAnalysis = Map<String, String>.from(data['yogaAiAnalysis']);
+        }
+        if (data['doshaAiAnalysis'] != null) {
+          _doshaAiAnalysis = Map<String, String>.from(data['doshaAiAnalysis']);
+        }
 
         _compatPartnerName = data['compatPartnerName'];
         _compatPartnerSign = data['compatPartnerSign'];
@@ -207,12 +247,15 @@ class AppState extends ChangeNotifier {
         notifyListeners();
         
         // Fetch supplemental details in background if onboarded
-        if (_userId != null && _astrologyData != null) {
-          fetchDailyHoroscope();
-          fetchTransits();
-          fetchMoodHistory();
-          fetchKundaliScore();
-          fetchVedicAnalysis();
+        if (_userId != null) {
+          http_get_profile(_userId!);
+          if (_astrologyData != null) {
+            fetchDailyHoroscope();
+            fetchTransits();
+            fetchMoodHistory();
+            fetchKundaliScore();
+            fetchVedicAnalysis();
+          }
         }
       }
     } catch (e) {
@@ -237,6 +280,9 @@ class AppState extends ChangeNotifier {
         'vedicLevel': _vedicLevel,
         'dailyHoroscopeNotif': _dailyHoroscopeNotif,
         'moodRemindersNotif': _moodRemindersNotif,
+        'themeMode': _themeMode.toString(),
+        'ucpEnabled': _ucpEnabled,
+        'ucpToken': _ucpToken,
         'birthDetails': _birthDetails?.toJson(),
         'questionnaireAnswers': _questionnaireAnswers.map((a) => a.toJson()).toList(),
         'astrologyData': _astrologyData?.toJson(),
@@ -244,6 +290,8 @@ class AppState extends ChangeNotifier {
         'traitScores': _traitScores.map((s) => s.toJson()).toList(),
         'reportSections': _reportSections.map((s) => s.toJson()).toList(),
         'reportSummary': _reportSummary,
+        'yogaAiAnalysis': _yogaAiAnalysis,
+        'doshaAiAnalysis': _doshaAiAnalysis,
         'compatPartnerName': _compatPartnerName,
         'compatPartnerSign': _compatPartnerSign,
         'compatOverallScore': _compatOverallScore,
@@ -353,6 +401,61 @@ class AppState extends ChangeNotifier {
     _moodRemindersNotif = enabled;
     _saveState();
     notifyListeners();
+  }
+
+  Future<void> setUcpEnabled(bool value) async {
+    _ucpEnabled = value;
+    if (value && (_ucpToken == null || _ucpToken!.isEmpty)) {
+      _ucpToken = 'ucp_token_${DateTime.now().millisecondsSinceEpoch}';
+    }
+    _saveState();
+    notifyListeners();
+
+    if (_userId != null) {
+      try {
+        final res = await ApiService.updatePreferences(
+          userId: _userId!,
+          ucpEnabled: value,
+        );
+        if (res['success'] == true && res['preferences'] != null && res['preferences']['ucpToken'] != null) {
+          _ucpToken = res['preferences']['ucpToken'];
+          _saveState();
+          notifyListeners();
+        }
+      } catch (e) {
+        debugPrint("Error syncing UCP enabled preference: $e");
+      }
+    }
+  }
+
+  Future<void> rotateUcpToken() async {
+    if (_userId == null) {
+      _ucpToken = 'ucp_token_${DateTime.now().millisecondsSinceEpoch}';
+      _saveState();
+      notifyListeners();
+      return;
+    }
+    _isLoading = true;
+    _loadingMessage = 'Generating new secure access token...';
+    notifyListeners();
+
+    try {
+      final res = await ApiService.updatePreferences(
+        userId: _userId!,
+        rotateUcpToken: true,
+      );
+      if (res['success'] == true && res['preferences'] != null && res['preferences']['ucpToken'] != null) {
+        _ucpToken = res['preferences']['ucpToken'];
+        _saveState();
+      }
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception:', '');
+      _ucpToken = 'ucp_token_${DateTime.now().millisecondsSinceEpoch}';
+      _saveState();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   void toggleAffirmationDone() {
@@ -477,7 +580,28 @@ class AppState extends ChangeNotifier {
 
   // Helper helper to load basic profile during login
   Future<Map<String, dynamic>?> http_get_profile(String userId) async {
-    return null;
+    try {
+      final res = await ApiService.fetchUserProfile(userId);
+      if (res['success'] == true && res['preferences'] != null) {
+        final prefs = res['preferences'];
+        _ucpEnabled = prefs['ucpEnabled'] ?? false;
+        _ucpToken = prefs['ucpToken'];
+        if (prefs['language'] != null) {
+          _language = prefs['language'];
+        }
+        if (prefs['vedicLevel'] != null) {
+          _vedicLevel = prefs['vedicLevel'];
+        }
+        _dailyHoroscopeNotif = prefs['dailyHoroscope'] ?? true;
+        _moodRemindersNotif = prefs['moodReminders'] ?? true;
+        _saveState();
+        notifyListeners();
+      }
+      return res;
+    } catch (e) {
+      debugPrint("Error fetching user profile: $e");
+      return null;
+    }
   }
 
   // Perform backend processing
@@ -1071,6 +1195,8 @@ class AppState extends ChangeNotifier {
     _reportSections = [];
     _reportSummary = '';
     _hasPaid = false;
+    _yogaAiAnalysis = {};
+    _doshaAiAnalysis = {};
     _compatPartnerName = null;
     _compatPartnerSign = null;
     _compatOverallScore = 0;
@@ -1089,5 +1215,179 @@ class AppState extends ChangeNotifier {
     _isVedicAnalysisLoading = false;
 
     notifyListeners();
+  }
+
+  // ─── Generative AI Reports & Yoga/Dosha Counselor Integration ───
+  bool _isDeepReportGenerating = false;
+  String? _deepReportError;
+
+  bool get isDeepReportGenerating => _isDeepReportGenerating;
+  String? get deepReportError => _deepReportError;
+
+  Future<void> generateDeepReport() async {
+    if (_userId == null || _astrologyData == null || _numerologyData == null) {
+      _deepReportError = 'Missing calculations payload data. Please complete onboarding first.';
+      notifyListeners();
+      return;
+    }
+
+    _isDeepReportGenerating = true;
+    _deepReportError = null;
+    notifyListeners();
+
+    try {
+      final astroPayload = {
+        'sunSign': _astrologyData!.sunSign,
+        'moonSign': _astrologyData!.moonSign,
+        'ascendant': _astrologyData!.ascendant,
+        'nakshatra': _astrologyData!.nakshatra,
+        'currentDasha': _astrologyData!.currentDasha,
+        'yogas': _astrologyData!.yogas,
+        'doshas': _astrologyData!.doshas,
+        'planetaryPositions': _astrologyData!.planetaryPositions.map((k, v) => MapEntry(k, {
+          'sign': v.sign,
+          'degree': v.degree,
+          'house': v.house,
+          'retrograde': v.retrograde,
+          'nakshatra': v.nakshatra,
+          'nakshatraPada': v.nakshatraPada,
+          'isCombust': v.isCombust,
+        })),
+      };
+
+      final numPayload = {
+        'lifePathNumber': _numerologyData!.lifePathNumber,
+        'destinyNumber': _numerologyData!.destinyNumber,
+        'soulUrgeNumber': _numerologyData!.soulUrgeNumber,
+      };
+
+      final Map<String, dynamic> traitsPayload = {};
+      for (final trait in _traitScores) {
+        traitsPayload[trait.name] = trait.score;
+      }
+
+      final result = await ApiService.fetchDeepIntelligenceReport(
+        userId: _userId!,
+        astrologyData: astroPayload,
+        numerologyData: numPayload,
+        traitScores: traitsPayload,
+        language: _language,
+      );
+
+      if (result['sections'] != null) {
+        final List<dynamic> list = result['sections'];
+        _reportSections = list.map((e) => ReportSection.fromJson(e)).toList();
+      }
+      _reportSummary = result['summary'] ?? '';
+      _hasPaid = true;
+      _isDeepReportGenerating = false;
+      _saveState();
+      notifyListeners();
+    } catch (e) {
+      _isDeepReportGenerating = false;
+      _deepReportError = e.toString().replaceAll('Exception:', '');
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> generateYogaAiAnalysis(String yogaName) async {
+    if (_userId == null || _astrologyData == null) return;
+    if (_yogaAiAnalysis.containsKey(yogaName)) return;
+
+    _yogaAiLoading[yogaName] = true;
+    notifyListeners();
+
+    try {
+      final contextPayload = {
+        'userName': _birthDetails?.name ?? 'Seeker',
+        'sunSign': _astrologyData!.sunSign,
+        'moonSign': _astrologyData!.moonSign,
+        'ascendant': _astrologyData!.ascendant,
+        'nakshatra': _astrologyData!.nakshatra,
+        'currentDasha': _astrologyData!.currentDasha,
+        'yogas': _astrologyData!.yogas,
+        'doshas': _astrologyData!.doshas,
+        'planetaryPositions': _astrologyData!.planetaryPositions.map((k, v) => MapEntry(k, {
+          'sign': v.sign,
+          'degree': v.degree,
+          'house': v.house,
+          'retrograde': v.retrograde,
+          'nakshatra': v.nakshatra,
+          'nakshatraPada': v.nakshatraPada,
+          'isCombust': v.isCombust,
+        })),
+        'traits': _traitScores.map((s) => {'name': s.name, 'score': s.score}).toList(),
+      };
+
+      final prompt = "Give me a hyper-personalized, brutally honest, and actionable Vedic psychological breakdown for the yoga: $yogaName based on my exact planetary positions, signs, and houses. Do not use generic text. Make it around 120-150 words and include a clear, specific remedial exercise or behavioral adjustment.";
+
+      final response = await ApiService.sendChatMessage(
+        message: prompt,
+        sessionId: _userId!,
+        context: contextPayload,
+        conversationHistory: [],
+      );
+
+      _yogaAiAnalysis[yogaName] = response;
+      _yogaAiLoading[yogaName] = false;
+      _saveState();
+      notifyListeners();
+    } catch (e) {
+      _yogaAiLoading[yogaName] = false;
+      debugPrint("Error generating Yoga AI analysis: $e");
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> generateDoshaAiAnalysis(String doshaName) async {
+    if (_userId == null || _astrologyData == null) return;
+    if (_doshaAiAnalysis.containsKey(doshaName)) return;
+
+    _doshaAiLoading[doshaName] = true;
+    notifyListeners();
+
+    try {
+      final contextPayload = {
+        'userName': _birthDetails?.name ?? 'Seeker',
+        'sunSign': _astrologyData!.sunSign,
+        'moonSign': _astrologyData!.moonSign,
+        'ascendant': _astrologyData!.ascendant,
+        'nakshatra': _astrologyData!.nakshatra,
+        'currentDasha': _astrologyData!.currentDasha,
+        'yogas': _astrologyData!.yogas,
+        'doshas': _astrologyData!.doshas,
+        'planetaryPositions': _astrologyData!.planetaryPositions.map((k, v) => MapEntry(k, {
+          'sign': v.sign,
+          'degree': v.degree,
+          'house': v.house,
+          'retrograde': v.retrograde,
+          'nakshatra': v.nakshatra,
+          'nakshatraPada': v.nakshatraPada,
+          'isCombust': v.isCombust,
+        })),
+        'traits': _traitScores.map((s) => {'name': s.name, 'score': s.score}).toList(),
+      };
+
+      final prompt = "Give me a hyper-personalized, brutally honest, and actionable Vedic psychological breakdown for the dosha: $doshaName based on my exact planetary positions, signs, and houses. Detail the karmic friction points and give 2-3 specific behavioral remedies. Make it around 120-150 words.";
+
+      final response = await ApiService.sendChatMessage(
+        message: prompt,
+        sessionId: _userId!,
+        context: contextPayload,
+        conversationHistory: [],
+      );
+
+      _doshaAiAnalysis[doshaName] = response;
+      _doshaAiLoading[doshaName] = false;
+      _saveState();
+      notifyListeners();
+    } catch (e) {
+      _doshaAiLoading[doshaName] = false;
+      debugPrint("Error generating Dosha AI analysis: $e");
+      notifyListeners();
+      rethrow;
+    }
   }
 }

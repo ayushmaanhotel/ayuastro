@@ -1,3 +1,4 @@
+export const maxDuration = 300;
 /**
  * AyuAstro - Deep Intelligence Report API
  *
@@ -40,9 +41,9 @@ const planetaryPositionSchema = z.object({
   degree: z.number(),
   house: z.number(),
   retrograde: z.boolean(),
-  nakshatra: z.string().optional(),
-  nakshatraPada: z.number().optional(),
-  isCombust: z.boolean().optional(),
+  nakshatra: z.string().nullish(),
+  nakshatraPada: z.number().nullish(),
+  isCombust: z.boolean().nullish(),
 });
 
 const deepIntelligenceSchema = z.object({
@@ -51,11 +52,11 @@ const deepIntelligenceSchema = z.object({
     sunSign: z.string(),
     moonSign: z.string(),
     ascendant: z.string(),
-    nakshatra: z.string().optional(),
-    currentDasha: z.string().optional(),
-    yogas: z.array(z.string()).optional(),
-    doshas: z.array(z.string()).optional(),
-    planetaryPositions: z.record(z.string(), planetaryPositionSchema).optional(),
+    nakshatra: z.string().nullish(),
+    currentDasha: z.string().nullish(),
+    yogas: z.array(z.string()).nullish(),
+    doshas: z.array(z.string()).nullish(),
+    planetaryPositions: z.record(z.string(), planetaryPositionSchema).nullish(),
   }),
   numerologyData: z.object({
     lifePathNumber: z.number().int(),
@@ -63,8 +64,8 @@ const deepIntelligenceSchema = z.object({
     soulUrgeNumber: z.number().int(),
   }),
   traitScores: traitScoresSchema,
-  temperature: z.number().min(0).max(1).optional(),
-  language: z.enum(['en', 'hi', 'hinglish']).optional(),
+  temperature: z.number().min(0).max(1).nullish(),
+  language: z.enum(['en', 'hi', 'hinglish']).nullish(),
 });
 
 // ─── POST Handler ─────────────────────────────────────────────────────────────

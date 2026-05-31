@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
-  serverExternalPackages: ["sweph"],
+  serverExternalPackages: ["sweph", "pdfkit"],
   turbopack: {},
 };
 

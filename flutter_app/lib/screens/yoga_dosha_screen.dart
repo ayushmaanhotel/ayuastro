@@ -544,6 +544,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
   }
 
   Widget _buildYogaCard(String yogaName, bool isPresent, bool isDark) {
+    final state = Provider.of<AppState>(context, listen: false);
     final yoga = _yogaDetails[yogaName];
     if (yoga == null) return const SizedBox.shrink();
     final isExpanded = _expandedYogas.contains(yogaName);
@@ -653,6 +654,12 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                     ),
                   ),
                 ],
+                if (isPresent) ...[
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  _buildYogaAiSection(state, yogaName, isDark),
+                ],
               ],
             ),
           ),
@@ -735,6 +742,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
   }
 
   Widget _buildDoshaCard(String doshaName, bool isPresent, bool isDark) {
+    final state = Provider.of<AppState>(context, listen: false);
     final dosha = _doshaDetails[doshaName];
     if (dosha == null) return const SizedBox.shrink();
     final isExpanded = _expandedDoshas.contains(doshaName);
@@ -834,6 +842,10 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                   _buildRemedyRow("🔧 Behavioral", dosha.remedies['behavioral'] ?? '', isDark),
                   _buildRemedyRow("🧘 Mindfulness", dosha.remedies['mindfulness'] ?? '', isDark),
                   _buildRemedyRow("📝 Journaling", dosha.remedies['journaling'] ?? '', isDark),
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  _buildDoshaAiSection(state, doshaName, isDark),
                 ],
               ],
             ),
@@ -1889,6 +1901,190 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
           Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.goldDark)),
           const SizedBox(height: 2),
           Text(sub, style: const TextStyle(fontSize: 8.5, color: AppColors.brown400)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildYogaAiSection(AppState state, String yogaName, bool isDark) {
+    final hasAnalysis = state.yogaAiAnalysis.containsKey(yogaName);
+    final isLoading = state.isYogaAiLoading(yogaName);
+
+    if (isLoading) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        child: Column(
+          children: [
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.gold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Consulting cosmic counselor AI...",
+              style: TextStyle(fontSize: 10, color: isDark ? Colors.white60 : AppColors.brown500, fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (!hasAnalysis) {
+      return Center(
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isDark ? AppColors.darkCard : Colors.white,
+            foregroundColor: AppColors.goldDark,
+            side: const BorderSide(color: AppColors.gold, width: 1.0),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          ),
+          icon: const Icon(LucideIcons.sparkles, size: 14, color: AppColors.gold),
+          label: const Text("Analyze Placement with Deep AI", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+          onPressed: () async {
+            try {
+              await state.generateYogaAiAnalysis(yogaName);
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("AI Consultation failed: $e"), backgroundColor: Colors.redAccent),
+                );
+              }
+            }
+          },
+        ),
+      );
+    }
+
+    final analysisText = state.yogaAiAnalysis[yogaName] ?? '';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.gold.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.gold.withOpacity(0.2), width: 1.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(LucideIcons.sparkles, color: AppColors.gold, size: 14),
+              const SizedBox(width: 6),
+              Text(
+                "Deep AI Insights",
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white70 : AppColors.goldDark,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          AstroMarkdownText(
+            text: analysisText,
+            style: TextStyle(
+              fontSize: 11.5,
+              height: 1.45,
+              color: isDark ? Colors.white70 : AppColors.brown700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDoshaAiSection(AppState state, String doshaName, bool isDark) {
+    final hasAnalysis = state.doshaAiAnalysis.containsKey(doshaName);
+    final isLoading = state.isDoshaAiLoading(doshaName);
+
+    if (isLoading) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        child: Column(
+          children: [
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.gold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Consulting cosmic counselor AI...",
+              style: TextStyle(fontSize: 10, color: isDark ? Colors.white60 : AppColors.brown500, fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (!hasAnalysis) {
+      return Center(
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isDark ? AppColors.darkCard : Colors.white,
+            foregroundColor: AppColors.goldDark,
+            side: const BorderSide(color: AppColors.gold, width: 1.0),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          ),
+          icon: const Icon(LucideIcons.sparkles, size: 14, color: AppColors.gold),
+          label: const Text("Analyze Lesson with Deep AI", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+          onPressed: () async {
+            try {
+              await state.generateDoshaAiAnalysis(doshaName);
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("AI Consultation failed: $e"), backgroundColor: Colors.redAccent),
+                );
+              }
+            }
+          },
+        ),
+      );
+    }
+
+    final analysisText = state.doshaAiAnalysis[doshaName] ?? '';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.gold.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.gold.withOpacity(0.2), width: 1.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(LucideIcons.sparkles, color: AppColors.gold, size: 14),
+              const SizedBox(width: 6),
+              Text(
+                "Deep AI Insights",
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white70 : AppColors.goldDark,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          AstroMarkdownText(
+            text: analysisText,
+            style: TextStyle(
+              fontSize: 11.5,
+              height: 1.45,
+              color: isDark ? Colors.white70 : AppColors.brown700,
+            ),
+          ),
         ],
       ),
     );

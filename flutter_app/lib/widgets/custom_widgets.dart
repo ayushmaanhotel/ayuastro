@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 // Theme Colors Constant
 class AppColors {
-  static const Color cream = Color(0xFFF4EFE6);
-  static const Color creamDark = Color(0xFFF5E6D0);
+  static const Color cream = Color(0xFFFAF6F0); // Premium light beige
+  static const Color creamDark = Color(0xFFF1EAE0); // Premium dark beige
   static const Color brown900 = Color(0xFF3E2723);
   static const Color brown800 = Color(0xFF4E342E);
   static const Color brown700 = Color(0xFF5D4037);
@@ -502,3 +502,123 @@ class _CosmicLoaderState extends State<CosmicLoader> with SingleTickerProviderSt
     );
   }
 }
+
+// 10. AstroMarkdownText for rendering rich styled text with basic markdown tags (bold '**', headers '#', lists '-')
+class AstroMarkdownText extends StatelessWidget {
+  final String text;
+  final TextStyle? style;
+
+  const AstroMarkdownText({
+    Key? key,
+    required this.text,
+    this.style,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final defaultStyle = style ?? TextStyle(
+      fontSize: 12.5,
+      height: 1.5,
+      color: isDark ? Colors.white70 : AppColors.brown700,
+    );
+
+    // Split text by lines to parse structure (headers, bullets, paragraphs)
+    final lines = text.split('\n');
+    final List<Widget> children = [];
+
+    for (final line in lines) {
+      if (line.trim().isEmpty) {
+        children.add(const SizedBox(height: 8));
+        continue;
+      }
+
+      // 1. Headers
+      if (line.startsWith('###')) {
+        children.add(Padding(
+          padding: const EdgeInsets.only(top: 10, bottom: 4),
+          child: Text(
+            _stripMarkdown(line.substring(3).trim()),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : AppColors.brown900,
+              fontFamily: 'Playfair Display',
+            ),
+          ),
+        ));
+      } else if (line.startsWith('##') || line.startsWith('#')) {
+        final content = line.startsWith('##') ? line.substring(2) : line.substring(1);
+        children.add(Padding(
+          padding: const EdgeInsets.only(top: 12, bottom: 6),
+          child: Text(
+            _stripMarkdown(content.trim()),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: AppColors.goldDark,
+              fontFamily: 'Playfair Display',
+            ),
+          ),
+        ));
+      }
+      // 2. Bullet list item
+      else if (line.trim().startsWith('-') || line.trim().startsWith('*')) {
+        final content = line.trim().substring(1).trim();
+        children.add(Padding(
+          padding: const EdgeInsets.only(left: 8.0, bottom: 4.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("✦  ", style: TextStyle(color: AppColors.gold, fontSize: defaultStyle.fontSize)),
+              Expanded(
+                child: RichText(
+                  text: _parseBoldText(content, defaultStyle),
+                ),
+              ),
+            ],
+          ),
+        ));
+      }
+      // 3. Regular Paragraph with inline bolding
+      else {
+        children.add(Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: RichText(
+            text: _parseBoldText(line, defaultStyle),
+          ),
+        ));
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
+    );
+  }
+
+  String _stripMarkdown(String input) {
+    return input.replaceAll('**', '').replaceAll('*', '');
+  }
+
+  TextSpan _parseBoldText(String text, TextStyle defaultStyle) {
+    final List<TextSpan> spans = [];
+    final parts = text.split('**');
+
+    for (int i = 0; i < parts.length; i++) {
+      final isBold = i % 2 == 1;
+      spans.add(TextSpan(
+        text: parts[i],
+        style: defaultStyle.copyWith(
+          fontWeight: isBold ? FontWeight.bold : defaultStyle.fontWeight,
+          color: isBold 
+              ? (defaultStyle.color?.withOpacity(1.0) ?? Colors.white) 
+              : defaultStyle.color,
+        ),
+      ));
+    }
+
+    return TextSpan(children: spans);
+  }
+}
+

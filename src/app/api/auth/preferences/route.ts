@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
+import crypto from 'crypto';
 
 // ─── Zod Schema ─────────────────────────────────────────────────────────────
 
@@ -12,6 +13,8 @@ const preferencesSchema = z.object({
   moodReminders: z.boolean().optional(),
   vedicLevel: z.enum(['standard', 'detailed', 'hinglish']).optional(),
   notificationsEnabled: z.boolean().optional(),
+  ucpEnabled: z.boolean().optional(),
+  rotateUcpToken: z.boolean().optional(),
 });
 
 // ─── PUT Handler ────────────────────────────────────────────────────────────
@@ -32,10 +35,13 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { userId, ...updates } = parsed.data;
+    const { userId, rotateUcpToken, ...updates } = parsed.data;
 
     // Verify user exists
-    const user = await db.user.findUnique({ where: { id: userId } });
+    const user = await db.user.findUnique({ 
+      where: { id: userId },
+      include: { preferences: true }
+    });
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'User not found' },
@@ -43,13 +49,20 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    const finalUpdates: any = { ...updates };
+    const existingPrefs = user.preferences;
+
+    if (rotateUcpToken || (updates.ucpEnabled === true && (!existingPrefs || !existingPrefs.ucpToken))) {
+      finalUpdates.ucpToken = 'ucp_' + crypto.randomBytes(16).toString('hex');
+    }
+
     // Upsert preferences
     const preferences = await db.userPreferences.upsert({
       where: { userId },
-      update: updates,
+      update: finalUpdates,
       create: {
         userId,
-        ...updates,
+        ...finalUpdates,
       },
     });
 
@@ -62,6 +75,8 @@ export async function PUT(request: NextRequest) {
         moodReminders: preferences.moodReminders,
         vedicLevel: preferences.vedicLevel,
         notificationsEnabled: preferences.notificationsEnabled,
+        ucpEnabled: preferences.ucpEnabled,
+        ucpToken: preferences.ucpToken,
       },
     });
   } catch (error) {

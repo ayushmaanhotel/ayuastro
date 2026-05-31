@@ -1,0 +1,39 @@
+# Exclude build and cache folders
+node_modules
+.next
+.vercel
+out
+dist
+build
+
+# Exclude local mobile app code
+flutter_app
+
+# Exclude git-portable and mingit
+git-portable
+mingit.zip
+
+# Exclude standalone copy tools
+copy-standalone.js
+
+# Exclude environment files
+.env*.local
+
+# Exclude MCP servers and original files
+mcp-server
+original
+mini-services
+Caddyfile
+dev.log
+server.log
+upade.md
+update.md
+worklog.md
+scratch
+.git
+.vscode
+agent-ctx
+*.html
+*.pdf
+*.zip
+*.log

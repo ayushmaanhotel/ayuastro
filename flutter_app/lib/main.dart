@@ -115,7 +115,7 @@ class MyApp extends StatelessWidget {
                 ),
               ),
             ),
-            themeMode: ThemeMode.system,
+            themeMode: state.themeMode,
             home: const AppViewSwitcher(),
           );
         },

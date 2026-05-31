@@ -185,20 +185,25 @@ class _LandingScreenState extends State<LandingScreen> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: isDark ? Colors.white : AppColors.brown900,
-                          fontSize: 34,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 36,
+                          fontWeight: FontWeight.w800,
                           fontFamily: 'Playfair Display',
-                          height: 1.25,
+                          height: 1.2,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        "Nothing to sugarcoat. Nothing to hide. Get psychologically grounded insights into your life dasha, yogas, doshas, and traits.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.brown500,
-                          fontSize: 14,
-                          height: 1.5,
+                      const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                        child: Text(
+                          "Nothing to sugarcoat. Nothing to hide. Get psychologically grounded insights into your life dasha, yogas, doshas, and traits.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: isDark ? Colors.white70 : AppColors.brown700,
+                            fontSize: 15,
+                            height: 1.6,
+                            letterSpacing: 0.2,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -216,6 +221,13 @@ class _LandingScreenState extends State<LandingScreen> {
                     ],
                   ),
                 ),
+
+                const SizedBox(height: 16),
+                const SectionDivider(),
+                const SizedBox(height: 24),
+
+                // ─── NOTHING TO HIDE MANDATE ───
+                _buildTransparencyMandateCard(isDark),
 
                 const SizedBox(height: 16),
                 const SectionDivider(),
@@ -541,6 +553,92 @@ class _LandingScreenState extends State<LandingScreen> {
               ),
               const SizedBox(height: 16),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTransparencyMandateCard(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: isDark ? AppColors.darkCard.withOpacity(0.3) : AppColors.gold.withOpacity(0.04),
+        border: Border.all(
+          color: AppColors.gold.withOpacity(0.4),
+          width: 1.2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(LucideIcons.scale, color: AppColors.gold, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                "OUR NOTHING-TO-HIDE MANDATE ✦",
+                style: TextStyle(
+                  color: isDark ? AppColors.goldLight : AppColors.goldDark,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "Astrology is a mathematical science of alignments, not a tool for fear-mongering and superstitious commercialization. We reject 3 things other platforms hide:",
+            style: TextStyle(
+              color: isDark ? Colors.white70 : AppColors.brown700,
+              fontSize: 12,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildMandatePoint(
+            title: "1. No Fear-Coercion or Scams",
+            desc: "Other platforms tell you a transit will 'destroy your family' just to pressure you into buying expensive ₹15,000 pacification pujas. We present transits as planetary weather—requiring awareness, not panic.",
+            isDark: isDark,
+          ),
+          const SizedBox(height: 12),
+          _buildMandatePoint(
+            title: "2. Gemstone Truth & Free Remedies",
+            desc: "Gemstones refract light frequencies but are optional. Simple practices like sound resonance (mantras), fasting, and helping the poor (charity) are scriptures' highest-recommended remedies. They are 100% free.",
+            isDark: isDark,
+          ),
+          const SizedBox(height: 12),
+          _buildMandatePoint(
+            title: "3. Double-Precision Math Over Guestimation",
+            desc: "We run a direct, high-precision Swiss Ephemeris calculation aligned to the Sidereal Lahiri Ayanamsa. We show you the exact longitudinal degrees and house alignments, rather than keeping the math hidden behind a paywall.",
+            isDark: isDark,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMandatePoint({required String title, required String desc, required bool isDark}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: isDark ? Colors.white : AppColors.brown900,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          desc,
+          style: TextStyle(
+            color: isDark ? Colors.white60 : AppColors.brown500,
+            fontSize: 11,
+            height: 1.45,
           ),
         ),
       ],
