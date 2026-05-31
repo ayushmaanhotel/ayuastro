@@ -5,7 +5,7 @@ import '../models/models.dart';
 class ApiService {
   // 10.0.2.2 is the special IP for Android emulators to access localhost on the host machine.
   // We can update this dynamically from the settings.
-  static String baseUrl = 'https://ayuastro-backend.vercel.app';
+  static String baseUrl = 'https://ayuastro.vercel.app';
 
   static void setBaseUrl(String newUrl) {
     if (newUrl.endsWith('/')) {

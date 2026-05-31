@@ -508,5 +508,10 @@ Integrated a professional-grade "Nothing to Hide" transparency initiative global
    - Disabled the `requireVerifiedCommits` constraint in Vercel project's `gitProviderOptions` via the REST API. This allows commits made from headless/local agents (which are GPG-unsigned) to build successfully.
 5. **Build Script Separation**:
    - Separated the Next.js `build` command in `package.json` into `"build": "next build"` (for standard Vercel deployments) and `"build:standalone": "next build && node copy-standalone.js"` (for localVM standalone execution). This resolves `MODULE_NOT_FOUND` errors caused by `copy-standalone.js` being excluded via `.vercelignore`.
+6. **Flutter API Client baseUrl Correction**:
+   - Discovered that the actual Vercel project domain configured on the dashboard is `ayuastro.vercel.app` (not `ayuastro-backend.vercel.app`).
+   - Updated the `baseUrl` property in `flutter_app/lib/services/api_service.dart` from `https://ayuastro-backend.vercel.app` to the correct live endpoint `https://ayuastro.vercel.app`.
+   - Started a clean compilation rebuild of the Flutter release APK to incorporate the corrected live production backend URL.
+
 
 
