@@ -6,7 +6,7 @@ import '../providers/app_state.dart';
 import '../widgets/custom_widgets.dart';
 
 class LandingScreen extends StatefulWidget {
-  const LandingScreen({Key? key}) : super(key: key);
+  const LandingScreen({super.key});
 
   @override
   State<LandingScreen> createState() => _LandingScreenState();
@@ -159,9 +159,9 @@ class _LandingScreenState extends State<LandingScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: AppColors.gold.withOpacity(0.1),
+                          color: AppColors.gold.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.gold.withOpacity(0.3), width: 0.8),
+                          border: Border.all(color: AppColors.gold.withValues(alpha: 0.3), width: 0.8),
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
@@ -447,7 +447,7 @@ class _LandingScreenState extends State<LandingScreen> {
                 Container(
                   margin: const EdgeInsets.only(top: 48),
                   padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
-                  color: isDark ? Colors.black.withOpacity(0.3) : AppColors.creamDark.withOpacity(0.3),
+                  color: isDark ? Colors.black.withValues(alpha: 0.3) : AppColors.creamDark.withValues(alpha: 0.3),
                   child: Column(
                     children: [
                       const Text(
@@ -523,7 +523,7 @@ class _LandingScreenState extends State<LandingScreen> {
               Container(
                 width: 1.5,
                 height: 60,
-                color: AppColors.gold.withOpacity(0.3),
+                color: AppColors.gold.withValues(alpha: 0.3),
               ),
           ],
         ),
@@ -564,9 +564,9 @@ class _LandingScreenState extends State<LandingScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: isDark ? AppColors.darkCard.withOpacity(0.3) : AppColors.gold.withOpacity(0.04),
+        color: isDark ? AppColors.darkCard.withValues(alpha: 0.3) : AppColors.gold.withValues(alpha: 0.04),
         border: Border.all(
-          color: AppColors.gold.withOpacity(0.4),
+          color: AppColors.gold.withValues(alpha: 0.4),
           width: 1.2,
         ),
       ),

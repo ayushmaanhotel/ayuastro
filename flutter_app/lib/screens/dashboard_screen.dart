@@ -12,7 +12,7 @@ import 'wisdom_screen.dart';
 import 'profile_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+  const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -46,13 +46,13 @@ class DashboardScreen extends StatelessWidget {
           color: isDark ? AppColors.darkCard : Colors.white,
           border: Border(
             top: BorderSide(
-              color: isDark ? Colors.white.withOpacity(0.08) : AppColors.brown100,
+              color: isDark ? Colors.white.withValues(alpha: 0.08) : AppColors.brown100,
               width: 1,
             ),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.25 : 0.04),
+              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
               blurRadius: 16,
               offset: const Offset(0, -4),
             ),
@@ -127,10 +127,10 @@ class DashboardScreen extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
           color: isActive 
-              ? AppColors.gold.withOpacity(0.08) 
+              ? AppColors.gold.withValues(alpha: 0.08) 
               : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
@@ -151,6 +151,7 @@ class DashboardScreen extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: isActive 
                     ? AppColors.gold 

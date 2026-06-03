@@ -6,7 +6,7 @@ import '../widgets/custom_widgets.dart';
 import 'compatibility_detail_screen.dart';
 
 class SyncScreen extends StatefulWidget {
-  const SyncScreen({Key? key}) : super(key: key);
+  const SyncScreen({super.key});
 
   @override
   State<SyncScreen> createState() => _SyncScreenState();
@@ -105,7 +105,7 @@ class _SyncScreenState extends State<SyncScreen> {
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _selectedSign,
+                      initialValue: _selectedSign,
                       style: TextStyle(color: isDark ? Colors.white : AppColors.brown900),
                       dropdownColor: isDark ? AppColors.darkCard : Colors.white,
                       decoration: InputDecoration(

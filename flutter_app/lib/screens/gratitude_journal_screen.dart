@@ -144,7 +144,7 @@ String _getDailyPrompt(String sunSign, String slot) {
 
 // ─── Screen Widget ───────────────────────────────────────────────────────────
 class GratitudeJournalScreen extends StatefulWidget {
-  const GratitudeJournalScreen({Key? key}) : super(key: key);
+  const GratitudeJournalScreen({super.key});
 
   @override
   State<GratitudeJournalScreen> createState() => _GratitudeJournalScreenState();
@@ -253,10 +253,11 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
         _isSlotSubmittedToday('afternoon', history) &&
         _isSlotSubmittedToday('evening', history);
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
         state.setView('insights');
-        return false;
       },
       child: Scaffold(
         backgroundColor: isDark ? AppColors.darkBg : AppColors.cream,
@@ -284,9 +285,9 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.gold.withOpacity(0.12),
+                      color: AppColors.gold.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.gold.withOpacity(0.2)),
+                      border: Border.all(color: AppColors.gold.withValues(alpha: 0.2)),
                     ),
                     child: Row(
                       children: [
@@ -323,7 +324,7 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                               colors: [Color(0x30A5D6A7), Color(0x10D4AF37)],
                             ),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppColors.sage.withOpacity(0.3)),
+                            border: Border.all(color: AppColors.sage.withValues(alpha: 0.3)),
                           ),
                           padding: const EdgeInsets.all(12),
                           child: Row(
@@ -333,7 +334,7 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                                 height: 36,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: AppColors.sage.withOpacity(0.2),
+                                  color: AppColors.sage.withValues(alpha: 0.2),
                                 ),
                                 child: const Icon(LucideIcons.check, color: AppColors.sage, size: 18),
                               ),
@@ -367,7 +368,7 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     )
@@ -438,12 +439,12 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                                       padding: const EdgeInsets.symmetric(vertical: 8),
                                       decoration: BoxDecoration(
                                         color: isCurrent
-                                            ? AppColors.gold.withOpacity(0.12)
+                                            ? AppColors.gold.withValues(alpha: 0.12)
                                             : Colors.transparent,
                                         borderRadius: BorderRadius.circular(12),
                                         border: Border.all(
                                           color: isCurrent
-                                              ? AppColors.gold.withOpacity(0.3)
+                                              ? AppColors.gold.withValues(alpha: 0.3)
                                               : (isDark ? Colors.white10 : AppColors.brown100),
                                           width: 1.5,
                                         ),
@@ -499,9 +500,9 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                               ? Container(
                                   width: double.infinity,
                                   decoration: BoxDecoration(
-                                    color: isDark ? Colors.white.withOpacity(0.03) : AppColors.cream.withOpacity(0.4),
+                                    color: isDark ? Colors.white.withValues(alpha: 0.03) : AppColors.cream.withValues(alpha: 0.4),
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: AppColors.sage.withOpacity(0.2)),
+                                    border: Border.all(color: AppColors.sage.withValues(alpha: 0.2)),
                                   ),
                                   padding: const EdgeInsets.all(14),
                                   child: Column(
@@ -539,10 +540,10 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                                       onChanged: (text) => setState(() {}),
                                       buildCounter: (_, {required currentLength, required isFocused, maxLength}) => const SizedBox.shrink(),
                                       decoration: InputDecoration(
-                                        hintText: 'What are you grateful for this ${_activeSlot}...',
+                                        hintText: 'What are you grateful for this $_activeSlot...',
                                         hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
                                         filled: true,
-                                        fillColor: isDark ? Colors.white.withOpacity(0.03) : AppColors.cream.withOpacity(0.3),
+                                        fillColor: isDark ? Colors.white.withValues(alpha: 0.03) : AppColors.cream.withValues(alpha: 0.3),
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(12),
                                           borderSide: BorderSide(color: isDark ? Colors.white10 : AppColors.brown100),
@@ -589,7 +590,7 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     )
@@ -677,11 +678,11 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                       decoration: BoxDecoration(
                                         color: hasSubmitted
-                                            ? AppColors.sage.withOpacity(0.06)
-                                            : (isDark ? Colors.white.withOpacity(0.02) : AppColors.cream.withOpacity(0.3)),
+                                            ? AppColors.sage.withValues(alpha: 0.06)
+                                            : (isDark ? Colors.white.withValues(alpha: 0.02) : AppColors.cream.withValues(alpha: 0.3)),
                                         borderRadius: BorderRadius.circular(14),
                                         border: Border.all(
-                                          color: hasSubmitted ? AppColors.sage.withOpacity(0.2) : Colors.transparent,
+                                          color: hasSubmitted ? AppColors.sage.withValues(alpha: 0.2) : Colors.transparent,
                                         ),
                                       ),
                                       child: Row(
@@ -713,7 +714,7 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                             decoration: BoxDecoration(
-                                              color: hasSubmitted ? AppColors.sage.withOpacity(0.15) : Colors.white10,
+                                              color: hasSubmitted ? AppColors.sage.withValues(alpha: 0.15) : Colors.white10,
                                               borderRadius: BorderRadius.circular(8),
                                             ),
                                             child: Row(
@@ -752,7 +753,7 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     )
@@ -823,7 +824,7 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     )
@@ -896,7 +897,7 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                                             shape: BoxShape.circle,
                                             color: count == 3
                                                 ? AppColors.sage
-                                                : (count > 0 ? AppColors.gold : Colors.grey.withOpacity(0.4)),
+                                                : (count > 0 ? AppColors.gold : Colors.grey.withValues(alpha: 0.4)),
                                           ),
                                         ),
                                       ],
@@ -935,10 +936,10 @@ class _GratitudeJournalScreenState extends State<GratitudeJournalScreen> {
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [AppColors.gold.withOpacity(0.05), AppColors.sage.withOpacity(0.1)],
+                      colors: [AppColors.gold.withValues(alpha: 0.05), AppColors.sage.withValues(alpha: 0.1)],
                     ),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.gold.withOpacity(0.15)),
+                    border: Border.all(color: AppColors.gold.withValues(alpha: 0.15)),
                   ),
                   padding: const EdgeInsets.all(16),
                   child: Column(

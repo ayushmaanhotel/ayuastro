@@ -5,7 +5,7 @@ import '../providers/app_state.dart';
 import '../widgets/custom_widgets.dart';
 
 class CompatibilityDetailScreen extends StatelessWidget {
-  const CompatibilityDetailScreen({Key? key}) : super(key: key);
+  const CompatibilityDetailScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +120,7 @@ class CompatibilityDetailScreen extends StatelessWidget {
                 value: score / 100.0,
                 minHeight: 6,
                 color: color,
-                backgroundColor: isDark ? Colors.white.withOpacity(0.04) : AppColors.brown100,
+                backgroundColor: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.brown100,
               ),
             ),
           ],

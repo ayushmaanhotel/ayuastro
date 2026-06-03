@@ -70,7 +70,7 @@ class AppState extends ChangeNotifier {
 
   // Astrologer chats and remaining messages tracking
   Map<String, List<ChatMessage>> _astrologerChats = {};
-  Map<String, int> _astrologerRemaining = {};
+  final Map<String, int> _astrologerRemaining = {};
 
   // Yoga/Dosha AI Analyses
   Map<String, String> _yogaAiAnalysis = {};
@@ -248,7 +248,7 @@ class AppState extends ChangeNotifier {
         
         // Fetch supplemental details in background if onboarded
         if (_userId != null) {
-          http_get_profile(_userId!);
+          httpGetProfile(_userId!);
           if (_astrologyData != null) {
             fetchDailyHoroscope();
             fetchTransits();
@@ -532,7 +532,7 @@ class AppState extends ChangeNotifier {
         if (_isOnboarded) {
           // If already onboarded, fetch profile/calculations from server to populate local state
           _updateLoadingMessage('Aligning with your stored stars...');
-          final profileRes = await http_get_profile(_userId!);
+          final profileRes = await httpGetProfile(_userId!);
           if (profileRes != null) {
             // Restore computed data from profile endpoint
             // But wait, the profile endpoint returns basic data. We'll fetch horoscope/transits directly.
@@ -578,8 +578,30 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  // Request password reset
+  Future<void> forgotPassword({required String email}) async {
+    _isLoading = true;
+    _error = null;
+    _loadingMessage = 'Sending password reset link...';
+    notifyListeners();
+
+    try {
+      final res = await ApiService.forgotPassword(email: email);
+      if (res['success'] != true) {
+        throw Exception(res['error'] ?? 'Failed to request password reset');
+      }
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString().replaceAll('Exception:', '');
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   // Helper helper to load basic profile during login
-  Future<Map<String, dynamic>?> http_get_profile(String userId) async {
+  Future<Map<String, dynamic>?> httpGetProfile(String userId) async {
     try {
       final res = await ApiService.fetchUserProfile(userId);
       if (res['success'] == true && res['preferences'] != null) {

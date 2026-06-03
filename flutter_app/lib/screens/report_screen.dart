@@ -12,7 +12,7 @@ import '../services/api_service.dart';
 import 'pdf_viewer_screen.dart';
 
 class ReportScreen extends StatefulWidget {
-  const ReportScreen({Key? key}) : super(key: key);
+  const ReportScreen({super.key});
 
   @override
   State<ReportScreen> createState() => _ReportScreenState();
@@ -118,7 +118,7 @@ class _ReportScreenState extends State<ReportScreen> {
                   isLocked,
                   isDark,
                 );
-              }).toList(),
+              }),
 
               const SizedBox(height: 32),
             ],
@@ -163,8 +163,8 @@ class _ReportScreenState extends State<ReportScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.gold.withOpacity(0.15),
-            AppColors.goldDark.withOpacity(0.05),
+            AppColors.gold.withValues(alpha: 0.15),
+            AppColors.goldDark.withValues(alpha: 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -173,7 +173,7 @@ class _ReportScreenState extends State<ReportScreen> {
         border: Border.all(color: AppColors.gold, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: AppColors.gold.withOpacity(0.1),
+            color: AppColors.gold.withValues(alpha: 0.1),
             blurRadius: 12,
             spreadRadius: 1,
           ),
@@ -227,7 +227,7 @@ class _ReportScreenState extends State<ReportScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: const Text(
@@ -344,7 +344,7 @@ class _ReportScreenState extends State<ReportScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                             decoration: BoxDecoration(
-                              color: AppColors.gold.withOpacity(0.12),
+                              color: AppColors.gold.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: const Row(
@@ -395,9 +395,9 @@ class _ReportScreenState extends State<ReportScreen> {
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppColors.sageLight.withOpacity(isDark ? 0.08 : 0.4),
+                      color: AppColors.sageLight.withValues(alpha: isDark ? 0.08 : 0.4),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.sage.withOpacity(0.2)),
+                      border: Border.all(color: AppColors.sage.withValues(alpha: 0.2)),
                     ),
                     child: Text(
                       trait,
@@ -479,9 +479,8 @@ class _ReportScreenState extends State<ReportScreen> {
                 selectedUpiApp = appName;
               });
               await Future.delayed(const Duration(milliseconds: 2000));
-              if (context.mounted) {
-                Navigator.pop(context); // Close the UPI payment sheet
-              }
+              if (!context.mounted) return;
+              Navigator.pop(context); // Close the UPI payment sheet
               _triggerReportGeneration(context, state, appName);
             }
 
@@ -490,7 +489,7 @@ class _ReportScreenState extends State<ReportScreen> {
               decoration: BoxDecoration(
                 color: isDark ? AppColors.darkBg : AppColors.cream,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-                border: Border.all(color: AppColors.gold.withOpacity(0.4), width: 1.0),
+                border: Border.all(color: AppColors.gold.withValues(alpha: 0.4), width: 1.0),
               ),
               child: StarFieldBackground(
                 child: Padding(
@@ -568,7 +567,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                   decoration: BoxDecoration(
                                     color: isDark ? AppColors.darkCard : Colors.white,
                                     borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: AppColors.gold.withOpacity(0.3)),
+                                    border: Border.all(color: AppColors.gold.withValues(alpha: 0.3)),
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -669,8 +668,8 @@ class _ReportScreenState extends State<ReportScreen> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return WillPopScope(
-          onWillPop: () async => false, // Prevent dismissing
+        return PopScope(
+          canPop: false,
           child: const AlertDialog(
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -686,7 +685,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
     try {
       await state.generateDeepReport();
-      if (mounted) {
+      if (context.mounted) {
         Navigator.pop(context); // Close loader dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -696,7 +695,7 @@ class _ReportScreenState extends State<ReportScreen> {
         );
       }
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         Navigator.pop(context); // Close loader dialog
         showDialog(
           context: context,
@@ -769,10 +768,10 @@ class _ReportScreenState extends State<ReportScreen> {
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkCard : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.brown100.withOpacity(0.4), width: 1.0),
+          border: Border.all(color: AppColors.brown100.withValues(alpha: 0.4), width: 1.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withValues(alpha: 0.02),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -784,9 +783,9 @@ class _ReportScreenState extends State<ReportScreen> {
               width: 50,
               height: 30,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: color.withOpacity(0.4), width: 0.8),
+                border: Border.all(color: color.withValues(alpha: 0.4), width: 0.8),
               ),
               alignment: Alignment.center,
               child: Text(
@@ -833,7 +832,7 @@ class _ReportScreenState extends State<ReportScreen> {
         final file = File('${directory.path}/ayuastro_report_$nameSlug.pdf');
         await file.writeAsBytes(pdfBytes);
 
-        if (mounted) {
+        if (context.mounted) {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -878,7 +877,7 @@ class _ReportScreenState extends State<ReportScreen> {
         throw Exception("Server returned code ${response.statusCode}");
       }
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Error generating report: ${e.toString().replaceAll('Exception:', '')}"),

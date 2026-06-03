@@ -3,7 +3,6 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../widgets/custom_widgets.dart';
-import '../models/models.dart';
 
 class _Product {
   final String id;
@@ -312,7 +311,7 @@ final List<_Product> _products = [
 ];
 
 class StoreScreen extends StatefulWidget {
-  const StoreScreen({Key? key}) : super(key: key);
+  const StoreScreen({super.key});
 
   @override
   State<StoreScreen> createState() => _StoreScreenState();
@@ -433,18 +432,18 @@ class _StoreScreenState extends State<StoreScreen> {
         borderRadius: BorderRadius.circular(24),
         gradient: LinearGradient(
           colors: isDark
-              ? [AppColors.gold.withOpacity(0.15), Colors.black.withOpacity(0.4)]
-              : [AppColors.gold.withOpacity(0.08), Colors.white],
+              ? [AppColors.gold.withValues(alpha: 0.15), Colors.black.withValues(alpha: 0.4)]
+              : [AppColors.gold.withValues(alpha: 0.08), Colors.white],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         border: Border.all(
-          color: AppColors.gold.withOpacity(0.4),
+          color: AppColors.gold.withValues(alpha: 0.4),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.gold.withOpacity(0.08),
+            color: AppColors.gold.withValues(alpha: 0.08),
             blurRadius: 16,
             spreadRadius: 2,
             offset: const Offset(0, 4),
@@ -464,7 +463,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                     decoration: BoxDecoration(
-                      color: AppColors.gold.withOpacity(0.15),
+                      color: AppColors.gold.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: AppColors.gold, width: 0.8),
                     ),
@@ -487,7 +486,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
+                      color: Colors.green.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Row(
@@ -537,10 +536,10 @@ class _StoreScreenState extends State<StoreScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkCard.withOpacity(0.6) : Colors.white.withOpacity(0.8),
+                          color: isDark ? AppColors.darkCard.withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.8),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: AppColors.brown100.withOpacity(0.4),
+                            color: AppColors.brown100.withValues(alpha: 0.4),
                             width: 0.8,
                           ),
                         ),
@@ -595,10 +594,10 @@ class _StoreScreenState extends State<StoreScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkCard.withOpacity(0.6) : Colors.white.withOpacity(0.8),
+                          color: isDark ? AppColors.darkCard.withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.8),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: AppColors.brown100.withOpacity(0.4),
+                            color: AppColors.brown100.withValues(alpha: 0.4),
                             width: 0.8,
                           ),
                         ),
@@ -694,7 +693,7 @@ class _StoreScreenState extends State<StoreScreen> {
           decoration: BoxDecoration(
             color: isDark ? AppColors.darkBg : AppColors.cream,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            border: Border.all(color: AppColors.gold.withOpacity(0.4), width: 1.0),
+            border: Border.all(color: AppColors.gold.withValues(alpha: 0.4), width: 1.0),
           ),
           child: StarFieldBackground(
             child: Column(
@@ -725,7 +724,7 @@ class _StoreScreenState extends State<StoreScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.amber.withOpacity(0.2),
+                                  color: Colors.amber.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(color: Colors.amber, width: 0.5),
                                 ),
@@ -741,7 +740,7 @@ class _StoreScreenState extends State<StoreScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.2),
+                                  color: Colors.blue.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(color: Colors.blue, width: 0.5),
                                 ),
@@ -782,8 +781,8 @@ class _StoreScreenState extends State<StoreScreen> {
                             height: 100,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: AppColors.gold.withOpacity(0.1),
-                              border: Border.all(color: AppColors.gold.withOpacity(0.4), width: 1.0),
+                              color: AppColors.gold.withValues(alpha: 0.1),
+                              border: Border.all(color: AppColors.gold.withValues(alpha: 0.4), width: 1.0),
                             ),
                             alignment: Alignment.center,
                             child: Text(
@@ -841,7 +840,7 @@ class _StoreScreenState extends State<StoreScreen> {
                           decoration: BoxDecoration(
                             color: isDark ? AppColors.darkCard : Colors.white,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppColors.brown100.withOpacity(0.4), width: 0.8),
+                            border: Border.all(color: AppColors.brown100.withValues(alpha: 0.4), width: 0.8),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -878,7 +877,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: Colors.green.withOpacity(0.1),
+                                    color: Colors.green.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
@@ -941,9 +940,9 @@ class _StoreScreenState extends State<StoreScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppColors.gold.withOpacity(0.05),
+                            color: AppColors.gold.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.gold.withOpacity(0.2), width: 0.8),
+                            border: Border.all(color: AppColors.gold.withValues(alpha: 0.2), width: 0.8),
                           ),
                           child: const Row(
                             children: [
@@ -1008,10 +1007,10 @@ class _StoreScreenState extends State<StoreScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard.withOpacity(0.3) : AppColors.gold.withOpacity(0.04),
+        color: isDark ? AppColors.darkCard.withValues(alpha: 0.3) : AppColors.gold.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.gold.withOpacity(0.3),
+          color: AppColors.gold.withValues(alpha: 0.3),
           width: 1.0,
         ),
       ),
@@ -1133,7 +1132,7 @@ class _StoreScreenState extends State<StoreScreen> {
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkCard : Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.brown100.withOpacity(0.4), width: 0.8),
+                  border: Border.all(color: AppColors.brown100.withValues(alpha: 0.4), width: 0.8),
                 ),
                 child: Row(
                   children: [
@@ -1176,7 +1175,7 @@ class _StoreScreenState extends State<StoreScreen> {
                     // ─── CATEGORY TAB FILTERS ───
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: Container(
+                      child: SizedBox(
                         height: 40,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
@@ -1251,7 +1250,7 @@ class _StoreScreenState extends State<StoreScreen> {
                             color: isDark ? AppColors.darkCard : Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
-                              side: BorderSide(color: AppColors.brown100.withOpacity(0.4), width: 0.8),
+                              side: BorderSide(color: AppColors.brown100.withValues(alpha: 0.4), width: 0.8),
                             ),
                             elevation: 0,
                             child: InkWell(
@@ -1262,8 +1261,8 @@ class _StoreScreenState extends State<StoreScreen> {
                                   borderRadius: BorderRadius.circular(16),
                                   gradient: LinearGradient(
                                     colors: isDark
-                                        ? [Colors.white.withOpacity(0.01), Colors.black.withOpacity(0.1)]
-                                        : [Colors.transparent, AppColors.brown100.withOpacity(0.1)],
+                                        ? [Colors.white.withValues(alpha: 0.01), Colors.black.withValues(alpha: 0.1)]
+                                        : [Colors.transparent, AppColors.brown100.withValues(alpha: 0.1)],
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
                                   ),
@@ -1277,7 +1276,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                       Expanded(
                                         child: Container(
                                           decoration: BoxDecoration(
-                                            color: AppColors.gold.withOpacity(0.05),
+                                            color: AppColors.gold.withValues(alpha: 0.05),
                                             borderRadius: BorderRadius.circular(12),
                                           ),
                                           alignment: Alignment.center,

@@ -1,3 +1,4 @@
+// ignore_for_file: use_null_aware_elements
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/models.dart';
@@ -61,6 +62,26 @@ class ApiService {
     }
   }
 
+  // Forgot Password API
+  static Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/auth/forgot-password'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+      }),
+    ).timeout(const Duration(seconds: 15));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      final errorMsg = _tryExtractErrorMessage(response.body);
+      throw Exception(errorMsg ?? 'Failed to request password reset.');
+    }
+  }
+
   // 1. Process All (Onboarding calculation)
   static Future<Map<String, dynamic>> processAll({
     required BirthDetails birthDetails,
@@ -74,6 +95,7 @@ class ApiService {
         ...birthDetails.toJson(),
         'questionnaireAnswers': answers.map((a) => a.toJson()).toList(),
         if (userId != null) 'userId': userId,
+        'freeOnly': true, // Explicitly request free report during onboarding
       }),
     ).timeout(const Duration(seconds: 60));
 

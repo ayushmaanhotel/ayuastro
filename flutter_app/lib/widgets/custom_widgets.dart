@@ -34,14 +34,14 @@ class GlassPremiumCard extends StatelessWidget {
   final Color? customBorderColor;
 
   const GlassPremiumCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.width,
     this.height,
     this.borderShimmer = false,
     this.customBorderColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,24 +53,24 @@ class GlassPremiumCard extends StatelessWidget {
       padding: padding ?? const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: isDark 
-            ? AppColors.darkCard.withOpacity(0.85) 
-            : Colors.white.withOpacity(0.9),
+            ? AppColors.darkCard.withValues(alpha: 0.85) 
+            : Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: customBorderColor ?? (isDark 
-              ? AppColors.gold.withOpacity(0.25) 
-              : AppColors.gold.withOpacity(0.15)),
+              ? AppColors.gold.withValues(alpha: 0.25) 
+              : AppColors.gold.withValues(alpha: 0.15)),
           width: borderShimmer ? 1.8 : 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: (isDark ? Colors.black : AppColors.brown900).withOpacity(isDark ? 0.4 : 0.06),
+            color: (isDark ? Colors.black : AppColors.brown900).withValues(alpha: isDark ? 0.4 : 0.06),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
           if (borderShimmer)
             BoxShadow(
-              color: AppColors.gold.withOpacity(0.15),
+              color: AppColors.gold.withValues(alpha: 0.15),
               blurRadius: 10,
               spreadRadius: 1,
             ),
@@ -115,14 +115,14 @@ class GlassLightCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const GlassLightCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.width,
     this.height,
     this.borderRadius = 12,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -134,12 +134,12 @@ class GlassLightCard extends StatelessWidget {
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDark 
-            ? Colors.white.withOpacity(0.04) 
-            : AppColors.cream.withOpacity(0.6),
+            ? Colors.white.withValues(alpha: 0.04) 
+            : AppColors.cream.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
           color: isDark 
-              ? Colors.white.withOpacity(0.08) 
+              ? Colors.white.withValues(alpha: 0.08) 
               : AppColors.brown100,
           width: 1,
         ),
@@ -166,15 +166,15 @@ class NeonGoldButton extends StatefulWidget {
   final IconData? icon;
 
   const NeonGoldButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.isLoading = false,
     this.icon,
-  }) : super(key: key);
+  });
 
   @override
-  _NeonGoldButtonState createState() => _NeonGoldButtonState();
+  State<NeonGoldButton> createState() => _NeonGoldButtonState();
 }
 
 class _NeonGoldButtonState extends State<NeonGoldButton> with SingleTickerProviderStateMixin {
@@ -224,7 +224,7 @@ class _NeonGoldButtonState extends State<NeonGoldButton> with SingleTickerProvid
             borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
-                color: AppColors.gold.withOpacity(0.35),
+                color: AppColors.gold.withValues(alpha: 0.35),
                 blurRadius: 16,
                 spreadRadius: 1,
                 offset: const Offset(0, 4),
@@ -247,13 +247,16 @@ class _NeonGoldButtonState extends State<NeonGoldButton> with SingleTickerProvid
                       Icon(widget.icon, color: Colors.white, size: 20),
                       const SizedBox(width: 8),
                     ],
-                    Text(
-                      widget.text,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
+                    Flexible(
+                      child: Text(
+                        widget.text,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
                   ],
@@ -267,7 +270,7 @@ class _NeonGoldButtonState extends State<NeonGoldButton> with SingleTickerProvid
 // 4. Custom Section Divider
 class SectionDivider extends StatelessWidget {
   final String symbol;
-  const SectionDivider({Key? key, this.symbol = '✦'}) : super(key: key);
+  const SectionDivider({super.key, this.symbol = '✦'});
 
   @override
   Widget build(BuildContext context) {
@@ -282,7 +285,7 @@ class SectionDivider extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   Colors.transparent,
-                  (isDark ? AppColors.gold.withOpacity(0.5) : AppColors.gold.withOpacity(0.3)),
+                  (isDark ? AppColors.gold.withValues(alpha: 0.5) : AppColors.gold.withValues(alpha: 0.3)),
                 ],
               ),
             ),
@@ -305,7 +308,7 @@ class SectionDivider extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  (isDark ? AppColors.gold.withOpacity(0.5) : AppColors.gold.withOpacity(0.3)),
+                  (isDark ? AppColors.gold.withValues(alpha: 0.5) : AppColors.gold.withValues(alpha: 0.3)),
                   Colors.transparent,
                 ],
               ),
@@ -320,10 +323,10 @@ class SectionDivider extends StatelessWidget {
 // 5. Star-field background simulation widget
 class StarFieldBackground extends StatefulWidget {
   final Widget child;
-  const StarFieldBackground({Key? key, required this.child}) : super(key: key);
+  const StarFieldBackground({super.key, required this.child});
 
   @override
-  _StarFieldBackgroundState createState() => _StarFieldBackgroundState();
+  State<StarFieldBackground> createState() => _StarFieldBackgroundState();
 }
 
 class _StarFieldBackgroundState extends State<StarFieldBackground> with SingleTickerProviderStateMixin {
@@ -395,14 +398,14 @@ class StarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
-    final starColor = AppColors.gold.withOpacity(isDark ? 0.35 : 0.2);
+    final starColor = AppColors.gold.withValues(alpha: isDark ? 0.35 : 0.2);
 
     for (int i = 0; i < stars.length; i++) {
       // Calculate flicker opacity based on sine wave
       final double flickerValue = sin(animationValue * 2 * pi + flickerOffset[i]);
       final double opacity = max(0.05, (flickerValue + 1.0) / 2.0 * (isDark ? 0.7 : 0.4));
       
-      paint.color = starColor.withOpacity(opacity);
+      paint.color = starColor.withValues(alpha: opacity);
       
       final dx = stars[i].dx * size.width;
       final dy = stars[i].dy * size.height;
@@ -419,10 +422,10 @@ class StarPainter extends CustomPainter {
 // 6. Cosmic loading spinner spinner mandala
 class CosmicLoader extends StatefulWidget {
   final String message;
-  const CosmicLoader({Key? key, required this.message}) : super(key: key);
+  const CosmicLoader({super.key, required this.message});
 
   @override
-  _CosmicLoaderState createState() => _CosmicLoaderState();
+  State<CosmicLoader> createState() => _CosmicLoaderState();
 }
 
 class _CosmicLoaderState extends State<CosmicLoader> with SingleTickerProviderStateMixin {
@@ -463,7 +466,7 @@ class _CosmicLoaderState extends State<CosmicLoader> with SingleTickerProviderSt
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.gold.withOpacity(isDark ? 0.35 : 0.2),
+                    color: AppColors.gold.withValues(alpha: isDark ? 0.35 : 0.2),
                     width: 1.5,
                   ),
                 ),
@@ -490,6 +493,9 @@ class _CosmicLoaderState extends State<CosmicLoader> with SingleTickerProviderSt
           child: Text(
             widget.message,
             key: ValueKey<String>(widget.message),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 3,
             style: TextStyle(
               color: isDark ? Colors.white : AppColors.brown900,
               fontSize: 16,
@@ -509,10 +515,10 @@ class AstroMarkdownText extends StatelessWidget {
   final TextStyle? style;
 
   const AstroMarkdownText({
-    Key? key,
+    super.key,
     required this.text,
     this.style,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -612,7 +618,7 @@ class AstroMarkdownText extends StatelessWidget {
         style: defaultStyle.copyWith(
           fontWeight: isBold ? FontWeight.bold : defaultStyle.fontWeight,
           color: isBold 
-              ? (defaultStyle.color?.withOpacity(1.0) ?? Colors.white) 
+              ? (defaultStyle.color?.withValues(alpha: 1.0) ?? Colors.white) 
               : defaultStyle.color,
         ),
       ));

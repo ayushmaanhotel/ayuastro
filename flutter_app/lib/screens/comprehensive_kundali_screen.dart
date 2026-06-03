@@ -8,7 +8,7 @@ import '../widgets/custom_widgets.dart';
 import '../widgets/kundali_chart.dart';
 
 class ComprehensiveKundaliScreen extends StatefulWidget {
-  const ComprehensiveKundaliScreen({Key? key}) : super(key: key);
+  const ComprehensiveKundaliScreen({super.key});
 
   @override
   State<ComprehensiveKundaliScreen> createState() => _ComprehensiveKundaliScreenState();
@@ -148,7 +148,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
           SliverAppBar(
             floating: true,
             pinned: true,
-            backgroundColor: (isDark ? AppColors.darkBg : AppColors.cream).withOpacity(0.95),
+            backgroundColor: (isDark ? AppColors.darkBg : AppColors.cream).withValues(alpha: 0.95),
             elevation: 0,
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: isDark ? Colors.white70 : AppColors.brown700),
@@ -207,7 +207,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       scrollDirection: Axis.horizontal,
                       itemCount: _sections.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 6),
+                      separatorBuilder: (_, _) => const SizedBox(width: 6),
                       itemBuilder: (context, i) {
                         final sec = _sections[i];
                         final isActive = i == _activeSection;
@@ -218,13 +218,13 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
                               color: isActive
-                                  ? AppColors.gold.withOpacity(0.2)
+                                  ? AppColors.gold.withValues(alpha: 0.2)
                                   : isViewed
-                                      ? (isDark ? Colors.white10 : AppColors.brown100.withOpacity(0.5))
+                                      ? (isDark ? Colors.white10 : AppColors.brown100.withValues(alpha: 0.5))
                                       : Colors.transparent,
                               borderRadius: BorderRadius.circular(20),
                               border: isActive
-                                  ? Border.all(color: AppColors.gold.withOpacity(0.3))
+                                  ? Border.all(color: AppColors.gold.withValues(alpha: 0.3))
                                   : null,
                             ),
                             child: Row(
@@ -272,7 +272,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: AppColors.gold.withOpacity(0.1),
+                              color: AppColors.gold.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(Icons.grid_3x3, color: AppColors.gold, size: 20),
@@ -422,7 +422,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.gold.withOpacity(0.1),
+                  color: AppColors.gold.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.auto_awesome, color: AppColors.gold, size: 20),
@@ -448,7 +448,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
             children: items.map((item) => Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark ? Colors.white.withOpacity(0.04) : AppColors.cream.withOpacity(0.6),
+                color: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.cream.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
@@ -488,9 +488,9 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: AppColors.gold.withOpacity(0.12),
+        color: AppColors.gold.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.gold.withOpacity(0.25)),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.25)),
       ),
       child: Text(text, style: TextStyle(
         fontSize: 11, fontWeight: FontWeight.w600,
@@ -507,7 +507,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
       highlights.add({
         'icon': '🧠',
         'title': '${pb['personalityArchetype']} Archetype',
-        'desc': (pb['archetypeDescription'] ?? 'Your core personality pattern').toString().split('.').first + '.',
+        'desc': '${(pb['archetypeDescription'] ?? 'Your core personality pattern').toString().split('.').first}.',
       });
     }
     final te = _data?['timingEvents'] as Map<String, dynamic>? ?? {};
@@ -515,7 +515,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
       highlights.add({
         'icon': '⏳',
         'title': '${te['currentMahadasha']} Dasha',
-        'desc': (te['dashaInterpretation'] ?? 'Current planetary period').toString().split('.').first + '.',
+        'desc': '${(te['dashaInterpretation'] ?? 'Current planetary period').toString().split('.').first}.',
       });
     }
     final ry = _data?['rareYogas'] as Map<String, dynamic>? ?? {};
@@ -539,7 +539,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: highlights.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (_, i) {
           final h = highlights[i];
           return Container(
@@ -547,11 +547,11 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.gold.withOpacity(0.12), AppColors.gold.withOpacity(0.04)],
+                colors: [AppColors.gold.withValues(alpha: 0.12), AppColors.gold.withValues(alpha: 0.04)],
                 begin: Alignment.topLeft, end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.gold.withOpacity(0.2)),
+              border: Border.all(color: AppColors.gold.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -639,7 +639,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
           widgets.add(Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.04) : AppColors.cream.withOpacity(0.6),
+              color: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.cream.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: isDark ? Colors.white12 : AppColors.brown100),
             ),
@@ -768,7 +768,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
           widgets.add(Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.04) : AppColors.cream.withOpacity(0.6),
+              color: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.cream.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: isDark ? Colors.white12 : AppColors.brown100),
             ),
@@ -850,9 +850,9 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [AppColors.gold.withOpacity(0.15), AppColors.gold.withOpacity(0.03)]),
+        gradient: LinearGradient(colors: [AppColors.gold.withValues(alpha: 0.15), AppColors.gold.withValues(alpha: 0.03)]),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.gold.withOpacity(0.25)),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.25)),
       ),
       child: Column(
         children: [
@@ -875,16 +875,16 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
 
   Widget _doshaCard(String dosha, String note, bool isDark) {
     final colors = {
-      'Pitta': [Colors.red.withOpacity(0.15), Colors.orange.withOpacity(0.15)],
-      'Vata': [Colors.blue.withOpacity(0.15), Colors.purple.withOpacity(0.15)],
-      'Kapha': [Colors.green.withOpacity(0.15), Colors.teal.withOpacity(0.15)],
+      'Pitta': [Colors.red.withValues(alpha: 0.15), Colors.orange.withValues(alpha: 0.15)],
+      'Vata': [Colors.blue.withValues(alpha: 0.15), Colors.purple.withValues(alpha: 0.15)],
+      'Kapha': [Colors.green.withValues(alpha: 0.15), Colors.teal.withValues(alpha: 0.15)],
     };
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: colors[dosha] ?? [Colors.grey.withOpacity(0.15), Colors.grey.withOpacity(0.1)]),
+        gradient: LinearGradient(colors: colors[dosha] ?? [Colors.grey.withValues(alpha: 0.15), Colors.grey.withValues(alpha: 0.1)]),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -906,9 +906,9 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [AppColors.gold.withOpacity(0.12), AppColors.gold.withOpacity(0.04)]),
+        gradient: LinearGradient(colors: [AppColors.gold.withValues(alpha: 0.12), AppColors.gold.withValues(alpha: 0.04)]),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.gold.withOpacity(0.25)),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -941,7 +941,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.04) : AppColors.cream.withOpacity(0.6),
+        color: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.cream.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: isDark ? Colors.white12 : AppColors.brown100),
       ),
@@ -967,7 +967,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
               children: areas.map((a) => Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white10 : AppColors.brown100.withOpacity(0.5),
+                  color: isDark ? Colors.white10 : AppColors.brown100.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(a.toString(), style: TextStyle(
@@ -987,9 +987,9 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [AppColors.gold.withOpacity(0.08), AppColors.gold.withOpacity(0.03)]),
+        gradient: LinearGradient(colors: [AppColors.gold.withValues(alpha: 0.08), AppColors.gold.withValues(alpha: 0.03)]),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.gold.withOpacity(0.15)),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1004,7 +1004,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: strengthColor.withOpacity(0.15),
+                  color: strengthColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(y['strength'] ?? '', style: TextStyle(fontSize: 10, color: strengthColor)),
@@ -1031,9 +1031,9 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.05),
+        color: Colors.red.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.withOpacity(0.15)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1048,7 +1048,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.12), borderRadius: BorderRadius.circular(10),
+                  color: Colors.red.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(d['severity'] ?? '', style: TextStyle(fontSize: 10, color: Colors.red.shade400)),
               ),
@@ -1085,9 +1085,9 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [AppColors.gold.withOpacity(0.15), AppColors.gold.withOpacity(0.03)]),
+        gradient: LinearGradient(colors: [AppColors.gold.withValues(alpha: 0.15), AppColors.gold.withValues(alpha: 0.03)]),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.gold.withOpacity(0.25)),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1121,7 +1121,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
     list.add(Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.04) : AppColors.cream.withOpacity(0.6),
+        color: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.cream.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: isDark ? Colors.white12 : AppColors.brown100),
       ),
@@ -1133,7 +1133,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.gold.withOpacity(0.12), borderRadius: BorderRadius.circular(8),
+                  color: AppColors.gold.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(name, style: TextStyle(fontSize: 10, color: AppColors.goldDark)),
               ),
@@ -1156,9 +1156,9 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [Colors.blueGrey.withOpacity(0.1), Colors.blueGrey.withOpacity(0.03)]),
+        gradient: LinearGradient(colors: [Colors.blueGrey.withValues(alpha: 0.1), Colors.blueGrey.withValues(alpha: 0.03)]),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.blueGrey.withOpacity(0.2)),
+        border: Border.all(color: Colors.blueGrey.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -1190,11 +1190,11 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
           children: items.map((item) => Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(item.toString(), style: TextStyle(
-              fontSize: 11, color: color.withOpacity(0.8),
+              fontSize: 11, color: color.withValues(alpha: 0.8),
             )),
           )).toList(),
         ),
@@ -1233,7 +1233,7 @@ class _ComprehensiveKundaliScreenState extends State<ComprehensiveKundaliScreen>
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withOpacity(0.04) : AppColors.cream.withOpacity(0.6),
+          color: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.cream.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(

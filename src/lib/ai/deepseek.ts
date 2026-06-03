@@ -51,9 +51,9 @@ export interface DeepSeekCompletionResponse {
 export async function createDeepSeekCompletion(
   options: DeepSeekCompletionOptions
 ): Promise<DeepSeekCompletionResponse> {
-  const apiKey = process.env.DEEPSEEK_API_KEY;
+  const apiKey = process.env.DEEPSEEK_API_KEY?.trim();
   if (!apiKey) {
-    throw new Error('DEEPSEEK_API_KEY is not defined in the environment variables.');
+    throw new Error('DEEPSEEK_API_KEY is not defined or is empty in the environment variables.');
   }
 
   // Map to deepseek-v4-flash

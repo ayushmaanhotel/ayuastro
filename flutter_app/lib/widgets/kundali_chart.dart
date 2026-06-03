@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import 'custom_widgets.dart';
@@ -14,7 +13,7 @@ class KundaliChart extends StatelessWidget {
   final bool compact;
 
   const KundaliChart({
-    Key? key,
+    super.key,
     required this.planetaryPositions,
     required this.ascendant,
     this.ascendantDegree,
@@ -23,7 +22,7 @@ class KundaliChart extends StatelessWidget {
     this.birthDetails,
     this.nakshatra,
     this.compact = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -217,7 +216,7 @@ class _KundaliChartPainter extends CustomPainter {
       text: text,
       style: TextStyle(
         fontSize: fontSize,
-        color: color.withOpacity(opacity),
+        color: color.withValues(alpha: opacity),
         fontWeight: fontWeight,
         fontFamily: isSerif ? 'Playfair Display' : 'Inter',
       ),
@@ -264,7 +263,7 @@ class _KundaliChartPainter extends CustomPainter {
 
   void _drawGridLines(Canvas canvas, Offset Function(double, double) gridFn) {
     final linePaint = Paint()
-      ..color = isDark ? AppColors.gold.withOpacity(0.3) : AppColors.brown700.withOpacity(0.6)
+      ..color = isDark ? AppColors.gold.withValues(alpha: 0.3) : AppColors.brown700.withValues(alpha: 0.6)
       ..strokeWidth = 1.2
       ..style = PaintingStyle.stroke;
 
@@ -388,7 +387,7 @@ class _KundaliChartPainter extends CustomPainter {
 
       // Diamond border
       final borderPaint = Paint()
-        ..color = isDark ? AppColors.gold.withOpacity(0.5) : AppColors.brown700
+        ..color = isDark ? AppColors.gold.withValues(alpha: 0.5) : AppColors.brown700
         ..strokeWidth = 2.5
         ..style = PaintingStyle.stroke;
       canvas.drawPath(diamondPath, borderPaint);
@@ -400,8 +399,8 @@ class _KundaliChartPainter extends CustomPainter {
       final ascGlowPaint = Paint()
         ..shader = LinearGradient(
           colors: [
-            AppColors.gold.withOpacity(0.18),
-            AppColors.gold.withOpacity(0.04),
+            AppColors.gold.withValues(alpha: 0.18),
+            AppColors.gold.withValues(alpha: 0.04),
           ],
         ).createShader(Rect.fromLTRB(cLeft.dx, cTop.dy, cRight.dx, cCenter.dy));
       final ascPath = Path();
@@ -431,11 +430,11 @@ class _KundaliChartPainter extends CustomPainter {
       );
 
       // Corners & Center dots
-      final dotPaint = Paint()..color = isDark ? AppColors.gold.withOpacity(0.4) : AppColors.brown700.withOpacity(0.4);
+      final dotPaint = Paint()..color = isDark ? AppColors.gold.withValues(alpha: 0.4) : AppColors.brown700.withValues(alpha: 0.4);
       for (final pt in [cTop, cRight, cBottom, cLeft]) {
         canvas.drawCircle(pt, 3, dotPaint);
       }
-      canvas.drawCircle(cCenter, 2, Paint()..color = AppColors.gold.withOpacity(0.3));
+      canvas.drawCircle(cCenter, 2, Paint()..color = AppColors.gold.withValues(alpha: 0.3));
 
     } else {
       // ══════════════════════════════════════════════════════════════════════════
@@ -467,21 +466,21 @@ class _KundaliChartPainter extends CustomPainter {
       final headerBgPaint = Paint()
         ..shader = LinearGradient(
           colors: [
-            AppColors.gold.withOpacity(0.06),
-            AppColors.brown500.withOpacity(0.03),
+            AppColors.gold.withValues(alpha: 0.06),
+            AppColors.brown500.withValues(alpha: 0.03),
           ],
         ).createShader(headerRect);
       canvas.drawRRect(RRect.fromRectAndRadius(headerRect, const Radius.circular(14)), headerBgPaint);
 
       final headerBorderPaint = Paint()
-        ..color = AppColors.gold.withOpacity(0.3)
+        ..color = AppColors.gold.withValues(alpha: 0.3)
         ..strokeWidth = 0.8
         ..style = PaintingStyle.stroke;
       canvas.drawRRect(RRect.fromRectAndRadius(headerRect, const Radius.circular(14)), headerBorderPaint);
 
       // Accent gold line top
       final headerAccentRect = Rect.fromLTWH(10, 8, 440, 3);
-      canvas.drawRRect(RRect.fromRectAndRadius(headerAccentRect, const Radius.circular(1.5)), Paint()..color = AppColors.gold.withOpacity(0.4));
+      canvas.drawRRect(RRect.fromRectAndRadius(headerAccentRect, const Radius.circular(1.5)), Paint()..color = AppColors.gold.withValues(alpha: 0.4));
 
       // Header Title
       _drawText(
@@ -567,14 +566,14 @@ class _KundaliChartPainter extends CustomPainter {
       // Sun & Moon Badges
       // Sun Badge
       final sunBadgeRect = Rect.fromLTWH(30, 126, 90, 20);
-      canvas.drawRRect(RRect.fromRectAndRadius(sunBadgeRect, const Radius.circular(10)), Paint()..color = const Color(0xFFEAB308).withOpacity(0.1));
-      canvas.drawRRect(RRect.fromRectAndRadius(sunBadgeRect, const Radius.circular(10)), Paint()..color = const Color(0xFFEAB308).withOpacity(0.5)..strokeWidth = 0.6..style = PaintingStyle.stroke);
+      canvas.drawRRect(RRect.fromRectAndRadius(sunBadgeRect, const Radius.circular(10)), Paint()..color = const Color(0xFFEAB308).withValues(alpha: 0.1));
+      canvas.drawRRect(RRect.fromRectAndRadius(sunBadgeRect, const Radius.circular(10)), Paint()..color = const Color(0xFFEAB308).withValues(alpha: 0.5)..strokeWidth = 0.6..style = PaintingStyle.stroke);
       _drawText(canvas, "☉ $sunSign", const Offset(75, 136), fontSize: 9.5, color: const Color(0xFFB8960C), fontWeight: FontWeight.bold);
 
       // Moon Badge
       final moonBadgeRect = Rect.fromLTWH(130, 126, 90, 20);
-      canvas.drawRRect(RRect.fromRectAndRadius(moonBadgeRect, const Radius.circular(10)), Paint()..color = const Color(0xFF94A3B8).withOpacity(0.1));
-      canvas.drawRRect(RRect.fromRectAndRadius(moonBadgeRect, const Radius.circular(10)), Paint()..color = const Color(0xFF94A3B8).withOpacity(0.5)..strokeWidth = 0.6..style = PaintingStyle.stroke);
+      canvas.drawRRect(RRect.fromRectAndRadius(moonBadgeRect, const Radius.circular(10)), Paint()..color = const Color(0xFF94A3B8).withValues(alpha: 0.1));
+      canvas.drawRRect(RRect.fromRectAndRadius(moonBadgeRect, const Radius.circular(10)), Paint()..color = const Color(0xFF94A3B8).withValues(alpha: 0.5)..strokeWidth = 0.6..style = PaintingStyle.stroke);
       _drawText(canvas, "☽ $moonSign", const Offset(175, 136), fontSize: 9.5, color: isDark ? Colors.white70 : const Color(0xFF64748B), fontWeight: FontWeight.bold);
 
 
@@ -588,7 +587,7 @@ class _KundaliChartPainter extends CustomPainter {
 
       // Shadow simulated
       final shadowPaint = Paint()
-        ..color = isDark ? Colors.black.withOpacity(0.5) : const Color(0xFF5D4037).withOpacity(0.15)
+        ..color = isDark ? Colors.black.withValues(alpha: 0.5) : const Color(0xFF5D4037).withValues(alpha: 0.15)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
       canvas.drawPath(diamondPath.shift(const Offset(0, 3)), shadowPaint);
 
@@ -602,7 +601,7 @@ class _KundaliChartPainter extends CustomPainter {
 
       // Diamond Border
       final borderPaint = Paint()
-        ..color = isDark ? AppColors.gold.withOpacity(0.5) : AppColors.brown700
+        ..color = isDark ? AppColors.gold.withValues(alpha: 0.5) : AppColors.brown700
         ..strokeWidth = 2.5
         ..style = PaintingStyle.stroke;
       canvas.drawPath(diamondPath, borderPaint);
@@ -614,8 +613,8 @@ class _KundaliChartPainter extends CustomPainter {
       final ascGlowPaint = Paint()
         ..shader = LinearGradient(
           colors: [
-            AppColors.gold.withOpacity(0.2),
-            AppColors.gold.withOpacity(0.04),
+            AppColors.gold.withValues(alpha: 0.2),
+            AppColors.gold.withValues(alpha: 0.04),
           ],
         ).createShader(Rect.fromLTRB(fLeft.dx, fTop.dy, fRight.dx, fCenter.dy));
       final ascPath = Path();
@@ -645,11 +644,11 @@ class _KundaliChartPainter extends CustomPainter {
       );
 
       // Corners & Center dots
-      final dotPaint = Paint()..color = isDark ? AppColors.gold.withOpacity(0.4) : AppColors.brown700.withOpacity(0.4);
+      final dotPaint = Paint()..color = isDark ? AppColors.gold.withValues(alpha: 0.4) : AppColors.brown700.withValues(alpha: 0.4);
       for (final pt in [fTop, fRight, fBottom, fLeft]) {
         canvas.drawCircle(pt, 3.5, dotPaint);
       }
-      canvas.drawCircle(fCenter, 2, Paint()..color = AppColors.gold.withOpacity(0.35));
+      canvas.drawCircle(fCenter, 2, Paint()..color = AppColors.gold.withValues(alpha: 0.35));
 
 
       // ── LEGEND ──
@@ -657,8 +656,8 @@ class _KundaliChartPainter extends CustomPainter {
       final legendBgPaint = Paint()
         ..shader = LinearGradient(
           colors: [
-            AppColors.gold.withOpacity(0.04),
-            AppColors.brown500.withOpacity(0.02),
+            AppColors.gold.withValues(alpha: 0.04),
+            AppColors.brown500.withValues(alpha: 0.02),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -666,7 +665,7 @@ class _KundaliChartPainter extends CustomPainter {
       canvas.drawRRect(RRect.fromRectAndRadius(legendRect, const Radius.circular(12)), legendBgPaint);
 
       final legendBorderPaint = Paint()
-        ..color = AppColors.gold.withOpacity(0.2)
+        ..color = AppColors.gold.withValues(alpha: 0.2)
         ..strokeWidth = 0.5
         ..style = PaintingStyle.stroke;
       canvas.drawRRect(RRect.fromRectAndRadius(legendRect, const Radius.circular(12)), legendBorderPaint);
@@ -684,7 +683,7 @@ class _KundaliChartPainter extends CustomPainter {
 
       // Row 1: Badges & markers
       // House Badge demo
-      canvas.drawCircle(const Offset(40, 638), 5, Paint()..color = isDark ? Colors.white12 : const Color(0xFF5D4037).withOpacity(0.08));
+      canvas.drawCircle(const Offset(40, 638), 5, Paint()..color = isDark ? Colors.white12 : const Color(0xFF5D4037).withValues(alpha: 0.08));
       _drawText(canvas, "1", const Offset(40, 638), fontSize: 7, color: isDark ? Colors.white70 : AppColors.brown400, fontWeight: FontWeight.bold);
       _drawText(canvas, "House number", const Offset(52, 638), fontSize: 8.5, color: AppColors.brown500, textAlign: TextAlign.left);
 
@@ -698,8 +697,8 @@ class _KundaliChartPainter extends CustomPainter {
 
       // Ascendant highlight demo
       final ascLegendRect = Rect.fromLTWH(350, 631, 12, 12);
-      canvas.drawRRect(RRect.fromRectAndRadius(ascLegendRect, const Radius.circular(2)), Paint()..color = AppColors.gold.withOpacity(0.18));
-      canvas.drawRRect(RRect.fromRectAndRadius(ascLegendRect, const Radius.circular(2)), Paint()..color = AppColors.gold.withOpacity(0.5)..strokeWidth = 0.5..style = PaintingStyle.stroke);
+      canvas.drawRRect(RRect.fromRectAndRadius(ascLegendRect, const Radius.circular(2)), Paint()..color = AppColors.gold.withValues(alpha: 0.18));
+      canvas.drawRRect(RRect.fromRectAndRadius(ascLegendRect, const Radius.circular(2)), Paint()..color = AppColors.gold.withValues(alpha: 0.5)..strokeWidth = 0.5..style = PaintingStyle.stroke);
       _drawText(canvas, "1st house (Asc)", const Offset(368, 638), fontSize: 8.5, color: AppColors.brown500, textAlign: TextAlign.left);
 
       // Row 2: Planet color dots
@@ -786,8 +785,8 @@ class _KundaliChartPainter extends CustomPainter {
       preset.badgeR,
       Paint()
         ..color = isAsc
-            ? const Color(0xFFD4AF37).withOpacity(0.2)
-            : const Color(0xFF5D4037).withOpacity(0.08),
+            ? const Color(0xFFD4AF37).withValues(alpha: 0.2)
+            : const Color(0xFF5D4037).withValues(alpha: 0.08),
     );
     _drawText(
       canvas,

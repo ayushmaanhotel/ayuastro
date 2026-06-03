@@ -130,7 +130,7 @@ const List<DoshaInfo> _doshaData = [
 class DoshaDetailCard extends StatefulWidget {
   final List<String> doshas;
 
-  const DoshaDetailCard({Key? key, required this.doshas}) : super(key: key);
+  const DoshaDetailCard({super.key, required this.doshas});
 
   @override
   State<DoshaDetailCard> createState() => _DoshaDetailCardState();
@@ -153,11 +153,11 @@ class _DoshaDetailCardState extends State<DoshaDetailCard> {
   Color _getSeverityBgColor(String severity) {
     switch (severity) {
       case 'Serious':
-        return Colors.red.withOpacity(0.12);
+        return Colors.red.withValues(alpha: 0.12);
       case 'Moderate':
-        return Colors.orange.withOpacity(0.12);
+        return Colors.orange.withValues(alpha: 0.12);
       default:
-        return Colors.yellow.shade100.withOpacity(0.3);
+        return Colors.yellow.shade100.withValues(alpha: 0.3);
     }
   }
 
@@ -239,7 +239,7 @@ class _DoshaDetailCardState extends State<DoshaDetailCard> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.sage.withOpacity(0.12),
+                    color: AppColors.sage.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(LucideIcons.shield, color: AppColors.sage, size: 24),
@@ -269,7 +269,7 @@ class _DoshaDetailCardState extends State<DoshaDetailCard> {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.sage.withOpacity(0.08),
+                color: AppColors.sage.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -311,7 +311,7 @@ class _DoshaDetailCardState extends State<DoshaDetailCard> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.12),
+                      color: Colors.red.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(LucideIcons.triangle_alert, color: Colors.red, size: 24),
@@ -340,7 +340,7 @@ class _DoshaDetailCardState extends State<DoshaDetailCard> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.08),
+                  color: Colors.red.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Row(
@@ -363,14 +363,14 @@ class _DoshaDetailCardState extends State<DoshaDetailCard> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: displayDoshas.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final dosha = displayDoshas[index];
               final isExpanded = _expandedDoshas[dosha.id] ?? false;
 
               return Container(
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withOpacity(0.02) : Colors.white,
+                  color: isDark ? Colors.white.withValues(alpha: 0.02) : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border(
                     left: BorderSide(
@@ -523,7 +523,7 @@ class _DoshaDetailCardState extends State<DoshaDetailCard> {
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: AppColors.sage.withOpacity(0.08),
+                                color: AppColors.sage.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Column(
@@ -567,7 +567,7 @@ class _DoshaDetailCardState extends State<DoshaDetailCard> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         decoration: BoxDecoration(
-                          color: isDark ? Colors.white.withOpacity(0.01) : Colors.grey.shade50,
+                          color: isDark ? Colors.white.withValues(alpha: 0.01) : Colors.grey.shade50,
                           border: Border(
                             top: BorderSide(color: isDark ? Colors.white10 : AppColors.brown100),
                           ),

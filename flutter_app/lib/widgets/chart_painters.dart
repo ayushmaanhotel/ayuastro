@@ -59,8 +59,8 @@ class RadarChartPainter extends CustomPainter {
 
     // Grid colors
     final gridColor = isDark 
-        ? const Color(0xFFA89070).withOpacity(0.15) 
-        : const Color(0xFF8B6F47).withOpacity(0.1);
+        ? const Color(0xFFA89070).withValues(alpha: 0.15) 
+        : const Color(0xFF8B6F47).withValues(alpha: 0.1);
     final axisColor = isDark ? const Color(0xFFA89070) : const Color(0xFF8B6F47);
     final goldColor = const Color(0xFFD4AF37);
 
@@ -72,7 +72,11 @@ class RadarChartPainter extends CustomPainter {
         final angle = -pi / 2 + i * angleStep;
         final x = center.dx + levelRadius * cos(angle);
         final y = center.dy + levelRadius * sin(angle);
-        if (i == 0) path.moveTo(x, y); else path.lineTo(x, y);
+        if (i == 0) {
+          path.moveTo(x, y);
+        } else {
+          path.lineTo(x, y);
+        }
       }
       path.close();
       canvas.drawPath(path, Paint()
@@ -126,13 +130,17 @@ class RadarChartPainter extends CustomPainter {
       final angle = -pi / 2 + idx * angleStep;
       final x = center.dx + r * cos(angle);
       final y = center.dy + r * sin(angle);
-      if (i == 0) scorePath.moveTo(x, y); else scorePath.lineTo(x, y);
+      if (i == 0) {
+        scorePath.moveTo(x, y);
+      } else {
+        scorePath.lineTo(x, y);
+      }
     }
     scorePath.close();
 
     // Fill with transparent gold
     canvas.drawPath(scorePath, Paint()
-      ..color = goldColor.withOpacity(0.1)
+      ..color = goldColor.withValues(alpha: 0.1)
       ..style = PaintingStyle.fill);
 
     // Stroke
@@ -256,7 +264,7 @@ class ElementBarChartPainter extends CustomPainter {
     if (data.isEmpty) return;
 
     final axisColor = isDark ? const Color(0xFFA89070) : const Color(0xFF8B6F47);
-    final gridColor = (isDark ? const Color(0xFFA89070) : const Color(0xFF8B6F47)).withOpacity(0.1);
+    final gridColor = (isDark ? const Color(0xFFA89070) : const Color(0xFF8B6F47)).withValues(alpha: 0.1);
 
     final leftPadding = 30.0;
     final bottomPadding = 28.0;
@@ -332,7 +340,7 @@ class MoodTrendAreaPainter extends CustomPainter {
     if (data.isEmpty) return;
 
     final axisColor = isDark ? const Color(0xFFA89070) : const Color(0xFF8B6F47);
-    final gridColor = (isDark ? const Color(0xFFA89070) : const Color(0xFF8B6F47)).withOpacity(0.1);
+    final gridColor = (isDark ? const Color(0xFFA89070) : const Color(0xFF8B6F47)).withValues(alpha: 0.1);
     final goldColor = const Color(0xFFD4AF37);
 
     final leftPadding = 30.0;
@@ -392,7 +400,7 @@ class MoodTrendAreaPainter extends CustomPainter {
       final gradient = ui.Gradient.linear(
         Offset(0, topPadding),
         Offset(0, topPadding + chartHeight),
-        [goldColor.withOpacity(0.15), goldColor.withOpacity(0.0)],
+        [goldColor.withValues(alpha: 0.15), goldColor.withValues(alpha: 0.0)],
       );
       canvas.drawPath(areaPath, Paint()..shader = gradient);
 
@@ -440,7 +448,7 @@ class NumerologyBarPainter extends CustomPainter {
     if (data.isEmpty) return;
 
     final axisColor = isDark ? const Color(0xFFA89070) : const Color(0xFF8B6F47);
-    final gridColor = (isDark ? const Color(0xFFA89070) : const Color(0xFF8B6F47)).withOpacity(0.1);
+    final gridColor = (isDark ? const Color(0xFFA89070) : const Color(0xFF8B6F47)).withValues(alpha: 0.1);
 
     final leftPadding = 80.0;
     final rightPadding = 10.0;

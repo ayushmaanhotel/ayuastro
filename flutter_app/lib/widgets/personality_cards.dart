@@ -192,14 +192,6 @@ const Map<String, Map<String, _SignData>> _allSignData = {
     'Pisces': _SignData('You are here to learn boundaries — to give without depleting, to dream without escaping.', 'Your soul\'s gift is channeling compassion and creativity that heals the world.', 'The lesson you keep avoiding is facing reality instead of floating above it.'),
   },
 };
-
-// ─── Helper: Get Sign Data ──────────────────────────────────────────────────
-
-_SignData _getSignData(String category, String? sign) {
-  final s = sign ?? 'Capricorn';
-  return _allSignData[category]?[s] ?? _allSignData[category]!['Capricorn']!;
-}
-
 // ─── Main Widget ────────────────────────────────────────────────────────────
 
 String _getSignFromPosition(Map<String, PlanetaryPositionInfo> positions, String planet, String fallback) {
@@ -453,11 +445,11 @@ class PersonalityCards extends StatefulWidget {
   final List<TraitScore> traitScores;
 
   const PersonalityCards({
-    Key? key,
+    super.key,
     this.astrologyData,
     this.numerologyData,
     required this.traitScores,
-  }) : super(key: key);
+  });
 
   @override
   State<PersonalityCards> createState() => _PersonalityCardsState();
@@ -628,7 +620,7 @@ class _PersonalityCardsState extends State<PersonalityCards> {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.gold.withOpacity(0.3)),
+                    border: Border.all(color: AppColors.gold.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -673,7 +665,7 @@ class _PersonalityCardsState extends State<PersonalityCards> {
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOut,
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkCard.withOpacity(0.85) : Colors.white,
+                  color: isDark ? AppColors.darkCard.withValues(alpha: 0.85) : Colors.white,
                   borderRadius: BorderRadius.circular(14),
                   border: Border(
                     left: BorderSide(color: def.accentColor, width: 4),
@@ -683,7 +675,7 @@ class _PersonalityCardsState extends State<PersonalityCards> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: (isDark ? Colors.black : AppColors.brown900).withOpacity(isDark ? 0.3 : 0.05),
+                      color: (isDark ? Colors.black : AppColors.brown900).withValues(alpha: isDark ? 0.3 : 0.05),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -765,7 +757,7 @@ class _PersonalityCardsState extends State<PersonalityCards> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Divider(
-                              color: (isDark ? Colors.white : AppColors.brown900).withOpacity(0.08),
+                              color: (isDark ? Colors.white : AppColors.brown900).withValues(alpha: 0.08),
                               height: 1,
                             ),
                             const SizedBox(height: 12),

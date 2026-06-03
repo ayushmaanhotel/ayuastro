@@ -111,7 +111,7 @@ final List<Map<String, dynamic>> _timerDurations = [
 
 // ─── Main Screen Widget ──────────────────────────────────────────────────────
 class CosmicSoundsScreen extends StatefulWidget {
-  const CosmicSoundsScreen({Key? key}) : super(key: key);
+  const CosmicSoundsScreen({super.key});
 
   @override
   State<CosmicSoundsScreen> createState() => _CosmicSoundsScreenState();
@@ -298,16 +298,16 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final state = Provider.of<AppState>(context);
 
     final hasRain = _channels.firstWhere((c) => c.id == 'rain').isPlaying;
     final hasCosmic = _channels.firstWhere((c) => c.id == 'cosmic').isPlaying;
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
         state.setView('breathing');
-        return false;
       },
       child: Scaffold(
         backgroundColor: Colors.transparent, // Controlled by atmospheric painter
@@ -366,9 +366,9 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.gold.withOpacity(0.15),
+                            color: AppColors.gold.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.gold.withOpacity(0.2)),
+                            border: Border.all(color: AppColors.gold.withValues(alpha: 0.2)),
                           ),
                           child: Row(
                             children: [
@@ -392,9 +392,9 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                     // ─── Master Volume card ───
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2D2320).withOpacity(0.85),
+                        color: const Color(0xFF2D2320).withValues(alpha: 0.85),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.gold.withOpacity(0.1)),
+                        border: Border.all(color: AppColors.gold.withValues(alpha: 0.1)),
                       ),
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -460,7 +460,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                                     style: const TextStyle(fontSize: 11, color: AppColors.gold, fontWeight: FontWeight.bold),
                                   ),
                                   style: TextButton.styleFrom(
-                                    backgroundColor: AppColors.gold.withOpacity(0.12),
+                                    backgroundColor: AppColors.gold.withValues(alpha: 0.12),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                   ),
                                 ),
@@ -490,9 +490,9 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                     // ─── Preset Scenes card ───
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2D2320).withOpacity(0.85),
+                        color: const Color(0xFF2D2320).withValues(alpha: 0.85),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.gold.withOpacity(0.1)),
+                        border: Border.all(color: AppColors.gold.withValues(alpha: 0.1)),
                       ),
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -531,12 +531,12 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                                 child: Container(
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? AppColors.gold.withOpacity(0.15)
-                                        : Colors.white.withOpacity(0.04),
+                                        ? AppColors.gold.withValues(alpha: 0.15)
+                                        : Colors.white.withValues(alpha: 0.04),
                                     borderRadius: BorderRadius.circular(14),
                                     border: Border.all(
                                       color: isSelected
-                                          ? AppColors.gold.withOpacity(0.4)
+                                          ? AppColors.gold.withValues(alpha: 0.4)
                                           : Colors.white10,
                                     ),
                                   ),
@@ -578,9 +578,9 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                     // ─── Sound Mixer Channels ───
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2D2320).withOpacity(0.85),
+                        color: const Color(0xFF2D2320).withValues(alpha: 0.85),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.gold.withOpacity(0.1)),
+                        border: Border.all(color: AppColors.gold.withValues(alpha: 0.1)),
                       ),
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -605,7 +605,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: _channels.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 10),
+                            separatorBuilder: (_, _) => const SizedBox(height: 10),
                             itemBuilder: (context, idx) {
                               final channel = _channels[idx];
                               final effectiveVol = (channel.volume * _masterVolume * 100).round();
@@ -613,13 +613,13 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                               return Container(
                                 decoration: BoxDecoration(
                                   color: channel.isPlaying
-                                      ? AppColors.gold.withOpacity(0.05)
-                                      : Colors.white.withOpacity(0.03),
+                                      ? AppColors.gold.withValues(alpha: 0.05)
+                                      : Colors.white.withValues(alpha: 0.03),
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
                                     color: channel.isPlaying
-                                        ? AppColors.gold.withOpacity(0.2)
-                                        : Colors.white.withOpacity(0.05),
+                                        ? AppColors.gold.withValues(alpha: 0.2)
+                                        : Colors.white.withValues(alpha: 0.05),
                                   ),
                                 ),
                                 padding: const EdgeInsets.all(10),
@@ -631,8 +631,8 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                                       height: 40,
                                       decoration: BoxDecoration(
                                         color: channel.isPlaying
-                                            ? AppColors.gold.withOpacity(0.1)
-                                            : Colors.white.withOpacity(0.05),
+                                            ? AppColors.gold.withValues(alpha: 0.1)
+                                            : Colors.white.withValues(alpha: 0.05),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       alignment: Alignment.center,
@@ -699,11 +699,11 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: channel.isPlaying
-                                              ? AppColors.gold.withOpacity(0.15)
-                                              : Colors.white.withOpacity(0.05),
+                                              ? AppColors.gold.withValues(alpha: 0.15)
+                                              : Colors.white.withValues(alpha: 0.05),
                                           border: Border.all(
                                             color: channel.isPlaying
-                                                ? AppColors.gold.withOpacity(0.3)
+                                                ? AppColors.gold.withValues(alpha: 0.3)
                                                 : Colors.white10,
                                           ),
                                         ),
@@ -727,9 +727,9 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                     // ─── Session Timer card ───
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2D2320).withOpacity(0.85),
+                        color: const Color(0xFF2D2320).withValues(alpha: 0.85),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.gold.withOpacity(0.1)),
+                        border: Border.all(color: AppColors.gold.withValues(alpha: 0.1)),
                       ),
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -755,7 +755,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: AppColors.gold.withOpacity(0.12),
+                                  color: AppColors.gold.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -788,12 +788,12 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                       decoration: BoxDecoration(
                                         color: isSelected && !_timerRunning
-                                            ? AppColors.gold.withOpacity(0.15)
-                                            : Colors.white.withOpacity(0.04),
+                                            ? AppColors.gold.withValues(alpha: 0.15)
+                                            : Colors.white.withValues(alpha: 0.04),
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(
                                           color: isSelected && !_timerRunning
-                                              ? AppColors.gold.withOpacity(0.3)
+                                              ? AppColors.gold.withValues(alpha: 0.3)
                                               : Colors.transparent,
                                         ),
                                       ),
@@ -850,7 +850,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                                         icon: const Icon(LucideIcons.rotate_ccw, size: 14),
                                         label: const Text('New Session'),
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: AppColors.gold.withOpacity(0.2),
+                                          backgroundColor: AppColors.gold.withValues(alpha: 0.2),
                                           foregroundColor: AppColors.gold,
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                         ),
@@ -904,7 +904,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                                               icon: const Icon(LucideIcons.play, size: 14),
                                               label: const Text('Start'),
                                               style: ElevatedButton.styleFrom(
-                                                backgroundColor: AppColors.gold.withOpacity(0.2),
+                                                backgroundColor: AppColors.gold.withValues(alpha: 0.2),
                                                 foregroundColor: AppColors.gold,
                                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                               ),
@@ -915,7 +915,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                                               icon: Icon(_timerPaused ? LucideIcons.play : LucideIcons.pause, size: 14),
                                               label: Text(_timerPaused ? 'Resume' : 'Pause'),
                                               style: ElevatedButton.styleFrom(
-                                                backgroundColor: AppColors.gold.withOpacity(0.2),
+                                                backgroundColor: AppColors.gold.withValues(alpha: 0.2),
                                                 foregroundColor: AppColors.gold,
                                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                               ),
@@ -984,8 +984,8 @@ class _AtmosphericBackgroundPainter extends CustomPainter {
           center: const Alignment(0, -0.4),
           radius: 1.1,
           colors: [
-            const Color(0xFFD4AF37).withOpacity(0.12),
-            const Color(0xFFA5D6A7).withOpacity(0.04),
+            const Color(0xFFD4AF37).withValues(alpha: 0.12),
+            const Color(0xFFA5D6A7).withValues(alpha: 0.04),
             Colors.transparent,
           ],
         ).createShader(Rect.fromLTWH(0, 0, w, h));
@@ -1025,7 +1025,7 @@ class _AtmosphericBackgroundPainter extends CustomPainter {
         
         // Sinusoidal opacity oscillation
         final double twinkle = sin(ambientProgress * 2 * pi + i) * 0.4 + 0.5;
-        starPaint.color = AppColors.gold.withOpacity(twinkle.clamp(0.0, 1.0));
+        starPaint.color = AppColors.gold.withValues(alpha: twinkle.clamp(0.0, 1.0));
 
         canvas.drawCircle(Offset(x, y), 1.2, starPaint);
       }
@@ -1055,7 +1055,7 @@ class _TimerProgressPainter extends CustomPainter {
 
     // Draw background ring
     final bgPaint = Paint()
-      ..color = Colors.white.withOpacity(0.08)
+      ..color = Colors.white.withValues(alpha: 0.08)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3;
 
@@ -1063,7 +1063,7 @@ class _TimerProgressPainter extends CustomPainter {
 
     // Draw active gold ring
     final activePaint = Paint()
-      ..color = AppColors.gold.withOpacity(0.8)
+      ..color = AppColors.gold.withValues(alpha: 0.8)
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 3;
@@ -1087,7 +1087,7 @@ class _TimerProgressPainter extends CustomPainter {
 class _AnimatedWaveformIndicator extends StatelessWidget {
   final double waveProgress;
 
-  const _AnimatedWaveformIndicator({Key? key, required this.waveProgress}) : super(key: key);
+  const _AnimatedWaveformIndicator({required this.waveProgress});
 
   @override
   Widget build(BuildContext context) {
@@ -1106,7 +1106,7 @@ class _AnimatedWaveformIndicator extends StatelessWidget {
             height: barHeight,
             margin: const EdgeInsets.only(left: 2),
             decoration: BoxDecoration(
-              color: AppColors.gold.withOpacity(0.7),
+              color: AppColors.gold.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(1),
             ),
           );

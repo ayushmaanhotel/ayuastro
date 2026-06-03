@@ -171,7 +171,7 @@ final List<_Astrologer> _astrologers = [
 ];
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  const ChatScreen({super.key});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -519,7 +519,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                 ),
               ),
               const SizedBox(height: 8),
-              Container(
+              SizedBox(
                 height: 80,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
@@ -547,7 +547,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                       color: ast.online
-                                          ? AppColors.gold.withOpacity(0.3 + 0.7 * _pulseController.value)
+                                          ? AppColors.gold.withValues(alpha: 0.3 + 0.7 * _pulseController.value)
                                           : Colors.transparent,
                                       width: 2.0,
                                     ),
@@ -618,13 +618,13 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: isDark
-                                ? AppColors.brown100.withOpacity(0.1)
-                                : AppColors.brown100.withOpacity(0.4),
+                                ? AppColors.brown100.withValues(alpha: 0.1)
+                                : AppColors.brown100.withValues(alpha: 0.4),
                             width: 0.8,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                               blurRadius: 16,
                               offset: const Offset(0, 6),
                             ),
@@ -741,7 +741,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                                               Container(
                                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                                 decoration: BoxDecoration(
-                                                  color: AppColors.gold.withOpacity(0.1),
+                                                  color: AppColors.gold.withValues(alpha: 0.1),
                                                   borderRadius: BorderRadius.circular(8),
                                                 ),
                                                 child: Text(
@@ -807,12 +807,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkCard.withOpacity(0.8) : Colors.white.withOpacity(0.8),
+              color: isDark ? AppColors.darkCard.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.gold.withOpacity(0.4), width: 1.0),
+              border: Border.all(color: AppColors.gold.withValues(alpha: 0.4), width: 1.0),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+                  color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
                   blurRadius: 24,
                   offset: const Offset(0, 10),
                 ),
@@ -857,7 +857,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.brown100.withOpacity(0.2),
+                    color: AppColors.brown100.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -920,13 +920,13 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               ? null
               : Border(
                   left: const BorderSide(color: AppColors.gold, width: 3.5),
-                  top: BorderSide(color: AppColors.brown100.withOpacity(0.4), width: 0.8),
-                  right: BorderSide(color: AppColors.brown100.withOpacity(0.4), width: 0.8),
-                  bottom: BorderSide(color: AppColors.brown100.withOpacity(0.4), width: 0.8),
+                  top: BorderSide(color: AppColors.brown100.withValues(alpha: 0.4), width: 0.8),
+                  right: BorderSide(color: AppColors.brown100.withValues(alpha: 0.4), width: 0.8),
+                  bottom: BorderSide(color: AppColors.brown100.withValues(alpha: 0.4), width: 0.8),
                 ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isUser ? 0.05 : 0.02),
+              color: Colors.black.withValues(alpha: isUser ? 0.05 : 0.02),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -958,7 +958,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             bottomLeft: Radius.circular(4),
             bottomRight: Radius.circular(18),
           ),
-          border: Border.all(color: AppColors.brown100.withOpacity(0.4), width: 0.8),
+          border: Border.all(color: AppColors.brown100.withValues(alpha: 0.4), width: 0.8),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

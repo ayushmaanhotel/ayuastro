@@ -16,6 +16,7 @@ import type {
 import { AIEngineError, AIErrorType } from './types';
 import { REPORT_SECTION_TEMPLATES, getDeepIntelligenceTemplates, getPremiumTemplates, getFreeTemplates } from './templates';
 import { buildReportPrompt, buildSectionPrompt, buildDeepIntelligencePrompt, getSystemPrompt, getDeepIntelligenceSystemPrompt } from './prompts';
+import { retrieveAstrologyContext } from './knowledge-base';
 
 // ---------------------------------------------------------------------------
 // SDK Initialization
@@ -442,7 +443,16 @@ export async function generateReport(
   // 3. Generate the report via AI
   const report = await withRetry(async () => {
     const client = await getAIClient();
-    const systemPrompt = getSystemPrompt();
+    const ragContext = retrieveAstrologyContext({
+      sunSign: input.sunSign,
+      moonSign: input.moonSign,
+      ascendant: input.ascendant,
+      nakshatra: input.nakshatra,
+      yogas: input.yogas,
+      doshas: input.doshas,
+      planetaryPositions: input.planetaryPositions,
+    });
+    const systemPrompt = getSystemPrompt('en', ragContext);
     const userPrompt = buildReportPrompt(input, templates);
 
     const response = await client.chat.completions.create({
@@ -497,7 +507,16 @@ export async function generateSection(
 
   const section = await withRetry(async () => {
     const client = await getAIClient();
-    const systemPrompt = getSystemPrompt();
+    const ragContext = retrieveAstrologyContext({
+      sunSign: input.sunSign,
+      moonSign: input.moonSign,
+      ascendant: input.ascendant,
+      nakshatra: input.nakshatra,
+      yogas: input.yogas,
+      doshas: input.doshas,
+      planetaryPositions: input.planetaryPositions,
+    });
+    const systemPrompt = getSystemPrompt('en', ragContext);
     const userPrompt = buildSectionPrompt(input, template);
 
     const response = await client.chat.completions.create({
@@ -586,6 +605,17 @@ export async function generateDeepIntelligenceReport(
   const onProgress = options?.onProgress;
   const BATCH_SIZE = 3; // Reduced from 4 to 3 for more reliable generation
 
+  // Retrieve RAG context once for the entire report
+  const ragContext = retrieveAstrologyContext({
+    sunSign: input.sunSign,
+    moonSign: input.moonSign,
+    ascendant: input.ascendant,
+    nakshatra: input.nakshatra,
+    yogas: input.yogas,
+    doshas: input.doshas,
+    planetaryPositions: input.planetaryPositions,
+  });
+
   console.info(`[Deep Intelligence] Starting report generation — ${freeTemplates.length} free + ${premiumTemplates.length} premium sections`);
   console.info(`[Deep Intelligence] Input: Sun=${input.sunSign}, Moon=${input.moonSign}, Asc=${input.ascendant}, Nakshatra=${input.nakshatra}`);
   if (input.planetaryPositions && Object.keys(input.planetaryPositions).length > 0) {
@@ -604,8 +634,8 @@ export async function generateDeepIntelligenceReport(
     const batchStart = Date.now();
     try {
       const systemPrompt = isFree 
-        ? getSystemPrompt(options?.language ?? 'en')
-        : getDeepIntelligenceSystemPrompt(options?.language ?? 'en');
+        ? getSystemPrompt(options?.language ?? 'en', ragContext)
+        : getDeepIntelligenceSystemPrompt(options?.language ?? 'en', ragContext);
       const userPrompt = isFree
         ? buildReportPrompt(input, batchTemplates)
         : buildDeepIntelligencePrompt(input, batchTemplates);
@@ -659,7 +689,7 @@ export async function generateDeepIntelligenceReport(
   };
 
   // Run all batches concurrently in parallel using Promise.all
-  const promises = [];
+  const promises: Promise<GeneratedReport>[] = [];
   // Push Batch 1 (Free)
   promises.push(generateBatchWithFallback(freeTemplates, true));
   // Push Premium batches (in groups of 3)

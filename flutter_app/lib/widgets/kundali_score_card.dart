@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
-import '../models/models.dart';
 import 'custom_widgets.dart';
 
 class KundaliScoreCard extends StatefulWidget {
-  const KundaliScoreCard({Key? key}) : super(key: key);
+  const KundaliScoreCard({super.key});
 
   @override
   State<KundaliScoreCard> createState() => _KundaliScoreCardState();
@@ -23,20 +22,14 @@ class _KundaliScoreCardState extends State<KundaliScoreCard> {
     return Colors.red;
   }
 
-  Color _getBarBg(double score, bool isDark) {
-    if (score >= 70) return AppColors.sage.withOpacity(0.12);
-    if (score >= 50) return AppColors.gold.withOpacity(0.12);
-    return Colors.red.withOpacity(0.12);
-  }
-
   Color _getGradeBgColor(String grade, bool isDark) {
     if (grade == 'Exceptional' || grade == 'Strong') {
-      return AppColors.sage.withOpacity(0.12);
+      return AppColors.sage.withValues(alpha: 0.12);
     }
     if (grade == 'Good' || grade == 'Average') {
-      return AppColors.gold.withOpacity(0.12);
+      return AppColors.gold.withValues(alpha: 0.12);
     }
-    return Colors.red.withOpacity(0.12);
+    return Colors.red.withValues(alpha: 0.12);
   }
 
   Color _getGradeTextColor(String grade, bool isDark) {
@@ -102,7 +95,7 @@ class _KundaliScoreCardState extends State<KundaliScoreCard> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.gold.withOpacity(0.12),
+                color: AppColors.gold.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(LucideIcons.star, color: AppColors.gold, size: 24),
@@ -185,7 +178,7 @@ class _KundaliScoreCardState extends State<KundaliScoreCard> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark ? Colors.white.withOpacity(0.04) : AppColors.creamDark.withOpacity(0.3),
+                color: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.creamDark.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isDark ? Colors.white10 : AppColors.brown100,
@@ -234,9 +227,9 @@ class _KundaliScoreCardState extends State<KundaliScoreCard> {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppColors.gold.withOpacity(0.05),
+              color: AppColors.gold.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.gold.withOpacity(0.1)),
+              border: Border.all(color: AppColors.gold.withValues(alpha: 0.1)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,7 +271,7 @@ class _KundaliScoreCardState extends State<KundaliScoreCard> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.sage.withOpacity(0.08),
+                    color: AppColors.sage.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -317,7 +310,7 @@ class _KundaliScoreCardState extends State<KundaliScoreCard> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.06),
+                    color: Colors.red.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -453,7 +446,7 @@ class _KundaliScoreCardState extends State<KundaliScoreCard> {
                                 return Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: isDark ? Colors.white.withOpacity(0.03) : AppColors.creamDark.withOpacity(0.4),
+                                    color: isDark ? Colors.white.withValues(alpha: 0.03) : AppColors.creamDark.withValues(alpha: 0.4),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
@@ -629,9 +622,9 @@ class _KundaliScoreCardState extends State<KundaliScoreCard> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.gold.withOpacity(0.04),
+                    color: AppColors.gold.withValues(alpha: 0.04),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.gold.withOpacity(0.08)),
+                    border: Border.all(color: AppColors.gold.withValues(alpha: 0.08)),
                   ),
                   child: Text(
                     scoreData.vedicRemedies!.disclaimer,
@@ -719,7 +712,7 @@ class _ScoreRing extends StatelessWidget {
   final double score;
   final double size;
 
-  const _ScoreRing({Key? key, required this.score, this.size = 110}) : super(key: key);
+  const _ScoreRing({required this.score}) : size = 110;
 
   Color _getScoreColor(double score) {
     if (score >= 70) return AppColors.sage;

@@ -7,7 +7,7 @@ import '../models/models.dart';
 import '../widgets/custom_widgets.dart';
 
 class MoodTrackerScreen extends StatefulWidget {
-  const MoodTrackerScreen({Key? key}) : super(key: key);
+  const MoodTrackerScreen({super.key});
 
   @override
   State<MoodTrackerScreen> createState() => _MoodTrackerScreenState();
@@ -146,7 +146,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                   height: 50,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.gold.withOpacity(0.12) : Colors.transparent,
+                    color: isSelected ? AppColors.gold.withValues(alpha: 0.12) : Colors.transparent,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isSelected ? AppColors.gold : Colors.transparent,
@@ -189,8 +189,8 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
               return ChoiceChip(
                 label: Text(tag, style: const TextStyle(fontSize: 10)),
                 selected: isSelected,
-                selectedColor: AppColors.sage.withOpacity(0.2),
-                backgroundColor: isDark ? Colors.white.withOpacity(0.03) : Colors.white,
+                selectedColor: AppColors.sage.withValues(alpha: 0.2),
+                backgroundColor: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
                 side: BorderSide(color: isSelected ? AppColors.sage : AppColors.brown100),
                 labelStyle: TextStyle(
                   color: isSelected ? AppColors.sage : (isDark ? Colors.white70 : AppColors.brown700),

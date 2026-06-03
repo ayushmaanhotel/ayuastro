@@ -88,7 +88,7 @@ final List<_Article> _articles = [
 ];
 
 class WisdomScreen extends StatefulWidget {
-  const WisdomScreen({Key? key}) : super(key: key);
+  const WisdomScreen({super.key});
 
   @override
   State<WisdomScreen> createState() => _WisdomScreenState();
@@ -161,7 +161,7 @@ class _WisdomScreenState extends State<WisdomScreen> {
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkCard : Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.brown100.withOpacity(0.4), width: 0.8),
+                  border: Border.all(color: AppColors.brown100.withValues(alpha: 0.4), width: 0.8),
                 ),
                 child: Row(
                   children: [
@@ -207,7 +207,7 @@ class _WisdomScreenState extends State<WisdomScreen> {
                   ),
                 ),
               ),
-              Container(
+              SizedBox(
                 height: 72,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
@@ -235,12 +235,12 @@ class _WisdomScreenState extends State<WisdomScreen> {
                         margin: const EdgeInsets.only(right: 12, bottom: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkCard.withOpacity(0.8) : Colors.white.withOpacity(0.8),
+                          color: isDark ? AppColors.darkCard.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.8),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.brown100.withOpacity(0.4), width: 0.8),
+                          border: Border.all(color: AppColors.brown100.withValues(alpha: 0.4), width: 0.8),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+                              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
                               blurRadius: 6,
                               offset: const Offset(0, 3),
                             ),
@@ -269,7 +269,7 @@ class _WisdomScreenState extends State<WisdomScreen> {
                                   Text(
                                     article.category,
                                     style: TextStyle(
-                                      color: accentColor.withOpacity(0.8),
+                                      color: accentColor.withValues(alpha: 0.8),
                                       fontSize: 9,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -289,7 +289,7 @@ class _WisdomScreenState extends State<WisdomScreen> {
             // ─── CATEGORY TAB FILTERS ───
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Container(
+              child: SizedBox(
                 height: 38,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
@@ -367,12 +367,12 @@ class _WisdomScreenState extends State<WisdomScreen> {
                               color: isDark ? AppColors.darkCard : Colors.white,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: AppColors.brown100.withOpacity(0.4),
+                                color: AppColors.brown100.withValues(alpha: 0.4),
                                 width: 0.8,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+                                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 ),
@@ -401,7 +401,7 @@ class _WisdomScreenState extends State<WisdomScreen> {
                                                 Container(
                                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                                   decoration: BoxDecoration(
-                                                    color: accentColor.withOpacity(0.1),
+                                                    color: accentColor.withValues(alpha: 0.1),
                                                     borderRadius: BorderRadius.circular(8),
                                                   ),
                                                   child: Row(

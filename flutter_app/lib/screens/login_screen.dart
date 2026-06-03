@@ -5,7 +5,7 @@ import '../providers/app_state.dart';
 import '../widgets/custom_widgets.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -59,6 +59,129 @@ class _LoginScreenState extends State<LoginScreen> {
         _localError = e.toString().replaceAll('Exception:', '').trim();
       });
     }
+  }
+
+  Future<void> _forgotPassword() async {
+    final TextEditingController emailResetController = TextEditingController(text: _emailController.text);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        bool sending = false;
+        String? errorMsg;
+        String? successMsg;
+
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              backgroundColor: isDark ? AppColors.darkCard : Colors.white,
+              title: const Text(
+                "Reset Password",
+                style: TextStyle(fontFamily: 'Playfair Display', fontWeight: FontWeight.bold),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    "Enter your email address to receive a secure link to reset your password.",
+                    style: TextStyle(color: AppColors.brown500, fontSize: 12, height: 1.4),
+                  ),
+                  const SizedBox(height: 16),
+                  if (errorMsg != null) ...[
+                    Text(
+                      errorMsg!,
+                      style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  if (successMsg != null) ...[
+                    Text(
+                      successMsg!,
+                      style: const TextStyle(color: AppColors.sage, fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  TextFormField(
+                    controller: emailResetController,
+                    keyboardType: TextInputType.emailAddress,
+                    style: TextStyle(color: isDark ? Colors.white : AppColors.brown900),
+                    decoration: InputDecoration(
+                      hintText: "you@example.com",
+                      hintStyle: const TextStyle(color: AppColors.brown400, fontSize: 13),
+                      prefixIcon: const Icon(LucideIcons.mail, color: AppColors.gold, size: 18),
+                      filled: true,
+                      fillColor: isDark ? Colors.black26 : Colors.black.withValues(alpha: 0.03),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: AppColors.gold.withValues(alpha: 0.2)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  child: const Text("Cancel", style: TextStyle(color: AppColors.brown500)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                sending
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(color: AppColors.gold, strokeWidth: 2),
+                        ),
+                      )
+                    : ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.gold,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: successMsg != null
+                            ? () => Navigator.pop(context)
+                            : () async {
+                                final email = emailResetController.text.trim();
+                                if (email.isEmpty) {
+                                  setStateDialog(() {
+                                    errorMsg = "Email is required";
+                                  });
+                                  return;
+                                }
+
+                                setStateDialog(() {
+                                  sending = true;
+                                  errorMsg = null;
+                                });
+
+                                try {
+                                  final state = Provider.of<AppState>(context, listen: false);
+                                  await state.forgotPassword(email: email);
+                                  setStateDialog(() {
+                                    sending = false;
+                                    successMsg = "Password reset link sent! Check your inbox.";
+                                  });
+                                } catch (e) {
+                                  setStateDialog(() {
+                                    sending = false;
+                                    errorMsg = e.toString().replaceAll('Exception:', '').trim();
+                                  });
+                                }
+                              },
+                        child: Text(
+                          successMsg != null ? "Done" : "Send Link",
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -136,9 +259,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
+                                color: Colors.red.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.red.withOpacity(0.3)),
+                                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
                               ),
                               child: Text(
                                 _localError!,
@@ -258,6 +381,27 @@ class _LoginScreenState extends State<LoginScreen> {
                               return null;
                             },
                           ),
+                          const SizedBox(height: 8),
+                          if (!_isSignUp)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                onPressed: _forgotPassword,
+                                child: const Text(
+                                  "Forgot Password?",
+                                  style: TextStyle(
+                                    color: AppColors.goldDark,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
                           const SizedBox(height: 24),
                           
                           // Submit Button
@@ -327,15 +471,15 @@ class _LoginScreenState extends State<LoginScreen> {
       prefixIcon: Icon(icon, color: AppColors.gold, size: 18),
       suffixIcon: suffix,
       filled: true,
-      fillColor: isDark ? Colors.black.withOpacity(0.2) : Colors.white.withOpacity(0.6),
+      fillColor: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.6),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: AppColors.gold.withOpacity(0.2)),
+        borderSide: BorderSide(color: AppColors.gold.withValues(alpha: 0.2)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: AppColors.gold.withOpacity(0.1)),
+        borderSide: BorderSide(color: AppColors.gold.withValues(alpha: 0.1)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),

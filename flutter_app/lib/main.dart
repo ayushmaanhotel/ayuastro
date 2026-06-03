@@ -48,11 +48,9 @@ class MyApp extends StatelessWidget {
                 primary: AppColors.gold,
                 secondary: AppColors.sage,
                 surface: Colors.white,
-                background: AppColors.cream,
                 onPrimary: Colors.white,
                 onSecondary: Colors.white,
                 onSurface: AppColors.brown900,
-                onBackground: AppColors.brown900,
               ),
               dividerTheme: const DividerThemeData(
                 color: AppColors.brown100,
@@ -86,14 +84,12 @@ class MyApp extends StatelessWidget {
                 primary: AppColors.gold,
                 secondary: AppColors.sage,
                 surface: AppColors.darkCard,
-                background: AppColors.darkBg,
                 onPrimary: Colors.white,
                 onSecondary: Colors.white,
                 onSurface: Colors.white,
-                onBackground: Colors.white,
               ),
               dividerTheme: DividerThemeData(
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: 0.08),
                 thickness: 1,
               ),
               textTheme: const TextTheme(
@@ -125,7 +121,7 @@ class MyApp extends StatelessWidget {
 }
 
 class AppViewSwitcher extends StatelessWidget {
-  const AppViewSwitcher({Key? key}) : super(key: key);
+  const AppViewSwitcher({super.key});
 
   @override
   Widget build(BuildContext context) {

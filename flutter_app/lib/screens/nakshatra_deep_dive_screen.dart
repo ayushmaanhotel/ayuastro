@@ -5,7 +5,7 @@ import '../widgets/custom_widgets.dart';
 import '../data/nakshatra_data.dart';
 
 class NakshatraDeepDiveScreen extends StatefulWidget {
-  const NakshatraDeepDiveScreen({Key? key}) : super(key: key);
+  const NakshatraDeepDiveScreen({super.key});
 
   @override
   State<NakshatraDeepDiveScreen> createState() => _NakshatraDeepDiveScreenState();
@@ -33,7 +33,7 @@ class _NakshatraDeepDiveScreenState extends State<NakshatraDeepDiveScreen> {
         slivers: [
           SliverAppBar(
             floating: true, pinned: true,
-            backgroundColor: (isDark ? AppColors.darkBg : AppColors.cream).withOpacity(0.95),
+            backgroundColor: (isDark ? AppColors.darkBg : AppColors.cream).withValues(alpha: 0.95),
             elevation: 0,
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: isDark ? Colors.white70 : AppColors.brown700),
@@ -65,9 +65,9 @@ class _NakshatraDeepDiveScreenState extends State<NakshatraDeepDiveScreen> {
                         duration: const Duration(milliseconds: 250),
                         width: 60, height: 65,
                         decoration: BoxDecoration(
-                          color: isSelected ? nColor.withOpacity(0.15) : Colors.transparent,
+                          color: isSelected ? nColor.withValues(alpha: 0.15) : Colors.transparent,
                           borderRadius: BorderRadius.circular(12),
-                          border: isSelected ? Border.all(color: nColor.withOpacity(0.4)) : null,
+                          border: isSelected ? Border.all(color: nColor.withValues(alpha: 0.4)) : null,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -98,9 +98,9 @@ class _NakshatraDeepDiveScreenState extends State<NakshatraDeepDiveScreen> {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [color.withOpacity(0.12), color.withOpacity(0.04)]),
+                  gradient: LinearGradient(colors: [color.withValues(alpha: 0.12), color.withValues(alpha: 0.04)]),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: color.withOpacity(0.2)),
+                  border: Border.all(color: color.withValues(alpha: 0.2)),
                 ),
                 child: Column(
                   children: [
@@ -244,11 +244,11 @@ class _NakshatraDeepDiveScreenState extends State<NakshatraDeepDiveScreen> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: [
-                color.withOpacity(0.08 + i * 0.02),
-                color.withOpacity(0.02),
+                color.withValues(alpha: 0.08 + i * 0.02),
+                color.withValues(alpha: 0.02),
               ]),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: color.withOpacity(0.15)),
+              border: Border.all(color: color.withValues(alpha: 0.15)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +259,7 @@ class _NakshatraDeepDiveScreenState extends State<NakshatraDeepDiveScreen> {
                       width: 32, height: 32,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: color.withOpacity(0.15),
+                        color: color.withValues(alpha: 0.15),
                       ),
                       child: Center(child: Text('${i + 1}', style: TextStyle(
                         fontWeight: FontWeight.bold, color: color,
@@ -365,10 +365,10 @@ class _NakshatraDeepDiveScreenState extends State<NakshatraDeepDiveScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isActive ? color.withOpacity(0.15) : Colors.transparent,
+            color: isActive ? color.withValues(alpha: 0.15) : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isActive ? color.withOpacity(0.4) : (isDark ? Colors.white12 : AppColors.brown100),
+              color: isActive ? color.withValues(alpha: 0.4) : (isDark ? Colors.white12 : AppColors.brown100),
             ),
           ),
           child: Center(child: Text(label, style: TextStyle(
@@ -384,7 +384,7 @@ class _NakshatraDeepDiveScreenState extends State<NakshatraDeepDiveScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(text, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color)),

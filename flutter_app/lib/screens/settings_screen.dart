@@ -4,14 +4,13 @@ import '../providers/app_state.dart';
 import '../widgets/custom_widgets.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _darkMode = false;
   bool _notifications = true;
   bool _dailyHoroscope = true;
   bool _transitAlerts = true;
@@ -20,7 +19,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _darkMode = false; // Would read from state in production
   }
 
   @override
@@ -66,7 +64,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
-                            colors: [AppColors.gold.withOpacity(0.3), AppColors.gold.withOpacity(0.1)],
+                            colors: [AppColors.gold.withValues(alpha: 0.3), AppColors.gold.withValues(alpha: 0.1)],
                           ),
                         ),
                         child: Center(
@@ -236,7 +234,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.gold,
+            activeThumbColor: AppColors.gold,
             inactiveTrackColor: isDark ? Colors.white12 : AppColors.brown100,
           ),
         ],
@@ -268,9 +266,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.gold.withOpacity(0.1),
+              color: AppColors.gold.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.gold.withOpacity(0.25)),
+              border: Border.all(color: AppColors.gold.withValues(alpha: 0.25)),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
@@ -318,7 +316,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.05) : AppColors.cream.withOpacity(0.8),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : AppColors.cream.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(text, style: TextStyle(

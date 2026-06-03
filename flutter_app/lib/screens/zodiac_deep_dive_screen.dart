@@ -5,7 +5,7 @@ import '../widgets/custom_widgets.dart';
 import '../data/zodiac_data.dart';
 
 class ZodiacDeepDiveScreen extends StatefulWidget {
-  const ZodiacDeepDiveScreen({Key? key}) : super(key: key);
+  const ZodiacDeepDiveScreen({super.key});
 
   @override
   State<ZodiacDeepDiveScreen> createState() => _ZodiacDeepDiveScreenState();
@@ -45,7 +45,7 @@ class _ZodiacDeepDiveScreenState extends State<ZodiacDeepDiveScreen> {
         slivers: [
           SliverAppBar(
             floating: true, pinned: true,
-            backgroundColor: (isDark ? AppColors.darkBg : AppColors.cream).withOpacity(0.95),
+            backgroundColor: (isDark ? AppColors.darkBg : AppColors.cream).withValues(alpha: 0.95),
             elevation: 0,
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: isDark ? Colors.white70 : AppColors.brown700),
@@ -74,9 +74,9 @@ class _ZodiacDeepDiveScreenState extends State<ZodiacDeepDiveScreen> {
                         duration: const Duration(milliseconds: 250),
                         width: 60, height: 70,
                         decoration: BoxDecoration(
-                          color: isSelected ? colors[0].withOpacity(0.15) : Colors.transparent,
+                          color: isSelected ? colors[0].withValues(alpha: 0.15) : Colors.transparent,
                           borderRadius: BorderRadius.circular(14),
-                          border: isSelected ? Border.all(color: colors[0].withOpacity(0.4)) : null,
+                          border: isSelected ? Border.all(color: colors[0].withValues(alpha: 0.4)) : null,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -103,9 +103,9 @@ class _ZodiacDeepDiveScreenState extends State<ZodiacDeepDiveScreen> {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [colors[0].withOpacity(0.12), colors[1].withOpacity(0.06)]),
+                  gradient: LinearGradient(colors: [colors[0].withValues(alpha: 0.12), colors[1].withValues(alpha: 0.06)]),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: colors[0].withOpacity(0.2)),
+                  border: Border.all(color: colors[0].withValues(alpha: 0.2)),
                 ),
                 child: Column(
                   children: [
@@ -126,7 +126,7 @@ class _ZodiacDeepDiveScreenState extends State<ZodiacDeepDiveScreen> {
                     Wrap(
                       spacing: 8, runSpacing: 6,
                       children: [
-                        _badge('${sign.element}', colors[0], isDark),
+                        _badge(sign.element, colors[0], isDark),
                         _badge(sign.modality, colors[0], isDark),
                         _badge('${sign.rulerSymbol} ${sign.ruler}', colors[0], isDark),
                       ],
@@ -351,10 +351,10 @@ class _ZodiacDeepDiveScreenState extends State<ZodiacDeepDiveScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isActive ? color.withOpacity(0.15) : Colors.transparent,
+            color: isActive ? color.withValues(alpha: 0.15) : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isActive ? color.withOpacity(0.4) : (isDark ? Colors.white12 : AppColors.brown100),
+              color: isActive ? color.withValues(alpha: 0.4) : (isDark ? Colors.white12 : AppColors.brown100),
             ),
           ),
           child: Center(child: Text(label, style: TextStyle(
@@ -370,7 +370,7 @@ class _ZodiacDeepDiveScreenState extends State<ZodiacDeepDiveScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(text, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),

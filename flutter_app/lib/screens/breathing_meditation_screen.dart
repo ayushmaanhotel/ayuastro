@@ -338,7 +338,7 @@ String _getDailyMindfulnessPrompt(String sunSign) {
 
 // ─── Main Screen Widget ──────────────────────────────────────────────────────
 class BreathingMeditationScreen extends StatefulWidget {
-  const BreathingMeditationScreen({Key? key}) : super(key: key);
+  const BreathingMeditationScreen({super.key});
 
   @override
   State<BreathingMeditationScreen> createState() => _BreathingMeditationScreenState();
@@ -445,16 +445,17 @@ class _BreathingMeditationScreenState extends State<BreathingMeditationScreen> w
     final activeTechnique = _techniques[_selectedTechniqueIndex];
     final currentPhase = activeTechnique.phases[_currentPhaseIndex];
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
         if (_activeMeditation != null) {
           setState(() {
             _activeMeditation = null;
           });
-          return false;
+          return;
         }
         state.setView('insights');
-        return false;
       },
       child: Scaffold(
         backgroundColor: isDark ? AppColors.darkBg : AppColors.cream,
@@ -507,7 +508,7 @@ class _BreathingMeditationScreenState extends State<BreathingMeditationScreen> w
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           )
@@ -555,12 +556,12 @@ class _BreathingMeditationScreenState extends State<BreathingMeditationScreen> w
                                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                       decoration: BoxDecoration(
                                         color: isSelected
-                                            ? AppColors.gold.withOpacity(0.12)
+                                            ? AppColors.gold.withValues(alpha: 0.12)
                                             : Colors.transparent,
                                         borderRadius: BorderRadius.circular(16),
                                         border: Border.all(
                                           color: isSelected
-                                              ? AppColors.gold.withOpacity(0.4)
+                                              ? AppColors.gold.withValues(alpha: 0.4)
                                               : (isDark ? Colors.white12 : AppColors.brown100),
                                           width: 1.5,
                                         ),
@@ -640,7 +641,7 @@ class _BreathingMeditationScreenState extends State<BreathingMeditationScreen> w
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: AppColors.gold.withOpacity(0.12),
+                                color: AppColors.gold.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Row(
@@ -734,7 +735,7 @@ class _BreathingMeditationScreenState extends State<BreathingMeditationScreen> w
                               ),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: isDark ? Colors.white10 : AppColors.brown100.withOpacity(0.5),
+                                color: isDark ? Colors.white10 : AppColors.brown100.withValues(alpha: 0.5),
                               ),
                             ),
                             padding: const EdgeInsets.all(12),
@@ -748,7 +749,7 @@ class _BreathingMeditationScreenState extends State<BreathingMeditationScreen> w
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                       decoration: BoxDecoration(
-                                        color: AppColors.gold.withOpacity(0.12),
+                                        color: AppColors.gold.withValues(alpha: 0.12),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Row(
@@ -823,7 +824,7 @@ class _BreathingMeditationScreenState extends State<BreathingMeditationScreen> w
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.gold.withOpacity(0.2)),
+                          border: Border.all(color: AppColors.gold.withValues(alpha: 0.2)),
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                         child: Column(
@@ -834,7 +835,7 @@ class _BreathingMeditationScreenState extends State<BreathingMeditationScreen> w
                                   width: 44,
                                   height: 44,
                                   decoration: BoxDecoration(
-                                    color: AppColors.gold.withOpacity(0.15),
+                                    color: AppColors.gold.withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: const Icon(LucideIcons.music, color: AppColors.gold, size: 22),
@@ -898,7 +899,7 @@ class _BreathingMeditationScreenState extends State<BreathingMeditationScreen> w
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           )
@@ -942,9 +943,9 @@ class _BreathingMeditationScreenState extends State<BreathingMeditationScreen> w
                                 Container(
                                   width: double.infinity,
                                   decoration: BoxDecoration(
-                                    color: isDark ? Colors.white.withOpacity(0.03) : AppColors.cream.withOpacity(0.5),
+                                    color: isDark ? Colors.white.withValues(alpha: 0.03) : AppColors.cream.withValues(alpha: 0.5),
                                     borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(color: AppColors.gold.withOpacity(0.1)),
+                                    border: Border.all(color: AppColors.gold.withValues(alpha: 0.1)),
                                   ),
                                   padding: const EdgeInsets.all(16),
                                   child: Column(
@@ -955,7 +956,7 @@ class _BreathingMeditationScreenState extends State<BreathingMeditationScreen> w
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                             decoration: BoxDecoration(
-                                              color: AppColors.sage.withOpacity(0.2),
+                                              color: AppColors.sage.withValues(alpha: 0.2),
                                               borderRadius: BorderRadius.circular(8),
                                             ),
                                             child: Text(
@@ -1081,7 +1082,7 @@ class _BreathingCirclePainter extends CustomPainter {
     if (isPlaying) {
       const particleCount = 6;
       const orbitRadius = 110.0;
-      final particlePaint = Paint()..color = color.withOpacity(0.5);
+      final particlePaint = Paint()..color = color.withValues(alpha: 0.5);
 
       for (int i = 0; i < particleCount; i++) {
         final baseAngle = (i * 360) / particleCount;
@@ -1100,8 +1101,8 @@ class _BreathingCirclePainter extends CustomPainter {
     final glowPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          color.withOpacity(0.2),
-          color.withOpacity(0.08),
+          color.withValues(alpha: 0.2),
+          color.withValues(alpha: 0.08),
           Colors.transparent,
         ],
       ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: 105 * scale));
@@ -1112,8 +1113,8 @@ class _BreathingCirclePainter extends CustomPainter {
     final mainPaint = Paint()
       ..shader = LinearGradient(
         colors: [
-          color.withOpacity(0.25),
-          color.withOpacity(0.12),
+          color.withValues(alpha: 0.25),
+          color.withValues(alpha: 0.12),
         ],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -1124,13 +1125,13 @@ class _BreathingCirclePainter extends CustomPainter {
     // Inner Circle Backdrop
     final innerSize = 65.0;
     final innerPaint = Paint()
-      ..color = isDark ? AppColors.darkCard.withOpacity(0.7) : Colors.white.withOpacity(0.7);
+      ..color = isDark ? AppColors.darkCard.withValues(alpha: 0.7) : Colors.white.withValues(alpha: 0.7);
     
     canvas.drawCircle(Offset(cx, cy), innerSize, innerPaint);
     
     // Border for Inner Circle
     final borderPaint = Paint()
-      ..color = AppColors.gold.withOpacity(0.2)
+      ..color = AppColors.gold.withValues(alpha: 0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
     canvas.drawCircle(Offset(cx, cy), innerSize, borderPaint);
@@ -1195,10 +1196,9 @@ class _MeditationTimerOverlay extends StatefulWidget {
   final VoidCallback onClose;
 
   const _MeditationTimerOverlay({
-    Key? key,
     required this.meditation,
     required this.onClose,
-  }) : super(key: key);
+  });
 
   @override
   State<_MeditationTimerOverlay> createState() => _MeditationTimerOverlayState();
@@ -1272,7 +1272,7 @@ class _MeditationTimerOverlayState extends State<_MeditationTimerOverlay> with S
     final progress = 1.0 - (_timeLeftSeconds / (widget.meditation.duration * 60));
 
     return Container(
-      color: isDark ? Colors.black.withOpacity(0.95) : const Color(0xFF1E1916).withOpacity(0.96),
+      color: isDark ? Colors.black.withValues(alpha: 0.95) : const Color(0xFF1E1916).withValues(alpha: 0.96),
       child: Stack(
         children: [
           // Close button
@@ -1311,8 +1311,8 @@ class _MeditationTimerOverlayState extends State<_MeditationTimerOverlay> with S
                                 shape: BoxShape.circle,
                                 gradient: RadialGradient(
                                   colors: [
-                                    AppColors.gold.withOpacity(0.3 * opacity),
-                                    AppColors.sage.withOpacity(0.15 * opacity),
+                                    AppColors.gold.withValues(alpha: 0.3 * opacity),
+                                    AppColors.sage.withValues(alpha: 0.15 * opacity),
                                     Colors.transparent,
                                   ],
                                 ),
@@ -1329,8 +1329,8 @@ class _MeditationTimerOverlayState extends State<_MeditationTimerOverlay> with S
                                 shape: BoxShape.circle,
                                 gradient: RadialGradient(
                                   colors: [
-                                    AppColors.gold.withOpacity(0.5),
-                                    const Color(0xFFF0C14B).withOpacity(0.2),
+                                    AppColors.gold.withValues(alpha: 0.5),
+                                    const Color(0xFFF0C14B).withValues(alpha: 0.2),
                                     Colors.transparent,
                                   ],
                                 ),
@@ -1494,7 +1494,7 @@ class _TimerProgressPainter extends CustomPainter {
 
     // Draw background ring
     final bgPaint = Paint()
-      ..color = Colors.white.withOpacity(0.08)
+      ..color = Colors.white.withValues(alpha: 0.08)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4;
 
@@ -1502,7 +1502,7 @@ class _TimerProgressPainter extends CustomPainter {
 
     // Draw active gold ring
     final activePaint = Paint()
-      ..color = AppColors.gold.withOpacity(0.8)
+      ..color = AppColors.gold.withValues(alpha: 0.8)
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 4;

@@ -154,7 +154,7 @@ Map<String, String> _getRating(int correctCount) {
 
 // ─── Main Screen Widget ───
 class ZodiacGameScreen extends StatefulWidget {
-  const ZodiacGameScreen({Key? key}) : super(key: key);
+  const ZodiacGameScreen({super.key});
 
   @override
   State<ZodiacGameScreen> createState() => _ZodiacGameScreenState();
@@ -238,10 +238,11 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
     final el2 = _zodiacElements[round.sign2]!;
     final isCorrect = _guessedLevel == round.actualLevel;
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
         state.setView('sync');
-        return false;
       },
       child: Scaffold(
         backgroundColor: isDark ? AppColors.darkBg : AppColors.cream,
@@ -273,7 +274,7 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     )
@@ -315,7 +316,7 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.gold.withOpacity(0.12),
+                            color: AppColors.gold.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
@@ -337,7 +338,7 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     )
@@ -370,8 +371,8 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                               height: 80,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: isDark ? Colors.white.withOpacity(0.04) : AppColors.cream.withOpacity(0.5),
-                                border: Border.all(color: AppColors.gold.withOpacity(0.2), width: 1.5),
+                                color: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.cream.withValues(alpha: 0.5),
+                                border: Border.all(color: AppColors.gold.withValues(alpha: 0.2), width: 1.5),
                               ),
                               alignment: Alignment.center,
                               child: Text(_zodiacSymbols[round.sign1]!, style: const TextStyle(fontSize: 36)),
@@ -382,9 +383,9 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: _elementColors[el1]!.withOpacity(0.12),
+                                color: _elementColors[el1]!.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: _elementColors[el1]!.withOpacity(0.3)),
+                                border: Border.all(color: _elementColors[el1]!.withValues(alpha: 0.3)),
                               ),
                               child: Text(
                                 el1,
@@ -400,8 +401,8 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                           height: 44,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppColors.gold.withOpacity(0.1),
-                            border: Border.all(color: AppColors.gold.withOpacity(0.2)),
+                            color: AppColors.gold.withValues(alpha: 0.1),
+                            border: Border.all(color: AppColors.gold.withValues(alpha: 0.2)),
                           ),
                           alignment: Alignment.center,
                           child: const Text(
@@ -418,8 +419,8 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                               height: 80,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: isDark ? Colors.white.withOpacity(0.04) : AppColors.cream.withOpacity(0.5),
-                                border: Border.all(color: AppColors.gold.withOpacity(0.2), width: 1.5),
+                                color: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.cream.withValues(alpha: 0.5),
+                                border: Border.all(color: AppColors.gold.withValues(alpha: 0.2), width: 1.5),
                               ),
                               alignment: Alignment.center,
                               child: Text(_zodiacSymbols[round.sign2]!, style: const TextStyle(fontSize: 36)),
@@ -430,9 +431,9 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: _elementColors[el2]!.withOpacity(0.12),
+                                color: _elementColors[el2]!.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: _elementColors[el2]!.withOpacity(0.3)),
+                                border: Border.all(color: _elementColors[el2]!.withValues(alpha: 0.3)),
                               ),
                               child: Text(
                                 el2,
@@ -530,11 +531,11 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                                   height: 100,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: AppColors.gold.withOpacity(0.1),
-                                    border: Border.all(color: AppColors.gold.withOpacity(0.3), width: 2),
+                                    color: AppColors.gold.withValues(alpha: 0.1),
+                                    border: Border.all(color: AppColors.gold.withValues(alpha: 0.3), width: 2),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppColors.gold.withOpacity(0.15),
+                                        color: AppColors.gold.withValues(alpha: 0.15),
                                         blurRadius: 15,
                                         spreadRadius: 2,
                                       )
@@ -563,9 +564,9 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: isCorrect ? AppColors.sage.withOpacity(0.12) : AppColors.gold.withOpacity(0.12),
+                                    color: isCorrect ? AppColors.sage.withValues(alpha: 0.12) : AppColors.gold.withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(color: isCorrect ? AppColors.sage.withOpacity(0.3) : AppColors.gold.withOpacity(0.3)),
+                                    border: Border.all(color: isCorrect ? AppColors.sage.withValues(alpha: 0.3) : AppColors.gold.withValues(alpha: 0.3)),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -626,7 +627,7 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     )
@@ -663,7 +664,7 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                         final sign = _zodiacSigns[idx];
                         return Container(
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.white.withOpacity(0.02) : AppColors.cream.withOpacity(0.5),
+                            color: isDark ? Colors.white.withValues(alpha: 0.02) : AppColors.cream.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
@@ -692,8 +693,8 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: AppColors.sage.withOpacity(0.06),
-                              border: Border.all(color: AppColors.sage.withOpacity(0.15)),
+                              color: AppColors.sage.withValues(alpha: 0.06),
+                              border: Border.all(color: AppColors.sage.withValues(alpha: 0.15)),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             padding: const EdgeInsets.all(8),
@@ -709,8 +710,8 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: AppColors.gold.withOpacity(0.06),
-                              border: Border.all(color: AppColors.gold.withOpacity(0.15)),
+                              color: AppColors.gold.withValues(alpha: 0.06),
+                              border: Border.all(color: AppColors.gold.withValues(alpha: 0.15)),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             padding: const EdgeInsets.all(8),
@@ -736,7 +737,6 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
 
   Widget _buildScoreboardView(bool isDark, AppState state) {
     final rating = _getRating(_correct);
-    final percentage = ((_correct / 10) * 100).round();
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : AppColors.cream,
@@ -750,7 +750,7 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
+                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   )
@@ -784,7 +784,7 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                     children: [
                       Expanded(
                         child: Container(
-                          decoration: BoxDecoration(color: AppColors.sage.withOpacity(0.12), borderRadius: BorderRadius.circular(14)),
+                          decoration: BoxDecoration(color: AppColors.sage.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(14)),
                           padding: const EdgeInsets.all(12),
                           child: Column(
                             children: [
@@ -797,7 +797,7 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Container(
-                          decoration: BoxDecoration(color: AppColors.gold.withOpacity(0.12), borderRadius: BorderRadius.circular(14)),
+                          decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(14)),
                           padding: const EdgeInsets.all(12),
                           child: Column(
                             children: [
@@ -827,9 +827,9 @@ class _ZodiacGameScreenState extends State<ZodiacGameScreen> {
                   // Progress bar
                   Container(
                     decoration: BoxDecoration(
-                      color: AppColors.gold.withOpacity(0.05),
+                      color: AppColors.gold.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.gold.withOpacity(0.15)),
+                      border: Border.all(color: AppColors.gold.withValues(alpha: 0.15)),
                     ),
                     padding: const EdgeInsets.all(14),
                     child: Column(

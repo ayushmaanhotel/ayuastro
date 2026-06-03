@@ -11,7 +11,7 @@ import '../widgets/kundali_chart.dart';
 import '../widgets/personality_cards.dart';
 
 class InsightsScreen extends StatefulWidget {
-  const InsightsScreen({Key? key}) : super(key: key);
+  const InsightsScreen({super.key});
 
   @override
   State<InsightsScreen> createState() => _InsightsScreenState();
@@ -212,19 +212,25 @@ class _InsightsScreenState extends State<InsightsScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Text("🧘", style: TextStyle(fontSize: 20)),
-                          const SizedBox(width: 12),
-                          Text(
-                            "View Yogas (${astro.yogas.length}) & Doshas (${astro.doshas.length})",
-                            style: TextStyle(
-                              color: isDark ? Colors.white : AppColors.brown900,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            const Text("🧘", style: TextStyle(fontSize: 20)),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                "View Yogas (${astro.yogas.length}) & Doshas (${astro.doshas.length})",
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : AppColors.brown900,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       const Icon(LucideIcons.arrow_right, color: AppColors.gold, size: 18),
                     ],
@@ -240,19 +246,25 @@ class _InsightsScreenState extends State<InsightsScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Text("📄", style: TextStyle(fontSize: 20)),
-                          const SizedBox(width: 12),
-                          Text(
-                            "Read Your Detailed AI Personality Report",
-                            style: TextStyle(
-                              color: isDark ? Colors.white : AppColors.brown900,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            const Text("📄", style: TextStyle(fontSize: 20)),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                "Read Your Detailed AI Personality Report",
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : AppColors.brown900,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       const Icon(LucideIcons.arrow_right, color: AppColors.gold, size: 18),
                     ],
@@ -400,7 +412,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.sage.withOpacity(0.2) : AppColors.sageLight,
+                  color: isDark ? AppColors.sage.withValues(alpha: 0.2) : AppColors.sageLight,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -482,19 +494,22 @@ class _InsightsScreenState extends State<InsightsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "${transit.planet} in ${transit.sign} (House ${transit.house})",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: isDark ? Colors.white : AppColors.brown900,
+                      Flexible(
+                        child: Text(
+                          "${transit.planet} in ${transit.sign} (House ${transit.house})",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: isDark ? Colors.white : AppColors.brown900,
+                          ),
                         ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                         decoration: BoxDecoration(
                           color: transit.type == 'Major'
-                              ? Colors.red.withOpacity(0.1)
+                              ? Colors.red.withValues(alpha: 0.1)
                               : (isDark ? Colors.white12 : AppColors.brown100),
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -580,7 +595,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                 value: pct,
                 minHeight: 8,
                 color: color,
-                backgroundColor: isDark ? Colors.white.withOpacity(0.04) : AppColors.brown100,
+                backgroundColor: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.brown100,
               ),
             ),
           ],
@@ -619,9 +634,9 @@ class _InsightsScreenState extends State<InsightsScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.gold.withOpacity(0.08),
+              color: AppColors.gold.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.gold.withOpacity(0.2)),
+              border: Border.all(color: AppColors.gold.withValues(alpha: 0.2)),
             ),
             child: Row(
               children: [
@@ -689,9 +704,9 @@ class _InsightsScreenState extends State<InsightsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
@@ -740,13 +755,19 @@ class _InsightsScreenState extends State<InsightsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "Nakshatra: ${astro.nakshatra}",
-                style: TextStyle(color: isDark ? Colors.white : AppColors.brown900, fontWeight: FontWeight.bold, fontSize: 13),
+              Flexible(
+                child: Text(
+                  "Nakshatra: ${astro.nakshatra}",
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: isDark ? Colors.white : AppColors.brown900, fontWeight: FontWeight.bold, fontSize: 13),
+                ),
               ),
-              Text(
-                "Current Dasha: ${astro.currentDasha}",
-                style: TextStyle(color: isDark ? AppColors.goldLight : AppColors.goldDark, fontWeight: FontWeight.bold, fontSize: 12),
+              Flexible(
+                child: Text(
+                  "Current Dasha: ${astro.currentDasha}",
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: isDark ? AppColors.goldLight : AppColors.goldDark, fontWeight: FontWeight.bold, fontSize: 12),
+                ),
               ),
             ],
           ),
@@ -762,7 +783,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withOpacity(0.02) : AppColors.cream,
+          color: isDark ? Colors.white.withValues(alpha: 0.02) : AppColors.cream,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: AppColors.brown100),
         ),
@@ -818,7 +839,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                   margin: const EdgeInsets.only(right: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isActive ? AppColors.gold.withOpacity(0.15) : Colors.transparent,
+                    color: isActive ? AppColors.gold.withValues(alpha: 0.15) : Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isActive ? AppColors.gold : (isDark ? Colors.white12 : AppColors.brown100),
@@ -875,7 +896,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.gold.withOpacity(0.12),
+                  color: AppColors.gold.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Text(
@@ -962,7 +983,8 @@ class _InsightsScreenState extends State<InsightsScreen> {
               child: DataTable(
                 columnSpacing: 16,
                 headingRowHeight: 32,
-                dataRowHeight: 36,
+                dataRowMinHeight: 36,
+                dataRowMaxHeight: 36,
                 columns: [
                   DataColumn(label: Text("Planet", style: TextStyle(color: isDark ? Colors.white70 : AppColors.brown900, fontSize: 11, fontWeight: FontWeight.bold))),
                   DataColumn(label: Text("Sign", style: TextStyle(color: isDark ? Colors.white70 : AppColors.brown900, fontSize: 11, fontWeight: FontWeight.bold))),
@@ -994,9 +1016,9 @@ class _InsightsScreenState extends State<InsightsScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.gold.withOpacity(0.06),
+                color: AppColors.gold.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.gold.withOpacity(0.2), width: 0.8),
+                border: Border.all(color: AppColors.gold.withValues(alpha: 0.2), width: 0.8),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1062,13 +1084,15 @@ class _InsightsScreenState extends State<InsightsScreen> {
             children: [
               const Icon(LucideIcons.shield_alert, color: AppColors.gold, size: 18),
               const SizedBox(width: 8),
-              Text(
-                "TRUTH DISCLOSURE (NOTHING TO HIDE) ✦",
-                style: TextStyle(
-                  color: isDark ? AppColors.goldLight : AppColors.goldDark,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
+              Expanded(
+                child: Text(
+                  "TRUTH DISCLOSURE (NOTHING TO HIDE) ✦",
+                  style: TextStyle(
+                    color: isDark ? AppColors.goldLight : AppColors.goldDark,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
             ],

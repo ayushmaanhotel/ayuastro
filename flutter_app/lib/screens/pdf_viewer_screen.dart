@@ -6,7 +6,7 @@ import '../widgets/custom_widgets.dart';
 class PdfViewerScreen extends StatefulWidget {
   final String filePath;
 
-  const PdfViewerScreen({Key? key, required this.filePath}) : super(key: key);
+  const PdfViewerScreen({super.key, required this.filePath});
 
   @override
   State<PdfViewerScreen> createState() => _PdfViewerScreenState();
@@ -157,12 +157,15 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
                                             )
                                         : null,
                                   ),
-                                  Text(
-                                    "Segment Page $currentPage of $totalPages",
-                                    style: TextStyle(
-                                      color: isDark ? Colors.white : AppColors.brown900,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
+                                  Flexible(
+                                    child: Text(
+                                      "Segment Page $currentPage of $totalPages",
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: isDark ? Colors.white : AppColors.brown900,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
                                     ),
                                   ),
                                   IconButton(

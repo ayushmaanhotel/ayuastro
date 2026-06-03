@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
-import '../models/models.dart';
 import '../widgets/custom_widgets.dart';
 
 // ─── Yoga Detail Model & Lookup ──────────────────────────────────────────────
@@ -288,7 +287,7 @@ const Map<String, _DoshaDetail> _doshaDetails = {
 
 // ─── Main Stateful Screen ────────────────────────────────────────────────────
 class YogaDoshaScreen extends StatefulWidget {
-  const YogaDoshaScreen({Key? key}) : super(key: key);
+  const YogaDoshaScreen({super.key});
 
   @override
   State<YogaDoshaScreen> createState() => _YogaDoshaScreenState();
@@ -298,8 +297,6 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
   String _activeTab = 'yogas'; // yogas, doshas, aspects, dignity, transit, nakshatra, analysis
   final Set<String> _expandedYogas = {};
   final Set<String> _expandedDoshas = {};
-  bool _showAbsentYogas = false;
-  bool _showAbsentDoshas = false;
 
   final Set<String> _expandedAspectPlanets = {};
   final Set<String> _expandedDignityPlanets = {};
@@ -371,7 +368,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: (isDark ? Colors.white : AppColors.brown900).withOpacity(0.05),
+                  color: (isDark ? Colors.white : AppColors.brown900).withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: isDark ? Colors.white10 : AppColors.brown800),
                 ),
@@ -462,7 +459,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
               : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           boxShadow: isSelected && !isDark
-              ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))]
+              ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))]
               : null,
         ),
         child: Row(
@@ -523,7 +520,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
             child: Text("No positive yogas detected in your planetary degrees.", style: TextStyle(color: AppColors.brown500, fontSize: 12)),
           )
         else
-          ...userYogas.map((yName) => _buildYogaCard(yName, true, isDark)).toList(),
+          ...userYogas.map((yName) => _buildYogaCard(yName, true, isDark)),
         
         if (absentYogas.isNotEmpty) ...[
           const SizedBox(height: 16),
@@ -551,7 +548,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      color: isDark ? AppColors.darkCard.withOpacity(0.85) : Colors.white,
+      color: isDark ? AppColors.darkCard.withValues(alpha: 0.85) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: isDark ? Colors.white10 : AppColors.brown100),
@@ -597,8 +594,8 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
             color: isPresent
-                ? AppColors.sage.withOpacity(0.12)
-                : AppColors.brown500.withOpacity(0.08),
+                ? AppColors.sage.withValues(alpha: 0.12)
+                : AppColors.brown500.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -635,7 +632,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.gold.withOpacity(0.06),
+                      color: AppColors.gold.withValues(alpha: 0.06),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
@@ -721,7 +718,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
             child: Text("No active doshas or karmic blockages identified in your chart.", style: TextStyle(color: AppColors.brown500, fontSize: 12)),
           )
         else
-          ...userDoshas.map((dName) => _buildDoshaCard(dName, true, isDark)).toList(),
+          ...userDoshas.map((dName) => _buildDoshaCard(dName, true, isDark)),
         
         if (absentDoshas.isNotEmpty) ...[
           const SizedBox(height: 16),
@@ -756,7 +753,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      color: isDark ? AppColors.darkCard.withOpacity(0.85) : Colors.white,
+      color: isDark ? AppColors.darkCard.withValues(alpha: 0.85) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: isDark ? Colors.white10 : AppColors.brown100),
@@ -802,8 +799,8 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
             color: isPresent
-                ? sevColor.withOpacity(0.12)
-                : AppColors.brown500.withOpacity(0.08),
+                ? sevColor.withValues(alpha: 0.12)
+                : AppColors.brown500.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -900,7 +897,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
 
             return Card(
               margin: const EdgeInsets.only(bottom: 10),
-              color: isDark ? AppColors.darkCard.withOpacity(0.85) : Colors.white,
+              color: isDark ? AppColors.darkCard.withValues(alpha: 0.85) : Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(color: isDark ? Colors.white10 : AppColors.brown100),
@@ -922,7 +919,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: AppColors.gold.withOpacity(0.12),
+                        color: AppColors.gold.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
                       child: Text(
@@ -954,7 +951,6 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                         const Divider(),
                         ...aspects.map((aspect) {
                           final targetPlanet = aspect['targetPlanet'] ?? '';
-                          final targetSign = aspect['targetSign'] ?? '';
                           final targetHouse = aspect['targetHouse'] ?? 1;
                           final aspectType = aspect['aspectType'] ?? '';
                           final interpretation = aspect['interpretation'] ?? '';
@@ -963,7 +959,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                             margin: const EdgeInsets.only(top: 8),
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: (isDark ? Colors.white : AppColors.brown900).withOpacity(0.04),
+                              color: (isDark ? Colors.white : AppColors.brown900).withValues(alpha: 0.04),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Column(
@@ -979,7 +975,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                                       decoration: BoxDecoration(
-                                        color: AppColors.gold.withOpacity(0.12),
+                                        color: AppColors.gold.withValues(alpha: 0.12),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
@@ -997,14 +993,14 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                               ],
                             ),
                           );
-                        }).toList(),
+                        }),
                       ],
                     ),
                   ),
                 ],
               ),
             );
-          }).toList(),
+          }),
       ],
     );
   }
@@ -1059,7 +1055,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                               decoration: BoxDecoration(
-                                color: barColor.withOpacity(0.12),
+                                color: barColor.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -1114,7 +1110,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
 
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
-            color: isDark ? AppColors.darkCard.withOpacity(0.85) : Colors.white,
+            color: isDark ? AppColors.darkCard.withValues(alpha: 0.85) : Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
               side: BorderSide(color: isDark ? Colors.white10 : AppColors.brown100),
@@ -1148,7 +1144,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
               ),
               trailing: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(color: digColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                decoration: BoxDecoration(color: digColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
                 child: Text(dignity, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: digColor)),
               ),
               children: [
@@ -1181,7 +1177,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: (relation == 'Friendly' ? Colors.green : relation == 'Enemy' ? Colors.red : Colors.orange).withOpacity(0.12),
+                              color: (relation == 'Friendly' ? Colors.green : relation == 'Enemy' ? Colors.red : Colors.orange).withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -1201,7 +1197,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
               ],
             ),
           );
-        }).toList(),
+        }),
         const SizedBox(height: 20),
         const Text(
           "House Lord Placements",
@@ -1214,7 +1210,6 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
           final String lord = hl['lord'] ?? '';
           final int lordHouse = hl['lordHouse'] ?? 1;
           final String lordDignity = hl['lordDignity'] ?? '';
-          final String lordRelation = hl['lordSignRelationship'] ?? '';
           final String type = hl['lordHouseType'] ?? '';
           final String interpretation = hl['interpretation'] ?? '';
           final isExpanded = _expandedHouseLords.contains(houseNum);
@@ -1226,7 +1221,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
 
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
-            color: isDark ? AppColors.darkCard.withOpacity(0.85) : Colors.white,
+            color: isDark ? AppColors.darkCard.withValues(alpha: 0.85) : Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
               side: BorderSide(color: isDark ? Colors.white10 : AppColors.brown100),
@@ -1262,13 +1257,13 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(color: houseColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                            decoration: BoxDecoration(color: houseColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
                             child: Text(type, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: houseColor)),
                           ),
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(color: AppColors.gold.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+                            decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
                             child: Text(lordDignity, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.goldDark)),
                           ),
                         ],
@@ -1281,7 +1276,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -1290,7 +1285,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
+        color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
@@ -1328,9 +1323,9 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: sadeSati['isActive'] == true ? Colors.red.withOpacity(0.08) : Colors.green.withOpacity(0.08),
+                  color: sadeSati['isActive'] == true ? Colors.red.withValues(alpha: 0.08) : Colors.green.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: sadeSati['isActive'] == true ? Colors.red.withOpacity(0.2) : Colors.green.withOpacity(0.2)),
+                  border: Border.all(color: sadeSati['isActive'] == true ? Colors.red.withValues(alpha: 0.2) : Colors.green.withValues(alpha: 0.2)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1354,9 +1349,9 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: dhaiya['isActive'] == true ? Colors.orange.withOpacity(0.08) : Colors.green.withOpacity(0.08),
+                  color: dhaiya['isActive'] == true ? Colors.orange.withValues(alpha: 0.08) : Colors.green.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: dhaiya['isActive'] == true ? Colors.orange.withOpacity(0.2) : Colors.green.withOpacity(0.2)),
+                  border: Border.all(color: dhaiya['isActive'] == true ? Colors.orange.withValues(alpha: 0.2) : Colors.green.withValues(alpha: 0.2)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1379,7 +1374,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: Colors.red.withOpacity(0.04), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.04), borderRadius: BorderRadius.circular(8)),
             child: Text(sadeSati['description'] ?? '', style: TextStyle(fontSize: 11, color: isDark ? Colors.white70 : AppColors.brown700, height: 1.35)),
           ),
         ],
@@ -1387,7 +1382,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: Colors.orange.withOpacity(0.04), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(color: Colors.orange.withValues(alpha: 0.04), borderRadius: BorderRadius.circular(8)),
             child: Text(dhaiya['description'] ?? '', style: TextStyle(fontSize: 11, color: isDark ? Colors.white70 : AppColors.brown700, height: 1.35)),
           ),
         ],
@@ -1396,9 +1391,9 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.gold.withOpacity(0.08),
+            color: AppColors.gold.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppColors.gold.withOpacity(0.2)),
+            border: Border.all(color: AppColors.gold.withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1435,7 +1430,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
 
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
-            color: isDark ? AppColors.darkCard.withOpacity(0.85) : Colors.white,
+            color: isDark ? AppColors.darkCard.withValues(alpha: 0.85) : Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
               side: BorderSide(color: isDark ? Colors.white10 : AppColors.brown100),
@@ -1467,7 +1462,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
               trailing: isMajor
                   ? Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                      decoration: BoxDecoration(color: AppColors.gold.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+                      decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
                       child: const Text("Major", style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: AppColors.goldDark)),
                     )
                   : null,
@@ -1487,7 +1482,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -1508,7 +1503,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
         ),
         const SizedBox(height: 10),
         Card(
-          color: isDark ? AppColors.darkCard.withOpacity(0.85) : Colors.white,
+          color: isDark ? AppColors.darkCard.withValues(alpha: 0.85) : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(color: isDark ? Colors.white10 : AppColors.brown100),
@@ -1528,7 +1523,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(color: Colors.purple.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                      decoration: BoxDecoration(color: Colors.purple.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
                       child: Text("Ruler: ${np['ruler']}", style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.purple)),
                     ),
                   ],
@@ -1541,7 +1536,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                   runSpacing: 4,
                   children: traits.map((tr) => Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(color: Colors.purple.withOpacity(0.06), borderRadius: BorderRadius.circular(12)),
+                        decoration: BoxDecoration(color: Colors.purple.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(12)),
                         child: Text(tr.toString(), style: const TextStyle(fontSize: 10, color: Colors.purple, fontWeight: FontWeight.bold)),
                       )).toList(),
                 ),
@@ -1550,7 +1545,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: Colors.purple.withOpacity(0.04), borderRadius: BorderRadius.circular(10)),
+                  decoration: BoxDecoration(color: Colors.purple.withValues(alpha: 0.04), borderRadius: BorderRadius.circular(10)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1577,7 +1572,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
         ),
         const SizedBox(height: 10),
         Card(
-          color: isDark ? AppColors.darkCard.withOpacity(0.85) : Colors.white,
+          color: isDark ? AppColors.darkCard.withValues(alpha: 0.85) : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(color: isDark ? Colors.white10 : AppColors.brown100),
@@ -1617,7 +1612,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                             Expanded(child: Text(note.toString(), style: TextStyle(fontSize: 11, color: isDark ? Colors.white70 : AppColors.brown700, height: 1.35))),
                           ],
                         ),
-                      )).toList(),
+                      )),
                 ],
               ],
             ),
@@ -1631,9 +1626,9 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.15)),
+        border: Border.all(color: color.withValues(alpha: 0.15)),
       ),
       child: Column(
         children: [
@@ -1650,7 +1645,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
       padding: const EdgeInsets.only(bottom: 10.0),
       child: Container(
         padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(color: color.withOpacity(0.03), borderRadius: BorderRadius.circular(8)),
+        decoration: BoxDecoration(color: color.withValues(alpha: 0.03), borderRadius: BorderRadius.circular(8)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1675,7 +1670,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
       children: [
         // Chart Strength Summary Box
         Card(
-          color: isDark ? AppColors.darkCard.withOpacity(0.85) : Colors.white,
+          color: isDark ? AppColors.darkCard.withValues(alpha: 0.85) : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(color: isDark ? Colors.white10 : AppColors.brown100),
@@ -1719,7 +1714,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
         const SizedBox(height: 16),
         // Ascendant Lord Analysis
         Card(
-          color: isDark ? AppColors.darkCard.withOpacity(0.85) : Colors.white,
+          color: isDark ? AppColors.darkCard.withValues(alpha: 0.85) : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(color: isDark ? Colors.white10 : AppColors.brown100),
@@ -1745,13 +1740,13 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(color: AppColors.gold.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+                      decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
                       child: Text("Ascendant: ${ascLord['ascendant']}", style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: AppColors.goldDark)),
                     ),
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(color: AppColors.sage.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+                      decoration: BoxDecoration(color: AppColors.sage.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
                       child: Text("Lord: ${ascLord['lord']} in H${ascLord['lordHouse']}", style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: AppColors.sage)),
                     ),
                   ],
@@ -1768,7 +1763,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
         const SizedBox(height: 16),
         // Dasha Card
         Card(
-          color: isDark ? AppColors.darkCard.withOpacity(0.85) : Colors.white,
+          color: isDark ? AppColors.darkCard.withValues(alpha: 0.85) : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(color: isDark ? Colors.white10 : AppColors.brown100),
@@ -1794,13 +1789,13 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(color: Colors.teal.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                      decoration: BoxDecoration(color: Colors.teal.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
                       child: Text("Mahadasha: ${dasha['mahadashaPlanet']}", style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.teal)),
                     ),
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(color: Colors.teal.withOpacity(0.06), borderRadius: BorderRadius.circular(6)),
+                      decoration: BoxDecoration(color: Colors.teal.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(6)),
                       child: Text("Antardasha: ${dasha['antardashaPlanet']}", style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.teal)),
                     ),
                   ],
@@ -1816,7 +1811,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
                   runSpacing: 4,
                   children: (dasha['areasAffected'] as List? ?? []).map((area) => Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(color: Colors.teal.withOpacity(0.06), borderRadius: BorderRadius.circular(10)),
+                        decoration: BoxDecoration(color: Colors.teal.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(10)),
                         child: Text(area.toString(), style: const TextStyle(fontSize: 9.5, color: Colors.teal, fontWeight: FontWeight.bold)),
                       )).toList(),
                 ),
@@ -1833,7 +1828,6 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
         ...strengths.map((ps) {
           final String planet = ps['planet'] ?? '';
           final String sign = ps['sign'] ?? '';
-          final String deg = ps['degree'] ?? '';
           final int house = ps['house'] ?? 1;
           final String strength = ps['strength'] ?? '';
           final isRetro = ps['isRetrograde'] ?? false;
@@ -1849,7 +1843,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkCard.withOpacity(0.85) : Colors.white,
+              color: isDark ? AppColors.darkCard.withValues(alpha: 0.85) : Colors.white,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: isDark ? Colors.white10 : AppColors.brown100),
             ),
@@ -1882,7 +1876,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -1891,7 +1885,7 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.gold.withOpacity(0.04),
+        color: AppColors.gold.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -1963,9 +1957,9 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.gold.withOpacity(0.06),
+        color: AppColors.gold.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.gold.withOpacity(0.2), width: 1.0),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.2), width: 1.0),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2055,9 +2049,9 @@ class _YogaDoshaScreenState extends State<YogaDoshaScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.gold.withOpacity(0.06),
+        color: AppColors.gold.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.gold.withOpacity(0.2), width: 1.0),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.2), width: 1.0),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

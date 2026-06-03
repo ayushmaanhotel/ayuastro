@@ -45,7 +45,7 @@ List<TraitScore> _getDefaultTraits() {
 }
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -58,14 +58,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   // Settings values (simulated local state synced with appState toggles)
   bool _dailyHoroscope = true;
   bool _transitAlerts = true;
-  String _language = 'English';
 
   @override
   void initState() {
     super.initState();
     final state = Provider.of<AppState>(context, listen: false);
     _dailyHoroscope = state.dailyHoroscopeNotif;
-    _language = state.language == 'en' ? 'English' : state.language == 'hi' ? 'Hindi' : 'Sanskrit';
   }
 
   @override
@@ -132,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 color: isDark ? AppColors.darkBg : AppColors.cream,
                 border: Border(
                   bottom: BorderSide(
-                    color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100,
+                    color: isDark ? Colors.white.withValues(alpha: 0.06) : AppColors.brown100,
                     width: 1,
                   ),
                 ),
@@ -164,10 +162,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   Container(
                     height: 42,
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withOpacity(0.04) : AppColors.brown100.withOpacity(0.5),
+                      color: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.brown100.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100,
+                        color: isDark ? Colors.white.withValues(alpha: 0.06) : AppColors.brown100,
                       ),
                     ),
                     child: Stack(
@@ -182,12 +180,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                             child: Container(
                               margin: const EdgeInsets.all(3),
                               decoration: BoxDecoration(
-                                color: isDark ? AppColors.gold.withOpacity(0.18) : Colors.white,
+                                color: isDark ? AppColors.gold.withValues(alpha: 0.18) : Colors.white,
                                 borderRadius: BorderRadius.circular(20),
-                                border: isDark ? Border.all(color: AppColors.gold.withOpacity(0.3), width: 1) : null,
+                                border: isDark ? Border.all(color: AppColors.gold.withValues(alpha: 0.3), width: 1) : null,
                                 boxShadow: isDark ? null : [
                                   BoxShadow(
-                                    color: AppColors.brown900.withOpacity(0.08),
+                                    color: AppColors.brown900.withValues(alpha: 0.08),
                                     blurRadius: 6,
                                     offset: const Offset(0, 2),
                                   ),
@@ -308,7 +306,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.gold.withOpacity(0.3),
+                      color: AppColors.gold.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -362,7 +360,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           const SizedBox(height: 18),
           
           // Aligned grid of birth details
-          Divider(color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100),
+          Divider(color: isDark ? Colors.white.withValues(alpha: 0.06) : AppColors.brown100),
           const SizedBox(height: 12),
           
           if (details != null) ...[
@@ -547,7 +545,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 Container(
                   width: 50, height: 50,
                   decoration: BoxDecoration(
-                    color: AppColors.gold.withOpacity(0.08),
+                    color: AppColors.gold.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.mood, size: 24, color: AppColors.gold),
@@ -650,11 +648,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         color: isDark ? AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100,
+          color: isDark ? Colors.white.withValues(alpha: 0.06) : AppColors.brown100,
         ),
         boxShadow: [
           BoxShadow(
-            color: (isDark ? Colors.black : AppColors.brown900).withOpacity(isDark ? 0.25 : 0.04),
+            color: (isDark ? Colors.black : AppColors.brown900).withValues(alpha: isDark ? 0.25 : 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -765,7 +763,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   ),
                 );
               }),
-              Divider(color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100),
+              Divider(color: isDark ? Colors.white.withValues(alpha: 0.06) : AppColors.brown100),
               _actionTile('Export Cosmic Chart (PDF)', Icons.file_download_outlined, AppColors.sage, isDark, () {
                 _exportPdfReport(context, state);
               }),
@@ -785,11 +783,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               _actionTile('Recalculate Chart Details', Icons.refresh_outlined, AppColors.gold, isDark, () {
                 _showEditProfileBottomSheet(context, state);
               }),
-              Divider(color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100),
+              Divider(color: isDark ? Colors.white.withValues(alpha: 0.06) : AppColors.brown100),
               _actionTile('Delete Account Data', Icons.person_remove_outlined, Colors.red, isDark, () {
                 _showDeleteAccountConfirm(context);
               }),
-              Divider(color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100),
+              Divider(color: isDark ? Colors.white.withValues(alpha: 0.06) : AppColors.brown100),
               _actionTile('Log Out Session', Icons.logout_outlined, Colors.red, isDark, () {
                 state.reset();
               }),
@@ -960,7 +958,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.gold,
+            activeThumbColor: AppColors.gold,
             inactiveTrackColor: isDark ? Colors.white12 : AppColors.brown100,
           ),
         ],
@@ -1111,9 +1109,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.gold.withOpacity(0.08),
+              color: AppColors.gold.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.gold.withOpacity(0.2)),
+              border: Border.all(color: AppColors.gold.withValues(alpha: 0.2)),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
@@ -1175,9 +1173,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.gold.withOpacity(0.08),
+              color: AppColors.gold.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.gold.withOpacity(0.2)),
+              border: Border.all(color: AppColors.gold.withValues(alpha: 0.2)),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
@@ -1333,7 +1331,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 color: sheetDark ? AppColors.darkCard : Colors.white,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                 border: Border.all(
-                  color: sheetDark ? Colors.white.withOpacity(0.08) : AppColors.brown100,
+                  color: sheetDark ? Colors.white.withValues(alpha: 0.08) : AppColors.brown100,
                 ),
               ),
               child: Column(
@@ -1504,6 +1502,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       );
                       
                       await state.updateBirthDetails(newDetails);
+                      if (!context.mounted) return;
                       
                       if (state.error != null) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -1617,12 +1616,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
       await Clipboard.setData(ClipboardData(text: shareText));
 
-      if (mounted) {
+      if (context.mounted) {
         _showShareSuccessSheet(context, imagePath, shareText);
       }
     } catch (e) {
       debugPrint("Error exporting blueprint card: $e");
-      if (mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Error exporting share card: ${e.toString()}"),
@@ -1645,7 +1644,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           decoration: BoxDecoration(
             color: isDark ? AppColors.darkBg : AppColors.cream,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            border: Border.all(color: AppColors.gold.withOpacity(0.4), width: 1.0),
+            border: Border.all(color: AppColors.gold.withValues(alpha: 0.4), width: 1.0),
           ),
           child: StarFieldBackground(
             child: Padding(
@@ -1698,7 +1697,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                         border: Border.all(color: AppColors.brown100, width: 0.8),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
                             blurRadius: 10,
                           ),
                         ],
@@ -1716,9 +1715,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.gold.withOpacity(0.05),
+                      color: AppColors.gold.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.gold.withOpacity(0.2)),
+                      border: Border.all(color: AppColors.gold.withValues(alpha: 0.2)),
                     ),
                     child: const Row(
                       children: [
@@ -1793,7 +1792,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.gold.withOpacity(0.12),
+              color: AppColors.gold.withValues(alpha: 0.12),
               blurRadius: 20,
               spreadRadius: 2,
             ),
@@ -1887,9 +1886,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.gold.withOpacity(0.15),
+                          color: AppColors.gold.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppColors.gold.withOpacity(0.4), width: 0.8),
+                          border: Border.all(color: AppColors.gold.withValues(alpha: 0.4), width: 0.8),
                         ),
                         child: Text(
                           archetype,
@@ -1994,11 +1993,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         color: isDark ? AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.06) : AppColors.brown100,
+          color: isDark ? Colors.white.withValues(alpha: 0.06) : AppColors.brown100,
         ),
         boxShadow: [
           BoxShadow(
-            color: (isDark ? Colors.black : AppColors.brown900).withOpacity(isDark ? 0.25 : 0.04),
+            color: (isDark ? Colors.black : AppColors.brown900).withValues(alpha: isDark ? 0.25 : 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

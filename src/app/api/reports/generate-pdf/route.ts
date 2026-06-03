@@ -1,6 +1,8 @@
+export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import PDFDocument from 'pdfkit';
 import { db } from '@/lib/db';
+import { generateDeepIntelligenceReport, generateReport } from '@/lib/ai';
 
 interface ReportRequestBody {
   userId: string;
@@ -87,6 +89,16 @@ function drawPDFReport(data: {
         doc.restore();
       };
 
+      const checkPageOverflow = (neededSpace: number) => {
+        if (doc.y + neededSpace > doc.page.height - 70) {
+          doc.addPage();
+          drawBackground();
+          drawHeaderLine();
+          return true;
+        }
+        return false;
+      };
+
       // ─── 1. COVER PAGE ───
       drawBackground();
       
@@ -104,7 +116,7 @@ function drawPDFReport(data: {
       doc.strokeColor('#C4973B').lineWidth(1.2).moveTo(160, doc.y).lineTo(doc.page.width - 160, doc.y).stroke();
       
       doc.moveDown(3);
-      doc.fontSize(20).font('Times-Bold').fillColor('#3E2723').text('Deep Intelligence Report', { align: 'center' });
+      doc.fontSize(20).font('Times-Bold').fillColor('#3E2723').text('Premium Deep Intelligence Report', { align: 'center' });
       doc.moveDown(2);
 
       // User details container
@@ -134,7 +146,48 @@ function drawPDFReport(data: {
       });
       doc.fillColor('#A1887F').fontSize(9).font('Helvetica').text(`Generated on ${todayStr}`, 50, doc.page.height - 80, { align: 'center' });
 
-      // ─── 2. TABLE OF CONTENTS ───
+      // ─── 2. TRUTH DISCLOSURE (NOTHING TO HIDE) ───
+      doc.addPage();
+      drawBackground();
+      drawHeaderLine();
+      doc.fillColor('#A1887F').fontSize(8).font('Helvetica').text('AyuAstro Deep Intelligence Report', 50, 20);
+
+      doc.y = 70;
+      doc.fillColor('#3E2723').fontSize(22).font('Times-Bold').text('Truth Disclosure (Nothing To Hide)', 50, doc.y);
+      doc.moveDown(1.5);
+      
+      doc.fillColor('#5D4037').fontSize(11).font('Helvetica').text(
+        'At AyuAstro, we believe in radical transparency. Other platforms often hide calculations, exaggerate negative transits to sell expensive remedies, and use outdated systems. Here is the unvarnished truth about your chart:',
+        { lineGap: 5 }
+      );
+      doc.moveDown(1.5);
+      
+      doc.fillColor('#3E2723').fontSize(14).font('Times-Bold').text('Your Signs Have Shifted by 24°');
+      doc.moveDown(0.5);
+      doc.fillColor('#5D4037').fontSize(11).font('Helvetica').text(
+        'Western astrology uses an outdated seasonal grid (Tropical). Vedic uses the actual physical sky (Sidereal). This precession shift (Lahiri Ayanamsa) means your Sun/Moon signs are roughly 24 degrees back from what you read online. If you think you are a Leo, you are physically a Cancer.',
+        { lineGap: 4 }
+      );
+      doc.moveDown(1.5);
+
+      doc.fillColor('#3E2723').fontSize(14).font('Times-Bold').text('Astrology is a Map, Not a Sentence');
+      doc.moveDown(0.5);
+      doc.fillColor('#5D4037').fontSize(11).font('Helvetica').text(
+        'No placement is "cursed." No dasha period guarantees ruin. Your chart shows probabilities and psychological tendencies, not fixed outcomes. Your free will always overrides planetary influence.',
+        { lineGap: 4 }
+      );
+      doc.moveDown(1.5);
+
+      doc.fillColor('#3E2723').fontSize(14).font('Times-Bold').text('Beware of Fear-Based Marketing');
+      doc.moveDown(0.5);
+      doc.fillColor('#5D4037').fontSize(11).font('Helvetica').text(
+        'Many astrologers use fear to sell expensive gemstones or pujas (rituals). We will never tell you that you must buy a product to fix your life. Real remedies are psychological integration and conscious action.',
+        { lineGap: 4 }
+      );
+      
+      drawFooter(2);
+
+      // ─── 3. TABLE OF CONTENTS ───
       doc.addPage();
       drawBackground();
       drawHeaderLine();
@@ -147,7 +200,7 @@ function drawPDFReport(data: {
 
       const tableOfContents = [
         { num: 1, title: 'Your Cosmic Identity' },
-        { num: 2, title: 'Emotional Trait Map' },
+        { num: 2, title: 'Emotional Trait Map & Radar' },
         { num: 3, title: 'Numerology Blueprint' },
         { num: 4, title: 'Vedic Astrology Summary' },
         ...activeSections.map((s, idx) => ({ num: 5 + idx, title: s.title + (s.insightLevel === 'premium' ? ' (Premium)' : '') }))
@@ -162,13 +215,13 @@ function drawPDFReport(data: {
         const endDotX = doc.page.width - 80;
         doc.strokeColor('#A1887F').lineWidth(0.5).dash(2, { space: 2 }).moveTo(350, itemY + 8).lineTo(endDotX, itemY + 8).stroke().undash();
         
-        doc.font('Helvetica-Bold').fillColor('#3E2723').text(`${index + 3}`, doc.page.width - 70, itemY, { align: 'right' });
+        doc.font('Helvetica-Bold').fillColor('#3E2723').text(`${index + 4}`, doc.page.width - 70, itemY, { align: 'right' });
         doc.moveDown(0.9);
       });
 
-      drawFooter(2);
+      drawFooter(3);
 
-      // ─── 3. COSMIC IDENTITY DETAILS ───
+      // ─── 4. COSMIC IDENTITY DETAILS ───
       doc.addPage();
       drawBackground();
       drawHeaderLine();
@@ -207,60 +260,120 @@ function drawPDFReport(data: {
         { lineGap: 5 }
       );
 
-      drawFooter(3);
+      drawFooter(4);
 
-      // ─── 4. EMOTIONAL TRAIT MAP ───
+      // ─── 5. EMOTIONAL TRAIT MAP & RADAR ───
       doc.addPage();
       drawBackground();
       drawHeaderLine();
       doc.fillColor('#A1887F').fontSize(8).font('Helvetica').text('AyuAstro Deep Intelligence Report', 50, 20);
 
       doc.y = 70;
-      doc.fillColor('#3E2723').fontSize(20).font('Times-Bold').text('2. Emotional Trait Map', 50, doc.y);
+      doc.fillColor('#3E2723').fontSize(20).font('Times-Bold').text('2. Emotional Trait Map & Radar', 50, doc.y);
       doc.moveDown(0.6);
       doc.fontSize(10).font('Helvetica').fillColor('#5D4037').text(
-        'Your emotional traits are scored on a 0-100 scale, derived from the synthesis of planetary placements, nakshatras, and your questionnaire responses. Scores above 70 indicate innate strengths; 40-70 represent moderate capacities; below 40 are growth zones.',
+        'Your emotional traits are scored on a 0-100 scale. Scores above 70 indicate innate strengths; 40-70 represent moderate capacities; below 40 are growth zones. The radar chart below visualizes your complete psychometric profile.',
         { lineGap: 3.5 }
       );
       
       doc.moveDown(1.5);
       
-      const progressBarWidth = doc.page.width - 260;
-      const progressBarHeight = 8;
+      // Draw Radar Chart
+      const cx = doc.page.width / 2;
+      const cy = doc.y + 120;
+      const r = 100;
+      
+      // Draw concentric circles
+      [0.2, 0.4, 0.6, 0.8, 1].forEach(scale => {
+        doc.circle(cx, cy, r * scale).lineWidth(0.5).stroke('#EFEBE9');
+      });
+      
+      // Draw axes and plot points
+      const numTraits = Math.min(data.traits.length, 14); // Avoid overcrowding
+      const plotPoints: {x: number, y: number}[] = [];
+      
+      for(let i=0; i<numTraits; i++) {
+        const trait = data.traits[i];
+        const angle = (Math.PI * 2 * i) / numTraits - Math.PI / 2;
+        
+        // Draw axis line
+        doc.moveTo(cx, cy).lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle)).lineWidth(0.5).stroke('#EFEBE9');
+        
+        // Label position
+        const labelR = r + 15;
+        const labelX = cx + labelR * Math.cos(angle);
+        const labelY = cy + labelR * Math.sin(angle);
+        
+        doc.fillColor('#A1887F').fontSize(6).font('Helvetica-Bold');
+        doc.text(trait.label || trait.name, labelX - 30, labelY, { width: 60, align: 'center' });
+        
+        // Plot point
+        const scoreNorm = trait.score / 100;
+        plotPoints.push({
+          x: cx + r * scoreNorm * Math.cos(angle),
+          y: cy + r * scoreNorm * Math.sin(angle)
+        });
+      }
+      
+      // Draw polygon
+      if (plotPoints.length > 0) {
+        doc.moveTo(plotPoints[0].x, plotPoints[0].y);
+        for(let i=1; i<plotPoints.length; i++) {
+          doc.lineTo(plotPoints[i].x, plotPoints[i].y);
+        }
+        doc.closePath();
+        
+        doc.lineWidth(1.5).strokeColor('#C4973B').fillColor('#C4973B');
+        doc.fillOpacity(0.2);
+        doc.fillAndStroke();
+        doc.fillOpacity(1.0); // Reset opacity
+      }
+      
+      doc.y = cy + r + 30;
+      
+      // Score Summary Table
+      doc.moveDown(1);
+      doc.fillColor('#3E2723').fontSize(14).font('Times-Bold').text('Score Summary');
+      doc.moveDown(1);
+      
+      const colWidth1 = 200;
+      const colWidth2 = 80;
+      const colWidth3 = 120;
+      let tableY = doc.y;
+      
+      // Table Header
+      doc.fillColor('#A1887F').fontSize(9).font('Helvetica-Bold');
+      doc.text('TRAIT', 50, tableY);
+      doc.text('SCORE', 50 + colWidth1, tableY);
+      doc.text('CATEGORY', 50 + colWidth1 + colWidth2, tableY);
+      doc.moveTo(50, tableY + 12).lineTo(doc.page.width - 50, tableY + 12).lineWidth(1).stroke('#EFEBE9');
+      
+      tableY += 20;
+      
+      data.traits.forEach((t, i) => {
+        checkPageOverflow(25);
+        if (doc.y > tableY) tableY = doc.y; // Update tableY if new page
 
-      data.traits.forEach((t) => {
-        const itemY = doc.y;
-        
-        // Trait Label
-        doc.fillColor('#3E2723').fontSize(9.5).font('Helvetica-Bold').text(t.label || t.name, 50, itemY);
-        
-        const barX = 180;
-        const barY = itemY - 1;
-        
-        // Progress bar background
-        doc.rect(barX, barY, progressBarWidth, progressBarHeight).fill('#EFEBE9');
-        
-        // Color mapping
-        const color = t.score > 70 ? '#4A7C59' : t.score >= 40 ? '#6B4C3B' : '#C4973B';
-        if (t.score > 0) {
-          doc.rect(barX, barY, progressBarWidth * (t.score / 100), progressBarHeight).fill(color);
+        // Alternating row background
+        if (i % 2 === 0) {
+          doc.rect(50, tableY - 5, doc.page.width - 100, 20).fill('#FFFFFF');
         }
         
-        // Score percentage
-        doc.fillColor('#5D4037').fontSize(9).font('Helvetica-Bold').text(`${t.score}%`, doc.page.width - 80, itemY, { align: 'right' });
-        doc.moveDown(0.9);
+        const category = t.score >= 70 ? 'Strength' : t.score >= 40 ? 'Moderate' : 'Growth Area';
+        const color = t.score >= 70 ? '#4A7C59' : t.score >= 40 ? '#6B4C3B' : '#C4973B';
+        
+        doc.fillColor('#3E2723').fontSize(9).font('Helvetica');
+        doc.text(t.label || t.name, 55, tableY);
+        doc.fillColor('#5D4037').text(`${t.score}%`, 50 + colWidth1, tableY);
+        doc.fillColor(color).font('Helvetica-Bold').text(category, 50 + colWidth1 + colWidth2, tableY);
+        
+        tableY += 20;
+        doc.y = tableY;
       });
 
-      // Legend
-      doc.moveDown(1.2);
-      const legendY = doc.y;
-      doc.fillColor('#4A7C59').fontSize(9).font('Helvetica-Bold').text('■ High Strength (70+)', 50, legendY);
-      doc.fillColor('#6B4C3B').text('■ Moderate (40-70)', 190, legendY);
-      doc.fillColor('#C4973B').text('■ Growth Area (<40)', 320, legendY);
+      drawFooter(5);
 
-      drawFooter(4);
-
-      // ─── 5. NUMEROLOGY BLUEPRINT ───
+      // ─── 6. NUMEROLOGY BLUEPRINT & VEDIC SUMMARY ───
       doc.addPage();
       drawBackground();
       drawHeaderLine();
@@ -277,35 +390,45 @@ function drawPDFReport(data: {
       doc.moveDown(1.2);
 
       if (data.numerology) {
-        const numCardW = (doc.page.width - 110) / 2;
-        const numCardH = 75;
+        let nTableY = doc.y;
+        
+        // Numerology Table
+        const nCols = [{w: 120, x: 50}, {w: 60, x: 170}, {w: doc.page.width - 280, x: 230}];
+        
+        doc.rect(50, nTableY, doc.page.width - 100, 20).fill('#EFEBE9');
+        doc.fillColor('#3E2723').fontSize(9).font('Helvetica-Bold');
+        doc.text('CORE NUMBER', nCols[0].x + 5, nTableY + 5);
+        doc.text('VALUE', nCols[1].x + 5, nTableY + 5);
+        doc.text('SIGNIFICANCE', nCols[2].x + 5, nTableY + 5);
+        
+        nTableY += 20;
+        
         const numList = [
-          { label: 'Life Path Number', val: data.numerology.lifePathNumber, desc: data.numerology.lifePathDesc?.split('.')[0] || 'Path of evolution' },
-          { label: 'Destiny Number', val: data.numerology.destinyNumber, desc: data.numerology.destinyDesc?.split('.')[0] || 'External expression' },
-          { label: 'Soul Urge Number', val: data.numerology.soulUrgeNumber, desc: data.numerology.soulUrgeDesc?.split('.')[0] || 'Deepest motivation' },
+          { label: 'Life Path Number', val: data.numerology.lifePathNumber, desc: data.numerology.lifePathDesc || 'Path of evolution' },
+          { label: 'Destiny Number', val: data.numerology.destinyNumber, desc: data.numerology.destinyDesc || 'External expression' },
+          { label: 'Soul Urge Number', val: data.numerology.soulUrgeNumber, desc: data.numerology.soulUrgeDesc || 'Deepest motivation' },
           { label: 'Personality Number', val: data.numerology.personalityNumber, desc: 'Your outer persona and first impression' }
         ];
 
-        const gridY = doc.y;
-        numList.forEach((n, idx) => {
-          const row = Math.floor(idx / 2);
-          const col = idx % 2;
-          const x = 50 + col * (numCardW + 10);
-          const y = gridY + row * (numCardH + 10);
+        numList.forEach((n, i) => {
+          doc.rect(50, nTableY, doc.page.width - 100, 35).fill(i % 2 === 0 ? '#FFFFFF' : 'transparent');
+          doc.fillColor('#5D4037').fontSize(9).font('Helvetica-Bold').text(n.label, nCols[0].x + 5, nTableY + 10);
+          doc.fillColor('#C4973B').fontSize(14).font('Times-Bold').text(`${n.val}`, nCols[1].x + 5, nTableY + 8);
+          doc.fillColor('#5D4037').fontSize(8.5).font('Helvetica').text(n.desc.substring(0, 100) + '...', nCols[2].x + 5, nTableY + 6, { width: nCols[2].w - 10, lineGap: 1.5 });
           
-          doc.rect(x, y, numCardW, numCardH).fillAndStroke('#FFFFFF', '#EFEBE9');
-          doc.fillColor('#A1887F').fontSize(7.5).font('Helvetica-Bold').text(n.label.toUpperCase(), x, y + 10, { width: numCardW, align: 'center' });
-          doc.fillColor('#3E2723').fontSize(24).font('Times-Bold').text(`${n.val}`, x, y + 22, { width: numCardW, align: 'center' });
-          doc.fillColor('#8D6E63').fontSize(8).font('Helvetica').text(n.desc, x + 12, y + 50, { width: numCardW - 24, align: 'center', lineGap: 2 });
+          nTableY += 35;
         });
-
-        doc.y = gridY + (numCardH * 2) + 20;
+        
+        doc.moveTo(50, nTableY).lineTo(doc.page.width - 50, nTableY).lineWidth(0.5).stroke('#EFEBE9');
+        doc.y = nTableY + 30;
       } else {
         doc.fillColor('#A1887F').fontSize(10).text('Numerology profile unavailable.', 50, doc.y);
         doc.moveDown(1.5);
       }
 
-      // ─── 6. VEDIC ASTROLOGY SUMMARY ───
+      checkPageOverflow(150);
+
+      // ─── VEDIC ASTROLOGY SUMMARY ───
       doc.fillColor('#3E2723').fontSize(20).font('Times-Bold').text('4. Vedic Astrology Summary', 50, doc.y);
       doc.moveDown(1);
 
@@ -331,10 +454,10 @@ function drawPDFReport(data: {
       const doshasStr = data.astrology?.doshas?.join(', ') || 'None detected in current chart';
       doc.fontSize(9.5).font('Helvetica').fillColor('#5D4037').text(doshasStr, 50 + columnW + 10, textY + 15, { width: columnW, lineGap: 3 });
 
-      drawFooter(5);
+      drawFooter(6);
 
       // ─── 7+. DETAILED REPORT SECTIONS ───
-      let pageNumber = 6;
+      let pageNumber = 7;
       activeSections.forEach((s) => {
         doc.addPage();
         drawBackground();
@@ -346,12 +469,15 @@ function drawPDFReport(data: {
         
         if (s.insightLevel === 'premium') {
           doc.fillColor('#C4973B').fontSize(7.5).font('Helvetica-Bold').text('👑 PREMIUM INSIGHT SEGMENT', 50, 56, { characterSpacing: 1 });
+        } else {
+          doc.fillColor('#A1887F').fontSize(7.5).font('Helvetica-Bold').text('🧠 AI INSIGHT SEGMENT', 50, 56, { characterSpacing: 1 });
         }
         
         doc.moveDown(1.5);
         doc.fillColor('#5D4037').fontSize(11).font('Helvetica').text(s.content, 50, doc.y, { lineGap: 5.5 });
         
         doc.moveDown(2);
+        checkPageOverflow(100);
         doc.fillColor('#A1887F').fontSize(10).font('Helvetica-Bold').text('Traits Addressed:', 50, doc.y);
         doc.moveDown(0.6);
 
@@ -495,14 +621,93 @@ export async function POST(request: NextRequest) {
 
     // Parse report sections from the most recent report
     let reportSections: { id: string; title: string; icon: string; content: string; traits: string[]; insightLevel: string }[] = [];
+    let needGeneration = false;
+
     if (user.reports.length > 0) {
       const latestReport = user.reports[user.reports.length - 1];
-      try {
-        reportSections = JSON.parse(latestReport.sections);
-      } catch { /* use empty */ }
+      // If we requested premium but the latest report is not premium or is not deep_intelligence
+      if (includePremium && (!latestReport.isPremium || latestReport.type !== 'deep_intelligence')) {
+        needGeneration = true;
+      } else {
+        try {
+          reportSections = JSON.parse(latestReport.sections);
+          if (reportSections.length === 0) {
+            needGeneration = true;
+          }
+        } catch {
+          needGeneration = true;
+        }
+      }
+    } else {
+      needGeneration = true;
     }
 
-    // If no report sections from DB, use fallback defaults
+    if (needGeneration && user.astrology && user.numerology && user.traits) {
+      try {
+        console.info(`[PDF Route] Dynamic DeepSeek PDF generation triggered for user: ${userId} (premium: ${includePremium})`);
+        
+        let parsedPlacements = undefined;
+        if (user.astrology.planetaryPositions) {
+          try {
+            parsedPlacements = JSON.parse(user.astrology.planetaryPositions);
+          } catch (e) {
+            console.error('[PDF Route] Error parsing planetary positions:', e);
+          }
+        }
+
+        const aiInput = {
+          sunSign: user.astrology.sunSign,
+          moonSign: user.astrology.moonSign,
+          ascendant: user.astrology.ascendant,
+          nakshatra: astrology?.nakshatra ?? '',
+          currentDasha: astrology?.currentDasha ?? '',
+          yogas: astrology?.yogas ?? [],
+          doshas: astrology?.doshas ?? [],
+          planetaryPositions: parsedPlacements,
+          lifePathNumber: user.numerology.lifePathNumber,
+          destinyNumber: user.numerology.destinyNumber,
+          soulUrgeNumber: user.numerology.soulUrgeNumber,
+          traits: {
+            emotionalIntensity: user.traits.emotionalIntensity,
+            attachmentStyle: user.traits.attachmentStyle,
+            ambition: user.traits.ambition,
+            trust: user.traits.trust,
+            communicationOpenness: user.traits.communicationOpenness,
+            impulsiveness: user.traits.impulsiveness,
+            empathy: user.traits.empathy,
+            resilience: user.traits.resilience,
+            creativity: user.traits.creativity,
+            intuition: user.traits.intuition,
+            discipline: user.traits.discipline,
+            socialEnergy: user.traits.socialEnergy,
+            patience: user.traits.patience,
+            adaptability: user.traits.adaptability,
+          }
+        };
+
+        const generatedReport = includePremium
+          ? await generateDeepIntelligenceReport(aiInput)
+          : await generateReport(aiInput, { freeOnly: true });
+
+        // Save generated report to database
+        await db.report.create({
+          data: {
+            userId: user.id,
+            type: includePremium ? 'deep_intelligence' : 'personality',
+            title: generatedReport.title,
+            summary: generatedReport.summary,
+            sections: JSON.stringify(generatedReport.sections),
+            isPremium: includePremium,
+          },
+        });
+
+        reportSections = generatedReport.sections;
+      } catch (genError) {
+        console.error('[PDF Route] Dynamic DeepSeek report generation failed:', genError);
+      }
+    }
+
+    // If no report sections from DB and generation failed, use fallback defaults
     if (reportSections.length === 0) {
       reportSections = [
         {

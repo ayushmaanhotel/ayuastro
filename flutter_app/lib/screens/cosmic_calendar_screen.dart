@@ -5,7 +5,7 @@ import '../widgets/custom_widgets.dart';
 import '../models/models.dart';
 
 class CosmicCalendarScreen extends StatefulWidget {
-  const CosmicCalendarScreen({Key? key}) : super(key: key);
+  const CosmicCalendarScreen({super.key});
 
   @override
   State<CosmicCalendarScreen> createState() => _CosmicCalendarScreenState();
@@ -198,9 +198,9 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     decoration: BoxDecoration(
-                      color: AppColors.gold.withOpacity(0.1),
+                      color: AppColors.gold.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.gold.withOpacity(0.25)),
+                      border: Border.all(color: AppColors.gold.withValues(alpha: 0.25)),
                     ),
                     child: Text(
                       '${months[_selectedMonth - 1]} $_selectedYear',
@@ -324,7 +324,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                     child: OutlinedButton.icon(
                       onPressed: _jumpToToday,
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: AppColors.gold.withOpacity(0.3)),
+                        side: BorderSide(color: AppColors.gold.withValues(alpha: 0.3)),
                         foregroundColor: isDark ? AppColors.goldLight : AppColors.goldDark,
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -350,11 +350,11 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.gold.withOpacity(0.15) : Colors.transparent,
+          color: isActive ? AppColors.gold.withValues(alpha: 0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isActive
-                ? AppColors.gold.withOpacity(0.4)
+                ? AppColors.gold.withValues(alpha: 0.4)
                 : (isDark ? Colors.white12 : AppColors.brown100),
           ),
         ),
@@ -400,7 +400,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
       elevation: 2,
       shadowColor: Colors.black12,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: isDark ? Colors.white.withOpacity(0.08) : Colors.white,
+      color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.white,
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -433,8 +433,8 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            AppColors.gold.withOpacity(0.2),
-                            const Color(0xFF8B5CF6).withOpacity(0.1),
+                            AppColors.gold.withValues(alpha: 0.2),
+                            const Color(0xFF8B5CF6).withValues(alpha: 0.1),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(12),
@@ -493,7 +493,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                       margin: const EdgeInsets.only(bottom: 6),
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.gold.withOpacity(0.05),
+                        color: AppColors.gold.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -520,7 +520,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppColors.gold.withOpacity(0.15),
+                              color: AppColors.gold.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -614,7 +614,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
       elevation: 2,
       shadowColor: Colors.black12,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: isDark ? Colors.white.withOpacity(0.08) : Colors.white,
+      color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.white,
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -672,11 +672,11 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: isEvToday
-                          ? AppColors.gold.withOpacity(0.1)
-                          : (isDark ? Colors.white.withOpacity(0.04) : AppColors.brown100.withOpacity(0.4)),
+                          ? AppColors.gold.withValues(alpha: 0.1)
+                          : (isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.brown100.withValues(alpha: 0.4)),
                       borderRadius: BorderRadius.circular(10),
                       border: isEvToday
-                          ? Border.all(color: AppColors.gold.withOpacity(0.2))
+                          ? Border.all(color: AppColors.gold.withValues(alpha: 0.2))
                           : null,
                     ),
                     child: Row(
@@ -717,7 +717,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.12),
+                            color: color.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -732,7 +732,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                       ],
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -778,13 +778,13 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
       elevation: 2,
       shadowColor: Colors.black12,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: isDark ? Colors.white.withOpacity(0.08) : Colors.white,
+      color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.white,
       clipBehavior: Clip.antiAlias,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         decoration: BoxDecoration(
           border: isEvToday
-              ? Border.all(color: AppColors.gold.withOpacity(0.5), width: 2)
+              ? Border.all(color: AppColors.gold.withValues(alpha: 0.5), width: 2)
               : null,
         ),
         child: Column(
@@ -802,8 +802,8 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                       height: 56,
                       decoration: BoxDecoration(
                         color: isEvToday
-                            ? AppColors.gold.withOpacity(0.15)
-                            : (isDark ? Colors.white.withOpacity(0.05) : AppColors.cream),
+                            ? AppColors.gold.withValues(alpha: 0.15)
+                            : (isDark ? Colors.white.withValues(alpha: 0.05) : AppColors.cream),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
@@ -827,8 +827,8 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                               fontWeight: FontWeight.w600,
                               color: isEvToday
                                   ? (isDark
-                                      ? AppColors.goldLight.withOpacity(0.7)
-                                      : AppColors.goldDark.withOpacity(0.7))
+                                      ? AppColors.goldLight.withValues(alpha: 0.7)
+                                      : AppColors.goldDark.withValues(alpha: 0.7))
                                   : (isDark ? Colors.white38 : AppColors.brown400),
                             ),
                           ),
@@ -871,7 +871,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: color.withOpacity(0.12),
+                                  color: color.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -888,7 +888,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: AppColors.gold.withOpacity(0.15),
+                                    color: AppColors.gold.withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: const Text(
@@ -973,7 +973,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.white.withOpacity(0.04) : AppColors.brown100.withOpacity(0.5),
+                        color: isDark ? Colors.white.withValues(alpha: 0.04) : AppColors.brown100.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Column(
@@ -1007,7 +1007,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.gold.withOpacity(isDark ? 0.08 : 0.05),
+                          color: AppColors.gold.withValues(alpha: isDark ? 0.08 : 0.05),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Column(
@@ -1050,7 +1050,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
       elevation: 2,
       shadowColor: Colors.black12,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: isDark ? Colors.white.withOpacity(0.08) : Colors.white,
+      color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -1060,7 +1060,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: isDark ? Colors.white.withOpacity(0.05) : AppColors.brown100,
+                color: isDark ? Colors.white.withValues(alpha: 0.05) : AppColors.brown100,
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
@@ -1073,7 +1073,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                     width: 150,
                     height: 14,
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withOpacity(0.05) : AppColors.brown100,
+                      color: isDark ? Colors.white.withValues(alpha: 0.05) : AppColors.brown100,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -1082,7 +1082,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                     width: 80,
                     height: 10,
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withOpacity(0.05) : AppColors.brown100,
+                      color: isDark ? Colors.white.withValues(alpha: 0.05) : AppColors.brown100,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -1091,7 +1091,7 @@ class _CosmicCalendarScreenState extends State<CosmicCalendarScreen> {
                     width: 100,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withOpacity(0.05) : AppColors.brown100,
+                      color: isDark ? Colors.white.withValues(alpha: 0.05) : AppColors.brown100,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),

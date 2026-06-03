@@ -5,7 +5,7 @@ import '../providers/app_state.dart';
 import '../widgets/custom_widgets.dart';
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({Key? key}) : super(key: key);
+  const OnboardingScreen({super.key});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -477,7 +477,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: _placeController.text,
+                initialValue: _placeController.text,
                 style: TextStyle(color: isDark ? Colors.white : AppColors.brown900),
                 dropdownColor: isDark ? AppColors.darkCard : Colors.white,
                 decoration: InputDecoration(
@@ -568,8 +568,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.gold.withOpacity(0.12)
-                            : (isDark ? Colors.white.withOpacity(0.03) : AppColors.cream.withOpacity(0.5)),
+                            ? AppColors.gold.withValues(alpha: 0.12)
+                            : (isDark ? Colors.white.withValues(alpha: 0.03) : AppColors.cream.withValues(alpha: 0.5)),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isSelected ? AppColors.gold : AppColors.brown100,
@@ -596,7 +596,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   ),
                 );
-              }).toList(),
+              }),
             ],
           ),
         );
@@ -626,7 +626,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            ..._questions.map((q) => _buildQuestionCard(q)).toList(),
+            ..._questions.map((q) => _buildQuestionCard(q)),
           ],
         );
 
@@ -643,8 +643,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: ChoiceChip(
         label: Text(label),
         selected: isSelected,
-        selectedColor: AppColors.gold.withOpacity(0.2),
-        backgroundColor: isDark ? Colors.white.withOpacity(0.04) : Colors.white,
+        selectedColor: AppColors.gold.withValues(alpha: 0.2),
+        backgroundColor: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white,
         side: BorderSide(
           color: isSelected ? AppColors.gold : AppColors.brown100,
           width: isSelected ? 1.5 : 1,
@@ -708,7 +708,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.gold
-                          : (isDark ? Colors.white.withOpacity(0.04) : Colors.white),
+                          : (isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white),
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: isSelected ? AppColors.gold : AppColors.brown100,

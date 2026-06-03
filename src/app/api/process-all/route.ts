@@ -376,7 +376,8 @@ export async function POST(request: NextRequest) {
         };
 
         const reportType = data.reportType ?? 'personality';
-        const generatedReport = data.freeOnly
+        const freeOnly = data.freeOnly ?? true; // Default to free-only preview for onboarding to prevent Vercel 10s timeout
+        const generatedReport = freeOnly
           ? await generateFreeReport(aiInput)
           : await generateReport(aiInput);
 
