@@ -309,7 +309,7 @@ export async function GET(request: NextRequest) {
 
     const catalog = PRODUCTS.map(product => {
       let isRecommended = false;
-      let reason = undefined;
+      let reason: string | undefined = undefined;
 
       if (isPersonalized) {
         // Check dosha alignment

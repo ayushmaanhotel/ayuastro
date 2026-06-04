@@ -7,7 +7,7 @@ import { db } from '@/lib/db';
 const gratitudeEntrySchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
   slot: z.enum(['morning', 'afternoon', 'evening'], {
-    errorMap: () => ({ message: 'Slot must be morning, afternoon, or evening' }),
+    message: 'Slot must be morning, afternoon, or evening',
   }),
   content: z.string().min(1, 'Content is required').max(500, 'Content must be 500 characters or less'),
 });

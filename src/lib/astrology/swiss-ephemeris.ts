@@ -53,6 +53,7 @@ export interface SwephInitResult {
 /** Cached sweph module reference */
 let swephModule: typeof import('sweph') | null = null;
 let initResult: SwephInitResult | null = null;
+type SwephConstants = typeof import('sweph')['constants'];
 
 /**
  * Lazily load and initialize the sweph native module.
@@ -69,10 +70,11 @@ export async function initSweph(): Promise<SwephInitResult> {
     // Use require() instead of dynamic import() for better compatibility
     // with Next.js server-side rendering
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    swephModule = require('sweph');
+    const loadedSweph = require('sweph') as typeof import('sweph');
+    swephModule = loadedSweph;
 
     // Test that the module actually works by calling a simple function
-    const { utc_to_jd, constants } = swephModule;
+    const { utc_to_jd, constants } = loadedSweph;
     const testResult = utc_to_jd(2000, 1, 1, 12, 0, 0, constants.SE_GREG_CAL);
     if (!testResult || !testResult.data) {
       throw new Error('sweph utc_to_jd returned unexpected result');
@@ -125,7 +127,7 @@ export function isSwephReady(): boolean {
 // ─── Planet ID Mapping ─────────────────────────────────────────────────────
 
 /** Map our planet names to Swiss Ephemeris planet IDs */
-function getSwephPlanetId(planet: Planet, constants: Record<string, number>): number {
+function getSwephPlanetId(planet: Planet, constants: SwephConstants): number {
   switch (planet) {
     case 'Sun':     return constants.SE_SUN;
     case 'Moon':    return constants.SE_MOON;
@@ -259,7 +261,7 @@ export function swephGetAyanamsa(jd_ut: number): number {
   set_sid_mode(constants.SE_SIDM_LAHIRI, 0, 0);
 
   // get_ayanamsa_ut returns the ayanamsa value - may be a number or {data: number}
-  const result = get_ayanamsa_ut(jd_ut, 0);
+  const result = get_ayanamsa_ut(jd_ut);
 
   if (result === undefined || result === null || (typeof result === 'number' && isNaN(result))) {
     throw new Error('sweph get_ayanamsa_ut failed');

@@ -604,20 +604,44 @@ class AppState extends ChangeNotifier {
   Future<Map<String, dynamic>?> httpGetProfile(String userId) async {
     try {
       final res = await ApiService.fetchUserProfile(userId);
-      if (res['success'] == true && res['preferences'] != null) {
-        final prefs = res['preferences'];
-        _ucpEnabled = prefs['ucpEnabled'] ?? false;
-        _ucpToken = prefs['ucpToken'];
-        if (prefs['language'] != null) {
-          _language = prefs['language'];
+      if (res['success'] == true) {
+        if (res['preferences'] != null) {
+          final prefs = res['preferences'];
+          _ucpEnabled = prefs['ucpEnabled'] ?? false;
+          _ucpToken = prefs['ucpToken'];
+          if (prefs['language'] != null) {
+            _language = prefs['language'];
+          }
+          if (prefs['vedicLevel'] != null) {
+            _vedicLevel = prefs['vedicLevel'];
+          }
+          _dailyHoroscopeNotif = prefs['dailyHoroscope'] ?? true;
+          _moodRemindersNotif = prefs['moodReminders'] ?? true;
         }
-        if (prefs['vedicLevel'] != null) {
-          _vedicLevel = prefs['vedicLevel'];
+
+        // Parse astrology, numerology, and traits if returned
+        if (res['astrology'] != null) {
+          _astrologyData = AstrologyInfo.fromJson(res['astrology']);
         }
-        _dailyHoroscopeNotif = prefs['dailyHoroscope'] ?? true;
-        _moodRemindersNotif = prefs['moodReminders'] ?? true;
+        if (res['numerology'] != null) {
+          _numerologyData = NumerologyInfo.fromJson(res['numerology']);
+        }
+        if (res['traits'] != null) {
+          final List<dynamic> list = res['traits'];
+          _traitScores = list.map((e) => TraitScore.fromJson(e)).toList();
+        }
+
         _saveState();
         notifyListeners();
+
+        // Fetch supplemental dashboard details if calculations exist
+        if (_astrologyData != null) {
+          fetchDailyHoroscope();
+          fetchTransits();
+          fetchMoodHistory();
+          fetchKundaliScore();
+          fetchVedicAnalysis();
+        }
       }
       return res;
     } catch (e) {

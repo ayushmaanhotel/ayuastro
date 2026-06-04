@@ -57,6 +57,8 @@ import DashaTimeline, { generateDashaPeriods, type DashaPeriod } from './DashaTi
 import PersonalityCards from './PersonalityCards';
 import KundaliScoreCard from './KundaliScoreCard';
 import DoshaDetailCard from './DoshaDetailCard';
+import { cosmicToast } from '@/lib/toast';
+
 const ZODIAC_ICONS: Record<string, string> = {
   Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍',
   Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
@@ -275,7 +277,7 @@ function getTopTraits(traits: TraitScore[], count: number = 3): TraitScore[] {
 function getArchetype(traits: TraitScore[]): string {
   if (traits.length === 0) return 'The Seeker';
   const top = getTopTraits(traits, 3);
-  const names = top.map((t) => (t.name || t.id || '').toLowerCase());
+  const names = top.map((t) => (t.name || '').toLowerCase());
   if (names.includes('empathy') && names.includes('trust')) return 'The Empathic Guardian';
   if (names.includes('empathy')) return 'The Deep Feeler';
   if (names.includes('resilience')) return 'The Resilient Anchor';

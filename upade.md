@@ -569,3 +569,39 @@ Integrated a local keyword-retrieval RAG engine and refined tone/jargon guidelin
 - **DeepSeek Environment Key Trimming**: Trimmed the API key lookup (`process.env.DEEPSEEK_API_KEY?.trim()`) in the backend completions connector (`deepseek.ts`) to self-heal and resolve authorization failures caused by trailing spaces or carriage returns (`\r\n`) in configuration files.
 - **Flutter Client Alignment**: Updated client-side onboarding (`api_service.dart`) to explicitly pass `'freeOnly': true` and configured file-level overrides (`// ignore_for_file: use_null_aware_elements`) to bypass legacy SDK constraints while preserving backward compatibility.
 
+---
+
+## 36. DeepSeek API Model Shift to Flash (2026-06-03)
+- **Model Change**: Updated the default model in `src/lib/ai/deepseek.ts` to `deepseek-v4-flash`.
+- **Hardcoded References**: Replaced hardcoded references to `deepseek-v4-pro` with `deepseek-v4-flash` in `src/lib/ai/report-generator.ts` (lines 459 and 646).
+- **Environment Configuration**: Added `DEEPSEEK_MODEL="deepseek-v4-flash"` in `.env`.
+
+---
+
+## 37. Web App TypeScript Compilation Fixes (2026-06-03)
+- **Null Reference Handlers**: Added optional chaining and default fallback values in astrology route handlers (`vedic-analysis`, `generate-pdf`, `astrologer`, `catalog`) to gracefully handle potentially null or undefined values.
+- **Framer Motion Easing Alignment**: Fixed Easing type mismatches in dashboard, personality, nakshatra, and zodiac deep dive views by using `as const` casts on transition easing configurations.
+- **Infinity Name Collision**: Renamed Lucide `Infinity` icon import to `InfinityIcon` in `ProfileView.tsx` to prevent collision with the global JS `Infinity` number value used in Framer Motion loops.
+- **Prisma & Zod Schema Validation**: Cleaned up duplicated object keys in timezone mapping, corrected error payload schemas inside gratitude and payment verification API route validators.
+- **Verification**: Verified that compilation resolves with zero errors in the active `src/` directory using `npx tsc --noEmit`.
+
+---
+
+## 38. Flutter App & Infrastructure Connection Verification (2026-06-03)
+- **Flutter App Health**: Run `flutter analyze` inside the `flutter_app/` directory and confirmed **No issues found!** meaning the app builds and functions without any compilation warnings.
+- **Vercel Connection**: Verified the local project is linked to `ayushmaanpremium/ayuastro-backend` (Project ID: `prj_5wzD9SZwNsvO7rwvPGZAQVRCV14w`) on Vercel.
+- **Vercel Domains**: Confirmed the custom domain alias `ayuastro.vercel.app` is active and correctly linked to the live production deployment.
+- **Git Integration**: Verified the Vercel project is linked to GitHub repository `ayushmaanhotel/ayuastro.git` on branch `main` for automatic CI/CD builds.
+- **Supabase Integration**: Validated Supabase database connection details (`db.maomqpepajpfulmrbayh.supabase.co`) and confirmed active read/write query capabilities using Prisma Client tests.
+
+---
+
+## 39. Deep Insights Report Sync & Database Fallback (2026-06-04)
+- **Profile calculations sync**: Updated `src/app/api/auth/profile/route.ts` to query and return complete astrology, numerology, and traits values from the database.
+- **Client state restoration**: Updated `httpGetProfile` in `lib/providers/app_state.dart` to parse these calculated objects on login/sync, restoring local state and triggering daily horoscope/transits fetches automatically.
+- **Report payload resilience**: Modified `/api/ai/deep-intelligence` validation schema and POST handler to accept nullish calculations data and fall back to querying the database directly using `userId`, preventing validation errors if client cache is incomplete or empty.
+- **Verification**: Verified that Next.js backend compiles cleanly, Flutter static analysis finds 0 issues, and all client-side unit/widget tests pass successfully.
+
+
+
+

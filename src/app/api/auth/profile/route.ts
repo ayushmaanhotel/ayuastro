@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
+import { TRAIT_METADATA } from '@/lib/scoring';
 
 // ─── Zod Schema ─────────────────────────────────────────────────────────────
 
@@ -30,13 +31,15 @@ export async function GET(request: NextRequest) {
 
     const { userId } = parsed.data;
 
-    // Fetch user with profile, preferences, and astrology data
+    // Fetch user with profile, preferences, and calculations data
     const user = await db.user.findUnique({
       where: { id: userId },
       include: {
         profile: true,
         preferences: true,
         astrology: true,
+        numerology: true,
+        traits: true,
       },
     });
 
@@ -79,6 +82,79 @@ export async function GET(request: NextRequest) {
         }
       : null;
 
+    // Parse full astrology calculations if available
+    let astrology: any = null;
+    if (user.astrology) {
+      try {
+        astrology = {
+          id: user.astrology.id,
+          userId: user.astrology.userId,
+          sunSign: user.astrology.sunSign,
+          moonSign: user.astrology.moonSign,
+          ascendant: user.astrology.ascendant,
+          planetaryPositions: JSON.parse(user.astrology.planetaryPositions),
+          houses: JSON.parse(user.astrology.houses),
+          nakshatra: JSON.parse(user.astrology.nakshatra),
+          dashaPeriods: JSON.parse(user.astrology.dashaPeriods),
+          yogas: JSON.parse(user.astrology.yogas),
+          doshas: JSON.parse(user.astrology.doshas),
+          createdAt: user.astrology.createdAt,
+          updatedAt: user.astrology.updatedAt,
+        };
+      } catch (e) {
+        console.error('Failed to parse astrology JSON:', e);
+      }
+    }
+
+    // Build numerology if available
+    const numerology = user.numerology
+      ? {
+          lifePathNumber: user.numerology.lifePathNumber,
+          destinyNumber: user.numerology.destinyNumber,
+          soulUrgeNumber: user.numerology.soulUrgeNumber,
+          personalityNumber: user.numerology.personalityNumber,
+          birthdayNumber: user.numerology.birthdayNumber,
+          descriptions: {
+            lifePath: user.numerology.lifePathDesc,
+            destiny: user.numerology.destinyDesc,
+            soulUrge: user.numerology.soulUrgeDesc,
+            personality: user.numerology.personalityDesc,
+          },
+        }
+      : null;
+
+    // Build traits list if available
+    const traitKeys = [
+      'emotionalIntensity',
+      'attachmentStyle',
+      'ambition',
+      'trust',
+      'communicationOpenness',
+      'impulsiveness',
+      'empathy',
+      'resilience',
+      'creativity',
+      'intuition',
+      'discipline',
+      'socialEnergy',
+      'patience',
+      'adaptability',
+    ] as const;
+
+    const traits = user.traits
+      ? traitKeys.map((key) => {
+          const metadata = TRAIT_METADATA[key];
+          return {
+            id: key,
+            label: metadata?.label ?? key,
+            description: metadata?.description ?? '',
+            score: user.traits![key],
+            lowLabel: metadata?.lowLabel ?? '',
+            highLabel: metadata?.highLabel ?? '',
+          };
+        })
+      : null;
+
     return NextResponse.json({
       success: true,
       user: {
@@ -95,6 +171,9 @@ export async function GET(request: NextRequest) {
       profile: user.profile,
       preferences,
       astrologySummary,
+      astrology,
+      numerology,
+      traits,
     });
   } catch (error) {
     console.error('[Profile API] Error:', error);

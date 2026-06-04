@@ -11,6 +11,16 @@ export const cosmicToast = {
       },
     });
   },
+  error: (message: string, description?: string) => {
+    toast.error(message, {
+      description,
+      style: {
+        background: 'var(--ayu-cream)',
+        border: '1px solid rgba(239, 68, 68, 0.2)',
+        color: '#b91c1c',
+      },
+    });
+  },
   info: (message: string, description?: string) => {
     toast.info(message, {
       description,

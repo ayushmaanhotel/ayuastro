@@ -44,7 +44,6 @@ const processAllSchema = z.object({
         'Asia/Mumbai': 5.5,
         'Asia/Delhi': 5.5,
         'Asia/Chennai': 5.5,
-        'Asia/Kolkata': 5.5,
       };
       return tzOffsets[v] ?? 5.5;
     }

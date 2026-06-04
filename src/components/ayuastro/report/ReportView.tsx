@@ -539,6 +539,17 @@ export default function ReportView() {
   // Generate personalized default sections
   const { freeSections: defaultFree, premiumSections: defaultPremium } = generatePersonalizedDefaults(astrologyData, numerologyData, traitScores);
 
+  // Sections logic — dynamic defaults
+  const freeSections = reportSections.filter((s) => s.insightLevel === 'free').length > 0
+    ? reportSections.filter((s) => s.insightLevel === 'free')
+    : defaultFree;
+  const premiumSections = reportSections.filter((s) => s.insightLevel === 'premium').length > 0
+    ? reportSections.filter((s) => s.insightLevel === 'premium')
+    : defaultPremium;
+  const allSections = [...freeSections, ...premiumSections];
+  const totalSections = allSections.length;
+  const hasDeepReport = reportSections.length >= 12;
+
   // Track scroll progress
   useEffect(() => {
     const handleScroll = () => {
@@ -641,17 +652,6 @@ export default function ReportView() {
   const toggleBookmark = (id: string) => {
     setBookmarkedSections(prev => ({ ...prev, [id]: !prev[id] }));
   };
-
-  // Sections logic — dynamic defaults
-  const freeSections = reportSections.filter((s) => s.insightLevel === 'free').length > 0
-    ? reportSections.filter((s) => s.insightLevel === 'free')
-    : defaultFree;
-  const premiumSections = reportSections.filter((s) => s.insightLevel === 'premium').length > 0
-    ? reportSections.filter((s) => s.insightLevel === 'premium')
-    : defaultPremium;
-  const allSections = [...freeSections, ...premiumSections];
-  const totalSections = allSections.length;
-  const hasDeepReport = reportSections.length >= 12;
 
   // Calculate reading time (180 words per min for detailed content)
   const totalWords = allSections.reduce((sum, s) => sum + s.content.split(/\s+/).length, 0);

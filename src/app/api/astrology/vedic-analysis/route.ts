@@ -1365,7 +1365,7 @@ export async function GET(request: NextRequest) {
         mahadashaEndDate: currentDasha.endDate.toISOString(),
         generalEffect: dashaInfo.generalEffect,
         areasAffected: dashaInfo.areasAffected,
-        interpretation: `You are currently in the ${currentDasha.planet} Mahadasha${currentAntardasha ? ` with ${currentAntardasha.planet} Antardasha` : ''}. ${dashaInfo.generalEffect}. ${antardashaInfo ? `The ${currentAntardasha.planet} sub-period adds a layer of ${antardashaInfo.generalEffect.toLowerCase()}.` : ''} This period affects: ${dashaInfo.areasAffected.join(', ')}.`,
+        interpretation: `You are currently in the ${currentDasha.planet} Mahadasha${currentAntardasha ? ` with ${currentAntardasha.planet} Antardasha` : ''}. ${dashaInfo.generalEffect}. ${antardashaInfo ? `The ${currentAntardasha?.planet} sub-period adds a layer of ${antardashaInfo.generalEffect.toLowerCase()}.` : ''} This period affects: ${dashaInfo.areasAffected.join(', ')}.`,
       };
     } else {
       dashaInterpretation = {

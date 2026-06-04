@@ -497,7 +497,8 @@ function isPlanetRetrogradeMeeus(
 function calculateAscendantMeeus(
   jd: number,
   latitude: number,
-  longitude: number
+  longitude: number,
+  ayanamsa = calculateLahiriAyanamsaMeeus(new Date((jd - 2440587.5) * 86400000))
 ): AscendantData {
   const T = julianCenturies(jd);
   let gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0)
@@ -513,7 +514,6 @@ function calculateAscendantMeeus(
   );
   let ascendantDeg = ascendantRad * 180 / Math.PI;
   ascendantDeg = normalizeLongitude(ascendantDeg);
-  const ayanamsa = calculateLahiriAyanamsaMeeus(new Date(jd.valueOf() - jd.valueOf() % 86400000 + 12 * 3600000));
   const siderealAscendant = normalizeLongitude(ascendantDeg - ayanamsa);
   const signIndex = longitudeToSignIndex(siderealAscendant);
   const degreeInSign = longitudeToDegreeInSign(siderealAscendant);
@@ -573,7 +573,7 @@ function calculateAllPlanetaryPositionsMeeus(
 } {
   const utcDate = new Date(date.getTime() - timezoneOffset * 3600000);
   const jd = dateToJulianDayMeeus(utcDate);
-  const ayanamsa = calculateLahiriAyanamsaMeeus(date);
+  const ayanamsa = calculateLahiriAyanamsaMeeus(utcDate);
 
   const sunTropical = calculateSunLongitudeMeeus(jd);
   const moonTropical = calculateMoonLongitudeMeeus(jd);
@@ -607,7 +607,7 @@ function calculateAllPlanetaryPositionsMeeus(
     );
   }
 
-  const ascendant = calculateAscendantMeeus(jd, latitude, longitude);
+  const ascendant = calculateAscendantMeeus(jd, latitude, longitude, ayanamsa);
   return { positions, ayanamsa, ascendant };
 }
 

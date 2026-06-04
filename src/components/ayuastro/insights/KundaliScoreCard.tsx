@@ -307,7 +307,7 @@ export default function KundaliScoreCard() {
     scoreData.breakdown.ascendantLord,
     scoreData.breakdown.nakshatraStrength,
     scoreData.breakdown.elementalBalance,
-  ].filter(Boolean);
+  ].filter((item): item is BreakdownItem => !!item);
 
   const hasVedicRemedies = scoreData.vedicRemedies && (
     scoreData.vedicRemedies.gemstones.length > 0 ||

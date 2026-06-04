@@ -6,7 +6,7 @@ const verifySchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
   transactionId: z.string().min(1, 'Transaction ID / UTR Number is required'),
   paymentMethod: z.enum(['upi', 'bank_transfer', 'other'], {
-    required_error: 'Payment method is required',
+    message: 'Payment method is required',
   }),
   screenshotUrl: z.string().optional(),
 });

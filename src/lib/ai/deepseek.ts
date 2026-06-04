@@ -2,7 +2,7 @@
 // AyuAstro - DeepSeek HTTP Client Wrapper
 // ============================================================================
 // Direct fetch-based OpenAI-compatible client wrapper targeting the DeepSeek API.
-// Avoids native library compilation and runtime SDK import conflicts.
+// This module must only be used from server-side code.
 // ============================================================================
 
 export interface DeepSeekMessage {
@@ -10,11 +10,14 @@ export interface DeepSeekMessage {
   content: string;
 }
 
+export type DeepSeekModel = 'deepseek-v4-flash' | 'deepseek-v4-pro';
+
 export interface DeepSeekCompletionOptions {
-  model?: string;
+  model?: DeepSeekModel;
   messages: DeepSeekMessage[];
   temperature?: number;
   max_tokens?: number;
+  reasoning_effort?: 'high' | 'max';
   thinking?: {
     type: 'enabled' | 'disabled';
   };
@@ -27,7 +30,8 @@ export interface DeepSeekChoice {
   index: number;
   message: {
     role: 'assistant';
-    content: string;
+    content: string | null;
+    reasoning_content?: string | null;
   };
   finish_reason: string;
 }
@@ -45,34 +49,84 @@ export interface DeepSeekCompletionResponse {
   };
 }
 
+export interface DeepSeekConfigStatus {
+  configured: boolean;
+  baseURL: string;
+  defaultModel: DeepSeekModel;
+  hasApiKey: boolean;
+  error?: string;
+}
+
+const DEFAULT_BASE_URL = 'https://api.deepseek.com';
+const DEFAULT_TIMEOUT_MS = 120000;
+
+function normalizeBaseURL(value?: string): string {
+  return (value?.trim() || DEFAULT_BASE_URL).replace(/\/+$/, '');
+}
+
+function normalizeApiKey(value?: string): string {
+  const trimmed = value?.trim() ?? '';
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
+function getDefaultModel(thinkingEnabled: boolean): DeepSeekModel {
+  const configured = process.env.DEEPSEEK_MODEL?.trim();
+  if (configured === 'deepseek-v4-flash' || configured === 'deepseek-v4-pro') {
+    return configured;
+  }
+  return 'deepseek-v4-flash';
+}
+
+export function getDeepSeekConfigStatus(): DeepSeekConfigStatus {
+  const apiKey = normalizeApiKey(process.env.DEEPSEEK_API_KEY);
+  const baseURL = normalizeBaseURL(process.env.DEEPSEEK_BASE_URL);
+  const defaultModel = getDefaultModel(true);
+
+  return {
+    configured: Boolean(apiKey),
+    baseURL,
+    defaultModel,
+    hasApiKey: Boolean(apiKey),
+    error: apiKey ? undefined : 'DEEPSEEK_API_KEY is missing or empty.',
+  };
+}
+
 /**
  * Executes a chat completion request to the DeepSeek API.
  */
 export async function createDeepSeekCompletion(
   options: DeepSeekCompletionOptions
 ): Promise<DeepSeekCompletionResponse> {
-  const apiKey = process.env.DEEPSEEK_API_KEY?.trim();
+  const apiKey = normalizeApiKey(process.env.DEEPSEEK_API_KEY);
   if (!apiKey) {
     throw new Error('DEEPSEEK_API_KEY is not defined or is empty in the environment variables.');
   }
 
-  // Map to deepseek-v4-flash
-  const model = 'deepseek-v4-flash';
+  const thinkingEnabled = options.thinking?.type !== 'disabled';
+  const model = options.model ?? getDefaultModel(thinkingEnabled);
+  const baseURL = normalizeBaseURL(process.env.DEEPSEEK_BASE_URL);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
 
-  // Construct request body
-  const body: any = {
+  const body: Record<string, unknown> = {
     model,
     messages: options.messages,
+    stream: false,
   };
 
-  // Map the thinking configuration to the body structure expected by DeepSeek V4 Flash API
   if (options.thinking) {
     body.thinking = options.thinking;
   }
 
-  // Only include temperature if thinking is disabled, as thinking mode does not support temperature customization
-  const isThinking = options.thinking?.type === 'enabled';
-  if (!isThinking && options.temperature !== undefined) {
+  if (thinkingEnabled) {
+    body.reasoning_effort = options.reasoning_effort ?? 'high';
+  } else if (options.temperature !== undefined) {
     body.temperature = options.temperature;
   }
 
@@ -85,13 +139,14 @@ export async function createDeepSeekCompletion(
   }
 
   try {
-    const res = await fetch('https://api.deepseek.com/chat/completions', {
+    const res = await fetch(`${baseURL}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(body),
+      signal: controller.signal,
     });
 
     if (!res.ok) {
@@ -100,11 +155,15 @@ export async function createDeepSeekCompletion(
       throw new Error(`DeepSeek API request failed with status ${res.status}: ${errorText}`);
     }
 
-    const data = await res.json();
-    return data as DeepSeekCompletionResponse;
+    return (await res.json()) as DeepSeekCompletionResponse;
   } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error(`DeepSeek API request timed out after ${DEFAULT_TIMEOUT_MS / 1000}s.`);
+    }
     console.error('[DeepSeek Client] Execution error:', error);
     throw error;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 

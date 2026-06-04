@@ -921,7 +921,7 @@ export default function YogaDoshaView() {
                             <span className="text-xs font-bold text-brown-800 dark:text-brown-400">{idx + 1}.</span>
                             <span className="text-sm font-medium text-brown-800 dark:text-brown-400">{sb.planet}</span>
                             <span className="text-[10px] text-brown-400 dark:text-brown-500">{sb.sign}</span>
-                            {sb.isRetrograde && <span className="text-[9px] px-1 rounded bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">℞</span>}
+                            {astrologyData?.planetaryPositions?.[sb.planet]?.retrograde && <span className="text-[9px] px-1 rounded bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">℞</span>}
                           </div>
                           <div className="flex items-center gap-1.5">
                             <span className="text-[10px] text-brown-400 dark:text-brown-500">{sb.totalStrength}/8</span>

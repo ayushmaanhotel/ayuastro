@@ -230,29 +230,29 @@ function calculatePlanetStrength(
     let dignity = 'neutral';
 
     // ── Sthana Bala (Positional Strength) ──
-    if (isExalted(planet as keyof typeof EXALTATION & string, pos.sign)) {
+    if (isExalted(planet as any, pos.sign as any)) {
       points = 10;
       dignity = 'exalted';
       details.push(`${planet} is exalted in ${pos.sign} — Uccha, very strong (Sthana Bala)`);
-    } else if (isInOwnSign(planet as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn', pos.sign)) {
+    } else if (isInOwnSign(planet as any, pos.sign as any)) {
       points = 9;
       dignity = 'own sign';
       details.push(`${planet} is in Swakshetra ${pos.sign} — strong (Sthana Bala)`);
-    } else if (isInMoolatrikona(planet as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn', pos.sign)) {
+    } else if (isInMoolatrikona(planet as any, pos.sign as any)) {
       points = 8.5;
       dignity = 'moolatrikona';
       details.push(`${planet} is in Moolatrikona (${pos.sign}) — good strength (Sthana Bala)`);
-    } else if (isDebilitated(planet as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn', pos.sign)) {
+    } else if (isDebilitated(planet as any, pos.sign as any)) {
       points = 1.5;
       dignity = 'debilitated';
       details.push(`${planet} is Neecha (debilitated) in ${pos.sign} — weak (Sthana Bala)`);
     } else {
       // Check dignity based on relationship with sign lord
       try {
-        const signLord = getSignLord(pos.sign as 'Aries' | 'Taurus' | 'Gemini' | 'Cancer' | 'Leo' | 'Virgo' | 'Libra' | 'Scorpio' | 'Sagittarius' | 'Capricorn' | 'Aquarius' | 'Pisces');
+        const signLord = getSignLord(pos.sign as any);
         const relationship = getPermanentRelationship(
-          planet as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn' | 'Rahu' | 'Ketu',
-          signLord as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn' | 'Rahu' | 'Ketu'
+          planet as any,
+          signLord as any
         );
 
         switch (relationship) {
@@ -304,7 +304,7 @@ function calculatePlanetStrength(
 
     // ── Degree-Based Strength — Sthana Bala component ──
     // Only apply for planets in their exaltation sign
-    if (isExalted(planet as keyof typeof EXALTATION & string, pos.sign)) {
+    if (isExalted(planet as any, pos.sign as any)) {
       const degreeStrength = getDegreeBasedStrength(planet, pos.degree);
       if (degreeStrength.bonus > 0) {
         points += degreeStrength.bonus;
@@ -523,25 +523,25 @@ function calculateBhavaStrength(
     }
 
     // ── Dignity of the house lord ──
-    if (isExalted(houseLord, lordPos.sign)) {
+    if (isExalted(houseLord as any, lordPos.sign as any)) {
       houseScore = 92;
       details.push(`${house.num}${getOrdinal(house.num)} house (${house.name}) lord ${houseLord} is Uccha (exalted) — very strong Bhava`);
-    } else if (isInOwnSign(houseLord as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn', lordPos.sign)) {
+    } else if (isInOwnSign(houseLord as any, lordPos.sign as any)) {
       houseScore = 85;
       details.push(`${house.num}${getOrdinal(house.num)} house (${house.name}) lord ${houseLord} in Swakshetra (own sign) — strong Bhava`);
-    } else if (isInMoolatrikona(houseLord as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn', lordPos.sign)) {
+    } else if (isInMoolatrikona(houseLord as any, lordPos.sign as any)) {
       houseScore = 80;
       details.push(`${house.num}${getOrdinal(house.num)} house (${house.name}) lord ${houseLord} in Moolatrikona — good Bhava strength`);
-    } else if (isDebilitated(houseLord as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn', lordPos.sign)) {
+    } else if (isDebilitated(houseLord as any, lordPos.sign as any)) {
       houseScore = 20;
       details.push(`${house.num}${getOrdinal(house.num)} house (${house.name}) lord ${houseLord} is Neecha (debilitated) — weak Bhava`);
     } else {
       // Check relationship
       try {
-        const signLord = getSignLord(lordPos.sign as 'Aries' | 'Taurus' | 'Gemini' | 'Cancer' | 'Leo' | 'Virgo' | 'Libra' | 'Scorpio' | 'Sagittarius' | 'Capricorn' | 'Aquarius' | 'Pisces');
+        const signLord = getSignLord(lordPos.sign as any);
         const relationship = getPermanentRelationship(
-          houseLord as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn' | 'Rahu' | 'Ketu',
-          signLord as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn' | 'Rahu' | 'Ketu'
+          houseLord as any,
+          signLord as any
         );
 
         switch (relationship) {
@@ -626,31 +626,31 @@ function calculateAscendantLordStrength(
   const details: string[] = [];
 
   // Exalted
-  if (isExalted(lord, lordPos.sign)) {
+  if (isExalted(lord as any, lordPos.sign as any)) {
     score = 95;
     details.push('Uccha (exalted) — extremely powerful Lagna lord');
   }
   // Own sign
-  else if (isInOwnSign(lord, lordPos.sign)) {
+  else if (isInOwnSign(lord as any, lordPos.sign as any)) {
     score = 88;
     details.push('Swakshetra (own sign) — very strong Lagna lord');
   }
   // Moolatrikona
-  else if (isInMoolatrikona(lord, lordPos.sign)) {
+  else if (isInMoolatrikona(lord as any, lordPos.sign as any)) {
     score = 85;
     details.push('Moolatrikona — strong Lagna lord');
   }
   // Debilitated
-  else if (isDebilitated(lord, lordPos.sign)) {
+  else if (isDebilitated(lord as any, lordPos.sign as any)) {
     score = 20;
     details.push('Neecha (debilitated) — this is a genuine challenge for the Lagna lord');
   } else {
     // Check relationship with sign lord
     try {
-      const signLord = getSignLord(lordPos.sign as 'Aries' | 'Taurus' | 'Gemini' | 'Cancer' | 'Leo' | 'Virgo' | 'Libra' | 'Scorpio' | 'Sagittarius' | 'Capricorn' | 'Aquarius' | 'Pisces');
+      const signLord = getSignLord(lordPos.sign as any);
       const relationship = getPermanentRelationship(
-        lord as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn' | 'Rahu' | 'Ketu',
-        signLord as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn' | 'Rahu' | 'Ketu'
+        lord as any,
+        signLord as any
       );
 
       switch (relationship) {
@@ -813,13 +813,13 @@ function calculateNakshatraStrength(
   // Check if the nakshatra lord is well-placed
   if (lord && positions[lord]) {
     const lordPos = positions[lord];
-    if (isExalted(lord as keyof typeof EXALTATION & string, lordPos.sign)) {
+    if (isExalted(lord as any, lordPos.sign as any)) {
       score += 10;
       details.push(`Nakshatra lord ${lord} is Uccha (exalted) — strengthens your emotional foundation`);
-    } else if (isInOwnSign(lord as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn', lordPos.sign)) {
+    } else if (isInOwnSign(lord as any, lordPos.sign as any)) {
       score += 7;
       details.push(`Nakshatra lord ${lord} is in Swakshetra — stable emotional base`);
-    } else if (isDebilitated(lord as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn', lordPos.sign)) {
+    } else if (isDebilitated(lord as any, lordPos.sign as any)) {
       score -= 10;
       details.push(`Nakshatra lord ${lord} is Neecha (debilitated) — emotional challenges are amplified`);
     }
@@ -1050,7 +1050,7 @@ function generateVedicRemedies(
     if (!pos) continue;
 
     // Check if debilitated
-    if (isDebilitated(planet as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn', pos.sign)) {
+    if (isDebilitated(planet as any, pos.sign as any)) {
       weakPlanets.push(planet);
       continue;
     }
@@ -1063,10 +1063,10 @@ function generateVedicRemedies(
 
     // Check if in enemy sign with low house placement
     try {
-      const signLord = getSignLord(pos.sign as 'Aries' | 'Taurus' | 'Gemini' | 'Cancer' | 'Leo' | 'Virgo' | 'Libra' | 'Scorpio' | 'Sagittarius' | 'Capricorn' | 'Aquarius' | 'Pisces');
+      const signLord = getSignLord(pos.sign as any);
       const relationship = getPermanentRelationship(
-        planet as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn' | 'Rahu' | 'Ketu',
-        signLord as 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn' | 'Rahu' | 'Ketu'
+        planet as any,
+        signLord as any
       );
       if ((relationship === 'Enemy' || relationship === 'Great Enemy') && [6, 8, 12].includes(pos.house)) {
         weakPlanets.push(planet);

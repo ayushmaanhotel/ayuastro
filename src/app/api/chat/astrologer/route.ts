@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build messages array
-    const systemPrompt = buildSystemPrompt(context, astrologerSystemPrompt);
+    const systemPrompt = buildSystemPrompt(context, astrologerSystemPrompt ?? undefined);
     const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
       { role: 'system', content: systemPrompt },
     ];

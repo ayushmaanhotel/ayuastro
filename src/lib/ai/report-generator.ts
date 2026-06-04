@@ -462,6 +462,7 @@ export async function generateReport(
         { role: 'user', content: userPrompt },
       ],
       thinking: { type: 'enabled' },
+      reasoning_effort: 'high',
       response_format: { type: 'json_object' },
     });
 
@@ -648,6 +649,7 @@ export async function generateDeepIntelligenceReport(
           { role: 'user', content: userPrompt },
         ],
         thinking: { type: 'enabled' },
+        reasoning_effort: 'high',
         response_format: { type: 'json_object' },
       });
 

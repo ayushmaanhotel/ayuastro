@@ -546,8 +546,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse astrology data
-    let astrology = null;
+    interface AstrologyPDFData {
+      sunSign: string;
+      moonSign: string;
+      ascendant: string;
+      nakshatra: string;
+      currentDasha: string;
+      yogas: string[];
+      doshas: string[];
+    }
+    let astrology: AstrologyPDFData | null = null;
     if (user.astrology) {
       let yogas: string[] = [];
       let doshas: string[] = [];
@@ -575,9 +583,9 @@ export async function POST(request: NextRequest) {
       }
 
       astrology = {
-        sunSign: user.astrology.sunSign,
-        moonSign: user.astrology.moonSign,
-        ascendant: user.astrology.ascendant,
+        sunSign: user.astrology.sunSign || 'Unknown',
+        moonSign: user.astrology.moonSign || 'Unknown',
+        ascendant: user.astrology.ascendant || 'Unknown',
         nakshatra,
         currentDasha,
         yogas,
@@ -585,14 +593,22 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // Parse numerology data
-    let numerology = null;
+    interface NumerologyPDFData {
+      lifePathNumber: number;
+      destinyNumber: number;
+      soulUrgeNumber: number;
+      personalityNumber: number;
+      lifePathDesc: string;
+      destinyDesc: string;
+      soulUrgeDesc: string;
+    }
+    let numerology: NumerologyPDFData | null = null;
     if (user.numerology) {
       numerology = {
-        lifePathNumber: user.numerology.lifePathNumber,
-        destinyNumber: user.numerology.destinyNumber,
-        soulUrgeNumber: user.numerology.soulUrgeNumber,
-        personalityNumber: user.numerology.personalityNumber,
+        lifePathNumber: user.numerology.lifePathNumber ?? 0,
+        destinyNumber: user.numerology.destinyNumber ?? 0,
+        soulUrgeNumber: user.numerology.soulUrgeNumber ?? 0,
+        personalityNumber: user.numerology.personalityNumber ?? 0,
         lifePathDesc: user.numerology.lifePathDesc || '',
         destinyDesc: user.numerology.destinyDesc || '',
         soulUrgeDesc: user.numerology.soulUrgeDesc || '',
@@ -785,7 +801,7 @@ export async function POST(request: NextRequest) {
     });
 
     const slug = (user.name || 'seeker').toLowerCase().replace(/[^a-z0-9]/g, '_');
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as any, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

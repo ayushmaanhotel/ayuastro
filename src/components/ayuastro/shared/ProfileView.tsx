@@ -28,7 +28,7 @@ import {
   FileText,
   Lock,
   BookHeart,
-  Infinity,
+  Infinity as InfinityIcon,
   Wind,
   Share2,
   HelpCircle,
@@ -1411,7 +1411,7 @@ export default function ProfileView() {
               <div className="h-1 bg-gradient-to-r from-gold via-gold-light to-gold-dark" />
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
-                  <Infinity className="size-5 text-gold" />
+                  <InfinityIcon className="size-5 text-gold" />
                   Cosmic Age
                 </CardTitle>
               </CardHeader>

@@ -134,36 +134,6 @@ function getMoodPatternInsight(entries: MoodEntryData[]): string {
 // ─── Confetti Effect Component ──────────────────────────────────────────────
 function ConfettiEffect({ active }: { active: boolean }) {
   if (!active) return null;
-  const particles = Array.from({ length: 6 }, (_, i) => ({
-    id: i,
-    left: `${30 + (i * 8)}%`,
-    delay: `${i * 0.05}s`,
-    size: 4 + (i % 3) * 2,
-  }));
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="confetti-particle animate-confetti"
-          style={{
-            left: p.left,
-            bottom: '40%',
-            width: p.size,
-            height: p.size,
-            backgroundColor: i % 2 === 0 ? '#D4AF37' : '#F0C14B',
-            animationDelay: p.delay,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-// We need `i` in the map above but it's inside a component. Let me fix.
-// Actually, the particles array uses index already via (i * 8), so this is fine.
-// But `i` is not defined inside the map — let me fix.
-function ConfettiEffectFixed({ active }: { active: boolean }) {
-  if (!active) return null;
   const particles = [
     { id: 0, left: '30%', delay: '0s', size: 6 },
     { id: 1, left: '38%', delay: '0.05s', size: 4 },
@@ -359,7 +329,7 @@ export default function MoodTrackerView() {
         {/* ─── Section 1: Today's Check-in ─────────────────────────── */}
         <motion.div {...fadeInUp} transition={{ duration: 0.4, delay: 0.05 }}>
           <Card className="border-0 shadow-sm bg-white dark:bg-white/[0.08] relative overflow-hidden">
-            <ConfettiEffectFixed active={showConfetti} />
+            <ConfettiEffect active={showConfetti} />
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-brown-900 dark:text-brown-600">
                 <Heart className="size-5 text-gold" />

@@ -20,20 +20,20 @@ import type { AIReportInput, TraitScores, PlanetaryPosition } from '@/lib/ai';
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
 const traitScoresSchema = z.object({
-  emotionalIntensity: z.number().min(0).max(100),
-  attachmentStyle: z.number().min(0).max(100),
-  ambition: z.number().min(0).max(100),
-  trust: z.number().min(0).max(100),
-  communicationOpenness: z.number().min(0).max(100),
-  impulsiveness: z.number().min(0).max(100),
-  empathy: z.number().min(0).max(100),
-  resilience: z.number().min(0).max(100),
-  creativity: z.number().min(0).max(100),
-  intuition: z.number().min(0).max(100),
-  discipline: z.number().min(0).max(100),
-  socialEnergy: z.number().min(0).max(100),
-  patience: z.number().min(0).max(100),
-  adaptability: z.number().min(0).max(100),
+  emotionalIntensity: z.number().min(0).max(100).nullish(),
+  attachmentStyle: z.number().min(0).max(100).nullish(),
+  ambition: z.number().min(0).max(100).nullish(),
+  trust: z.number().min(0).max(100).nullish(),
+  communicationOpenness: z.number().min(0).max(100).nullish(),
+  impulsiveness: z.number().min(0).max(100).nullish(),
+  empathy: z.number().min(0).max(100).nullish(),
+  resilience: z.number().min(0).max(100).nullish(),
+  creativity: z.number().min(0).max(100).nullish(),
+  intuition: z.number().min(0).max(100).nullish(),
+  discipline: z.number().min(0).max(100).nullish(),
+  socialEnergy: z.number().min(0).max(100).nullish(),
+  patience: z.number().min(0).max(100).nullish(),
+  adaptability: z.number().min(0).max(100).nullish(),
 });
 
 const planetaryPositionSchema = z.object({
@@ -57,13 +57,13 @@ const deepIntelligenceSchema = z.object({
     yogas: z.array(z.string()).nullish(),
     doshas: z.array(z.string()).nullish(),
     planetaryPositions: z.record(z.string(), planetaryPositionSchema).nullish(),
-  }),
+  }).nullish(),
   numerologyData: z.object({
     lifePathNumber: z.number().int(),
     destinyNumber: z.number().int(),
     soulUrgeNumber: z.number().int(),
-  }),
-  traitScores: traitScoresSchema,
+  }).nullish(),
+  traitScores: traitScoresSchema.nullish(),
   temperature: z.number().min(0).max(1).nullish(),
   language: z.enum(['en', 'hi', 'hinglish']).nullish(),
 });
@@ -88,8 +88,16 @@ export async function POST(request: NextRequest) {
 
     const { userId, astrologyData, numerologyData, traitScores, temperature } = parsed.data;
 
-    // Verify user exists
-    const user = await db.user.findUnique({ where: { id: userId } });
+    // Verify user exists and fetch calculations
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      include: {
+        astrology: true,
+        numerology: true,
+        traits: true,
+      },
+    });
+
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'User not found' },
@@ -97,20 +105,167 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Resolve astrologyData (merge client payload with DB calculations if needed)
+    let finalAstrologyData = astrologyData;
+    if (!finalAstrologyData) {
+      if (!user.astrology) {
+        return NextResponse.json(
+          { success: false, error: 'Astrology calculations not found in database. Complete onboarding first.' },
+          { status: 400 }
+        );
+      }
+
+      let parsedYogas: string[] = [];
+      try {
+        const rawYogas = JSON.parse(user.astrology.yogas);
+        if (Array.isArray(rawYogas)) {
+          parsedYogas = rawYogas
+            .map((y: any) => (typeof y === 'string' ? y : y?.name || ''))
+            .filter(Boolean);
+        }
+      } catch (e) {
+        console.error('Failed to parse yogas:', e);
+      }
+
+      let parsedDoshas: string[] = [];
+      try {
+        const rawDoshas = JSON.parse(user.astrology.doshas);
+        if (Array.isArray(rawDoshas)) {
+          parsedDoshas = rawDoshas
+            .map((d: any) => (typeof d === 'string' ? d : d?.name || ''))
+            .filter(Boolean);
+        }
+      } catch (e) {
+        console.error('Failed to parse doshas:', e);
+      }
+
+      let nakshatraStr = '';
+      try {
+        const rawNak = JSON.parse(user.astrology.nakshatra);
+        nakshatraStr = typeof rawNak === 'string' ? rawNak : rawNak?.name || '';
+      } catch (e) {
+        console.error('Failed to parse nakshatra:', e);
+      }
+
+      let dashaStr = '';
+      try {
+        const rawDasha = JSON.parse(user.astrology.dashaPeriods);
+        if (rawDasha && rawDasha.currentMahadasha) {
+          dashaStr = `${rawDasha.currentMahadasha.planet} (Mahadasha)`;
+          if (rawDasha.currentAntardasha) {
+            dashaStr += ` / ${rawDasha.currentAntardasha.planet} (Antardasha)`;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse dashaPeriods:', e);
+      }
+
+      let planetaryPos: Record<string, PlanetaryPosition> | undefined;
+      try {
+        if (user.astrology.planetaryPositions) {
+          planetaryPos = JSON.parse(user.astrology.planetaryPositions);
+        }
+      } catch (e) {
+        console.error('Failed to parse planetaryPositions:', e);
+      }
+
+      finalAstrologyData = {
+        sunSign: user.astrology.sunSign,
+        moonSign: user.astrology.moonSign,
+        ascendant: user.astrology.ascendant,
+        nakshatra: nakshatraStr,
+        currentDasha: dashaStr,
+        yogas: parsedYogas,
+        doshas: parsedDoshas,
+        planetaryPositions: planetaryPos,
+      };
+    }
+
+    // Resolve numerologyData
+    let finalNumerologyData = numerologyData;
+    if (!finalNumerologyData) {
+      if (!user.numerology) {
+        return NextResponse.json(
+          { success: false, error: 'Numerology calculations not found in database. Complete onboarding first.' },
+          { status: 400 }
+        );
+      }
+      finalNumerologyData = {
+        lifePathNumber: user.numerology.lifePathNumber,
+        destinyNumber: user.numerology.destinyNumber,
+        soulUrgeNumber: user.numerology.soulUrgeNumber,
+      };
+    }
+
+    // Resolve traitScores (merge database scores with any provided scores)
+    let finalTraitScores: Record<string, number> = {};
+    if (user.traits) {
+      finalTraitScores = {
+        emotionalIntensity: user.traits.emotionalIntensity,
+        attachmentStyle: user.traits.attachmentStyle,
+        ambition: user.traits.ambition,
+        trust: user.traits.trust,
+        communicationOpenness: user.traits.communicationOpenness,
+        impulsiveness: user.traits.impulsiveness,
+        empathy: user.traits.empathy,
+        resilience: user.traits.resilience,
+        creativity: user.traits.creativity,
+        intuition: user.traits.intuition,
+        discipline: user.traits.discipline,
+        socialEnergy: user.traits.socialEnergy,
+        patience: user.traits.patience,
+        adaptability: user.traits.adaptability,
+      };
+    }
+
+    if (traitScores) {
+      for (const [key, val] of Object.entries(traitScores)) {
+        if (val !== undefined && val !== null) {
+          finalTraitScores[key] = val;
+        }
+      }
+    }
+
+    // Check if we have all required traits
+    const traitKeys = [
+      'emotionalIntensity',
+      'attachmentStyle',
+      'ambition',
+      'trust',
+      'communicationOpenness',
+      'impulsiveness',
+      'empathy',
+      'resilience',
+      'creativity',
+      'intuition',
+      'discipline',
+      'socialEnergy',
+      'patience',
+      'adaptability',
+    ];
+    for (const key of traitKeys) {
+      if (finalTraitScores[key] === undefined) {
+        return NextResponse.json(
+          { success: false, error: `Missing trait score for: ${key}. Please complete onboarding first.` },
+          { status: 400 }
+        );
+      }
+    }
+
     // Build AI report input
     const aiInput: AIReportInput = {
-      sunSign: astrologyData.sunSign,
-      moonSign: astrologyData.moonSign,
-      ascendant: astrologyData.ascendant,
-      nakshatra: astrologyData.nakshatra ?? '',
-      currentDasha: astrologyData.currentDasha ?? '',
-      yogas: astrologyData.yogas ?? [],
-      doshas: astrologyData.doshas ?? [],
-      planetaryPositions: astrologyData.planetaryPositions as Record<string, PlanetaryPosition> | undefined,
-      lifePathNumber: numerologyData.lifePathNumber,
-      destinyNumber: numerologyData.destinyNumber,
-      soulUrgeNumber: numerologyData.soulUrgeNumber,
-      traits: traitScores as TraitScores,
+      sunSign: finalAstrologyData.sunSign,
+      moonSign: finalAstrologyData.moonSign,
+      ascendant: finalAstrologyData.ascendant,
+      nakshatra: finalAstrologyData.nakshatra ?? '',
+      currentDasha: finalAstrologyData.currentDasha ?? '',
+      yogas: finalAstrologyData.yogas ?? [],
+      doshas: finalAstrologyData.doshas ?? [],
+      planetaryPositions: finalAstrologyData.planetaryPositions as Record<string, PlanetaryPosition> | undefined,
+      lifePathNumber: finalNumerologyData.lifePathNumber,
+      destinyNumber: finalNumerologyData.destinyNumber,
+      soulUrgeNumber: finalNumerologyData.soulUrgeNumber,
+      traits: finalTraitScores as unknown as TraitScores,
     };
 
     // Generate the deep intelligence report (batched, with progress)
