@@ -16,6 +16,8 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { generateDeepIntelligenceReport } from '@/lib/ai';
 import type { AIReportInput, TraitScores, PlanetaryPosition } from '@/lib/ai';
+import { requireApiUser } from '@/lib/api-auth';
+import { hasPremiumEntitlement } from '@/lib/entitlements';
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
@@ -47,7 +49,7 @@ const planetaryPositionSchema = z.object({
 });
 
 const deepIntelligenceSchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1, 'User ID is required').optional(),
   astrologyData: z.object({
     sunSign: z.string(),
     moonSign: z.string(),
@@ -86,7 +88,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { userId, astrologyData, numerologyData, traitScores, temperature } = parsed.data;
+    const { userId: claimedUserId, astrologyData, numerologyData, traitScores, temperature } = parsed.data;
+    const auth = await requireApiUser(request, claimedUserId);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
 
     // Verify user exists and fetch calculations
     const user = await db.user.findUnique({
@@ -102,6 +107,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'User not found' },
         { status: 404 }
+      );
+    }
+
+    const hasPaid = await hasPremiumEntitlement(userId);
+    if (!hasPaid) {
+      return NextResponse.json(
+        { success: false, error: 'Payment required to generate deep intelligence report' },
+        { status: 402 }
       );
     }
 

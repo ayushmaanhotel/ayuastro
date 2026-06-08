@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
@@ -7,6 +8,8 @@ import '../services/api_service.dart';
 class AppState extends ChangeNotifier {
   // Persistence Key
   static const String _storageKey = 'ayuastro_pref_storage';
+  static const String _accessTokenKey = 'ayuastro_supabase_access_token';
+  static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   // Navigation state
   String _currentView = 'landing';
@@ -16,6 +19,7 @@ class AppState extends ChangeNotifier {
 
   // User state
   String? _userId;
+  String? _accessToken;
   bool _isOnboarded = false;
   String? _userEmail;
   String? _userName;
@@ -91,6 +95,7 @@ class AppState extends ChangeNotifier {
   String get activeTab => _activeTab;
   String get onboardingStep => _onboardingStep;
   String? get userId => _userId;
+  String? get accessToken => _accessToken;
   bool get isOnboarded => _isOnboarded;
   String? get userEmail => _userEmail;
   String? get userName => _userName;
@@ -163,6 +168,9 @@ class AppState extends ChangeNotifier {
   Future<void> _loadState() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      _accessToken = await _secureStorage.read(key: _accessTokenKey);
+      ApiService.setAuthToken(_accessToken);
+
       final dataStr = prefs.getString(_storageKey);
       if (dataStr != null) {
         final Map<String, dynamic> data = jsonDecode(dataStr);
@@ -305,6 +313,21 @@ class AppState extends ChangeNotifier {
     } catch (e) {
       debugPrint("Error saving persistent state: $e");
     }
+  }
+
+  Future<void> _storeSessionFromResponse(Map<String, dynamic> response) async {
+    final session = response['session'];
+    final accessToken = session is Map<String, dynamic> ? session['accessToken'] as String? : null;
+
+    _accessToken = accessToken;
+    ApiService.setAuthToken(accessToken);
+
+    if (accessToken == null || accessToken.isEmpty) {
+      await _secureStorage.delete(key: _accessTokenKey);
+      return;
+    }
+
+    await _secureStorage.write(key: _accessTokenKey, value: accessToken);
   }
 
   // View control
@@ -477,6 +500,7 @@ class AppState extends ChangeNotifier {
     try {
       final res = await ApiService.signUp(name: name, email: email, password: password);
       if (res['success'] == true) {
+        await _storeSessionFromResponse(res);
         _userId = res['userId'];
         _userName = res['name'] ?? name;
         _userEmail = res['email'] ?? email;
@@ -524,6 +548,7 @@ class AppState extends ChangeNotifier {
     try {
       final res = await ApiService.signIn(email: email, password: password);
       if (res['success'] == true) {
+        await _storeSessionFromResponse(res);
         _userId = res['userId'];
         _userName = res['name'];
         _userEmail = res['email'];
@@ -939,6 +964,7 @@ class AppState extends ChangeNotifier {
       final result = await ApiService.sendAstrologerChatMessage(
         message: messageText,
         sessionId: sessionId,
+        userId: _userId,
         context: context,
         conversationHistory: history,
         astrologerId: astrologerId,
@@ -1223,6 +1249,7 @@ class AppState extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_storageKey);
+      await _secureStorage.delete(key: _accessTokenKey);
     } catch (_) {}
 
     _currentView = 'landing';
@@ -1230,6 +1257,8 @@ class AppState extends ChangeNotifier {
     _activeTab = 'insights';
     _onboardingStep = 'birth';
     _userId = null;
+    _accessToken = null;
+    ApiService.setAuthToken(null);
     _isOnboarded = false;
     _userEmail = null;
     _userName = null;

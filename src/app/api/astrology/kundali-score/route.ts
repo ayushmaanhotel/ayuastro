@@ -2,6 +2,7 @@ export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
+import { requireApiUser } from '@/lib/api-auth';
 import {
   isExalted,
   isDebilitated,
@@ -1287,7 +1288,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { userId, sunSign, moonSign, ascendant, planetaryPositions, yogas, doshas, nakshatra } = parsed.data;
+    let { userId, sunSign, moonSign, ascendant, planetaryPositions, yogas, doshas, nakshatra } = parsed.data;
+    if (userId) {
+      const auth = await requireApiUser(request, userId);
+      if (!auth.ok) return auth.response;
+      userId = auth.userId;
+    }
 
     // Safely cast planetary positions from unknown to PlanetPosInput
     let positions: Record<string, PlanetPosInput> = {};

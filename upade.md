@@ -602,6 +602,44 @@ Integrated a local keyword-retrieval RAG engine and refined tone/jargon guidelin
 - **Report payload resilience**: Modified `/api/ai/deep-intelligence` validation schema and POST handler to accept nullish calculations data and fall back to querying the database directly using `userId`, preventing validation errors if client cache is incomplete or empty.
 - **Verification**: Verified that Next.js backend compiles cleanly, Flutter static analysis finds 0 issues, and all client-side unit/widget tests pass successfully.
 
+---
+
+## 40. Outdated Domain Configuration Fixes & Compilation Isolation (2026-06-04)
+- **TypeScript Compilation Cleanliness (`tsconfig.json`)**: Excluded `original/`, `examples/`, and `flutter_app/` directories inside `tsconfig.json`. Standard typescript compile checks now run successfully with 0 errors, focusing solely on the active source code in `src/`.
+- **Dynamic Origin Resolution in UCP Checkout (`src/app/api/ucp/checkout/route.ts`)**: Replaced the hardcoded outdated `ayuastro-backend.vercel.app` domain in the checkout redirect URL with dynamic origin resolution derived from the incoming request.
+- **Model Context Protocol Server Domain Update (`mcp-server/index.ts`)**: Updated the hardcoded `DEFAULT_API_URL` variable to point to the correct production live endpoint (`https://ayuastro.vercel.app`) and rebuilt the server binary using `npm run build`.
+- **Verification**: Verified Next.js compiles with zero errors using `npx tsc --noEmit`. Ran Flutter test suite (`flutter test`) inside `flutter_app/` with all tests passing successfully.
+
+---
+
+## 41. Database & Authentication Routing Audit (2026-06-04)
+- **Database Schema Audit**: Identified missing index fields `@@index([userId])` for `Report`, `QuestionnaireAnswer`, and `Transaction` models in `prisma/schema.prisma` that trigger sequential table scans on PostgreSQL. Verified cascading deletes are correctly setup on all relations.
+- **Authentication Flow Audit**: Analyzed the asynchronous registration flow in `signup/route.ts` and identified transactional synchronization vulnerabilities (zombie/orphaned users in Supabase Auth if Prisma user setup fails).
+- **Profile Update Auth Divergence**: Discovered that `profile-update/route.ts` updates user email/phone in the local Prisma DB but does not synchronize them with Supabase Auth, permanently breaking credentials login for updated accounts.
+- **Paywall Bypass Vulnerability Audit**: Identified paywall verification issues in backend routes `/api/ai/deep-intelligence`, `/api/reports/generate-pdf`, and `/api/ai/generate-report`, where premium resources are generated or returned based on user request body/query parameters without verifying database `hasPaid` status.
+- **Audit Documentation**: Updated the comprehensive security audit artifact `database_auth_audit_report.md` detailing security holes, indexing bottlenecks, and a step-by-step remediation plan.
+
+---
+
+## 42. Security, Timezone, Database Indexes, and Auth Rollback Fixes (2026-06-04)
+- **Database Schema Indexes**: Added `@@index([userId])` to `Report`, `QuestionnaireAnswer`, and `Transaction` models in `prisma/schema.prisma` and pushed them to the live PostgreSQL database with `npx prisma db push` to resolve sequential table scan bottlenecks.
+- **Timezone-Independent Calculations**: Replaced host-server local timezone-dependent methods in `src/lib/astrology/index.ts` and `src/app/api/astrology/planet-strength/route.ts` with `Date.UTC` to combine birth date and birth time timezone-independently.
+- **Paywall Verification Structure**: Added paywall check structures (currently bypassed to allow free users access per user instructions) in `/api/reports/generate-pdf/route.ts`, `/api/ai/deep-intelligence/route.ts`, and `/api/ai/generate-report/route.ts`.
+- **Auth Sanitization & Rollback**: Replaced unsafe `$executeRawUnsafe` calls with safe parameterized `$executeRaw` query blocks in `signup/route.ts` and `signin/route.ts`. Added automatic transactional rollback (deleting orphaned Supabase auth users via SQL raw delete if Prisma signup fails).
+- **Auth Self-Healing**: Added self-healing logic to `signin/route.ts` that dynamically reconstructs a missing Prisma user profile if they successfully authenticate via Supabase.
+- **Lint Configurations**: Added `original/**`, `flutter_app/**`, and `mcp-server/**` to ignores in `eslint.config.mjs`.
+- **Verification**: Verified Next.js compiles cleanly (`npx tsc --noEmit`), ESLint checks on modified files pass with 0 errors/warnings, and Flutter test suite passes successfully with all tests passing.
+
+---
+
+## 43. Astrologer Chat Hyper-Personalization & Tone Remediation (2026-06-08)
+- **Database-Backed Personalization Fallback**: Modified the POST handler in `src/app/api/chat/astrologer/route.ts` to accept a `userId`. If provided, the backend queries the database using Prisma (`User`, `AstrologyData`, `NumerologyData`, `TraitScores`) and parses calculations (yogas, doshas, nakshatras, current dasha, top traits) on the server to dynamically generate a hyper-personalized prompt. This eliminates generic responses when the client-side store is empty or desynced.
+- **Tone & Length Guidelines**: Relaxed the strict astrologer response length from 10-30 words to **30-60 words (max 80 words)** in the system prompt. Refined the guidelines to guide responses into a warm, friendly, conversational, and empathetic tone rather than a robotic/rushed vibe.
+- **Client Integration**: Updated `src/components/ayuastro/chat/AstrologerChatView.tsx` to retrieve `userId` from the Zustand store and pass it in the request payload, securing personalization.
+- **Verification**: Verified Next.js compiles with zero compilation errors using `npx tsc --noEmit` and database lookup logic works cleanly against real database records.
+
+
+
 
 
 

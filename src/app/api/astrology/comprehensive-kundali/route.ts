@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { calculateKundali, initializeSwissEphemeris } from '@/lib/astrology';
+import { requireApiUser } from '@/lib/api-auth';
 import {
   type Planet,
   type ZodiacSign,
@@ -40,7 +41,7 @@ import { getDashaInterpretation } from '@/lib/astrology/dasha';
 import { calculateAllDivisionalCharts, analyzeNavamsha, type VargaType } from '@/lib/astrology/divisional';
 import { calculateKarakas, getAtmakaraka, getDarakaraka, getAmatyakaraka, type KarakaData } from '@/lib/astrology/jaimini';
 
-const requestSchema = z.object({ userId: z.string().min(1) });
+const requestSchema = z.object({ userId: z.string().min(1).optional() });
 
 // ─── In-Memory Cache ────────────────────────────────────────────────────────
 const cache = new Map<string, { data: unknown; timestamp: number }>();
@@ -592,7 +593,10 @@ export async function POST(request: NextRequest) {
     await initializeSwissEphemeris();
 
     const body = await request.json();
-    const { userId } = requestSchema.parse(body);
+    const { userId: claimedUserId } = requestSchema.parse(body);
+    const auth = await requireApiUser(request, claimedUserId);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
 
     // Check cache
     const cached = cache.get(userId);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireApiUser } from '@/lib/api-auth';
 import { calculateKundali, initializeSwissEphemeris } from '@/lib/astrology';
 import {
   type PlanetPosition,
@@ -1225,14 +1226,9 @@ export async function GET(request: NextRequest) {
     // Ensure Swiss Ephemeris is initialized before calculations
     await initializeSwissEphemeris();
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'userId query parameter is required' },
-        { status: 400 }
-      );
-    }
+    const auth = await requireApiUser(request, searchParams.get('userId'));
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
 
     // Fetch user data
     const user = await db.user.findUnique({

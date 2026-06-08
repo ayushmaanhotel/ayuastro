@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const index_js_1 = require("@modelcontextprotocol/sdk/server/index.js");
 const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
 const types_js_1 = require("@modelcontextprotocol/sdk/types.js");
-const DEFAULT_API_URL = "https://ayuastro-backend.vercel.app";
+const DEFAULT_API_URL = "https://ayuastro.vercel.app";
 const server = new index_js_1.Server({
     name: "ayuastro-mcp-server",
     version: "1.0.0",

@@ -5,7 +5,7 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 
-const DEFAULT_API_URL = "https://ayuastro-backend.vercel.app";
+const DEFAULT_API_URL = "https://ayuastro.vercel.app";
 
 const server = new Server(
   {

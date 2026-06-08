@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getUcpCorsHeaders, ucpPreflightResponse } from '@/lib/ucp-cors';
 
 export async function GET(request: NextRequest) {
   try {
+    const corsHeaders = getUcpCorsHeaders(request);
+    if (corsHeaders === null) {
+      return NextResponse.json(
+        { success: false, error: 'Origin is not allowed for UCP access' },
+        { status: 403 }
+      );
+    }
+
     const authHeader = request.headers.get('Authorization');
     const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
@@ -137,11 +146,7 @@ export async function GET(request: NextRequest) {
       success: true,
       context: cosmicContext,
     }, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      }
+      headers: corsHeaders,
     });
   } catch (error) {
     console.error('[UCP Context API] Error:', error);
@@ -152,13 +157,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function OPTIONS() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    }
-  });
+export async function OPTIONS(request: NextRequest) {
+  return ucpPreflightResponse(request);
 }

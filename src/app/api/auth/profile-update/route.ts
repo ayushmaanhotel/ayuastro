@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
+import { requireApiUser } from '@/lib/api-auth';
 
 // ─── Zod Schema ─────────────────────────────────────────────────────────────
 
 const profileUpdateSchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1, 'User ID is required').optional(),
   name: z.string().min(2, 'Name must be at least 2 characters').optional(),
   email: z.string().email('Invalid email address').optional(),
   phone: z.string().min(1, 'Phone number is required').optional(),
@@ -30,7 +31,10 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { userId, ...updates } = parsed.data;
+    const { userId: claimedUserId, ...updates } = parsed.data;
+    const auth = await requireApiUser(request, claimedUserId);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
 
     // Verify user exists
     const existingUser = await db.user.findUnique({ where: { id: userId } });

@@ -3,9 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import PDFDocument from 'pdfkit';
 import { db } from '@/lib/db';
 import { generateDeepIntelligenceReport, generateReport } from '@/lib/ai';
+import { requireApiUser } from '@/lib/api-auth';
+import { hasPremiumEntitlement } from '@/lib/entitlements';
 
 interface ReportRequestBody {
-  userId: string;
+  userId?: string;
   includePremium?: boolean;
 }
 
@@ -518,14 +520,11 @@ function drawPDFReport(data: {
 export async function POST(request: NextRequest) {
   try {
     const body: ReportRequestBody = await request.json();
-    const { userId, includePremium = false } = body;
+    let { userId, includePremium = false } = body;
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'userId is required' },
-        { status: 400 }
-      );
-    }
+    const auth = await requireApiUser(request, userId);
+    if (!auth.ok) return auth.response;
+    userId = auth.userId;
 
     // Fetch user data from database
     const user = await db.user.findUnique({
@@ -544,6 +543,11 @@ export async function POST(request: NextRequest) {
         { error: 'User not found' },
         { status: 404 }
       );
+    }
+
+    const hasPaid = await hasPremiumEntitlement(userId);
+    if (includePremium && !hasPaid) {
+      includePremium = false;
     }
 
     interface AstrologyPDFData {

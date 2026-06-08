@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { calculateNumerology } from '@/lib/numerology';
+import { requireApiUser } from '@/lib/api-auth';
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
 const numerologySchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1, 'User ID is required').optional(),
   fullName: z.string().min(1, 'Full name is required'),
   dateOfBirth: z.string().min(1, 'Date of birth is required'),
 });
@@ -29,7 +30,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { userId, fullName, dateOfBirth } = parsed.data;
+    const auth = await requireApiUser(request, parsed.data.userId);
+    if (!auth.ok) return auth.response;
+    const { fullName, dateOfBirth } = parsed.data;
+    const userId = auth.userId;
 
     // Verify user exists
     const user = await db.user.findUnique({ where: { id: userId } });

@@ -47,40 +47,10 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
-    let { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     });
-
-    if (authError) {
-      // Self-healing: If email is not confirmed, auto-confirm it in the database and retry
-      if (
-        authError.message.toLowerCase().includes('confirm') ||
-        authError.message.toLowerCase().includes('verify') ||
-        authError.message.toLowerCase().includes('verified')
-      ) {
-        try {
-          const localUser = await db.user.findUnique({ where: { email } });
-          if (localUser) {
-            await db.$executeRawUnsafe(
-              `UPDATE auth.users SET email_confirmed_at = NOW(), confirmed_at = NOW() WHERE id = $1`,
-              localUser.id
-            );
-            console.log(`[Signin API] Self-healed & auto-confirmed email for user ${localUser.id}`);
-
-            // Retry signin
-            const retryRes = await supabase.auth.signInWithPassword({
-              email,
-              password,
-            });
-            authData = retryRes.data;
-            authError = retryRes.error;
-          }
-        } catch (dbErr) {
-          console.error('[Signin API] Failed self-healing auto-confirmation:', dbErr);
-        }
-      }
-    }
 
     if (authError) {
       return NextResponse.json(
@@ -98,13 +68,33 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user in local Prisma DB
-    const user = await db.user.findUnique({ where: { email } });
+    let user = await db.user.findUnique({ where: { email } });
 
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'User record not found in database' },
-        { status: 404 }
-      );
+      console.log(`[Signin API] User authenticated in Supabase but record missing in Prisma. Recreating profile for ${email}`);
+      try {
+        user = await db.user.create({
+          data: {
+            id: supabaseUserId,
+            name: email.split('@')[0], // Fallback name
+            email,
+            passwordHash: 'SUPABASE_AUTH',
+            isOnboarded: false,
+            preferences: {
+              create: {
+                language: 'en',
+                vedicLevel: 'standard',
+              },
+            },
+          },
+        });
+      } catch (dbCreateErr) {
+        console.error('[Signin API] Failed to self-heal/recreate Prisma user record:', dbCreateErr);
+        return NextResponse.json(
+          { success: false, error: 'User record not found in database and self-healing failed' },
+          { status: 404 }
+        );
+      }
     }
 
     return NextResponse.json({
@@ -114,6 +104,14 @@ export async function POST(request: NextRequest) {
       email: user.email,
       phone: user.phone,
       isOnboarded: user.isOnboarded,
+      session: authData.session
+        ? {
+            accessToken: authData.session.access_token,
+            refreshToken: authData.session.refresh_token,
+            expiresAt: authData.session.expires_at,
+            tokenType: authData.session.token_type,
+          }
+        : null,
     });
   } catch (error) {
     console.error('[Signin API] Error:', error);

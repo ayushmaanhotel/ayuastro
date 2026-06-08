@@ -276,6 +276,7 @@ function AstrologerListItem({
 
 export default function AstrologerChatView() {
   const {
+    userId,
     birthDetails,
     astrologyData,
     numerologyData,
@@ -372,6 +373,7 @@ export default function AstrologerChatView() {
         body: JSON.stringify({
           message: messageText.trim(),
           sessionId: `${sessionIdRef.current}-${astrologer.id}`,
+          userId: userId || undefined,
           context: buildContext(),
           conversationHistory,
           astrologerId: astrologer.id,

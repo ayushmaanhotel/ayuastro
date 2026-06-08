@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
+import { requireApiUser } from '@/lib/api-auth';
 
 // ─── Zod Schema ─────────────────────────────────────────────────────────────
 
 const historyQuerySchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1, 'User ID is required').optional().nullable(),
   days: z.coerce.number().int().min(1).max(365).default(30),
 });
 
@@ -30,7 +31,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { userId, days } = parsed.data;
+    const auth = await requireApiUser(request, parsed.data.userId);
+    if (!auth.ok) return auth.response;
+    const { days } = parsed.data;
+    const userId = auth.userId;
 
     // Verify user exists - return empty results for unknown users instead of 404
     const user = await db.user.findUnique({ where: { id: userId } });

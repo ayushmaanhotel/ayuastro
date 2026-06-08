@@ -84,37 +84,38 @@ export async function POST(request: NextRequest) {
       throw new Error('Supabase user creation failed');
     }
 
-    // Auto-confirm the user in Supabase auth.users table
-    try {
-      await db.$executeRawUnsafe(
-        `UPDATE auth.users SET email_confirmed_at = NOW(), confirmed_at = NOW() WHERE id = $1`,
-        supabaseUserId
-      );
-      console.log(`[Signup API] Auto-confirmed email for user ${supabaseUserId}`);
-    } catch (dbErr) {
-      console.error('[Signup API] Failed to auto-confirm user in auth.users:', dbErr);
-    }
-
     // Create user in Prisma with Supabase ID
-    const user = await db.user.create({
-      data: {
-        id: supabaseUserId, // Sync IDs
-        name,
-        email: email ?? null,
-        phone: phone ?? null,
-        passwordHash: 'SUPABASE_AUTH', // Password handled by Supabase
-        isOnboarded: false,
-        preferences: {
-          create: {
-            language: 'en',
-            vedicLevel: 'standard',
+    let user;
+    try {
+      user = await db.user.create({
+        data: {
+          id: supabaseUserId, // Sync IDs
+          name,
+          email: email ?? null,
+          phone: phone ?? null,
+          passwordHash: 'SUPABASE_AUTH', // Password handled by Supabase
+          isOnboarded: false,
+          preferences: {
+            create: {
+              language: 'en',
+              vedicLevel: 'standard',
+            },
           },
         },
-      },
-      include: {
-        preferences: true,
-      },
-    });
+        include: {
+          preferences: true,
+        },
+      });
+    } catch (prismaError) {
+      console.error('[Signup API] Failed to sync user to Prisma, rolling back Supabase auth:', prismaError);
+      try {
+        await db.user.deleteMany({ where: { id: supabaseUserId } });
+        console.log(`[Signup API] Removed partial Prisma user ${supabaseUserId}`);
+      } catch (rollbackErr) {
+        console.error('[Signup API] Failed to remove partial Prisma user:', rollbackErr);
+      }
+      throw prismaError;
+    }
 
     return NextResponse.json(
       {
@@ -123,6 +124,14 @@ export async function POST(request: NextRequest) {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        session: authData.session
+          ? {
+              accessToken: authData.session.access_token,
+              refreshToken: authData.session.refresh_token,
+              expiresAt: authData.session.expires_at,
+              tokenType: authData.session.token_type,
+            }
+          : null,
         message: 'Signup successful',
       },
       { status: 201 }

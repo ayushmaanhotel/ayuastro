@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { TRAIT_METADATA } from '@/lib/scoring';
+import { requireApiUser } from '@/lib/api-auth';
 
 // ─── Zod Schema ─────────────────────────────────────────────────────────────
 
 const profileQuerySchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1, 'User ID is required').optional().nullable(),
 });
 
 // ─── GET Handler ────────────────────────────────────────────────────────────
@@ -29,7 +30,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { userId } = parsed.data;
+    const auth = await requireApiUser(request, parsed.data.userId);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
 
     // Fetch user with profile, preferences, and calculations data
     const user = await db.user.findUnique({

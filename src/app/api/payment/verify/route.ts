@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
+import { requireApiUser } from '@/lib/api-auth';
 
 const verifySchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1, 'User ID is required').optional(),
   transactionId: z.string().min(1, 'Transaction ID / UTR Number is required'),
   paymentMethod: z.enum(['upi', 'bank_transfer', 'other'], {
     message: 'Payment method is required',
@@ -23,7 +24,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { userId, transactionId, paymentMethod, screenshotUrl } = parsed.data;
+    const auth = await requireApiUser(request, parsed.data.userId);
+    if (!auth.ok) return auth.response;
+    const { transactionId, paymentMethod, screenshotUrl } = parsed.data;
+    const userId = auth.userId;
 
     // Check if this transactionId has already been submitted
     const existing = await db.transaction.findFirst({

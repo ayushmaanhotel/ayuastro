@@ -8,6 +8,7 @@ import {
   toDatabaseFormat,
   TRAIT_METADATA,
 } from '@/lib/scoring';
+import { requireApiUser } from '@/lib/api-auth';
 import type {
   AstrologyInput,
   NumerologyInput as ScoringNumerologyInput,
@@ -57,7 +58,7 @@ const questionnaireAnswerApiSchema = z.object({
 });
 
 const traitsSchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1, 'User ID is required').optional(),
   astrologyData: z.object({
     sunSign: z.string(),
     moonSign: z.string(),
@@ -96,7 +97,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { userId, astrologyData, numerologyData, questionnaireAnswers } = parsed.data;
+    const auth = await requireApiUser(request, parsed.data.userId);
+    if (!auth.ok) return auth.response;
+    const { astrologyData, numerologyData, questionnaireAnswers } = parsed.data;
+    const userId = auth.userId;
 
     // Verify user exists
     const user = await db.user.findUnique({ where: { id: userId } });

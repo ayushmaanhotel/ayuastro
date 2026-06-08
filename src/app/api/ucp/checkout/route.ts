@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { z } from 'zod';
+import { getUcpCorsHeaders, ucpPreflightResponse } from '@/lib/ucp-cors';
 
 const checkoutSchema = z.object({
   productId: z.string().min(1, 'Product ID is required'),
@@ -30,6 +31,14 @@ const PRODUCTS_PRICE_MAP: Record<string, number> = {
 
 export async function POST(request: NextRequest) {
   try {
+    const corsHeaders = getUcpCorsHeaders(request);
+    if (corsHeaders === null) {
+      return NextResponse.json(
+        { success: false, error: 'Origin is not allowed for UCP access' },
+        { status: 403 }
+      );
+    }
+
     const authHeader = request.headers.get('Authorization');
     const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
@@ -95,7 +104,8 @@ export async function POST(request: NextRequest) {
     });
 
     // Mock checkout/redirect URL for the user to complete payment
-    const checkoutUrl = `https://ayuastro-backend.vercel.app/checkout/pay?txId=${transaction.id}`;
+    const origin = request.nextUrl.origin || 'https://ayuastro.vercel.app';
+    const checkoutUrl = `${origin}/checkout/pay?txId=${transaction.id}`;
 
     return NextResponse.json({
       success: true,
@@ -110,11 +120,7 @@ export async function POST(request: NextRequest) {
       },
       checkoutUrl,
     }, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      }
+      headers: corsHeaders,
     });
   } catch (error) {
     console.error('[UCP Checkout API] Error:', error);
@@ -125,13 +131,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function OPTIONS() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    }
-  });
+export async function OPTIONS(request: NextRequest) {
+  return ucpPreflightResponse(request);
 }

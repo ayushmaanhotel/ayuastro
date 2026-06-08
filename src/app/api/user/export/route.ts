@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
+import { requireApiUser } from '@/lib/api-auth';
 
 // ─── Zod Schema ─────────────────────────────────────────────────────────────
 
 const exportQuerySchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1, 'User ID is required').optional().nullable(),
 });
 
 // ─── GET Handler ────────────────────────────────────────────────────────────
@@ -28,7 +29,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { userId } = parsed.data;
+    const auth = await requireApiUser(request, parsed.data.userId);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
 
     // Fetch user with all related data
     const user = await db.user.findUnique({

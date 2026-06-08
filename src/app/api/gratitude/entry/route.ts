@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-
-// ─── Zod Schema ─────────────────────────────────────────────────────────────
+import { requireApiUser } from '@/lib/api-auth';
 
 const gratitudeEntrySchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1, 'User ID is required').optional(),
   slot: z.enum(['morning', 'afternoon', 'evening'], {
     message: 'Slot must be morning, afternoon, or evening',
   }),
   content: z.string().min(1, 'Content is required').max(500, 'Content must be 500 characters or less'),
 });
-
-// ─── POST Handler ───────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,22 +27,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data = parsed.data;
+    const auth = await requireApiUser(request, parsed.data.userId);
+    if (!auth.ok) return auth.response;
 
-    // Verify user exists — auto-create if not found
-    let user = await db.user.findUnique({ where: { id: data.userId } });
+    const user = await db.user.findUnique({ where: { id: auth.userId } });
     if (!user) {
-      user = await db.user.create({
-        data: {
-          id: data.userId,
-          name: 'Seeker',
-          isOnboarded: false,
-          hasPaid: false,
-        },
-      });
+      return NextResponse.json(
+        { success: false, error: 'User not found' },
+        { status: 404 }
+      );
     }
 
-    // Check if entry for this slot already exists today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -53,8 +45,8 @@ export async function POST(request: NextRequest) {
 
     const existing = await db.gratitudeEntry.findFirst({
       where: {
-        userId: data.userId,
-        slot: data.slot,
+        userId: auth.userId,
+        slot: parsed.data.slot,
         createdAt: {
           gte: today,
           lt: tomorrow,
@@ -63,10 +55,9 @@ export async function POST(request: NextRequest) {
     });
 
     if (existing) {
-      // Update existing entry for this slot today
       const updated = await db.gratitudeEntry.update({
         where: { id: existing.id },
-        data: { content: data.content },
+        data: { content: parsed.data.content },
       });
 
       return NextResponse.json({
@@ -80,12 +71,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create new gratitude entry
     const entry = await db.gratitudeEntry.create({
       data: {
-        userId: data.userId,
-        slot: data.slot,
-        content: data.content,
+        userId: auth.userId,
+        slot: parsed.data.slot,
+        content: parsed.data.content,
       },
     });
 

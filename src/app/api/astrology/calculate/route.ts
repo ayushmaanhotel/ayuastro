@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { calculateKundali, getCalculationMethod, initializeSwissEphemeris } from '@/lib/astrology';
+import { requireApiUser } from '@/lib/api-auth';
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
 const astrologySchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1, 'User ID is required').optional(),
   dateOfBirth: z.string().min(1, 'Date of birth is required'),
   timeOfBirth: z.string().regex(/^\d{2}:\d{2}$/, 'Time must be in HH:MM format'),
   latitude: z.number().min(-90).max(90),
@@ -46,7 +47,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { userId, dateOfBirth, timeOfBirth, latitude, longitude, timezone } = parsed.data;
+    const auth = await requireApiUser(request, parsed.data.userId);
+    if (!auth.ok) return auth.response;
+    const { dateOfBirth, timeOfBirth, latitude, longitude, timezone } = parsed.data;
+    const userId = auth.userId;
 
     // Verify user exists
     const user = await db.user.findUnique({ where: { id: userId } });

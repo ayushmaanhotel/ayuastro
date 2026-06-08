@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import crypto from 'crypto';
+import { requireApiUser } from '@/lib/api-auth';
 
 // ─── Zod Schema ─────────────────────────────────────────────────────────────
 
 const preferencesSchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1, 'User ID is required').optional(),
   language: z.enum(['en', 'hi', 'hinglish']).optional(),
   darkMode: z.boolean().optional(),
   dailyHoroscope: z.boolean().optional(),
@@ -35,7 +36,10 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { userId, rotateUcpToken, ...updates } = parsed.data;
+    const { userId: claimedUserId, rotateUcpToken, ...updates } = parsed.data;
+    const auth = await requireApiUser(request, claimedUserId);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
 
     // Verify user exists
     const user = await db.user.findUnique({ 

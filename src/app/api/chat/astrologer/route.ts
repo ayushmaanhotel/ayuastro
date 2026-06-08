@@ -2,6 +2,8 @@ export const maxDuration = 300;
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import deepseek from '@/lib/ai/deepseek';
+import { db } from '@/lib/db';
+import { requireApiUser } from '@/lib/api-auth';
 
 // ─── Rate Limiting (in-memory, per session) ────────────────────────────────
 
@@ -41,6 +43,7 @@ setInterval(() => {
 const chatSchema = z.object({
   message: z.string().min(1, 'Message is required').max(500, 'Message too long (max 500 characters)'),
   sessionId: z.string().min(1, 'Session ID is required'),
+  userId: z.string().nullish(),
   context: z.object({
     name: z.string().nullish(),
     sunSign: z.string().nullish(),
@@ -101,10 +104,10 @@ ${astrologerBlock}
 ${contextBlock}
 
 Your guiding principles:
-1. Speak strictly within your ASTROLOGER PERSONA and domain expertise, but keep your responses extremely short and to the point.
-2. Every response must be between 10 to 30 words, and under no circumstances exceed 50 words maximum.
-3. Reference the user's astrological data (like their moon sign, nakshatra, or a specific planet placement) very briefly when answering, blending it with a behavioral psychology angle.
-4. Speak in simple language, with a natural, friendly, and warm human tone.
+1. Speak strictly within your ASTROLOGER PERSONA and domain expertise.
+2. Keep your responses warm, human, conversational, and direct, but concise (around 30 to 60 words, and under no circumstances exceed 80 words maximum).
+3. Reference the user's astrological data (like their moon sign, nakshatra, or a specific planet placement) naturally when answering, blending it with a behavioral psychology angle.
+4. Speak in simple language, with a natural, friendly, warm, and empathetic tone.
 5. Do NOT use cliché AI phrases like "I am not sugarcoating", "without sugarcoating", or "no sugarcoating". Be honest, direct, but gentle and supportive.
 
 SAFETY RULES (non-negotiable):
@@ -151,7 +154,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { message, sessionId, context, conversationHistory, astrologerSystemPrompt } = parsed.data;
+    const { message, sessionId, userId, context, conversationHistory, astrologerSystemPrompt } = parsed.data;
 
     // Rate limiting
     const rateCheck = checkRateLimit(sessionId);
@@ -166,8 +169,134 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Resolve context from database if userId is provided
+    let resolvedContext = context;
+    if (userId) {
+      const auth = await requireApiUser(request, userId);
+      if (!auth.ok) return auth.response;
+      try {
+        const user = await db.user.findUnique({
+          where: { id: auth.userId },
+          include: {
+            astrology: true,
+            numerology: true,
+            traits: true,
+            profile: true,
+          },
+        });
+
+        if (user) {
+          // Parse astrology details
+          let parsedYogas: string[] = [];
+          if (user.astrology?.yogas) {
+            try {
+              const rawYogas = JSON.parse(user.astrology.yogas);
+              if (Array.isArray(rawYogas)) {
+                parsedYogas = rawYogas
+                  .map((y: any) => (typeof y === 'string' ? y : y?.name || ''))
+                  .filter(Boolean);
+              }
+            } catch (e) {
+              console.error('Failed to parse yogas in astrologer chat:', e);
+            }
+          }
+
+          let parsedDoshas: string[] = [];
+          if (user.astrology?.doshas) {
+            try {
+              const rawDoshas = JSON.parse(user.astrology.doshas);
+              if (Array.isArray(rawDoshas)) {
+                parsedDoshas = rawDoshas
+                  .map((d: any) => (typeof d === 'string' ? d : d?.name || ''))
+                  .filter(Boolean);
+              }
+            } catch (e) {
+              console.error('Failed to parse doshas in astrologer chat:', e);
+            }
+          }
+
+          let nakshatraStr = '';
+          if (user.astrology?.nakshatra) {
+            try {
+              const rawNak = JSON.parse(user.astrology.nakshatra);
+              nakshatraStr = typeof rawNak === 'string' ? rawNak : rawNak?.name || '';
+            } catch (e) {
+              console.error('Failed to parse nakshatra in astrologer chat:', e);
+            }
+          }
+
+          let dashaStr = '';
+          if (user.astrology?.dashaPeriods) {
+            try {
+              const rawDasha = JSON.parse(user.astrology.dashaPeriods);
+              if (rawDasha && rawDasha.currentMahadasha) {
+                dashaStr = `${rawDasha.currentMahadasha.planet} (Mahadasha)`;
+                if (rawDasha.currentAntardasha) {
+                  dashaStr += ` / ${rawDasha.currentAntardasha.planet} (Antardasha)`;
+                }
+              }
+            } catch (e) {
+              console.error('Failed to parse dashaPeriods in astrologer chat:', e);
+            }
+          }
+
+          // Build topTraits lists from user.traits
+          const traitsList: { name: string; label: string; score: number }[] = [];
+          if (user.traits) {
+            const traitMappings: Record<string, string> = {
+              emotionalIntensity: 'Emotional Intensity',
+              attachmentStyle: 'Attachment Style',
+              ambition: 'Ambition',
+              trust: 'Trust Capacity',
+              communicationOpenness: 'Communication Openness',
+              impulsiveness: 'Impulsiveness',
+              empathy: 'Empathy',
+              resilience: 'Resilience',
+              creativity: 'Creativity',
+              intuition: 'Intuition',
+              discipline: 'Discipline',
+              socialEnergy: 'Social Energy',
+              patience: 'Patience',
+              adaptability: 'Adaptability',
+            };
+
+            for (const [key, label] of Object.entries(traitMappings)) {
+              const score = (user.traits as any)[key];
+              if (typeof score === 'number') {
+                traitsList.push({ name: key, label, score });
+              }
+            }
+          }
+
+          const topTraits = traitsList
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 5)
+            .map((t) => t.label);
+
+          resolvedContext = {
+            name: user.name || context?.name || 'Seeker',
+            sunSign: user.astrology?.sunSign || context?.sunSign,
+            moonSign: user.astrology?.moonSign || context?.moonSign,
+            ascendant: user.astrology?.ascendant || context?.ascendant,
+            nakshatra: nakshatraStr || context?.nakshatra,
+            currentDasha: dashaStr || context?.currentDasha,
+            yogas: parsedYogas.length > 0 ? parsedYogas : context?.yogas,
+            doshas: parsedDoshas.length > 0 ? parsedDoshas : context?.doshas,
+            lifePathNumber: user.numerology?.lifePathNumber || context?.lifePathNumber,
+            destinyNumber: user.numerology?.destinyNumber || context?.destinyNumber,
+            soulUrgeNumber: user.numerology?.soulUrgeNumber || context?.soulUrgeNumber,
+            archetype: context?.archetype || 'Explorer',
+            topTraits: topTraits.length > 0 ? topTraits : context?.topTraits,
+            relationshipStatus: user.profile?.relationshipStatus || context?.relationshipStatus,
+          };
+        }
+      } catch (dbError) {
+        console.error('[Astrologer Chat API] Database lookup error:', dbError);
+      }
+    }
+
     // Build messages array
-    const systemPrompt = buildSystemPrompt(context, astrologerSystemPrompt ?? undefined);
+    const systemPrompt = buildSystemPrompt(resolvedContext || undefined, astrologerSystemPrompt ?? undefined);
     const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
       { role: 'system', content: systemPrompt },
     ];

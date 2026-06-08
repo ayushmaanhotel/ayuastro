@@ -7,6 +7,7 @@ class ApiService {
   // 10.0.2.2 is the special IP for Android emulators to access localhost on the host machine.
   // We can update this dynamically from the settings.
   static String baseUrl = 'https://ayuastro.vercel.app';
+  static String? _accessToken;
 
   static void setBaseUrl(String newUrl) {
     if (newUrl.endsWith('/')) {
@@ -16,6 +17,19 @@ class ApiService {
     }
   }
 
+  static void setAuthToken(String? accessToken) {
+    _accessToken = accessToken;
+  }
+
+  static Map<String, String> _jsonHeaders() => {
+        'Content-Type': 'application/json',
+      };
+
+  static Map<String, String> _authHeaders() => {
+        'Content-Type': 'application/json',
+        if (_accessToken != null && _accessToken!.isNotEmpty) 'Authorization': 'Bearer $_accessToken',
+      };
+
   // Sign In API
   static Future<Map<String, dynamic>> signIn({
     required String email,
@@ -23,7 +37,7 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/auth/signin'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders(),
       body: jsonEncode({
         'email': email,
         'password': password,
@@ -46,7 +60,7 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/auth/signup'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders(),
       body: jsonEncode({
         'name': name,
         'email': email,
@@ -68,7 +82,7 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/auth/forgot-password'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders(),
       body: jsonEncode({
         'email': email,
       }),
@@ -90,7 +104,7 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/process-all'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _authHeaders(),
       body: jsonEncode({
         ...birthDetails.toJson(),
         'questionnaireAnswers': answers.map((a) => a.toJson()).toList(),
@@ -164,7 +178,7 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/chat'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders(),
       body: jsonEncode({
         'message': message,
         'sessionId': sessionId,
@@ -197,7 +211,7 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/mood/entry'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _authHeaders(),
       body: jsonEncode({
         'userId': userId,
         'mood': mood,
@@ -226,7 +240,7 @@ class ApiService {
       },
     );
 
-    final response = await http.get(uri).timeout(const Duration(seconds: 10));
+    final response = await http.get(uri, headers: _authHeaders()).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -255,7 +269,7 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/astrology/kundali-score'),
-      headers: {'Content-Type': 'application/json'},
+      headers: userId != null ? _authHeaders() : _jsonHeaders(),
       body: jsonEncode({
         if (userId != null) 'userId': userId,
         'sunSign': sunSign,
@@ -289,7 +303,7 @@ class ApiService {
       },
     );
 
-    final response = await http.get(uri).timeout(const Duration(seconds: 10));
+    final response = await http.get(uri, headers: _authHeaders()).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
       final raw = jsonDecode(response.body);
@@ -322,7 +336,7 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/gratitude/entry'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _authHeaders(),
       body: jsonEncode({
         'userId': userId,
         'slot': slot,
@@ -373,7 +387,7 @@ class ApiService {
       },
     );
 
-    final response = await http.get(uri).timeout(const Duration(seconds: 25));
+    final response = await http.get(uri, headers: _authHeaders()).timeout(const Duration(seconds: 25));
 
     if (response.statusCode == 200) {
       final raw = jsonDecode(response.body);
@@ -389,6 +403,7 @@ class ApiService {
   static Future<Map<String, dynamic>> sendAstrologerChatMessage({
     required String message,
     required String sessionId,
+    String? userId,
     required Map<String, dynamic> context,
     required List<ChatMessage> conversationHistory,
     required String astrologerId,
@@ -396,10 +411,11 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/chat/astrologer'),
-      headers: {'Content-Type': 'application/json'},
+      headers: userId != null ? _authHeaders() : _jsonHeaders(),
       body: jsonEncode({
         'message': message,
         'sessionId': sessionId,
+        if (userId != null) 'userId': userId,
         'context': context,
         'conversationHistory': conversationHistory
             .map((msg) => {
@@ -434,7 +450,7 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/ai/deep-intelligence'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _authHeaders(),
       body: jsonEncode({
         'userId': userId,
         'astrologyData': astrologyData,
@@ -464,7 +480,7 @@ class ApiService {
   }) async {
     final response = await http.put(
       Uri.parse('$baseUrl/api/auth/preferences'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _authHeaders(),
       body: jsonEncode({
         'userId': userId,
         if (ucpEnabled != null) 'ucpEnabled': ucpEnabled,
@@ -496,7 +512,7 @@ class ApiService {
   static Future<Map<String, dynamic>> fetchUserProfile(String userId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/api/auth/profile?userId=$userId'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _authHeaders(),
     ).timeout(const Duration(seconds: 15));
 
     if (response.statusCode == 200) {
@@ -507,5 +523,4 @@ class ApiService {
     }
   }
 }
-
 

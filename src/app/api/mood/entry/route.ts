@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-
-// ─── Zod Schema ─────────────────────────────────────────────────────────────
+import { requireApiUser } from '@/lib/api-auth';
 
 const moodEntrySchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1, 'User ID is required').optional(),
   mood: z.number().int().min(1).max(5, 'Mood must be between 1 and 5'),
   emoji: z.string().min(1, 'Emoji is required'),
   note: z.string().max(2000).optional(),
   tags: z.array(z.string()).optional(),
 });
-
-// ─── POST Handler ───────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,29 +27,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data = parsed.data;
+    const auth = await requireApiUser(request, parsed.data.userId);
+    if (!auth.ok) return auth.response;
 
-    // Verify user exists — auto-create if not found (for localStorage-based users)
-    let user = await db.user.findUnique({ where: { id: data.userId } });
+    const user = await db.user.findUnique({ where: { id: auth.userId } });
     if (!user) {
-      user = await db.user.create({
-        data: {
-          id: data.userId,
-          name: 'Seeker',
-          isOnboarded: false,
-          hasPaid: false,
-        },
-      });
+      return NextResponse.json(
+        { success: false, error: 'User not found' },
+        { status: 404 }
+      );
     }
 
-    // Create mood entry
     const moodEntry = await db.moodEntry.create({
       data: {
-        userId: data.userId,
-        mood: data.mood,
-        emoji: data.emoji,
-        note: data.note ?? null,
-        tags: JSON.stringify(data.tags ?? []),
+        userId: auth.userId,
+        mood: parsed.data.mood,
+        emoji: parsed.data.emoji,
+        note: parsed.data.note ?? null,
+        tags: JSON.stringify(parsed.data.tags ?? []),
       },
     });
 

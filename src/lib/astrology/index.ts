@@ -140,10 +140,12 @@ export function calculateKundali(
   longitude: number,
   timezoneOffset: number = 5.5
 ): KundaliData {
-  // Parse birth time and combine with date
+  // Parse birth time and combine with date in a timezone-independent manner
   const [hours, minutes] = birthTime.split(':').map(Number);
-  const fullBirthDate = new Date(birthDate);
-  fullBirthDate.setHours(hours || 0, minutes || 0, 0, 0);
+  const year = birthDate.getUTCFullYear();
+  const month = birthDate.getUTCMonth();
+  const dateNum = birthDate.getUTCDate();
+  const fullBirthDate = new Date(Date.UTC(year, month, dateNum, hours || 0, minutes || 0, 0, 0));
   
   // Step 1: Calculate all planetary positions
   const { positions, ayanamsa, ascendant } = calculateAllPlanetaryPositions(

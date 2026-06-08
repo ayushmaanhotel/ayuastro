@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { generateReport, generateFreeReport } from '@/lib/ai';
 import type { AIReportInput, TraitScores } from '@/lib/ai';
+import { requireApiUser } from '@/lib/api-auth';
+import { hasPremiumEntitlement } from '@/lib/entitlements';
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
@@ -25,7 +27,7 @@ const traitScoresSchema = z.object({
 });
 
 const generateReportSchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1, 'User ID is required').optional(),
   reportType: z.enum(['personality', 'relationship', 'emotional_pattern']),
   astrologyData: z.object({
     sunSign: z.string(),
@@ -63,7 +65,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { userId, reportType, astrologyData, numerologyData, traitScores, freeOnly } = parsed.data;
+    let { userId: claimedUserId, reportType, astrologyData, numerologyData, traitScores, freeOnly = false } = parsed.data;
+    const auth = await requireApiUser(request, claimedUserId);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
 
     // Verify user exists
     const user = await db.user.findUnique({ where: { id: userId } });
@@ -72,6 +77,11 @@ export async function POST(request: NextRequest) {
         { success: false, error: 'User not found' },
         { status: 404 }
       );
+    }
+
+    const hasPaid = await hasPremiumEntitlement(userId);
+    if (!freeOnly && !hasPaid) {
+      freeOnly = true;
     }
 
     // Build AI report input

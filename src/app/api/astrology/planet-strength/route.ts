@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { calculateKundali, initializeSwissEphemeris } from '@/lib/astrology';
+import { requireApiUser } from '@/lib/api-auth';
 import {
   type Planet,
   type ZodiacSign,
@@ -35,7 +36,7 @@ import {
 } from '@/lib/astrology/utils';
 import { calculateDivisionalChart } from '@/lib/astrology/divisional';
 
-const requestSchema = z.object({ userId: z.string().min(1) });
+const requestSchema = z.object({ userId: z.string().min(1).optional() });
 
 // ─── In-Memory Cache ────────────────────────────────────────────────────────
 const cache = new Map<string, { data: unknown; timestamp: number }>();
@@ -321,7 +322,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { userId } = parsed.data;
+    const auth = await requireApiUser(request, parsed.data.userId);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
 
     // Check cache
     const cacheKey = `planet-strength-${userId}`;
@@ -345,10 +348,13 @@ export async function POST(request: NextRequest) {
 
     const profile = user.profile;
 
-    // Recalculate kundali for fresh positions
-    const birthDate = new Date(profile.dateOfBirth);
+    // Recalculate kundali for fresh positions in a timezone-independent manner
+    const parsedDate = new Date(profile.dateOfBirth);
     const [hours, minutes] = (profile.timeOfBirth || '12:00').split(':').map(Number);
-    birthDate.setHours(hours || 0, minutes || 0, 0, 0);
+    const year = parsedDate.getUTCFullYear();
+    const month = parsedDate.getUTCMonth();
+    const dateNum = parsedDate.getUTCDate();
+    const birthDate = new Date(Date.UTC(year, month, dateNum, hours || 0, minutes || 0, 0, 0));
 
     const tzOffset = typeof profile.timezone === 'number'
       ? profile.timezone
