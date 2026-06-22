@@ -1,11 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
@@ -837,14 +835,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
 
     try {
-      final response = await http.post(
-        Uri.parse('${ApiService.baseUrl}/api/reports/generate-pdf'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'userId': state.userId,
-          'includePremium': state.hasPaid,
-        }),
-      ).timeout(const Duration(seconds: 40));
+      final response = await ApiService.generatePdfReport(
+        userId: state.userId!,
+        includePremium: state.hasPaid,
+      );
 
       if (response.statusCode == 200) {
         final pdfBytes = response.bodyBytes;
@@ -1334,13 +1328,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   color: sheetDark ? Colors.white.withValues(alpha: 0.08) : AppColors.brown100,
                 ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
                       Text(
                         'Recalculate Kundali details',
                         style: TextStyle(
@@ -1517,7 +1512,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   ),
                 ],
               ),
-            );
+            ),
+          );
           },
         );
       },

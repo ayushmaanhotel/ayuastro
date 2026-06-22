@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:http/http.dart' as http;
 import '../providers/app_state.dart';
 import '../models/models.dart';
 import '../widgets/custom_widgets.dart';
@@ -814,14 +812,10 @@ class _ReportScreenState extends State<ReportScreen> {
     });
 
     try {
-      final response = await http.post(
-        Uri.parse('${ApiService.baseUrl}/api/reports/generate-pdf'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'userId': state.userId,
-          'includePremium': state.hasPaid,
-        }),
-      ).timeout(const Duration(seconds: 35));
+      final response = await ApiService.generatePdfReport(
+        userId: state.userId!,
+        includePremium: state.hasPaid,
+      );
 
       if (response.statusCode == 200) {
         final pdfBytes = response.bodyBytes;

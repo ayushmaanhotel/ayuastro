@@ -638,8 +638,12 @@ Integrated a local keyword-retrieval RAG engine and refined tone/jargon guidelin
 - **Client Integration**: Updated `src/components/ayuastro/chat/AstrologerChatView.tsx` to retrieve `userId` from the Zustand store and pass it in the request payload, securing personalization.
 - **Verification**: Verified Next.js compiles with zero compilation errors using `npx tsc --noEmit` and database lookup logic works cleanly against real database records.
 
+---
 
-
-
-
-
+## 43. UI Screens Layout, Auto-Scroll, and PDF Download Auth Fixes (2026-06-22)
+- **PDF Export/Download Auth Headers**: Added `ApiService.generatePdfReport` static helper method in `flutter_app/lib/services/api_service.dart` that uses authenticated headers `_authHeaders()` to ensure Authorization headers are sent.
+- **Profile Screen Layout & API Integration**: Wrapped the edit profile modal container in `_showEditProfileBottomSheet` in `flutter_app/lib/screens/profile_screen.dart` with a `SingleChildScrollView` to prevent keyboard flex/overflow layout issues, and refactored the PDF export function to call the new `ApiService.generatePdfReport` helper.
+- **Report Screen API Integration**: Refactored the PDF download function in `flutter_app/lib/screens/report_screen.dart` to call the new `ApiService.generatePdfReport` helper.
+- **Chat Screen Scroll Behavior**: Added state tracking `_lastMessageCount` in `flutter_app/lib/screens/chat_screen.dart` and updated the auto-scroll callback in `build` to only trigger when the actual message count increases. This prevents manual scrolling from being interrupted on every build/repaint tick.
+- **Insights Screen Painter Cleanliness**: Removed the misplaced `shouldRepaint` method inside `_InsightsScreenState` in `flutter_app/lib/screens/insights_screen.dart`.
+- **Verification**: Verified compilation and static analysis with `flutter analyze`.

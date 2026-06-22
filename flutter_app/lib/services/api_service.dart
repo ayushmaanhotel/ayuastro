@@ -522,5 +522,20 @@ class ApiService {
       throw Exception(errorMsg ?? 'Failed to fetch user profile from server');
     }
   }
+
+  // Generate PDF Report
+  static Future<http.Response> generatePdfReport({
+    required String userId,
+    required bool includePremium,
+  }) async {
+    return await http.post(
+      Uri.parse('$baseUrl/api/reports/generate-pdf'),
+      headers: _authHeaders(),
+      body: jsonEncode({
+        'userId': userId,
+        'includePremium': includePremium,
+      }),
+    ).timeout(const Duration(seconds: 45));
+  }
 }
 

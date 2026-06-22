@@ -182,6 +182,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
   bool _showSuggestions = true;
+  int _lastMessageCount = 0;
 
   // For pulsing story outline
   late AnimationController _pulseController;
@@ -232,7 +233,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
     if (_selectedAstrologer != null) {
       final messages = state.astrologerChats[_selectedAstrologer!.id] ?? [];
-      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+      if (messages.length > _lastMessageCount) {
+        _lastMessageCount = messages.length;
+        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+      } else if (messages.length < _lastMessageCount) {
+        _lastMessageCount = messages.length;
+      }
 
       return Scaffold(
         backgroundColor: isDark ? AppColors.darkBg : AppColors.cream,
@@ -252,6 +258,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                           setState(() {
                             _selectedAstrologer = null;
                             _showSuggestions = true;
+                            _lastMessageCount = 0;
                           });
                         },
                       ),
@@ -532,6 +539,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                       onTap: () {
                         setState(() {
                           _selectedAstrologer = ast;
+                          _lastMessageCount = 0;
                         });
                       },
                       child: Padding(
@@ -638,6 +646,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                               onTap: () {
                                 setState(() {
                                   _selectedAstrologer = ast;
+                                  _lastMessageCount = 0;
                                 });
                               },
                               child: Padding(
