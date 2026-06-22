@@ -139,7 +139,9 @@ class ApiService {
     final response = await http.get(uri).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
-      return DailyHoroscope.fromJson(jsonDecode(response.body));
+      final raw = jsonDecode(response.body);
+      final data = raw['data'] ?? raw;
+      return DailyHoroscope.fromJson(data);
     } else {
       throw Exception('Failed to load daily horoscope');
     }
@@ -162,7 +164,8 @@ class ApiService {
     final response = await http.get(uri).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
-      final List<dynamic> body = jsonDecode(response.body);
+      final raw = jsonDecode(response.body);
+      final List<dynamic> body = (raw is Map && raw.containsKey('data')) ? raw['data'] : raw;
       return body.map((item) => TransitInfo.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load current planetary transits');
@@ -222,7 +225,9 @@ class ApiService {
     ).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return MoodEntry.fromJson(jsonDecode(response.body));
+      final raw = jsonDecode(response.body);
+      final data = raw['data'] ?? raw;
+      return MoodEntry.fromJson(data);
     } else {
       throw Exception('Failed to log mood entry');
     }
@@ -243,7 +248,8 @@ class ApiService {
     final response = await http.get(uri, headers: _authHeaders()).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final raw = jsonDecode(response.body);
+      final data = (raw is Map && raw.containsKey('data')) ? raw['data'] : raw;
       final List<dynamic> entriesRaw = data['entries'] ?? [];
       final entries = entriesRaw.map((e) => MoodEntry.fromJson(e)).toList();
       final summary = MoodHistorySummary.fromJson(data['summary'] ?? {});
@@ -477,6 +483,8 @@ class ApiService {
     bool? rotateUcpToken,
     String? language,
     String? vedicLevel,
+    bool? dailyHoroscope,
+    bool? moodReminders,
   }) async {
     final response = await http.put(
       Uri.parse('$baseUrl/api/auth/preferences'),
@@ -487,6 +495,8 @@ class ApiService {
         if (rotateUcpToken != null) 'rotateUcpToken': rotateUcpToken,
         if (language != null) 'language': language,
         if (vedicLevel != null) 'vedicLevel': vedicLevel,
+        if (dailyHoroscope != null) 'dailyHoroscope': dailyHoroscope,
+        if (moodReminders != null) 'moodReminders': moodReminders,
       }),
     ).timeout(const Duration(seconds: 15));
 
@@ -495,6 +505,28 @@ class ApiService {
     } else {
       final errorMsg = _tryExtractErrorMessage(response.body);
       throw Exception(errorMsg ?? 'Failed to update preferences on server');
+    }
+  }
+
+  // 8. Generate PDF Report
+  static Future<List<int>> generatePdfReport({
+    required String userId,
+    required bool includePremium,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/reports/generate-pdf'),
+      headers: _authHeaders(),
+      body: jsonEncode({
+        'userId': userId,
+        'includePremium': includePremium,
+      }),
+    ).timeout(const Duration(seconds: 40));
+
+    if (response.statusCode == 200) {
+      return response.bodyBytes;
+    } else {
+      final errorMsg = _tryExtractErrorMessage(response.body);
+      throw Exception(errorMsg ?? 'Failed to generate PDF report (${response.statusCode})');
     }
   }
 

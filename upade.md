@@ -638,8 +638,11 @@ Integrated a local keyword-retrieval RAG engine and refined tone/jargon guidelin
 - **Client Integration**: Updated `src/components/ayuastro/chat/AstrologerChatView.tsx` to retrieve `userId` from the Zustand store and pass it in the request payload, securing personalization.
 - **Verification**: Verified Next.js compiles with zero compilation errors using `npx tsc --noEmit` and database lookup logic works cleanly against real database records.
 
-
-
-
-
-
+## 14. API Service Unwrapping & Preferences Synchronization (2026-06-22)
+- **API Service Response Unwrapping**: Updated `getDailyHoroscope`, `getCurrentTransits`, `logMood`, and `getMoodHistory` in `lib/services/api_service.dart` to support responses wrapped in `{ success: true, data: ... }` by automatically checking and unwrapping the `data` key.
+- **Preference Syncing Parameters**: Updated `updatePreferences` in `api_service.dart` to support two new parameters: `dailyHoroscope` and `moodReminders`.
+- **Cosmic PDF Generation Helper**: Added `generatePdfReport` to `api_service.dart` to stream binary PDF bytes from the `/api/reports/generate-pdf` POST endpoint.
+- **Refactoring Screen Files**: Refactored `profile_screen.dart` and `report_screen.dart` to use `ApiService.generatePdfReport` helper instead of duplicate manual HTTP calls. Removed unused `dart:convert` and `package:http/http.dart` imports in both screens to keep the codebase clean.
+- **Settings State Sync Background Execution**: Added a `_syncPreference` helper to `AppState` in `lib/providers/app_state.dart` to call `ApiService.updatePreferences` in the background (using unawaited futures and handling errors inside a try-catch block to avoid any Dart analyzer warnings).
+- **Background Synchronization Integration**: Updated setters in `app_state.dart` for `language`, `vedicLevel`, `dailyHoroscopeNotif`, and `moodRemindersNotif` to trigger the background sync helper whenever `userId` is present.
+- **Static Analysis Validation**: Verified the codebase using `dart analyze`, confirming zero compile errors and zero static analysis warnings.

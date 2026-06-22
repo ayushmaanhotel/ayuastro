@@ -402,28 +402,52 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _syncPreference({
+    String? language,
+    String? vedicLevel,
+    bool? dailyHoroscope,
+    bool? moodReminders,
+  }) async {
+    if (_userId == null) return;
+    try {
+      await ApiService.updatePreferences(
+        userId: _userId!,
+        language: language,
+        vedicLevel: vedicLevel,
+        dailyHoroscope: dailyHoroscope,
+        moodReminders: moodReminders,
+      );
+    } catch (e) {
+      debugPrint("Error syncing preferences: $e");
+    }
+  }
+
   void setLanguage(String lang) {
     _language = lang;
     _saveState();
     notifyListeners();
+    _syncPreference(language: lang);
   }
 
   void setVedicLevel(String level) {
     _vedicLevel = level;
     _saveState();
     notifyListeners();
+    _syncPreference(vedicLevel: level);
   }
 
   void setDailyHoroscopeNotif(bool enabled) {
     _dailyHoroscopeNotif = enabled;
     _saveState();
     notifyListeners();
+    _syncPreference(dailyHoroscope: enabled);
   }
 
   void setMoodRemindersNotif(bool enabled) {
     _moodRemindersNotif = enabled;
     _saveState();
     notifyListeners();
+    _syncPreference(moodReminders: enabled);
   }
 
   Future<void> setUcpEnabled(bool value) async {

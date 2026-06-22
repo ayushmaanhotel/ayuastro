@@ -1,11 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
@@ -837,66 +835,56 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
 
     try {
-      final response = await http.post(
-        Uri.parse('${ApiService.baseUrl}/api/reports/generate-pdf'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'userId': state.userId,
-          'includePremium': state.hasPaid,
-        }),
-      ).timeout(const Duration(seconds: 40));
+      final pdfBytes = await ApiService.generatePdfReport(
+        userId: state.userId!,
+        includePremium: state.hasPaid,
+      );
 
-      if (response.statusCode == 200) {
-        final pdfBytes = response.bodyBytes;
+      final directory = await getApplicationDocumentsDirectory();
+      final nameSlug = state.birthDetails?.name.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_').toLowerCase() ?? 'seeker';
+      final file = File('${directory.path}/ayuastro_report_$nameSlug.pdf');
+      await file.writeAsBytes(pdfBytes);
 
-        final directory = await getApplicationDocumentsDirectory();
-        final nameSlug = state.birthDetails?.name.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_').toLowerCase() ?? 'seeker';
-        final file = File('${directory.path}/ayuastro_report_$nameSlug.pdf');
-        await file.writeAsBytes(pdfBytes);
-
-        if (context.mounted) {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkCard : Colors.white,
-              title: const Row(
-                children: [
-                  Icon(Icons.file_present_outlined, color: AppColors.sage),
-                  SizedBox(width: 8),
-                  Text("Cosmic Chart Exported"),
-                ],
-              ),
-              content: Text(
-                "Your detailed astrological chart and traits summary have been exported natively as a PDF:\n\n${file.path}",
-                style: const TextStyle(fontSize: 12.5, height: 1.45),
-              ),
-              actions: [
-                TextButton(
-                  child: const Text("Later", style: TextStyle(color: AppColors.brown500)),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.gold,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  child: const Text("View PDF", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PdfViewerScreen(filePath: file.path),
-                      ),
-                    );
-                  },
-                ),
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkCard : Colors.white,
+            title: const Row(
+              children: [
+                Icon(Icons.file_present_outlined, color: AppColors.sage),
+                SizedBox(width: 8),
+                Text("Cosmic Chart Exported"),
               ],
             ),
-          );
-        }
-      } else {
-        throw Exception("Server returned code ${response.statusCode}");
+            content: Text(
+              "Your detailed astrological chart and traits summary have been exported natively as a PDF:\n\n${file.path}",
+              style: const TextStyle(fontSize: 12.5, height: 1.45),
+            ),
+            actions: [
+              TextButton(
+                child: const Text("Later", style: TextStyle(color: AppColors.brown500)),
+                onPressed: () => Navigator.pop(context),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.gold,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: const Text("View PDF", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PdfViewerScreen(filePath: file.path),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {
