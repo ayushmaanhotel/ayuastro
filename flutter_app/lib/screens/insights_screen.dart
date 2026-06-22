@@ -1161,6 +1161,4 @@ class _InsightsScreenState extends State<InsightsScreen> {
       ],
     );
   }
-
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

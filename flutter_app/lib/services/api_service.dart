@@ -554,5 +554,6 @@ class ApiService {
       throw Exception(errorMsg ?? 'Failed to fetch user profile from server');
     }
   }
+
 }
 

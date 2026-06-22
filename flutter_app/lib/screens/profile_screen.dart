@@ -1322,13 +1322,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   color: sheetDark ? Colors.white.withValues(alpha: 0.08) : AppColors.brown100,
                 ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
                       Text(
                         'Recalculate Kundali details',
                         style: TextStyle(
@@ -1505,7 +1506,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   ),
                 ],
               ),
-            );
+            ),
+          );
           },
         );
       },
