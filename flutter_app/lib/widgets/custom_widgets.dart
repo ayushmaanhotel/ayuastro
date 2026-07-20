@@ -11,11 +11,11 @@ class AppColors {
   static const Color brown500 = Color(0xFF8D6E63);
   static const Color brown400 = Color(0xFFA1887F);
   static const Color brown100 = Color(0xFFEFEBE9);
-  
+
   static const Color gold = Color(0xFFC4973B);
   static const Color goldDark = Color(0xFF8B6914);
   static const Color goldLight = Color(0xFFF0C14B);
-  
+
   static const Color sage = Color(0xFF4A7C59);
   static const Color sageLight = Color(0xFFE8F0E9);
 
@@ -46,61 +46,33 @@ class GlassPremiumCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       width: width,
       height: height,
-      padding: padding ?? const EdgeInsets.all(20),
+      padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark 
-            ? AppColors.darkCard.withValues(alpha: 0.85) 
-            : Colors.white.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(16),
+        color: isDark
+            ? AppColors.darkCard.withValues(alpha: 0.94)
+            : Colors.white,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: customBorderColor ?? (isDark 
-              ? AppColors.gold.withValues(alpha: 0.25) 
-              : AppColors.gold.withValues(alpha: 0.15)),
-          width: borderShimmer ? 1.8 : 1.2,
+          color:
+              customBorderColor ??
+              (isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : AppColors.brown100),
+          width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: (isDark ? Colors.black : AppColors.brown900).withValues(alpha: isDark ? 0.4 : 0.06),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-          if (borderShimmer)
-            BoxShadow(
-              color: AppColors.gold.withValues(alpha: 0.15),
-              blurRadius: 10,
-              spreadRadius: 1,
-            ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          child,
-          const Positioned(
-            top: 4,
-            left: 4,
-            child: Text("✦", style: TextStyle(color: AppColors.gold, fontSize: 8)),
-          ),
-          const Positioned(
-            top: 4,
-            right: 4,
-            child: Text("✦", style: TextStyle(color: AppColors.gold, fontSize: 8)),
-          ),
-          const Positioned(
-            bottom: 4,
-            left: 4,
-            child: Text("✦", style: TextStyle(color: AppColors.gold, fontSize: 8)),
-          ),
-          const Positioned(
-            bottom: 4,
-            right: 4,
-            child: Text("✦", style: TextStyle(color: AppColors.gold, fontSize: 8)),
+            color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
+      child: child,
     );
   }
 }
@@ -127,19 +99,17 @@ class GlassLightCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     Widget content = Container(
       width: width,
       height: height,
-      padding: padding ?? const EdgeInsets.all(16),
+      padding: padding ?? const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark 
-            ? Colors.white.withValues(alpha: 0.04) 
-            : AppColors.cream.withValues(alpha: 0.6),
+        color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
-          color: isDark 
-              ? Colors.white.withValues(alpha: 0.08) 
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.06)
               : AppColors.brown100,
           width: 1,
         ),
@@ -177,7 +147,8 @@ class NeonGoldButton extends StatefulWidget {
   State<NeonGoldButton> createState() => _NeonGoldButtonState();
 }
 
-class _NeonGoldButtonState extends State<NeonGoldButton> with SingleTickerProviderStateMixin {
+class _NeonGoldButtonState extends State<NeonGoldButton>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
@@ -208,10 +179,8 @@ class _NeonGoldButtonState extends State<NeonGoldButton> with SingleTickerProvid
       onTapCancel: () => _controller.reverse(),
       child: AnimatedBuilder(
         animation: _scaleAnimation,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        ),
+        builder: (context, child) =>
+            Transform.scale(scale: _scaleAnimation.value, child: child),
         child: Container(
           height: 52,
           alignment: Alignment.center,
@@ -275,7 +244,7 @@ class SectionDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Row(
       children: [
         Expanded(
@@ -285,7 +254,9 @@ class SectionDivider extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   Colors.transparent,
-                  (isDark ? AppColors.gold.withValues(alpha: 0.5) : AppColors.gold.withValues(alpha: 0.3)),
+                  (isDark
+                      ? AppColors.gold.withValues(alpha: 0.5)
+                      : AppColors.gold.withValues(alpha: 0.3)),
                 ],
               ),
             ),
@@ -308,7 +279,9 @@ class SectionDivider extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  (isDark ? AppColors.gold.withValues(alpha: 0.5) : AppColors.gold.withValues(alpha: 0.3)),
+                  (isDark
+                      ? AppColors.gold.withValues(alpha: 0.5)
+                      : AppColors.gold.withValues(alpha: 0.3)),
                   Colors.transparent,
                 ],
               ),
@@ -320,103 +293,28 @@ class SectionDivider extends StatelessWidget {
   }
 }
 
-// 5. Star-field background simulation widget
-class StarFieldBackground extends StatefulWidget {
+// 5. Quiet background wrapper for chat surfaces
+class StarFieldBackground extends StatelessWidget {
   final Widget child;
   const StarFieldBackground({super.key, required this.child});
 
   @override
-  State<StarFieldBackground> createState() => _StarFieldBackgroundState();
-}
-
-class _StarFieldBackgroundState extends State<StarFieldBackground> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  final List<Offset> _stars = [];
-  final List<double> _starsFlickerOffset = [];
-  final Random _random = Random();
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat();
-
-    // Generate 35 static star coordinates
-    for (int i = 0; i < 35; i++) {
-      _stars.add(Offset(_random.nextDouble(), _random.nextDouble()));
-      _starsFlickerOffset.add(_random.nextDouble() * pi);
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return Stack(
-      children: [
-        // Star Drawing Layer
-        Positioned.fill(
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) => CustomPaint(
-              painter: StarPainter(
-                stars: _stars,
-                flickerOffset: _starsFlickerOffset,
-                animationValue: _controller.value,
-                isDark: isDark,
-              ),
-            ),
-          ),
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [AppColors.darkBg, AppColors.darkCard]
+              : [AppColors.cream, Colors.white],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
         ),
-        widget.child,
-      ],
+      ),
+      child: child,
     );
   }
-}
-
-class StarPainter extends CustomPainter {
-  final List<Offset> stars;
-  final List<double> flickerOffset;
-  final double animationValue;
-  final bool isDark;
-
-  StarPainter({
-    required this.stars,
-    required this.flickerOffset,
-    required this.animationValue,
-    required this.isDark,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-    final starColor = AppColors.gold.withValues(alpha: isDark ? 0.35 : 0.2);
-
-    for (int i = 0; i < stars.length; i++) {
-      // Calculate flicker opacity based on sine wave
-      final double flickerValue = sin(animationValue * 2 * pi + flickerOffset[i]);
-      final double opacity = max(0.05, (flickerValue + 1.0) / 2.0 * (isDark ? 0.7 : 0.4));
-      
-      paint.color = starColor.withValues(alpha: opacity);
-      
-      final dx = stars[i].dx * size.width;
-      final dy = stars[i].dy * size.height;
-      final radius = (i % 3 == 0) ? 1.5 : 1.0;
-      
-      canvas.drawCircle(Offset(dx, dy), radius, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
 // 6. Cosmic loading spinner spinner mandala
@@ -428,7 +326,8 @@ class CosmicLoader extends StatefulWidget {
   State<CosmicLoader> createState() => _CosmicLoaderState();
 }
 
-class _CosmicLoaderState extends State<CosmicLoader> with SingleTickerProviderStateMixin {
+class _CosmicLoaderState extends State<CosmicLoader>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -449,7 +348,7 @@ class _CosmicLoaderState extends State<CosmicLoader> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -466,7 +365,9 @@ class _CosmicLoaderState extends State<CosmicLoader> with SingleTickerProviderSt
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.gold.withValues(alpha: isDark ? 0.35 : 0.2),
+                    color: AppColors.gold.withValues(
+                      alpha: isDark ? 0.35 : 0.2,
+                    ),
                     width: 1.5,
                   ),
                 ),
@@ -476,14 +377,14 @@ class _CosmicLoaderState extends State<CosmicLoader> with SingleTickerProviderSt
                 final angle = (index * pi / 2);
                 return Transform.translate(
                   offset: Offset(45 * cos(angle), 45 * sin(angle)),
-                  child: const Text("✦", style: TextStyle(color: AppColors.gold, fontSize: 12)),
+                  child: const Text(
+                    "✦",
+                    style: TextStyle(color: AppColors.gold, fontSize: 12),
+                  ),
                 );
               }),
               // Inner core celestial symbol
-              const Text(
-                "🔮",
-                style: TextStyle(fontSize: 32),
-              ),
+              const Text("🔮", style: TextStyle(fontSize: 32)),
             ],
           ),
         ),
@@ -514,20 +415,18 @@ class AstroMarkdownText extends StatelessWidget {
   final String text;
   final TextStyle? style;
 
-  const AstroMarkdownText({
-    super.key,
-    required this.text,
-    this.style,
-  });
+  const AstroMarkdownText({super.key, required this.text, this.style});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final defaultStyle = style ?? TextStyle(
-      fontSize: 12.5,
-      height: 1.5,
-      color: isDark ? Colors.white70 : AppColors.brown700,
-    );
+    final defaultStyle =
+        style ??
+        TextStyle(
+          fontSize: 12.5,
+          height: 1.5,
+          color: isDark ? Colors.white70 : AppColors.brown700,
+        );
 
     // Split text by lines to parse structure (headers, bullets, paragraphs)
     final lines = text.split('\n');
@@ -541,59 +440,71 @@ class AstroMarkdownText extends StatelessWidget {
 
       // 1. Headers
       if (line.startsWith('###')) {
-        children.add(Padding(
-          padding: const EdgeInsets.only(top: 10, bottom: 4),
-          child: Text(
-            _stripMarkdown(line.substring(3).trim()),
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : AppColors.brown900,
-              fontFamily: 'Playfair Display',
+        children.add(
+          Padding(
+            padding: const EdgeInsets.only(top: 10, bottom: 4),
+            child: Text(
+              _stripMarkdown(line.substring(3).trim()),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : AppColors.brown900,
+                fontFamily: 'Playfair Display',
+              ),
             ),
           ),
-        ));
+        );
       } else if (line.startsWith('##') || line.startsWith('#')) {
-        final content = line.startsWith('##') ? line.substring(2) : line.substring(1);
-        children.add(Padding(
-          padding: const EdgeInsets.only(top: 12, bottom: 6),
-          child: Text(
-            _stripMarkdown(content.trim()),
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: AppColors.goldDark,
-              fontFamily: 'Playfair Display',
+        final content = line.startsWith('##')
+            ? line.substring(2)
+            : line.substring(1);
+        children.add(
+          Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 6),
+            child: Text(
+              _stripMarkdown(content.trim()),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AppColors.goldDark,
+                fontFamily: 'Playfair Display',
+              ),
             ),
           ),
-        ));
+        );
       }
       // 2. Bullet list item
       else if (line.trim().startsWith('-') || line.trim().startsWith('*')) {
         final content = line.trim().substring(1).trim();
-        children.add(Padding(
-          padding: const EdgeInsets.only(left: 8.0, bottom: 4.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("✦  ", style: TextStyle(color: AppColors.gold, fontSize: defaultStyle.fontSize)),
-              Expanded(
-                child: RichText(
-                  text: _parseBoldText(content, defaultStyle),
+        children.add(
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, bottom: 4.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "✦  ",
+                  style: TextStyle(
+                    color: AppColors.gold,
+                    fontSize: defaultStyle.fontSize,
+                  ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: RichText(text: _parseBoldText(content, defaultStyle)),
+                ),
+              ],
+            ),
           ),
-        ));
+        );
       }
       // 3. Regular Paragraph with inline bolding
       else {
-        children.add(Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: RichText(
-            text: _parseBoldText(line, defaultStyle),
+        children.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: RichText(text: _parseBoldText(line, defaultStyle)),
           ),
-        ));
+        );
       }
     }
 
@@ -613,18 +524,19 @@ class AstroMarkdownText extends StatelessWidget {
 
     for (int i = 0; i < parts.length; i++) {
       final isBold = i % 2 == 1;
-      spans.add(TextSpan(
-        text: parts[i],
-        style: defaultStyle.copyWith(
-          fontWeight: isBold ? FontWeight.bold : defaultStyle.fontWeight,
-          color: isBold 
-              ? (defaultStyle.color?.withValues(alpha: 1.0) ?? Colors.white) 
-              : defaultStyle.color,
+      spans.add(
+        TextSpan(
+          text: parts[i],
+          style: defaultStyle.copyWith(
+            fontWeight: isBold ? FontWeight.bold : defaultStyle.fontWeight,
+            color: isBold
+                ? (defaultStyle.color?.withValues(alpha: 1.0) ?? Colors.white)
+                : defaultStyle.color,
+          ),
         ),
-      ));
+      );
     }
 
     return TextSpan(children: spans);
   }
 }
-

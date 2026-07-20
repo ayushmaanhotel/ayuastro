@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../widgets/custom_widgets.dart';
 import '../data/zodiac_data.dart';
+import '../data/vedic_zodiac_data.dart';
 
 class ZodiacDeepDiveScreen extends StatefulWidget {
   const ZodiacDeepDiveScreen({super.key});
@@ -150,6 +151,8 @@ class _ZodiacDeepDiveScreenState extends State<ZodiacDeepDiveScreen> {
                   _tab('Career', 2, colors[0], isDark),
                   const SizedBox(width: 8),
                   _tab('Spirit', 3, colors[0], isDark),
+                  const SizedBox(width: 8),
+                  _tab('Vedic', 4, colors[0], isDark),
                 ],
               ),
             ),
@@ -175,6 +178,7 @@ class _ZodiacDeepDiveScreenState extends State<ZodiacDeepDiveScreen> {
       case 1: return _loveTab(sign, color, isDark);
       case 2: return _careerTab(sign, color, isDark);
       case 3: return _spiritualTab(sign, color, isDark);
+      case 4: return _vedicTab(_selectedSign, color, isDark);
       default: return _overviewTab(sign, color, isDark);
     }
   }
@@ -336,6 +340,199 @@ class _ZodiacDeepDiveScreenState extends State<ZodiacDeepDiveScreen> {
                 fontFamily: 'Playfair Display', fontSize: 16, fontStyle: FontStyle.italic,
                 height: 1.5, color: isDark ? Colors.white : AppColors.brown900,
               )),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _vedicTab(String signName, Color color, bool isDark) {
+    final vedic = vedicZodiacData[signName];
+    if (vedic == null) {
+      return const Center(child: Text("Vedic data not available for this sign."));
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Vedic Identity Card
+        GlassPremiumCard(
+          borderShimmer: true,
+          child: Column(
+            children: [
+              Text(vedic.symbol, style: const TextStyle(fontSize: 40)),
+              const SizedBox(height: 8),
+              Text(vedic.sanskritName, style: TextStyle(
+                fontFamily: 'Playfair Display', fontSize: 22, fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : AppColors.brown900,
+              )),
+              Text(vedic.name, style: TextStyle(
+                fontSize: 14, color: color,
+              )),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8, runSpacing: 6,
+                children: [
+                  _badge(vedic.element, color, isDark),
+                  _badge(vedic.modality, color, isDark),
+                  _badge(vedic.rulingPlanet, color, isDark),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.auto_awesome, color: AppColors.gold, size: 14),
+                  const SizedBox(width: 6),
+                  Text('Deity: ${vedic.deity}', style: TextStyle(
+                    fontSize: 12, fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : AppColors.brown700,
+                  )),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Nakshatras
+        GlassPremiumCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('NAKSHATRAS', style: TextStyle(
+                fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.2,
+                color: isDark ? Colors.white38 : AppColors.brown500,
+              )),
+              const SizedBox(height: 8),
+              Text(vedic.nakshatras, style: TextStyle(
+                fontSize: 13, height: 1.5, color: isDark ? Colors.white70 : AppColors.brown700,
+              )),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Personality Traits
+        _listCard('Vedic Personality', vedic.personalityTraits, color, isDark),
+        const SizedBox(height: 12),
+
+        // Strengths & Weaknesses
+        _listCard('Strengths', vedic.strengths, Colors.green, isDark),
+        const SizedBox(height: 12),
+        _listCard('Shadow Side', vedic.weaknesses, Colors.orange, isDark),
+        const SizedBox(height: 12),
+
+        // Career & Love
+        _textCard('Career Aptitude', vedic.careerAptitude, isDark),
+        const SizedBox(height: 12),
+        _textCard('Love Style', vedic.loveStyle, isDark),
+        const SizedBox(height: 12),
+
+        // Health & Spiritual
+        _textCard('Health Tendencies', vedic.healthTendency, isDark),
+        const SizedBox(height: 12),
+        _textCard('Spiritual Path', vedic.spiritualPath, isDark),
+        const SizedBox(height: 12),
+
+        // Life Lesson
+        GlassPremiumCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('LIFE LESSON', style: TextStyle(
+                fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.2,
+                color: isDark ? Colors.white38 : AppColors.brown500,
+              )),
+              const SizedBox(height: 8),
+              Text(vedic.lifeLesson, style: TextStyle(
+                fontSize: 13, height: 1.5, color: isDark ? Colors.white70 : AppColors.brown700,
+              )),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Daily Affirmation
+        GlassPremiumCard(
+          borderShimmer: true,
+          child: Column(
+            children: [
+              const Text('🙏', style: TextStyle(fontSize: 32)),
+              const SizedBox(height: 8),
+              Text('VEDIC AFFIRMATION', style: TextStyle(
+                fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.2,
+                color: isDark ? AppColors.goldLight : AppColors.goldDark,
+              )),
+              const SizedBox(height: 8),
+              Text('"${vedic.dailyAffirmation}"', textAlign: TextAlign.center, style: TextStyle(
+                fontFamily: 'Playfair Display', fontSize: 16, fontStyle: FontStyle.italic,
+                height: 1.5, color: isDark ? Colors.white : AppColors.brown900,
+              )),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Compatibility
+        GlassPremiumCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('VEDIC COMPATIBILITY', style: TextStyle(
+                fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.2,
+                color: isDark ? Colors.white38 : AppColors.brown500,
+              )),
+              const SizedBox(height: 12),
+              ...vedic.compatibility.entries.map((entry) {
+                final partnerSign = vedicZodiacData[entry.key];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        child: Text(
+                          '${partnerSign?.symbol ?? ''} ${entry.key}',
+                          style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : AppColors.brown700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: entry.value / 100,
+                            backgroundColor: AppColors.brown100.withValues(alpha: 0.3),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              entry.value >= 80 ? Colors.green :
+                              entry.value >= 60 ? AppColors.gold :
+                              entry.value >= 50 ? Colors.orange : Colors.redAccent,
+                            ),
+                            minHeight: 6,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 35,
+                        child: Text(
+                          '${entry.value}%',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white54 : AppColors.brown500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
             ],
           ),
         ),

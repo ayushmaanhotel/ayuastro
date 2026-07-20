@@ -58,6 +58,7 @@ export interface DeepSeekConfigStatus {
 }
 
 const DEFAULT_BASE_URL = 'https://api.deepseek.com';
+const AGENT_ROUTER_BASE_URL = 'https://agentrouter.org/v1';
 const DEFAULT_TIMEOUT_MS = 120000;
 
 function normalizeBaseURL(value?: string): string {
@@ -83,9 +84,22 @@ function getDefaultModel(thinkingEnabled: boolean): DeepSeekModel {
   return 'deepseek-v4-flash';
 }
 
+function getApiKey(): string {
+  return normalizeApiKey(process.env.DEEPSEEK_API_KEY || process.env.AGENT_ROUTER_TOKEN);
+}
+
+function getBaseURL(): string {
+  const explicit = process.env.DEEPSEEK_BASE_URL?.trim();
+  if (explicit) return normalizeBaseURL(explicit);
+  if (process.env.AGENT_ROUTER_TOKEN?.trim() && !process.env.DEEPSEEK_API_KEY?.trim()) {
+    return AGENT_ROUTER_BASE_URL;
+  }
+  return DEFAULT_BASE_URL;
+}
+
 export function getDeepSeekConfigStatus(): DeepSeekConfigStatus {
-  const apiKey = normalizeApiKey(process.env.DEEPSEEK_API_KEY);
-  const baseURL = normalizeBaseURL(process.env.DEEPSEEK_BASE_URL);
+  const apiKey = getApiKey();
+  const baseURL = getBaseURL();
   const defaultModel = getDefaultModel(true);
 
   return {
@@ -103,14 +117,14 @@ export function getDeepSeekConfigStatus(): DeepSeekConfigStatus {
 export async function createDeepSeekCompletion(
   options: DeepSeekCompletionOptions
 ): Promise<DeepSeekCompletionResponse> {
-  const apiKey = normalizeApiKey(process.env.DEEPSEEK_API_KEY);
+  const apiKey = getApiKey();
   if (!apiKey) {
-    throw new Error('DEEPSEEK_API_KEY is not defined or is empty in the environment variables.');
+    throw new Error('DEEPSEEK_API_KEY or AGENT_ROUTER_TOKEN is not defined or is empty in the environment variables.');
   }
 
   const thinkingEnabled = options.thinking?.type !== 'disabled';
   const model = options.model ?? getDefaultModel(thinkingEnabled);
-  const baseURL = normalizeBaseURL(process.env.DEEPSEEK_BASE_URL);
+  const baseURL = getBaseURL();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
 

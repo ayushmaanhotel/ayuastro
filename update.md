@@ -385,8 +385,8 @@ Integrated DeepSeek's official V4 Flash model lineup across the entire AI ecosys
    - Modified `initializeSwissEphemeris()` to store and return a cached `swephInitPromise`, ensuring all subsequent calculation requests wait for the same promise to resolve.
 
 5. **Verification**:
-   - Executed `test-ephemeris.ts` and successfully verified double-precision planetary placements and Lahiri ayanamsa (`24.226013` degrees) computed by the authentic Swiss Ephemeris library.
-   - Executed `test-deepseek.ts` and successfully validated V4 Flash completion execution, JSON parsing, and response correctness.
+    - Executed `test-ephemeris.ts` and successfully verified double-precision planetary placements and Lahiri ayanamsa (`24.226013` degrees) computed by the authentic Swiss Ephemeris library.
+    - Executed `test-deepseek.ts` and successfully validated V4 Flash completion execution, JSON parsing, and response correctness.
 
 ---
 
@@ -437,15 +437,15 @@ Resolved the issue where AI responses in counselor chat and Deep AI Insights rep
    - Performed a clean production redeployment of the Next.js backend to Vercel, bypassing Hobby plan Git commit author restrictions by temporarily disabling Git metadata uploads.
 
 2. **Cross-Platform Standalone Build**:
-   - Created [copy-standalone.js](file:///c:/Users/prabh/OneDrive/Documents/applications/ayuastro%20zip/copy-standalone.js) as a cross-platform folder copy utility.
-   - Updated the `build` script in [package.json](file:///c:/Users/prabh/OneDrive/Documents/applications/ayuastro%20zip/package.json) to use this Node utility instead of the Unix `cp -r` command, resolving Windows build failures.
+   - Created `copy-standalone.js` as a cross-platform folder copy utility.
+   - Updated the `build` script in `package.json` to use this Node utility instead of the Unix `cp -r` command, resolving Windows build failures.
 
 3. **Zod Validation Nullish Handling**:
-   - Changed schema fields from `.optional()` to `.nullish()` in [route.ts](file:///c:/Users/prabh/OneDrive/Documents/applications/ayuastro%20zip/src/app/api/chat/route.ts) and [route.ts](file:///c:/Users/prabh/OneDrive/Documents/applications/ayuastro%20zip/src/app/api/ai/deep-intelligence/route.ts).
+   - Changed schema fields from `.optional()` to `.nullish()` in `src/app/api/chat/route.ts` and `src/app/api/ai/deep-intelligence/route.ts`.
    - This ensures the Next.js API safely accepts `null` values sent by the Flutter client (when encoding Dart maps with optional null values) instead of failing validation with a 400 Bad Request.
 
 4. **JSON Formatting Retry Logic**:
-   - Updated [report-generator.ts](file:///c:/Users/prabh/OneDrive/Documents/applications/ayuastro%20zip/src/lib/ai/report-generator.ts) to flag JSON parsing errors as retryable (`true`).
+   - Updated `src/lib/ai/report-generator.ts` to flag JSON parsing errors as retryable (`true`).
    - This ensures the interpretation engine automatically retries generation if the DeepSeek model outputs a slightly malformed JSON, making it robust against generative formatting quirks.
 
 ---
@@ -612,7 +612,16 @@ Integrated a local keyword-retrieval RAG engine and refined tone/jargon guidelin
 
 ---
 
-## 41. Security, Timezone, Database Indexes, and Auth Rollback Fixes (2026-06-04)
+## 41. Database & Authentication Routing Audit (2026-06-04)
+- **Database Schema Audit**: Identified missing index fields `@@index([userId])` for `Report`, `QuestionnaireAnswer`, and `Transaction` models in `prisma/schema.prisma` that trigger sequential table scans on PostgreSQL. Verified cascading deletes are correctly setup on all relations.
+- **Authentication Flow Audit**: Analyzed the asynchronous registration flow in `signup/route.ts` and identified transactional synchronization vulnerabilities (zombie/orphaned users in Supabase Auth if Prisma user setup fails).
+- **Profile Update Auth Divergence**: Discovered that `profile-update/route.ts` updates user email/phone in the local Prisma DB but does not synchronize them with Supabase Auth, permanently breaking credentials login for updated accounts.
+- **Paywall Bypass Vulnerability Audit**: Identified paywall verification issues in backend routes `/api/ai/deep-intelligence`, `/api/reports/generate-pdf`, and `/api/ai/generate-report`, where premium resources are generated or returned based on user request body/query parameters without verifying database `hasPaid` status.
+- **Audit Documentation**: Updated the comprehensive security audit artifact `database_auth_audit_report.md` detailing security holes, indexing bottlenecks, and a step-by-step remediation plan.
+
+---
+
+## 42. Security, Timezone, Database Indexes, and Auth Rollback Fixes (2026-06-04)
 - **Database Schema Indexes**: Added `@@index([userId])` to `Report`, `QuestionnaireAnswer`, and `Transaction` models in `prisma/schema.prisma` and pushed them to the live PostgreSQL database with `npx prisma db push` to resolve sequential table scan bottlenecks.
 - **Timezone-Independent Calculations**: Replaced host-server local timezone-dependent methods in `src/lib/astrology/index.ts` and `src/app/api/astrology/planet-strength/route.ts` with `Date.UTC` to combine birth date and birth time timezone-independently.
 - **Paywall Verification Structure**: Added paywall check structures (currently bypassed to allow free users access per user instructions) in `/api/reports/generate-pdf/route.ts`, `/api/ai/deep-intelligence/route.ts`, and `/api/ai/generate-report/route.ts`.
@@ -623,7 +632,7 @@ Integrated a local keyword-retrieval RAG engine and refined tone/jargon guidelin
 
 ---
 
-## 42. Astrologer Chat Hyper-Personalization & Tone Remediation (2026-06-08)
+## 43. Astrologer Chat Hyper-Personalization & Tone Remediation (2026-06-08)
 - **Database-Backed Personalization Fallback**: Modified the POST handler in `src/app/api/chat/astrologer/route.ts` to accept a `userId`. If provided, the backend queries the database using Prisma (`User`, `AstrologyData`, `NumerologyData`, `TraitScores`) and parses calculations (yogas, doshas, nakshatras, current dasha, top traits) on the server to dynamically generate a hyper-personalized prompt. This eliminates generic responses when the client-side store is empty or desynced.
 - **Tone & Length Guidelines**: Relaxed the strict astrologer response length from 10-30 words to **30-60 words (max 80 words)** in the system prompt. Refined the guidelines to guide responses into a warm, friendly, conversational, and empathetic tone rather than a robotic/rushed vibe.
 - **Client Integration**: Updated `src/components/ayuastro/chat/AstrologerChatView.tsx` to retrieve `userId` from the Zustand store and pass it in the request payload, securing personalization.
@@ -631,7 +640,7 @@ Integrated a local keyword-retrieval RAG engine and refined tone/jargon guidelin
 
 ---
 
-## 43. API Unwrapping, State Sync, UI Layout & PDF Auth Fixes (2026-06-22)
+## 44. API Unwrapping, State Sync, UI Layout & PDF Auth Fixes (2026-06-22)
 - **API Response Unwrapping**: Updated `getDailyHoroscope`, `getCurrentTransits`, `logMood`, and `getMoodHistory` in `lib/services/api_service.dart` to support responses wrapped in `{ success: true, data: ... }` by automatically checking and unwrapping the `data` key.
 - **Preference Syncing Parameters**: Updated `updatePreferences` in `api_service.dart` to support two new parameters: `dailyHoroscope` and `moodReminders`.
 - **Cosmic PDF Generation Helper**: Added `generatePdfReport` to `api_service.dart` to stream binary PDF bytes from the `/api/reports/generate-pdf` POST endpoint with `_authHeaders()`.

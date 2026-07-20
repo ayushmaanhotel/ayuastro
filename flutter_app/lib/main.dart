@@ -21,6 +21,61 @@ import 'widgets/custom_widgets.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Global error boundary
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return Material(
+      child: Container(
+        color: const Color(0xFF1A1410),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('⚠️', style: TextStyle(fontSize: 48)),
+                const SizedBox(height: 16),
+                const Text(
+                  'Something went wrong',
+                  style: TextStyle(
+                    color: Color(0xFFD4AF37),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Playfair Display',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  details.exception.toString(),
+                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    // Restart app
+                    main();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFD4AF37),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Restart'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  };
+  
+  // Catch async errors
+  FlutterError.onError = (details) {
+    debugPrint('Flutter Error: ${details.exception}');
+    debugPrintStack(stackTrace: details.stack);
+  };
+  
   runApp(const MyApp());
 }
 

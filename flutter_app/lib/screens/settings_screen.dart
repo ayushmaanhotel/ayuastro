@@ -11,14 +11,40 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _notifications = true;
-  bool _dailyHoroscope = true;
-  bool _transitAlerts = true;
-  String _language = 'English';
+  late bool _notifications;
+  late bool _dailyHoroscope;
+  late bool _transitAlerts;
+  late String _language;
 
   @override
   void initState() {
     super.initState();
+    // Initialize from AppState so changes persist
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = Provider.of<AppState>(context, listen: false);
+      setState(() {
+        _notifications = state.dailyHoroscopeNotif || state.moodRemindersNotif;
+        _dailyHoroscope = state.dailyHoroscopeNotif;
+        _transitAlerts = state.moodRemindersNotif;
+        _language = _mapLanguageCode(state.language);
+      });
+    });
+  }
+
+  String _mapLanguageCode(String code) {
+    switch (code) {
+      case 'hi': return 'Hindi';
+      case 'hinglish': return 'Hinglish';
+      default: return 'English';
+    }
+  }
+
+  String _mapLanguageToCode(String lang) {
+    switch (lang) {
+      case 'Hindi': return 'hi';
+      case 'Hinglish': return 'hinglish';
+      default: return 'en';
+    }
   }
 
   @override
@@ -124,7 +150,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             }, isDark),
 
             const SizedBox(height: 12),
-            _languageSetting(isDark),
+            _languageSetting(isDark, state),
 
             const SizedBox(height: 24),
 
@@ -132,13 +158,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _sectionHeader('NOTIFICATIONS', isDark),
             const SizedBox(height: 10),
             _toggleSetting('Push Notifications', '🔔', 'Receive cosmic updates and reminders', _notifications,
-              (v) => setState(() => _notifications = v), isDark),
+              (v) {
+                setState(() => _notifications = v);
+                // Persist to AppState
+                state.setDailyHoroscopeNotif(v);
+                state.setMoodRemindersNotif(v);
+              }, isDark),
             const SizedBox(height: 10),
             _toggleSetting('Daily Horoscope', '⭐', 'Morning horoscope alert at 7:00 AM', _dailyHoroscope,
-              (v) => setState(() => _dailyHoroscope = v), isDark),
+              (v) {
+                setState(() => _dailyHoroscope = v);
+                state.setDailyHoroscopeNotif(v);
+              }, isDark),
             const SizedBox(height: 10),
             _toggleSetting('Transit Alerts', '🪐', 'Notify on significant planetary movements', _transitAlerts,
-              (v) => setState(() => _transitAlerts = v), isDark),
+              (v) {
+                setState(() => _transitAlerts = v);
+                state.setMoodRemindersNotif(v);
+              }, isDark),
 
             const SizedBox(height: 24),
 
@@ -242,7 +279,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _languageSetting(bool isDark) {
+  Widget _languageSetting(bool isDark, AppState state) {
     return GlassLightCard(
       padding: const EdgeInsets.all(14),
       child: Row(
@@ -277,7 +314,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: TextStyle(fontSize: 12, color: isDark ? AppColors.goldLight : AppColors.goldDark),
                 dropdownColor: isDark ? const Color(0xFF1E1E2E) : Colors.white,
                 items: ['English', 'Hindi', 'Sanskrit'].map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
-                onChanged: (v) => setState(() => _language = v ?? 'English'),
+                onChanged: (v) {
+                  setState(() => _language = v ?? 'English');
+                  state.setLanguage(_mapLanguageToCode(_language));
+                },
               ),
             ),
           ),

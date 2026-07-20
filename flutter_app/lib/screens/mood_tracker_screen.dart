@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../providers/app_state.dart';
 import '../models/models.dart';
 import '../widgets/custom_widgets.dart';
@@ -226,7 +227,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "7-Day Mood Timeline",
+            "7-Day Mood Trend",
             style: TextStyle(color: AppColors.goldDark, fontSize: 13, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -238,42 +239,192 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
               ),
             )
           else
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: last7Days.map((entry) {
-                final dateLabel = DateFormat('E').format(entry.createdAt);
-                
-                // Color mapping
-                Color barColor = Colors.orange;
-                if (entry.mood == 5) barColor = AppColors.sage;
-                if (entry.mood == 4) barColor = Colors.greenAccent;
-                if (entry.mood == 3) barColor = Colors.yellow;
-                if (entry.mood == 1) barColor = Colors.redAccent;
-
-                return Column(
-                  children: [
-                    Text(entry.emoji, style: const TextStyle(fontSize: 18)),
-                    const SizedBox(height: 6),
-                    Container(
-                      width: 16,
-                      height: entry.mood * 10.0,
-                      decoration: BoxDecoration(
-                        color: barColor,
-                        borderRadius: BorderRadius.circular(4),
+            SizedBox(
+              height: 160,
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    horizontalInterval: 1,
+                    getDrawingHorizontalLine: (value) => FlLine(
+                      color: isDark ? Colors.white.withValues(alpha: 0.05) : AppColors.brown100.withValues(alpha: 0.5),
+                      strokeWidth: 1,
+                    ),
+                  ),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 24,
+                        interval: 1,
+                        getTitlesWidget: (value, meta) {
+                          final idx = value.toInt();
+                          if (idx < 0 || idx >= last7Days.length) return const SizedBox();
+                          final entry = last7Days[idx];
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(
+                              DateFormat('E').format(entry.createdAt),
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: isDark ? Colors.white38 : AppColors.brown500,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      dateLabel,
-                      style: const TextStyle(fontSize: 9, color: AppColors.brown500, fontWeight: FontWeight.bold),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 28,
+                        interval: 1,
+                        getTitlesWidget: (value, meta) {
+                          final emojis = {1: '😔', 2: '😐', 3: '😌', 4: '😊', 5: '🤩'};
+                          return Text(
+                            emojis[value.toInt()] ?? '',
+                            style: const TextStyle(fontSize: 10),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  borderData: FlBorderData(show: false),
+                  minX: 0,
+                  maxX: (last7Days.length - 1).toDouble(),
+                  minY: 0.5,
+                  maxY: 5.5,
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: List.generate(last7Days.length, (i) {
+                        return FlSpot(i.toDouble(), last7Days[i].mood.toDouble());
+                      }),
+                      isCurved: true,
+                      curveSmoothness: 0.3,
+                      color: AppColors.gold,
+                      barWidth: 2.5,
+                      isStrokeCapRound: true,
+                      dotData: FlDotData(
+                        show: true,
+                        getDotPainter: (spot, percent, barData, index) {
+                          return FlDotCirclePainter(
+                            radius: 4,
+                            color: AppColors.gold,
+                            strokeWidth: 2,
+                            strokeColor: isDark ? AppColors.darkCard : Colors.white,
+                          );
+                        },
+                      ),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.gold.withValues(alpha: 0.3),
+                            AppColors.gold.withValues(alpha: 0.0),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
                     ),
                   ],
-                );
-              }).toList(),
+                  lineTouchData: LineTouchData(
+                    touchTooltipData: LineTouchTooltipData(
+                      getTooltipItems: (touchedSpots) {
+                        return touchedSpots.map((spot) {
+                          final entry = last7Days[spot.x.toInt()];
+                          return LineTooltipItem(
+                            '${entry.emoji} ${entry.mood}/5',
+                            const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                          );
+                        }).toList();
+                      },
+                    ),
+                    handleBuiltInTouches: true,
+                  ),
+                ),
+              ),
             ),
+          // ─── Tag Frequency ───
+          if (last7Days.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+            const Text(
+              "Emotional Patterns",
+              style: TextStyle(color: AppColors.goldDark, fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            _buildTagFrequency(state.moodHistory, isDark),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _buildTagFrequency(List<MoodEntry> history, bool isDark) {
+    final Map<String, int> tagCounts = {};
+    for (final entry in history) {
+      for (final tag in entry.tags) {
+        tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;
+      }
+    }
+    if (tagCounts.isEmpty) {
+      return const Text("No tags logged yet.", style: TextStyle(color: AppColors.brown500, fontSize: 10));
+    }
+
+    final sorted = tagCounts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    final topTags = sorted.take(5).toList();
+    final maxCount = topTags.first.value.toDouble();
+
+    return Column(
+      children: topTags.map((entry) {
+        final fraction = entry.value / maxCount;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 70,
+                child: Text(
+                  entry.key,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: isDark ? Colors.white70 : AppColors.brown700,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: fraction,
+                    backgroundColor: AppColors.brown100.withValues(alpha: 0.3),
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.gold),
+                    minHeight: 6,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 20,
+                child: Text(
+                  '${entry.value}',
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(fontSize: 9, color: AppColors.brown500, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 

@@ -6,7 +6,26 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
+const eslintConfig = [{
+  ignores: [
+    "node_modules/**",
+    ".next/**",
+    ".vercel/**",
+    "out/**",
+    "build/**",
+    "download/**",
+    "upload/**",
+    "scratch/**",
+    "db/**",
+    "next-env.d.ts",
+    "examples/**",
+    "skills/**",
+    "original/**",
+    "flutter_app/**",
+    "mcp-server/**",
+    "*.js",
+  ],
+}, ...nextCoreWebVitals, ...nextTypescript, {
   rules: {
     // TypeScript rules
     "@typescript-eslint/no-explicit-any": "off",
@@ -19,6 +38,7 @@ const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
     // React rules
     "react-hooks/exhaustive-deps": "off",
     "react-hooks/purity": "off",
+    "react-hooks/set-state-in-effect": "off",
     "react/no-unescaped-entities": "off",
     "react/display-name": "off",
     "react/prop-types": "off",
@@ -43,8 +63,6 @@ const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
     "no-unreachable": "off",
     "no-useless-escape": "off",
   },
-}, {
-  ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts", "examples/**", "skills", "original/**", "flutter_app/**", "mcp-server/**"]
 }];
 
 export default eslintConfig;

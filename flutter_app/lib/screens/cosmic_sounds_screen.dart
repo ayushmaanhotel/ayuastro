@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:just_audio/just_audio.dart';
 import '../providers/app_state.dart';
 import '../widgets/custom_widgets.dart';
 
@@ -118,6 +119,10 @@ class CosmicSoundsScreen extends StatefulWidget {
 }
 
 class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProviderStateMixin {
+  // Audio players for each channel
+  final Map<String, AudioPlayer> _audioPlayers = {};
+  bool _audioInitialized = false;
+
   // Sound channels state
   final List<SoundChannel> _channels = [
     SoundChannel(id: 'rain', name: 'Rain', emoji: '🌧️'),
@@ -134,7 +139,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
   String? _activePresetId;
 
   // Timer state
-  int _selectedDurationSeconds = 600; // 10 min default
+  int _selectedDurationSeconds = 600;
   bool _timerRunning = false;
   bool _timerPaused = false;
   int _timeRemainingSeconds = 600;
@@ -145,6 +150,18 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
   // Animations controllers
   late AnimationController _ambientController;
   late AnimationController _waveController;
+
+  // Audio asset paths - replace with actual bundled audio files
+  static const Map<String, String> _audioAssets = {
+    'rain': 'assets/audio/rain.mp3',
+    'ocean': 'assets/audio/ocean.mp3',
+    'fireplace': 'assets/audio/fireplace.mp3',
+    'forest': 'assets/audio/forest.mp3',
+    'cosmic': 'assets/audio/cosmic.mp3',
+    'singingBowl': 'assets/audio/singing_bowl.mp3',
+    'crickets': 'assets/audio/crickets.mp3',
+    'wind': 'assets/audio/wind.mp3',
+  };
 
   @override
   void initState() {
@@ -158,6 +175,27 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat();
+
+    _initAudioPlayers();
+  }
+
+  Future<void> _initAudioPlayers() async {
+    for (final channel in _channels) {
+      final player = AudioPlayer();
+      try {
+        // Try to load from bundled assets
+        final assetPath = _audioAssets[channel.id];
+        if (assetPath != null) {
+          await player.setAsset(assetPath);
+          await player.setLoopMode(LoopMode.all);
+          await player.setVolume(0.0);
+        }
+      } catch (e) {
+        debugPrint('Audio asset not found for ${channel.id}: $e');
+      }
+      _audioPlayers[channel.id] = player;
+    }
+    _audioInitialized = true;
   }
 
   @override
@@ -165,7 +203,41 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
     _countdownTimer?.cancel();
     _ambientController.dispose();
     _waveController.dispose();
+    for (final player in _audioPlayers.values) {
+      player.dispose();
+    }
     super.dispose();
+  }
+
+  Future<void> _updateChannelAudio(String id, bool isPlaying, double volume) async {
+    if (!_audioInitialized) return;
+    final player = _audioPlayers[id];
+    if (player == null) return;
+
+    try {
+      final effectiveVolume = volume * _masterVolume;
+      if (isPlaying) {
+        if (player.playing == false) {
+          await player.play();
+        }
+        await player.setVolume(effectiveVolume.clamp(0.0, 1.0));
+      } else {
+        await player.setVolume(0.0);
+        if (player.playing) {
+          await player.pause();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error updating audio for $id: $e');
+    }
+  }
+
+  Future<void> _updateMasterVolume(double volume) async {
+    for (final channel in _channels) {
+      if (channel.isPlaying) {
+        await _updateChannelAudio(channel.id, true, channel.volume);
+      }
+    }
   }
 
   // Timer Handlers
@@ -232,6 +304,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
         if (channel.isPlaying && channel.volume == 0.0) {
           channel.volume = 0.5;
         }
+        _updateChannelAudio(id, channel.isPlaying, channel.volume);
       }
       _activePresetId = null;
     });
@@ -246,6 +319,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
         if (volume > 0.0) {
           channel.isPlaying = true;
         }
+        _updateChannelAudio(id, channel.isPlaying, channel.volume);
       }
       _activePresetId = null;
     });
@@ -258,6 +332,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
         if (c.volume == 0.0) {
           c.volume = 0.5;
         }
+        _updateChannelAudio(c.id, true, c.volume);
       }
       _activePresetId = null;
     });
@@ -267,6 +342,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
     setState(() {
       for (final c in _channels) {
         c.isPlaying = false;
+        _updateChannelAudio(c.id, false, 0.0);
       }
     });
   }
@@ -275,7 +351,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
     setState(() {
       for (final c in _channels) {
         c.isPlaying = false;
-        c.volume = 0.0;
+        _updateChannelAudio(c.id, false, 0.0);
       }
       _activePresetId = null;
     });
@@ -288,6 +364,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
         final vol = preset.volumes[c.id] ?? 0.0;
         c.volume = vol;
         c.isPlaying = vol > 0.0;
+        _updateChannelAudio(c.id, c.isPlaying, c.volume);
       }
     });
   }
@@ -441,6 +518,7 @@ class _CosmicSoundsScreenState extends State<CosmicSoundsScreen> with TickerProv
                                 setState(() {
                                   _masterVolume = v;
                                 });
+                                _updateMasterVolume(v);
                               },
                             ),
                           ),

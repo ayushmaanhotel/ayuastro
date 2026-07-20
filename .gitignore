@@ -69,3 +69,10 @@ test-deepseek.ts
 test-ephemeris.ts
 update-max-duration.js
 flutter_app/upade.md
+
+
+# WhatsApp Session & Caches
+.wwebjs_auth/
+.wwebjs_cache/
+Crashpad/
+*.dmp

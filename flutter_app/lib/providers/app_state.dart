@@ -9,7 +9,7 @@ class AppState extends ChangeNotifier {
   // Persistence Key
   static const String _storageKey = 'ayuastro_pref_storage';
   static const String _accessTokenKey = 'ayuastro_supabase_access_token';
-  static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  static final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   // Navigation state
   String _currentView = 'landing';
@@ -250,6 +250,15 @@ class AppState extends ChangeNotifier {
         final savedBaseUrl = prefs.getString('ayuastro_api_base_url');
         if (savedBaseUrl != null) {
           ApiService.setBaseUrl(savedBaseUrl);
+        }
+
+        // Session restore: if user is onboarded and has a token, go to insights
+        if (_isOnboarded && _accessToken != null && _userId != null) {
+          _currentView = 'insights';
+        } else if (_accessToken != null && _userId != null && !_isOnboarded) {
+          _currentView = 'onboarding';
+        } else {
+          _currentView = 'landing';
         }
 
         notifyListeners();
